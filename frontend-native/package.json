@@ -9,6 +9,7 @@
     "test": "jest",
     "lint": "eslint ."
   },
+  "proxy": "http://localhost:4000",
   "dependencies": {
     "expo": "^49.0.21",
     "react": "17.0.2",

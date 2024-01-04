@@ -1,0 +1,29 @@
+{
+  "name": "noti",
+  "version": "1.0.0",
+  "description": "팀장 봉성은\r 팀원 이지현, 박현수, 채서윤",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "deploy-storybook": "storybook-to-ghpages"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@storybook/addon-essentials": "7.6.7",
+    "@storybook/addon-interactions": "7.6.7",
+    "@storybook/addon-links": "7.6.7",
+    "@storybook/addon-onboarding": "1.0.10",
+    "@storybook/blocks": "7.6.7",
+    "@storybook/react": "7.6.7",
+    "@storybook/react-vite": "7.6.7",
+    "@storybook/test": "7.6.7",
+    "prop-types": "15.8.1",
+    "react": "18.2.0",
+    "react-docgen-typescript-loader": "^3.7.2",
+    "react-dom": "18.2.0"
+  }
+}
