@@ -9,6 +9,6 @@ import java.util.Arrays;
 public class welcomeController {
     @GetMapping("/api/v1/welcome")
     public List<String> Hello() {
-        return Arrays.asList("리액트 스프링", "연결 성공");
+        return Arrays.asList("노티와 함께 만드는 ", "유쾌한 하루");
     }
 }
