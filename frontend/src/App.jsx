@@ -1,24 +1,35 @@
-import logo from "./logo.svg";
-import "./App.css";
+/* eslint-disable no-unused-vars */
+/* eslint-disable prettier/prettier */
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import styled from "styled-components";
+import Login from "./pages/Login";
+import Main from "./pages/Main";
+import Redirection from "./pages/Redirection";
+
+const MainDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+  background-color: #F9F9F9;
+  height: 100vh;
+  display: flex;
+`;
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+   return (
+    <>
+      <Router>
+        <Routes>
+          <Route path='/' element={<Login/>} />
+          <Route path='/Main' element={<Main/>} />
+
+          <Route path='/api/v1/KakaoLogin' element={<Redirection/>} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

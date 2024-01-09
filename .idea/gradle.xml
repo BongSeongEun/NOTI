@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/backend" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/backend" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/frontend-native/node_modules/react-native-gradle-plugin" name="react-native-gradle-plugin">
+                <projects>
+                  <project path="$PROJECT_DIR$/frontend-native/node_modules/react-native-gradle-plugin" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/frontend-native/android" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/frontend-native/android" />
+            <option value="$PROJECT_DIR$/frontend-native/android/app" />
+            <option value="$PROJECT_DIR$/frontend-native/node_modules/react-native-gradle-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
