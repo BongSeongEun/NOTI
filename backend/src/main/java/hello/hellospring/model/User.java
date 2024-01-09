@@ -1,19 +1,18 @@
 package hello.hellospring.model;
 
-
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.sql.Timestamp;
 
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "noti") //(1)
-public class UserDAO {
+@Table(name = "user_master")
+public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //(2)
-    @Column(name = "user_code") //(3)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_code")
     private Long userCode;
 
     @Column(name = "kakao_id")
@@ -32,11 +31,11 @@ public class UserDAO {
     private String userRole;
 
     @Column(name = "create_time")
-    @CreationTimestamp //(4)
+    @CreationTimestamp
     private Timestamp createTime;
 
     @Builder
-    public UserDAO(Long kakaoId, String kakaoProfileImg, String kakaoNickname,
+    public User(Long kakaoId, String kakaoProfileImg, String kakaoNickname,
                 String kakaoEmail, String userRole) {
 
         this.kakaoId = kakaoId;

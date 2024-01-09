@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from "styled-components";
 import Login from "./pages/Login";
 import Main from "./pages/Main";
+import Redirection from "./pages/Redirection";
 
 const MainDiv = styled.div`
   display: flex;
@@ -24,6 +25,8 @@ function App() {
         <Routes>
           <Route path='/' element={<Login/>} />
           <Route path='/Main' element={<Main/>} />
+
+          <Route path='/api/v1/KakaoLogin' element={<Redirection/>} />
         </Routes>
       </Router>
     </>

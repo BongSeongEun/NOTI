@@ -4,22 +4,29 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import axios from "axios";
 
-const Redirection = () => {
-    const code = window.location.search;
+const Redirection = (props) => {
+    
     const navigate = useNavigate();
-  
+    const code = new URL(window.location.href).searchParams.get("code");
+
     useEffect(() => {
-      console.log(process.env.REACT_APP_URL);
-      axios.post(`${process.env.REACT_APP_URL}kakaoLogin${code}`).then((r) => {
-        console.log(r.data);
-  
-        // 토큰을 받아서 localStorage같은 곳에 저장하는 코드를 여기에 쓴다.
-        localStorage.setItem('name', r.data.user_name); // 일단 이름만 저장했다.
-        
-        navigate('/loginSuccess');
-      });
-    }, []);
-  
+      const kakaoLogin = async () => {
+        await axios({
+          method: "GET",
+          url: `http://localhost:3000/auth?code=${code}`,
+          headers: {
+            "Content-Type": "application/json;charset=utf-8", //json형태로 데이터를 보내겠다는뜻
+            "Access-Control-Allow-Origin": "*", //이건 cors 에러때문에 넣어둔것. 당신의 프로젝트에 맞게 지워도됨
+          },
+        }).then((res) => {
+          console.log(res);
+          localStorage.setItem("name", res.data.account.kakaoName);
+          navigate("/owner-question");
+        });
+    };
+    kakaoLogin();
+  }, [code, navigate, props.history]);
+
     return <div>로그인 중입니다.</div>;
   };
   

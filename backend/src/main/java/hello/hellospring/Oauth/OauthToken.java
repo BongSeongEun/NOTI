@@ -1,8 +1,6 @@
-package hello.hellospring.controller;
+package hello.hellospring.Oauth;
 
 import lombok.*;
-@Getter
-@Setter
 @Data
 public class OauthToken {
     private String access_token;
