@@ -19,7 +19,7 @@ public class KakaoController {
     private UserService userService;
 
     // 프론트에서 인가코드 받아오는 url
-    @GetMapping("/api/v1/KakaoLogin")
+    @PostMapping("/auth")
     public ResponseEntity getLogin(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
 
         // 넘어온 인가 코드를 통해 access_token 발급

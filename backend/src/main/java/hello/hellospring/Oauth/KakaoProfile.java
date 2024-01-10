@@ -9,6 +9,7 @@ public class KakaoProfile {
     public String connected_at;
     public Properties properties;
     public KakaoAccount kakao_account;
+    public String synched_at;
 
     @Data
     public class Properties {

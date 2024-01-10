@@ -9,13 +9,12 @@ const Redirection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    //console.log(process.env.REACT_APP_CLIENT_HOST);
-    axios.post(`http://localhost:3000/api/v1/KakaoLogin?code=${code}`)
+    axios.post(`/auth?code=${code}`)
     .then((res) => {
       console.log(res);
       navigate('/Main');
     });
-  });
+  },[]);
 
   return <div>로그인 중입니다.</div>;
 };
