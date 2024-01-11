@@ -5,3 +5,16 @@ expo install react-native-gesture-handler react-native-reanimated react-native-s
 npm install @react-navigation/stack --save --legacy-peer-deps
 
 */
+
+import React from 'react';
+import {View, Text} from 'react-native';
+
+function Main() {
+  return (
+    <View>
+      <Text>Main!</Text>
+    </View>
+  );
+}
+
+export default Main;

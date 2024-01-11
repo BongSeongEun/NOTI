@@ -11,9 +11,13 @@
   },
   "proxy": "http://localhost:4000",
   "dependencies": {
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/stack": "^6.3.20",
     "expo": "^49.0.21",
     "react": "17.0.2",
     "react-native": "0.68.2",
+    "react-native-gesture-handler": "^2.14.0",
+    "react-native-safe-area-context": "^4.8.2",
     "styled-components": "5.2.0"
   },
   "devDependencies": {
