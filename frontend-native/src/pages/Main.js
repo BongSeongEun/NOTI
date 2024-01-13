@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+
 /* install 명령어
 
 npm install @react-navigation/native --save --legacy-peer-deps

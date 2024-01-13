@@ -1,3 +1,5 @@
+/* eslint-disable quotes */
+/* eslint-disable prettier/prettier */
 ///* eslint-disable prettier/prettier */
 //
 //import React, {useState, useEffect} from 'react';
@@ -70,6 +72,12 @@ import 'react-native-gesture-handler';
 
 import Main from "./src/pages/Main";
 import Login from "./src/pages/Login";
+import Coop from "./src/pages/Coop";
+import Diary from "./src/pages/Diary";
+import Register from "./src/pages/Register";
+import Register_Success from "./src/pages/Register_Success";
+import Setting from "./src/pages/Setting";
+import Todo from "./src/pages/Todo";
 
 const Stack = createStackNavigator();
 
@@ -77,8 +85,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Main" component={Main} />
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Main" component={Main} />
+		<Stack.Screen name="Register" component={Register} />
       </Stack.Navigator>
     </NavigationContainer>
   );
