@@ -4,30 +4,56 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import axios from "axios";
 
-const Redirection = (props) => {
-    
-    const navigate = useNavigate();
-    const code = new URL(window.location.href).searchParams.get("code");
+const Redirection = () => {
+  const code = new URL(window.location.toString()).searchParams.get('code');
+  const navigate = useNavigate();
 
-    useEffect(() => {
-      const kakaoLogin = async () => {
-        await axios({
-          method: "GET",
-          url: `http://localhost:3000/auth?code=${code}`,
-          headers: {
-            "Content-Type": "application/json;charset=utf-8", //json형태로 데이터를 보내겠다는뜻
-            "Access-Control-Allow-Origin": "*", //이건 cors 에러때문에 넣어둔것. 당신의 프로젝트에 맞게 지워도됨
-          },
-        }).then((res) => {
-          console.log(res);
-          localStorage.setItem("name", res.data.account.kakaoName);
-          navigate("/owner-question");
-        });
-    };
-    kakaoLogin();
-  }, [code, navigate, props.history]);
+  useEffect(() => {
+    axios.post(`/auth?code=${code}`)
+    .then((res) => {
+      console.log(res);
+      navigate('/Main');
+    });
+  },[]);
 
-    return <div>로그인 중입니다.</div>;
-  };
-  
-  export default Redirection;
+  return <div>로그인 중입니다.</div>;
+};
+
+// const Redirection = () => {
+//   useEffect(() => {
+//     const params= new URL(document.location.toString()).searchParams;
+//     const code = params.get('code');
+//     const grantType = "authorization_code";
+//     const REACT_APP_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY
+//     const REACT_APP_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
+
+//     axios.post(`https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_REST_API_KEY}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`,
+//       {},
+//       {  headers: { "Content-type": "application/x-www-form-urlencoded;charset=utf-8" } }
+//     )
+//     .then((res) => {
+//       console.log(res);
+//       const { access_token } = res.data;
+//       axios.post(
+//           `http://localhost:3000/api/v1/KakaoLogin?code=${code}`,
+//           {},
+//           {
+//             headers: {
+//                 Authorization: `Bearer ${access_token}`,
+//                 "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+//             }
+//           }
+//       )
+//       .then((res) => {
+//           console.log('2번쨰', res);
+//       })
+//     })
+//   }, [])
+
+//   return(
+//     <>
+//     </>
+//   )
+// }
+
+export default Redirection;

@@ -37,10 +37,10 @@ public class UserService {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "{클라이언트 앱 키}");
-        params.add("redirect_uri", "{리다이렉트 uri}");
+        params.add("client_id", "e0701f9b1bb96d831f98e5c0c295925f");
+        params.add("redirect_uri", "http://localhost:3000/auth");
         params.add("code", code);
-        params.add("client_secret", "{시크릿 키}"); // 생략 가능!
+
 
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
                 new HttpEntity<>(params, headers);
