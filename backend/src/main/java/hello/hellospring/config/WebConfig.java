@@ -1,4 +1,4 @@
-package hello.hellospring;
+package hello.hellospring.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
