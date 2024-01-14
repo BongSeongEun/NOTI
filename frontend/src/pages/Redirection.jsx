@@ -21,7 +21,7 @@ const Redirection = (props) => {
         }).then((res) => {
           console.log(res);
           localStorage.setItem("name", res.data.account.kakaoName);
-          navigate("/owner-question");
+          navigate("/Register");
         });
     };
     kakaoLogin();

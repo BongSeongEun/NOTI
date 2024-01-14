@@ -1,12 +1,13 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
-import Login from "./pages/Login";
-import Main from "./pages/Main";
-import Register from "./pages/Register";
-import Redirection from "./pages/Redirection";
+import Login from "./pages/Login.jsx";
+import Main from "./pages/Main.jsx";
+import Register from "./pages/Register.jsx";
+import Redirection from "./pages/Redirection.jsx";
+import Welcome from "./pages/Welcome.jsx";
 
 const MainDiv = styled.div`
   display: flex;
@@ -14,21 +15,21 @@ const MainDiv = styled.div`
   align-items: center;
   width: 100%;
   justify-content: center;
-  background-color: #F9F9F9;
+  background-color: #f9f9f9;
   height: 100vh;
   display: flex;
 `;
 
 function App() {
-   return (
+  return (
     <>
       <Router>
         <Routes>
-          <Route path='/' element={<Login/>} />
-          <Route path='/Main' element={<Main/>} />
-          <Route path='/Register' element={<Register/>} />
-
-          <Route path='/api/v1/KakaoLogin' element={<Redirection/>} />
+          <Route path="/" element={<Login />} />
+          <Route path="/Main" element={<Main />} />
+          <Route path="/Register" element={<Register />} />
+          <Route path="/Welcom" element={<Welcome />} />
+          <Route path="/api/v1/KakaoLogin" element={<Redirection />} />
         </Routes>
       </Router>
     </>

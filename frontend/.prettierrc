@@ -1,10 +1,10 @@
 {
-    "printWidth": 80,
-    "tabWidth": 2,
-    "doubleQuote": true,
-    "trailingComma": "all",
-    "bracketSpacing": true,
-    "semi": true,
-    "arrowParens": "avoid",
-    "endOfLine": "auto" 
-  }
+  "printWidth": 80,
+  "doubleQuote": true,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "semi": true,
+  "arrowParens": "avoid",
+  "endOfLine": "auto",
+  "useTabs": false
+}
