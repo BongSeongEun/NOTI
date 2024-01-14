@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from "styled-components";
 import Login from "./pages/Login";
 import Main from "./pages/Main";
+import Register from "./pages/Register";
 import Redirection from "./pages/Redirection";
 
 const MainDiv = styled.div`
@@ -25,6 +26,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Login/>} />
           <Route path='/Main' element={<Main/>} />
+          <Route path='/Register' element={<Register/>} />
 
           <Route path='/api/v1/KakaoLogin' element={<Redirection/>} />
         </Routes>

@@ -16,10 +16,9 @@ const MainDiv = styled.div`
   justify-content: center;
   background-color: #F9F9F9;
   height: 100vh;
-  display: flex;
 `;
 
-const Mainlogo = styled.img`
+const MainLogo = styled.img`
   width: 10rem;
   height: 13rem;
   padding: 1.2rem;
@@ -60,7 +59,7 @@ function Login() {
   return (
     <>
       <MainDiv>
-        <Mainlogo src={NOTI} />
+        <MainLogo src={NOTI} />
         <h1>{message}</h1>
         <SocialWrap>
         {/* <button onClick={handleLogin}>카카오 로그인</button> */}
