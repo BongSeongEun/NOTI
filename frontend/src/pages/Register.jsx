@@ -2,8 +2,8 @@
 /* eslint-disable prettier/prettier */
 import React from "react";
 import styled from "styled-components";
-import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import { Navigate, useNavigate, Link } from "react-router-dom";
+import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 
 const MainDiv = styled.div`
   //전체화면 테두리
@@ -35,7 +35,6 @@ const MainLogo = styled.img`
 
 const RegDiv = styled.div`
   //회원가입 제일큰 박스
-  border: 1px solid red; // 테두리 박스
   height: auto;
   width: 50%; // 가로 50%
   display: flex;
@@ -172,7 +171,7 @@ function Register() {
                   height: "110px",
                   width: "110px",
                   borderRadius: "50%",
-                  paddingRight: "10px",
+                  marginRight: "10px",
                 }}
                 src={NOTI}
                 alt="로고"
@@ -224,7 +223,7 @@ function Register() {
               />
             </VerticalBox>
             <Link to="/Welcom">
-              <RegBtn style={{ marginTop: "30px" }} onClick={navigate("/main")}>
+              <RegBtn style={{ marginTop: "30px" }} onClick={Navigate("/main")}>
                 가입하기
               </RegBtn>
             </Link>
