@@ -18,16 +18,14 @@ const MainDiv = styled.div`
 
 function App() {
   return (
-    <>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/Main" element={<Main />} />
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/Main" element={<Main />} />
 
-          <Route exact path="/auth" element={<Redirection />} />
-        </Routes>
-      </Router>
-    </>
+        <Route exact path="/auth" element={<Redirection />} />
+      </Routes>
+    </Router>
   );
 }
 
