@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
 import Login from "./pages/Login";
 import Main from "./pages/Main";
@@ -13,20 +11,20 @@ const MainDiv = styled.div`
   align-items: center;
   width: 100%;
   justify-content: center;
-  background-color: #F9F9F9;
+  background-color: #f9f9f9;
   height: 100vh;
   display: flex;
 `;
 
 function App() {
-   return (
+  return (
     <>
       <Router>
         <Routes>
-          <Route path='/' element={<Login/>} />
-          <Route path='/Main' element={<Main/>} />
+          <Route path="/" element={<Login />} />
+          <Route path="/Main" element={<Main />} />
 
-          <Route exact path='/auth' element={<Redirection />} />
+          <Route exact path="/auth" element={<Redirection />} />
         </Routes>
       </Router>
     </>
