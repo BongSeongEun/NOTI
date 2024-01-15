@@ -37,7 +37,7 @@ public class UserService {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "e0701f9b1bb96d831f98e5c0c295925f");
+        params.add("client_id", "77cf97c36317f2622a926b9ddb30f96f");
         params.add("redirect_uri", "http://localhost:3000/auth");
         params.add("code", code);
 

@@ -27,7 +27,7 @@ function App() {
           <Route path="/Main" element={<Main />} />
           <Route path="/Register" element={<Register />} />
           <Route path="/Welcom" element={<Welcome />} />
-          <Route path="/api/v1/KakaoLogin" element={<Redirection />} />
+          <Route path="/auth" element={<Redirection />} />
         </Routes>
       </Router>
     </>
