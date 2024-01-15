@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
@@ -38,8 +36,8 @@ const LoginImage = styled.image`
 `;
 function Login() {
   const [message, setMassege] = useState([]);
-  const REACT_APP_REST_API_KEY = process.env.REACT_APP_KAKAO_REST_API_KEY;
-  const REACT_APP_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
+  const REACT_APP_REST_API_KEY = "77cf97c36317f2622a926b9ddb30f96f";
+  const REACT_APP_REDIRECT_URI = "http://localhost:3000/auth";
   // oauth 요청 URL
   const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_REST_API_KEY}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`;
   const handleLogin = () => {
@@ -60,8 +58,6 @@ function Login() {
         <MainLogo src={NOTI} />
         <h1>{message}</h1>
         <SocialWrap>
-          {/* <button onClick={handleLogin}>카카오 로그인</button> */}
-
           <a href="/Main">
             <SocialImg style={{ margin: "1rem" }} src={GOOGLE} />
           </a>
