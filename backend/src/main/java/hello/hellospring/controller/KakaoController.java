@@ -1,5 +1,6 @@
 package hello.hellospring.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import hello.hellospring.Oauth.OauthToken;
 import hello.hellospring.jwt.JwtProperties;
 import hello.hellospring.model.User;
@@ -8,22 +9,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api")
 public class KakaoController {
 
     @Autowired
     private UserService userService;
 
     // 프론트에서 인가코드 받아오는 url
-    @GetMapping("/api/v1/KakaoLogin")
-    public ResponseEntity getLogin(@RequestParam("code") String code) {
+    @PostMapping("/auth")
+    public ResponseEntity getLogin(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
 
         // 넘어온 인가 코드를 통해 access_token 발급
         OauthToken oauthToken = userService.getAccessToken(code);
