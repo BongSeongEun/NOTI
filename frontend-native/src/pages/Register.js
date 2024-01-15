@@ -77,7 +77,10 @@ function Register({ }) {
 							clicked={clicked} />
 					</DisturbTimeContainer>
 				</RegularText>
-				<RegularTextBox>
+
+				{ clicked && (
+					<>
+						<RegularTextBox>
 					<Text1>시작 시간                                                                                 </Text1>
 						<DisturbTimeButton_Input
 				  			placeholder="00"
@@ -109,6 +112,9 @@ function Register({ }) {
 							keyboardType="numeric"
 						/>
 				</RegularTextBox>
+					</>
+				)}
+				
 
 				<RegularText>테마 선택</RegularText>
 				
