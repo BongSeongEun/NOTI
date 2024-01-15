@@ -118,7 +118,7 @@ function Register({ }) {
 
 				<RegularText>테마 선택</RegularText>
 				
-				<ResultButton onPress={() => navigation.navigate("Main")}>
+				<ResultButton onPress={() => navigation.navigate("Register_Success")}>
   					<ResultButton_Text>완료</ResultButton_Text>
 				</ResultButton>
 
@@ -265,8 +265,6 @@ const ResultButton = styled.TouchableOpacity`
 	height: 40px;
 	background-color: #FF7154;
 	border-radius: 15px;
-	margin-left: 50px;
-	margin-block-end: 50px;
 	margin: 50px;
 	margin-bottom: 80px;
 `;
@@ -280,4 +278,20 @@ const ResultButton_Text = styled.Text`
 	margin: 13px;
 `;
 
+const ThemeContainer = styled.View`
+	width: 300px;
+	height: 50px;
+	display: flex;
+  	justify-content: center;
+	flex-direction: row;
+`;
+
+const Theme = styled.TouchableOpacity`
+	width: 40px;
+	height: 40px;
+	border-radius: 100px;
+	
+`;
+
+//시발 테마 어케만드는데
 export default Register;

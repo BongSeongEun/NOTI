@@ -70,7 +70,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import styled from "styled-components/native";
 import 'react-native-gesture-handler';
 
-import Main from "./src/pages/Main";
 import Login from "./src/pages/Login";
 import Coop from "./src/pages/Coop";
 import Diary from "./src/pages/Diary";
@@ -84,11 +83,14 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Main" component={Main} />
-		<Stack.Screen name="Register" component={Register} />
-      </Stack.Navigator>
+    	<Stack.Navigator initialRouteName="Login">
+        	<Stack.Screen name="Login" component={Login} />
+        
+			<Stack.Screen name="Register" component={Register} />
+			<Stack.Screen name="Register_Success" component={Register_Success} />
+		
+			<Stack.Screen name="Todo" component={Todo} />
+      	</Stack.Navigator>
     </NavigationContainer>
   );
 }
