@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
-import Login from "./pages/Login";
-import Main from "./pages/Main";
-import Redirection from "./pages/Redirection";
+import Login from "./pages/Login.jsx";
+import Main from "./pages/Main.jsx";
+import Register from "./pages/Register.jsx";
+import Redirection from "./pages/Redirection.jsx";
+import Welcome from "./pages/Welcome.jsx";
 
 const MainDiv = styled.div`
   display: flex;
@@ -18,14 +20,17 @@ const MainDiv = styled.div`
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/Main" element={<Main />} />
-
-        <Route exact path="/auth" element={<Redirection />} />
-      </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/Main" element={<Main />} />
+          <Route path="/Register" element={<Register />} />
+          <Route path="/Welcom" element={<Welcome />} />
+          <Route path="/api/v1/KakaoLogin" element={<Redirection />} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 
