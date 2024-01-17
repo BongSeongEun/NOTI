@@ -4,9 +4,6 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="delegatedBuild" value="true" />
-        <option name="testRunner" value="GRADLE" />
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/backend" />
         <option name="modules">
           <set>
@@ -26,15 +23,14 @@
             </builds>
           </compositeBuild>
         </compositeConfiguration>
-        <option name="delegatedBuild" value="true" />
-        <option name="testRunner" value="GRADLE" />
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/frontend-native/android" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/frontend-native/android" />
             <option value="$PROJECT_DIR$/frontend-native/android/app" />
+            <option value="$PROJECT_DIR$/frontend-native/node_modules/react-native-gesture-handler/android" />
             <option value="$PROJECT_DIR$/frontend-native/node_modules/react-native-gradle-plugin" />
+            <option value="$PROJECT_DIR$/frontend-native/node_modules/react-native-safe-area-context/android" />
           </set>
         </option>
       </GradleProjectSettings>
