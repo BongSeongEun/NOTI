@@ -90,6 +90,10 @@ export default function App() {
 			<Stack.Screen name="Register_Success" component={Register_Success} />
 		
 			<Stack.Screen name="Todo" component={Todo} />
+			<Stack.Screen name="Coop" component={Coop} />
+
+			<Stack.Screen name="Diary" component={Diary} />
+			<Stack.Screen name="Setting" component={Setting} />
       	</Stack.Navigator>
     </NavigationContainer>
   );

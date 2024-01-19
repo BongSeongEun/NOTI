@@ -3,24 +3,17 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import styled, { keyframes } from "styled-components/native"
+import styled from "styled-components/native"
 
 import React, { useState } from 'react';
 import {
-	View,
 	Text,
-	Button,
-	Image,
-	TextInput,
-	TouchableOpacity,
 	ScrollView,
-	Keyboard,
-  } from "react-native";
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
-import profile from "../asset/profile.png";
-import gallery from "../asset/gallery.png";
+import images from "../components/images";
 
 function Register({ }) {
 	const navigation = useNavigation();
@@ -39,11 +32,11 @@ function Register({ }) {
 			  	<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
 	
 			  	<ProfileGalleryContainer>
-          			<ProfileImg source={profile} />
+          			<ProfileImg source={images.profile} />
 
           			<GalleryButtonContainer>
-            			<GalleryButton source={gallery}>
-            		    	<Gallery source={gallery} />
+            			<GalleryButton source={images.gallery}>
+            		    	<Gallery source={images.gallery} />
             			</GalleryButton>
           			</GalleryButtonContainer>
         		</ProfileGalleryContainer>
@@ -220,7 +213,7 @@ const RegularTextBox = styled.TouchableOpacity`
 	align-items: center;
 `;
 
-const RegularTextBox_Input = styled.TextInput`
+const RegularTextBox_Input = styled.TextInput.attrs({maxLength: 6,})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
@@ -251,7 +244,7 @@ const DisturbTimeButton_Circle = styled.TouchableOpacity`
 	transform: ${({clicked}) => (clicked) ? 'translateX(-34px)' : 'translateX(-16px)'}
 `;
 
-const DisturbTimeButton_Input = styled.TextInput`
+const DisturbTimeButton_Input = styled.TextInput.attrs({maxLength: 2,})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;

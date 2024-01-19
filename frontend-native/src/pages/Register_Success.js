@@ -1,30 +1,22 @@
+/* eslint-disable quotes */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
-/* eslint-disable no-mixed-spaces-and-tabs */
 
 import styled from "styled-components/native"
 
 import React from 'react';
 import {
-	View,
-	Text,
-	Button,
-	Image,
-	TextInput,
-	TouchableOpacity,
 	ScrollView,
-	Keyboard,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
-import profile_g from "../asset/profile_g.png";
-import deco from "../asset/deco.png";
+import images from "../components/images";
 
 function Register_Success({ }) {
 	const navigation = useNavigation();
-	const name = "홍길동"
+	const name = "홍길동";
 
 	return (
 		<ScrollView>
@@ -38,8 +30,8 @@ function Register_Success({ }) {
 				</MainText>
 
 				<ProfileContainer>
-					<Profile source={profile_g}></Profile>
-					<Deco source={deco}></Deco>
+					<Profile source={images.Profile_g}></Profile>
+					<Deco source={images.Deco}></Deco>
 				</ProfileContainer>
 
 				<ResultButton onPress={() => navigation.navigate("Todo")}>
