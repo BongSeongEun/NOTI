@@ -8,6 +8,7 @@ import styled from "styled-components/native"
 import React from 'react';
 import {
 	ScrollView,
+	Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';

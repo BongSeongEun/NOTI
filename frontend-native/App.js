@@ -77,6 +77,7 @@ import Register from "./src/pages/Register";
 import Register_Success from "./src/pages/Register_Success";
 import Setting from "./src/pages/Setting";
 import Todo from "./src/pages/Todo";
+import Todo_Add from "./src/pages/Todo_Add";
 
 const Stack = createStackNavigator();
 
@@ -90,6 +91,7 @@ export default function App() {
 			<Stack.Screen name="Register_Success" component={Register_Success} />
 		
 			<Stack.Screen name="Todo" component={Todo} />
+			<Stack.Screen name="Todo_Add" component={Todo_Add} />
 			<Stack.Screen name="Coop" component={Coop} />
 
 			<Stack.Screen name="Diary" component={Diary} />

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
 	Text,
 	ScrollView,
+	Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
