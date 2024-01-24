@@ -1,2 +1,4 @@
-package hello.hellospring.model;public class time {
+package hello.hellospring.model;
+
+public class Time {
 }

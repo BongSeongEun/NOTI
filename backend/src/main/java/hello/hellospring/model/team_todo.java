@@ -1,2 +1,4 @@
-package hello.hellospring.model;public class team_todo {
+package hello.hellospring.model;
+
+public class team_todo {
 }

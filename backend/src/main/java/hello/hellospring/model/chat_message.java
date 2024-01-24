@@ -1,2 +1,4 @@
-package hello.hellospring.model;public class chat_message {
+package hello.hellospring.model;
+
+public class chat_message {
 }
