@@ -70,7 +70,6 @@ import { createStackNavigator } from "@react-navigation/stack";
 import styled from "styled-components/native";
 import 'react-native-gesture-handler';
 
-import Main from "./src/pages/Main";
 import Login from "./src/pages/Login";
 import Coop from "./src/pages/Coop";
 import Diary from "./src/pages/Diary";
@@ -78,17 +77,26 @@ import Register from "./src/pages/Register";
 import Register_Success from "./src/pages/Register_Success";
 import Setting from "./src/pages/Setting";
 import Todo from "./src/pages/Todo";
+import Todo_Add from "./src/pages/Todo_Add";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Main" component={Main} />
-		<Stack.Screen name="Register" component={Register} />
-      </Stack.Navigator>
+    	<Stack.Navigator initialRouteName="Login">
+        	<Stack.Screen name="Login" component={Login} />
+        
+			<Stack.Screen name="Register" component={Register} />
+			<Stack.Screen name="Register_Success" component={Register_Success} />
+		
+			<Stack.Screen name="Todo" component={Todo} />
+			<Stack.Screen name="Todo_Add" component={Todo_Add} />
+			<Stack.Screen name="Coop" component={Coop} />
+
+			<Stack.Screen name="Diary" component={Diary} />
+			<Stack.Screen name="Setting" component={Setting} />
+      	</Stack.Navigator>
     </NavigationContainer>
   );
 }

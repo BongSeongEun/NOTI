@@ -3,24 +3,18 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import styled, { keyframes } from "styled-components/native"
+import styled from "styled-components/native"
 
 import React, { useState } from 'react';
 import {
-	View,
 	Text,
-	Button,
-	Image,
-	TextInput,
-	TouchableOpacity,
 	ScrollView,
-	Keyboard,
-  } from "react-native";
+	Image,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
-import profile from "../asset/profile.png";
-import gallery from "../asset/gallery.png";
+import images from "../components/images";
 
 function Register({ }) {
 	const navigation = useNavigation();
@@ -39,11 +33,11 @@ function Register({ }) {
 			  	<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
 	
 			  	<ProfileGalleryContainer>
-          			<ProfileImg source={profile} />
+          			<ProfileImg source={images.profile} />
 
           			<GalleryButtonContainer>
-            			<GalleryButton source={gallery}>
-            		    	<Gallery source={gallery} />
+            			<GalleryButton source={images.gallery}>
+            		    	<Gallery source={images.gallery} />
             			</GalleryButton>
           			</GalleryButtonContainer>
         		</ProfileGalleryContainer>
@@ -118,7 +112,7 @@ function Register({ }) {
 
 				<RegularText>테마 선택</RegularText>
 				
-				<ResultButton onPress={() => navigation.navigate("Main")}>
+				<ResultButton onPress={() => navigation.navigate("Register_Success")}>
   					<ResultButton_Text>완료</ResultButton_Text>
 				</ResultButton>
 
@@ -220,7 +214,7 @@ const RegularTextBox = styled.TouchableOpacity`
 	align-items: center;
 `;
 
-const RegularTextBox_Input = styled.TextInput`
+const RegularTextBox_Input = styled.TextInput.attrs({maxLength: 6,})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
@@ -251,7 +245,7 @@ const DisturbTimeButton_Circle = styled.TouchableOpacity`
 	transform: ${({clicked}) => (clicked) ? 'translateX(-34px)' : 'translateX(-16px)'}
 `;
 
-const DisturbTimeButton_Input = styled.TextInput`
+const DisturbTimeButton_Input = styled.TextInput.attrs({maxLength: 2,})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
@@ -265,8 +259,6 @@ const ResultButton = styled.TouchableOpacity`
 	height: 40px;
 	background-color: #FF7154;
 	border-radius: 15px;
-	margin-left: 50px;
-	margin-block-end: 50px;
 	margin: 50px;
 	margin-bottom: 80px;
 `;
@@ -280,4 +272,20 @@ const ResultButton_Text = styled.Text`
 	margin: 13px;
 `;
 
+const ThemeContainer = styled.View`
+	width: 300px;
+	height: 50px;
+	display: flex;
+  	justify-content: center;
+	flex-direction: row;
+`;
+
+const Theme = styled.TouchableOpacity`
+	width: 40px;
+	height: 40px;
+	border-radius: 100px;
+	
+`;
+
+//시발 테마 어케만드는데
 export default Register;
