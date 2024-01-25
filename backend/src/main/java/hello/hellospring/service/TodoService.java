@@ -30,7 +30,7 @@ public class TodoService {
         validateEmptyTodoTile(todo);
         todoRepository.save(todo);
 
-        return todoRepository.findByUserCode(todo.getUserCode());
+        return todoRepository.findByUserId(todo.getUserId());
     }
     @Transactional
     public List<Todo> update(Todo todo){

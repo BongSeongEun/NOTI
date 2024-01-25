@@ -64,19 +64,15 @@ public class UserService {
     }
     public KakaoProfile findProfile(String token) {
 
-        //(1-2)
         RestTemplate rt = new RestTemplate();
 
-        //(1-3)
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token); //(1-4)
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        //(1-5)
         HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest =
                 new HttpEntity<>(headers);
 
-        //(1-6)
         // Http 요청 (POST 방식) 후, response 변수에 응답을 받음
         ResponseEntity<String> kakaoProfileResponse = rt.exchange(
                 "https://kapi.kakao.com/v2/user/me",
@@ -85,7 +81,6 @@ public class UserService {
                 String.class
         );
 
-        //(1-7)
         ObjectMapper objectMapper = new ObjectMapper();
         KakaoProfile kakaoProfile = null;
         try {
@@ -98,10 +93,10 @@ public class UserService {
     }
     public User getUser(HttpServletRequest request) { //(1)
         //(2)
-        Long userCode = (Long) request.getAttribute("userCode");
+        Long userId = (Long) request.getAttribute("userId");
 
         //(3)
-        User user = userRepository.findByUserCode(userCode);
+        User user = userRepository.findByUserId(userId);
 
         //(4)
         return user;

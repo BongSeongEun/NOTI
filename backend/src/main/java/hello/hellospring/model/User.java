@@ -2,46 +2,41 @@ package hello.hellospring.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import java.sql.Timestamp;
 
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "user_master")
+@Table(name = "user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_code")
-    private Long userCode;
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "kakao_id")
     private Long kakaoId;
 
-    @Column(name = "kakao_profile_img")
-    private String kakaoProfileImg;
+    @Column(name = "user_profile")
+    private String userProfile;
 
-    @Column(name = "kakao_nickname")
-    private String kakaoNickname;
+    @Column(name = "user_nickname")
+    private String userNickname;
 
-    @Column(name = "kakao_email")
-    private String kakaoEmail;
+    @Column(name = "user_color")
+    private String userColor;
 
     @Column(name = "user_role")
     private String userRole;
 
-    @Column(name = "create_time")
-    @CreationTimestamp
-    private Timestamp createTime;
-
     @Builder
-    public User(Long kakaoId, String kakaoProfileImg, String kakaoNickname,
-                String kakaoEmail, String userRole) {
+    public User(Long userId, Long kakaoId, String userProfile, String userNickname,
+                String userColor, String userRole) {
 
+        this.userId = userId;
         this.kakaoId = kakaoId;
-        this.kakaoProfileImg = kakaoProfileImg;
-        this.kakaoNickname = kakaoNickname;
-        this.kakaoEmail = kakaoEmail;
+        this.userProfile = userProfile;
+        this.userNickname = userNickname;
+        this.userColor = userColor;
         this.userRole = userRole;
     }
 }
