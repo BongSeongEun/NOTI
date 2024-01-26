@@ -41,7 +41,7 @@ jobs:
       working-directory: ${{ env.working-directory }}
       
     - name: AWS credential 설정
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v3
       with:
         aws-region: ${{ env.AWS_REGION }}
         aws-access-key-id: ${{ secrets.CICD_ACCESS_KEY }}
