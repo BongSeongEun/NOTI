@@ -1,9 +1,16 @@
+/* eslint-disable import/no-extraneous-dependencies */
+// 회원가입 페이지
+
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
-import React from "react";
-import styled from "styled-components";
-import { Navigate, useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import styled, { ThemeProvider } from "styled-components";
+import { Navigate, useNavigate, Link, Toggle } from "react-router-dom";
+import { backgrounds, lighten } from "polished";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
+import USER from "../asset/userimage.png";
+import COM from "../asset/cam.png";
+import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const MainDiv = styled.div`
   //전체화면 테두리
@@ -94,20 +101,6 @@ const SubTextBox = styled.div`
   height: 30px;
 `;
 
-const RegBtn = styled.button`
-  // 가입하기 버튼
-  width: 260px;
-  height: 30px;
-  border-radius: 40px; // 모서리 둥굴게
-  background-color: #333;
-  color: #ffffff;
-  font-size: 12px; // 글씨크기
-  font-weight: bold;
-  letter-spacing: 1px; // 글자사이 간격
-  // transition: transform 80ms ease-in; // 부드럽게 전환
-  text-align: center; // 텍스트 가운데 정렬
-`;
-
 const InputBox = styled.input`
   // 읽기전용 input box
   border: none; // 테두리 없음
@@ -135,6 +128,7 @@ const InputBox2 = styled.input`
 
 const Button2 = styled.button`
   // 중복확인
+  border: none;
   height: 30px;
   width: 60px;
   top: 0;
@@ -142,95 +136,180 @@ const Button2 = styled.button`
   margin: auto 0;
   border-radius: 3px;
   font-size: 10px;
-  background-color: #333;
+  background-color: ${props => props.theme.color1};
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => lighten(0.1, props.theme.color1)};
+  }
   color: #ffffff;
+`;
+
+const RegBtn = styled.button`
+  // 가입하기 버튼
+  border: none;
+  width: 260px;
+  height: 30px;
+  border-radius: 40px; // 모서리 둥굴게
+  background-color: ${props => props.theme.color1};
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => lighten(0.1, props.theme.color1)};
+  }
+  color: #ffffff;
+  font-size: 12px; // 글씨크기
+  font-weight: bold;
+  letter-spacing: 1px; // 글자사이 간격
+  // transition: transform 80ms ease-in; // 부드럽게 전환
+  text-align: center; // 텍스트 가운데 정렬
+`;
+
+function myLighten(amount, color) {
+  return lighten(amount, color);
+}
+
+const ThemedButton = styled.button`
+  border: 4px solid #ffffff;
+  height: 30px;
+  width: 30px;
+  padding: 10px;
+  margin: 10px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  /* 테마 색상에 따른 스타일 */
+  background-color: ${props => props.theme.color1};
+  color: #fff; // 텍스트 색상은 흰색으로 설정
+
+  &:hover {
+    background-color: ${props => lighten(0.1, props.theme.color1)};
+  }
 `;
 
 function Register() {
   const navigate = useNavigate();
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+
+  const handleThemeChange = selectedTheme => {
+    setCurrentTheme(selectedTheme);
+  };
   return (
-    <div>
-      <MainDiv>
-        <LogoDiv>
-          <MainLogo src={NOTI} alt="로고" />
-          <MainTextBox style={{ fontSize: "30px" }}>
-            노티와 대화하며 하루를 만들어보세요
-          </MainTextBox>
-        </LogoDiv>
-        <RegDiv>
-          <RegBox>
-            <MainTextBox style={{ marginTop: "10px" }}>
-              가입을 축하드려요!
+    <ThemeProvider theme={currentTheme}>
+      <div>
+        <MainDiv>
+          <LogoDiv>
+            <MainLogo src={NOTI} alt="로고" />
+            <MainTextBox style={{ fontSize: "30px" }}>
+              노티와 대화하며 하루를 만들어보세요
             </MainTextBox>
-            <MainTextBox style={{ marginBottom: "20px" }}>
-              프로필을 등록해보세요
-            </MainTextBox>
-            <HorizontalBox>
-              <MainLogo
-                style={{
-                  height: "110px",
-                  width: "110px",
-                  borderRadius: "50%",
-                  marginRight: "10px",
-                }}
-                src={NOTI}
-                alt="로고"
-              />
+          </LogoDiv>
+          <RegDiv>
+            <RegBox>
+              <MainTextBox style={{ marginTop: "10px" }}>
+                가입을 축하드려요!
+              </MainTextBox>
+              <MainTextBox style={{ marginBottom: "20px" }}>
+                프로필을 등록해보세요
+              </MainTextBox>
+              <HorizontalBox>
+                <MainLogo
+                  style={{
+                    marginTop: "15px",
+                    height: "80px",
+                    width: "80px",
+                    borderRadius: "50%",
+                    marginRight: "10px",
+                  }}
+                  src={USER}
+                  alt="userimage"
+                />
+                <VerticalBox>
+                  <SubTextBox>이름</SubTextBox>
+                  <InputBox id="info_id" type="text" readOnly />
+                  <SubTextBox>닉네임*</SubTextBox>
+                  <HorizontalBox>
+                    <InputBox2
+                      id="user_name"
+                      type="text"
+                      placeholder="닉네임 입력(6~20자)"
+                    />
+                    <Button2 style={{ marginLeft: "5px" }}>중복 확인</Button2>
+                  </HorizontalBox>
+                </VerticalBox>
+              </HorizontalBox>
               <VerticalBox>
-                <SubTextBox>이름</SubTextBox>
-                <InputBox id="info_id" type="text" readOnly />
-                <SubTextBox>닉네임*</SubTextBox>
+                <SubTextBox>이메일</SubTextBox>
+                <InputBox
+                  id="user_email"
+                  type="text"
+                  readOnly
+                  style={{ width: "320px" }}
+                />
                 <HorizontalBox>
-                  <InputBox2
-                    id="user_name"
-                    type="text"
-                    placeholder="닉네임 입력(6~20자)"
-                  />
-                  <Button2 style={{ marginLeft: "5px" }}>중복 확인</Button2>
+                  <SubTextBox>방해금지 시간 설정</SubTextBox>
                 </HorizontalBox>
+                <InputBox2
+                  id="mute_start"
+                  type="time"
+                  min="yyy"
+                  max="zzz"
+                  style={{ width: "320px", marginBottom: "5px" }}
+                />
+                <InputBox2
+                  id="mute_finish"
+                  type="time"
+                  min="yyy"
+                  max="zzz"
+                  style={{ width: "320px" }}
+                />
+                <SubTextBox>일기 생성 시간 설정*</SubTextBox>
+                <InputBox2
+                  id="diary_create"
+                  type="time"
+                  min="yyy"
+                  max="zzz"
+                  style={{ width: "320px", marginBottom: "5px" }}
+                />
               </VerticalBox>
-            </HorizontalBox>
-            <VerticalBox>
-              <SubTextBox>이메일</SubTextBox>
-              <InputBox
-                id="user_email"
-                type="text"
-                readOnly
-                style={{ width: "320px" }}
-              />
-              <SubTextBox>방해금지 시간 설정</SubTextBox>
-              <InputBox2
-                id="mute_start"
-                type="time"
-                min="yyy"
-                max="zzz"
-                style={{ width: "320px", marginBottom: "5px" }}
-              />
-              <InputBox2
-                id="mute_finish"
-                type="time"
-                min="yyy"
-                max="zzz"
-                style={{ width: "320px" }}
-              />
-              <SubTextBox>일기 생성 시간 설정*</SubTextBox>
-              <InputBox2
-                id="diary_create"
-                type="time"
-                min="yyy"
-                max="zzz"
-                style={{ width: "320px", marginBottom: "5px" }}
-              />
-            </VerticalBox>
-            <Link to="/Welcom">
-              <RegBtn style={{ marginTop: "30px" }} onClick={Navigate("/main")}>
-                가입하기
-              </RegBtn>
-            </Link>
-          </RegBox>
-        </RegDiv>
-      </MainDiv>
-    </div>
+              <SubTextBox>테마 선택</SubTextBox>
+              <HorizontalBox>
+                <ThemedButton
+                  style={{ backgroundColor: theme.OrangeTheme.color1 }}
+                  onClick={() => handleThemeChange(theme.OrangeTheme)}
+                ></ThemedButton>
+                <ThemedButton
+                  style={{ backgroundColor: theme.RedTheme.color1 }}
+                  onClick={() => handleThemeChange(theme.RedTheme)}
+                ></ThemedButton>
+                <ThemedButton
+                  style={{ backgroundColor: theme.PinkTheme.color1 }}
+                  onClick={() => handleThemeChange(theme.PinkTheme)}
+                ></ThemedButton>
+                <ThemedButton
+                  style={{ backgroundColor: theme.GreenTheme.color1 }}
+                  onClick={() => handleThemeChange(theme.GreenTheme)}
+                ></ThemedButton>
+                <ThemedButton
+                  style={{ backgroundColor: theme.BlueTheme.color1 }}
+                  onClick={() => handleThemeChange(theme.BlueTheme)}
+                ></ThemedButton>
+              </HorizontalBox>
+              <Link to="/Welcom">
+                <RegBtn
+                  style={{ marginTop: "30px" }}
+                  onClick={Navigate("/main")}
+                >
+                  가입하기
+                </RegBtn>
+              </Link>
+            </RegBox>
+          </RegDiv>
+        </MainDiv>
+      </div>
+    </ThemeProvider>
   );
 }
 export default Register;
