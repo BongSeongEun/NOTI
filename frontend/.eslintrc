@@ -1,7 +1,11 @@
-{   
-  "extends": ["react-app", "plugin:prettier/recommended"],   
-  "plugins": ["prettier"],   
-  "rules": {  // rules에 다음과 같이 추가
+{
+  "extends": ["react-app", "airbnb-base", "prettier"],
+  "plugins": ["prettier"],
+  "rules": {
+    "import/no-unresolved": 0,
+    "no-unused-vars": 0,
+    "import/extensions": 0,
+    // rules에 다음과 같이 추가
     "prettier/prettier": [
       "error",
       {
@@ -10,4 +14,3 @@
     ]
   }
 }
-
