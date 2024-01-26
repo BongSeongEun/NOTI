@@ -31,3 +31,8 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build
       working-directory: ${{ env.working-directory }}
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4.0.1
+      with:
+         node-version: 20
+         node-version-file: optional
