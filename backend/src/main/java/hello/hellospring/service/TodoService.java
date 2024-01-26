@@ -21,8 +21,8 @@ public class TodoService {
     TodoRepository todoRepository;
 
     @Transactional(readOnly = true)
-    public List<Todo> retrieve(String userCode){
-        return todoRepository.findByUserCode(userCode);
+    public List<Todo> retrieve(String userId){
+        return todoRepository.findByUserId(Long.valueOf(userId));
     }
 
     @Transactional
@@ -36,17 +36,19 @@ public class TodoService {
     public List<Todo> update(Todo todo){
         validateEmptyTodoTile(todo);
 
-        Optional<Todo> original = todoRepository.findById(todo.getId());
+        Optional<Todo> original = todoRepository.findById(String.valueOf(todo.getUserId()));
 
         if(original.isPresent()){
             Todo newTodo = original.get();
-            newTodo.setTitle(todo.getTitle());
-            newTodo.setDone(todo.isDone());
-            newTodo.setTime(todo.getTime());
+            newTodo.setTodoTitle(todo.getTodoTitle());
+            newTodo.setTodoDate(todo.getTodoDate());
+            newTodo.setTodoStartTime(todo.getTodoStartTime());
+            newTodo.setTodoEndTime(todo.getTodoEndTime());
+            newTodo.setTodoDone(todo.isTodoDone());
 
             todoRepository.save(newTodo);
         }
-        return retrieve(todo.getUserCode());
+        return retrieve(String.valueOf(todo.getUserId()));
     }
 
     @Transactional
@@ -54,13 +56,13 @@ public class TodoService {
         try{
             todoRepository.delete(todo);
         } catch(Exception e){
-            throw new RuntimeException("error deleting entity" + todo.getId());
+            throw new RuntimeException("error deleting entity" + todo.getTodoId());
         }
-        return retrieve(todo.getUserCode());
+        return retrieve(String.valueOf(todo.getUserId()));
     }
 
     private void validateEmptyTodoTile(Todo todo) {
-        if (todo.getTitle().equals("") || todo.getTitle() == null) {
+        if (todo.getTodoTitle().equals("") || todo.getTodoTitle() == null) {
             throw new AppException(NO_TITLE_ENTERED);
         }
     }

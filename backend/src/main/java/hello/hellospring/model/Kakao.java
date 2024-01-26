@@ -19,10 +19,18 @@ public class Kakao {
     @Column(name = "kakao_profile_img")
     private String kakaoProfileImg;
 
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "kakao_nickname")
+    private String kakaoNickname;
+
     @Builder
-    public Kakao(Long KakaoId, String kakaoEmail, String kakaoProfileImg){
+    public Kakao(Long kakaoId, String kakaoEmail, String kakaoProfileImg, Long userId, String kakaoNickname){
+        this.userId = userId;
         this.kakaoId = kakaoId;
         this.kakaoEmail = kakaoEmail;
         this.kakaoProfileImg = kakaoProfileImg;
+        this.kakaoNickname = kakaoNickname;
     }
 }

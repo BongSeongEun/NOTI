@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.hellospring.Oauth.KakaoProfile;
 import hello.hellospring.Oauth.OauthToken;
 import hello.hellospring.jwt.JwtProperties;
-import hello.hellospring.model.User;
-import hello.hellospring.repository.UserRepository;
+import hello.hellospring.model.Kakao;
+import hello.hellospring.repository.KakaoRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -23,10 +23,10 @@ import com.auth0.jwt.algorithms.Algorithm;
 import java.util.Date;
 
 @Service
-public class UserService {
+public class KakaoService {
 
     @Autowired
-    UserRepository userRepository; //(1)
+    KakaoRepository kakaoRepository; //(1)
 
     public OauthToken getAccessToken(String code) {
 
@@ -91,44 +91,49 @@ public class UserService {
 
         return kakaoProfile;
     }
-    public User getUser(HttpServletRequest request) { //(1)
+    public Kakao getUser(HttpServletRequest request) { //(1)
         //(2)
         Long userId = (Long) request.getAttribute("userId");
 
         //(3)
-        User user = userRepository.findByUserId(userId);
+        Kakao kakao = kakaoRepository.findByUserId(userId);
 
         //(4)
-        return user;
+        return kakao;
     }
-    public String SaveUserAndGetToken(String token) { //(1)
+    public String SaveUserAndGetToken(String token) {
         KakaoProfile profile = findProfile(token);
 
-        User user = userRepository.findByKakaoEmail(profile.getKakao_account().getEmail());
-        if(user == null) {
-            user = User.builder()
-                    .kakaoId(profile.getId())
+        // profile 객체가 null인지 확인
+        if (profile == null || profile.getKakao_account() == null) {
+            // 적절한 오류 처리 로직
+            // 예: 오류 로그 기록, 사용자에게 오류 메시지 반환 등
+            return "Error message or handling logic"; // 이 부분을 적절하게 수정
+        }
+
+        Kakao kakao = kakaoRepository.findByKakaoEmail(profile.getKakao_account().getEmail());
+        if (kakao == null) {
+            kakao = Kakao.builder()
+                    .userId(profile.getId())
                     .kakaoProfileImg(profile.getKakao_account().getProfile().getProfile_image_url())
                     .kakaoNickname(profile.getKakao_account().getProfile().getNickname())
                     .kakaoEmail(profile.getKakao_account().getEmail())
-                    .userRole("ROLE_USER").build();
+                    .build();
 
-            userRepository.save(user);
+            kakaoRepository.save(kakao);
         }
 
-        return createToken(user); //(2)
+        return createToken(kakao);
     }
 
-    public String createToken(User user) { //(2-1)
 
-        //(2-2)
+    public String createToken(Kakao kakao) { //(2-1)
+
         String jwtToken = JWT.create()
-
-                //(2-3)
-                .withSubject(user.getKakaoEmail())
+                .withSubject(kakao.getKakaoEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ JwtProperties.EXPIRATION_TIME))
-                .withClaim("id", user.getUserCode())
-                .withClaim("nickname", user.getKakaoNickname())
+                .withClaim("id", kakao.getUserId())
+                .withClaim("nickname", kakao.getKakaoNickname())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         return jwtToken; //(2-6)

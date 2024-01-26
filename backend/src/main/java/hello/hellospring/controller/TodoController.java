@@ -22,8 +22,8 @@ public class TodoController {
     @Autowired
     private TodoService service;
     @GetMapping("/getTodo")
-    public ResponseEntity<?> getTodo(@AuthenticationPrincipal String userCode) {
-        List<Todo> todoEntity = service.retrieve(userCode);
+    public ResponseEntity<?> getTodo(@AuthenticationPrincipal String userId) {
+        List<Todo> todoEntity = service.retrieve(userId);
 
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
 
@@ -32,11 +32,11 @@ public class TodoController {
     }
 
     @PostMapping("/createTodo")
-    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userCode, @RequestBody TodoDTO todoDTO){
+    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO todoDTO){
         Todo entity = TodoDTO.toEntity(todoDTO);
 
-        entity.setId(null);
-        entity.setUserCode(userCode);
+        entity.setTodoId(null);
+        entity.setUserId(Long.valueOf(userId));
         List<Todo> todoEntity = service.create(entity);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
 
@@ -45,10 +45,10 @@ public class TodoController {
     }
 
     @PutMapping("/updateTodo")
-    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userCode, @RequestBody TodoDTO todoDTO){
+    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
 
-        todoEntity.setUserCode(userCode);
+        todoEntity.setUserId(Long.valueOf(userId));
 
         List<Todo> todoEntities = service.update(todoEntity);
 
@@ -58,10 +58,10 @@ public class TodoController {
     }
 
     @DeleteMapping("/deleteTodo")
-    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userCode, @RequestBody TodoDTO todoDTO){
+    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
 
-        todoEntity.setUserCode(userCode);
+        todoEntity.setUserId(Long.valueOf(userId));
 
         List<Todo> todoEntities = service.delete(todoEntity, todoDTO);
 
@@ -75,11 +75,14 @@ public class TodoController {
 
         for(Todo todoEntity : todoEntities){
             TodoDTO todoDTO = TodoDTO.builder()
-                    .id(todoEntity.getId())
-                    .title(todoEntity.getTitle())
-                    .done(todoEntity.isDone())
-                    .time(String.valueOf(todoEntity.getTime()))
-                    .userCode(todoEntity.getUserCode())
+                    .todoId(todoEntity.getTodoId())
+                    .todoTitle(todoEntity.getTodoTitle())
+                    .todoDone(todoEntity.isTodoDone())
+                    .todoStartTime(todoEntity.getTodoStartTime())
+                    .todoEndTime(todoEntity.getTodoEndTime())
+                    .todoColor(todoEntity.getTodoColor())
+                    .userId(todoEntity.getUserId())
+                    .todoDate(todoEntity.getTodoDate())
                     .build();
 
             todoDTOList.add(todoDTO);
