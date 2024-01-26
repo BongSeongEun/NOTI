@@ -1,4 +1,4 @@
-name: coinTalk chatRoom server CI/CD
+name: NOTI API server CI/CD
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 env:
   S3_BUCKET_NAME: NOTI
+  working-directory: ./backend
 
 jobs:
   build:
@@ -25,6 +26,8 @@ jobs:
         
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+      working-directory: ${{ env.working-directory }}
     
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ${{ env.working-directory }}
