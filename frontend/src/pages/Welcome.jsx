@@ -2,9 +2,9 @@
 import React from "react";
 import styled from "styled-components";
 import { Navigate, useNavigate, Link } from "react-router-dom";
+import theme from "../styles/theme";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import STAR from "../asset/star.png";
-import theme from "../styles/theme";
 
 const MainDiv = styled.div`
   //전체화면 테두리

@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
+import { useDropzone } from "react-dropzone";
 
 const MainDiv = styled.div`
   // 메인 div

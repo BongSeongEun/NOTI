@@ -5,13 +5,54 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { Navigate, useNavigate, Link, Toggle } from "react-router-dom";
+import { useDropzone, open } from "react-dropzone";
+import {
+  Navigate,
+  useNavigate,
+  Link,
+  Toggle,
+  redirect,
+} from "react-router-dom";
 import { backgrounds, lighten } from "polished";
+import theme from "../styles/theme"; // 테마 파일 불러오기
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import USER from "../asset/userimage.png";
 import COM from "../asset/cam.png";
-import theme from "../styles/theme"; // 테마 파일 불러오기
 
+// 이미지 업로드
+const ImageUpload = () => {
+  const [uploadedImage, setUploadedImage] = useState(USER);
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: "image/*",
+    onDrop: acceptedFiles => {
+      const file = acceptedFiles[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    },
+  });
+
+  return (
+    <div {...getRootProps()}>
+      <input {...getInputProps()} />
+      <img
+        src={uploadedImage}
+        alt="Uploaded"
+        style={{
+          border: "3px",
+          borderColor: "red",
+          marginTop: "15px",
+          height: "80px",
+          width: "80px",
+          borderRadius: "50%",
+          marginRight: "10px",
+        }}
+      />
+    </div>
+  );
+};
 const MainDiv = styled.div`
   //전체화면 테두리
   display: flex;
@@ -215,17 +256,7 @@ function Register() {
                 프로필을 등록해보세요
               </MainTextBox>
               <HorizontalBox>
-                <MainLogo
-                  style={{
-                    marginTop: "15px",
-                    height: "80px",
-                    width: "80px",
-                    borderRadius: "50%",
-                    marginRight: "10px",
-                  }}
-                  src={USER}
-                  alt="userimage"
-                />
+                <ImageUpload />
                 <VerticalBox>
                   <SubTextBox>이름</SubTextBox>
                   <InputBox id="info_id" type="text" readOnly />
