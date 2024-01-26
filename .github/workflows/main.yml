@@ -28,6 +28,10 @@ jobs:
       run: chmod +x gradlew
       working-directory: ${{ env.working-directory }}
 
+    - name: gradlew Update
+      run: ./gradlew wrapper --gradle-version 8.4
+      working-directory: ${{ env.working-directory }}
+
     
     - name: Build with Gradle
       run: ./gradlew clean build
