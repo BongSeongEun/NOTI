@@ -1,89 +1,242 @@
-// 내 일정 페이지
+import React, { useState } from "react";
+import styled, { ThemeProvider } from "styled-components";
+import Calendar from "react-calendar";
+import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
+import theme from "../styles/theme";
+import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
+import "react-calendar/dist/Calendar.css"; // 로고 이미지를 가져옵니다.
+import Todo from "../pages/Todo"; // Todo 컴포넌트 import
+import Diary from "../pages/Diary"; // Diary 컴포넌트 import
+import Coop from "../pages/Coop"; // Coop 컴포넌트 import
+import Setting from "../pages/Setting"; // Setting 컴포넌트 import
+import Stat from "../pages/Stat"; // Stat 컴포넌트 import
 
-/* eslint-disable no-unused-vars */
-/* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import styled from "styled-components";
-import { useDropzone } from "react-dropzone";
-
-const MainDiv = styled.div`
-  // 메인 div
+const PageLayout = styled.div`
   display: flex;
-  // flex-direction: column; // 세로 나열
-  // align-items: center; // 가운데 놓기
-  width: 100%;
-  justify-content: center;
-  background-color: #ffffff;
+  flex-direction: column;
   height: 100vh;
 `;
-const HorizontalBox = styled.div`
-  // 아이템을 가로정렬하는 상자
-  display: flex; // 정렬하려면 이거 먼저 써야함
-  //flex-direction: row; // 가로나열
-  justify-content: center; // 가운데 정렬
-  width: 100%;
-  height: auto;
-`;
-const VerticalBox = styled.div`
-  // 아이템을 세로정렬하는 상자
-  display: flex; // 정렬하려면 이거 먼저 써야함
-  align-items: center; // 수직 가운데 정렬
-  flex-direction: column; // 세로나열
-  width: 100%;
-  height: auto;
-`;
 
-const header = styled.div`
-  // 상단메뉴
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 80px;
-  background-color: #b1c3ff;
-`;
-
-const contents = styled.div`
+const Header = styled.header`
   display: flex;
-  width: 96%;
-  max-width: 1100px;
-  height: 100%;
-  margin: 0 outo;
+  justify-content: space-between;
   align-items: center;
-  justify-content: space-between; //항목사이 동일한 간격
+  background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  padding: 0 20px;
+  height: 80px;
 `;
 
-const navigation = styled.div`
-  ul {
-    // ul 요소 스타일 적용
-    // 자식요소들 수평나열
+const Logo = styled.img`
+  height: 50px; // 로고 이미지의 높이 설정
+  width: auto;
+`;
+
+const Navigation = styled.nav`
+  display: flex;
+
+  & > ul {
     display: flex;
     list-style: none;
+    padding: 0;
+    color: white;
   }
-  li + li {
-    // 형제 관계에있는 리스트 아이템 스타일 적용
+
+  & > ul > li {
     margin-left: 30px;
   }
 `;
 
+const Content = styled.main`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+`;
+
+const LeftSidebar = styled.aside`
+  position: fixed; // 사이드바를 화면에 고정
+  left: 0; // 오른쪽에 배치
+  top: 80px; // 헤더 아래에 배치
+  width: 300px; // 사이드바의 너비 설정
+  height: calc(100vh - 80px); // 전체 높이에서 헤더 높이를 뺀 값
+  background-color: #f9f9f9; // 배경색 설정
+  /* border-left: 1px solid
+    ${props => props.theme.color1 || theme.OrangeTheme.color1}; */
+  overflow-y: auto; // 내용이 많을 경우 스크롤
+  padding: 20px;
+  box-sizing: border-box; // 패딩을 너비에 포함
+`;
+
+const MainContent = styled.section`
+  flex-grow: 1;
+  padding: 20px;
+`;
+
+const RightSidebar = styled.aside`
+  position: fixed; // 사이드바를 화면에 고정
+  right: 0; // 오른쪽에 배치
+  top: 80px; // 헤더 아래에 배치
+  width: 300px; // 사이드바의 너비 설정
+  height: calc(100vh - 80px); // 전체 높이에서 헤더 높이를 뺀 값
+  background-color: #f9f9f9; // 배경색 설정
+  /* border-left: 1px solid
+    ${props => props.theme.color1 || theme.OrangeTheme.color1}; */
+  overflow-y: auto; // 내용이 많을 경우 스크롤
+  padding: 20px;
+  box-sizing: border-box; // 패딩을 너비에 포함
+`;
+
+const GreetingSection = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  border-radius: 20px;
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+const UserProfileImage = styled.img`
+  margin-left: 10px;
+  border-radius: 50%;
+  height: 40px;
+  width: 40px;
+  object-fit: cover;
+  box-shadow: 0px 0px 10px 5px
+    ${props => props.theme.color1 || theme.OrangeTheme.color1}; // 그림자 추가
+  border: 3px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
+`;
+
+const GreetingText = styled.div`
+  margin-left: 20px;
+  display: flex; // 텍스트를 가로로 나열
+  flex-direction: column; // 세로 나열 대신 가로 나열
+  align-items: flex-start; // 텍스트 왼쪽 정렬
+  justify-content: center; // 세로 중앙 정렬
+  color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  font-size: 15px; // 텍스트 크기 조절
+`;
+
+const StyledCalendar = styled(Calendar)`
+  width: 100%;
+  max-width: 300px; // 달력의 최대 너비를 설정
+  background-color: white;
+  border: 1px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  border-radius: 10px; // 달력 모서리를 둥글게
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* font-family: Arial, sans-serif; // 글꼴 설정 */
+
+  .react-calendar__navigation button {
+    border-radius: 50%;
+    color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  }
+
+  .react-calendar__tile:enabled:hover,
+  .react-calendar__tile:enabled:focus {
+    border-radius: 50%;
+    background-color: ${props =>
+      props.theme.color2 || theme.OrangeTheme.color2};
+    border-radius: 50%;
+  }
+
+  .react-calendar__tile--weekend {
+    color: black; // 주말 날짜 텍스트 색상을 검은색으로 변경
+  }
+
+  .react-calendar__tile--active {
+    background-color: ${props =>
+      props.theme.color2 || theme.OrangeTheme.color2};
+    color: white;
+    border-radius: 50%;
+  }
+`;
+
 function Main() {
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+  const formatDay = (locale, date) => <span>{date.getDate()}</span>;
+  const [nickname] = useState("사용자");
+  const [selectedComponent, setSelectedComponent] = useState("Todo");
+  const handleMenuClick = component => {
+    setSelectedComponent(component);
+  };
+
+  const renderComponent = () => {
+    switch (selectedComponent) {
+      case "Todo":
+        return <Todo />;
+      case "Diary":
+        return <Diary />;
+      case "Coop":
+        return <Coop />;
+      case "Stat":
+        return <Stat />;
+      case "Setting":
+        return <Setting />;
+      default:
+        return <Todo />;
+    }
+  };
+
   return (
-    <>
-      <div>
-        <header>
-          <contents>로고</contents>
-          <navigation>
+    <ThemeProvider theme={currentTheme}>
+      <PageLayout>
+        <Header>
+          <Logo src={NOTI} alt="NOTI Logo" /> {/* 로고 이미지를 삽입합니다. */}
+          <Navigation>
             <ul>
-              <li>메뉴1</li>
-              <li>메뉴2</li>
-              <li>메뉴3</li>
+              <li
+                onClick={() => handleMenuClick("Todo")}
+                style={{ cursor: "pointer" }}
+              >
+                일정
+              </li>
+              <li
+                onClick={() => handleMenuClick("Coop")}
+                style={{ cursor: "pointer" }}
+              >
+                협업
+              </li>
+              <li
+                onClick={() => handleMenuClick("Diary")}
+                style={{ cursor: "pointer" }}
+              >
+                달력/일기
+              </li>
+              <li
+                onClick={() => handleMenuClick("Stat")}
+                style={{ cursor: "pointer" }}
+              >
+                통계
+              </li>
+              <li
+                onClick={() => handleMenuClick("Setting")}
+                style={{ cursor: "pointer" }}
+              >
+                설정
+              </li>
             </ul>
-          </navigation>
-        </header>
-        <h1>메인입니다.</h1>
-      </div>
-    </>
+          </Navigation>
+        </Header>
+        <Content>
+          <LeftSidebar>
+            <GreetingSection>
+              <UserProfileImage src={USER} alt="User Profile" />
+              <GreetingText>
+                <div>{nickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
+                <div style={{ color: "black" }}>반갑습니다!</div>
+              </GreetingText>
+            </GreetingSection>
+            {/* 사이드바의 다른 내용 */}
+          </LeftSidebar>
+          <MainContent>
+            {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
+          </MainContent>
+        </Content>
+        <RightSidebar>
+          <StyledCalendar formatDay={formatDay} />
+        </RightSidebar>
+      </PageLayout>
+    </ThemeProvider>
   );
 }
 

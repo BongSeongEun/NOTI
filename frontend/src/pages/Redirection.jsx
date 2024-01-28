@@ -17,10 +17,9 @@ const Redirection = () => {
 
   useEffect(() => {
     axios.post(`/auth?code=${code}`).then(res => {
-      console.log(res);
       navigate("/Main");
     });
-  }, []);
+  }, [code, navigate]);
 
   return <div>로그인 중입니다.</div>;
 };
