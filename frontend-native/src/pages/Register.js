@@ -166,9 +166,9 @@ const ProfileImg = styled.Image`
 `;
 
 const GalleryButtonContainer = styled.View`
-  position: absolute;
-  bottom: 0px;
-  right: 150px; 
+  	position: absolute;
+  	bottom: 0px;
+  	right: 150px; 
 `;
 
 const GalleryButton = styled.TouchableOpacity`
