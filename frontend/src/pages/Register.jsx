@@ -15,6 +15,7 @@ import {
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
 import theme from "../styles/theme"; // 테마 파일 불러오기
+
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import USER from "../asset/userimage.png";
 import COM from "../asset/cam.png";

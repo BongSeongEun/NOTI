@@ -38,6 +38,7 @@ function App() {
           <Route path="/Stat" element={<Stat />} />
           <Route path="/Setting" element={<Setting />} />
           <Route path="/api/v1/KakaoLogin" element={<Redirection />} />
+
         </Routes>
       </Router>
     </>
