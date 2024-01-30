@@ -31,14 +31,13 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/Main" element={<Main />} />
           <Route path="/Register" element={<Register />} />
-          <Route path="/Welcom" element={<Welcome />} />
+          <Route path="/Welcome" element={<Welcome />} />
           <Route path="/Todo" element={<Todo />} />
           <Route path="/Coop" element={<Coop />} />
           <Route path="/Diary" element={<Diary />} />
           <Route path="/Stat" element={<Stat />} />
           <Route path="/Setting" element={<Setting />} />
-          <Route path="/api/v1/KakaoLogin" element={<Redirection />} />
-
+          <Route path="/auth" element={<Redirection />} />
         </Routes>
       </Router>
     </>
