@@ -16,33 +16,40 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 public class TodoDTO {
 
-    private String id;
-    private String title;
-    private boolean done;
-    private String time;
-    private String userCode;
+    private Long todoId;
+    private Long userId;
+    private String todoTitle;
+    private String todoStartTime;
+    private String todoEndTime;
+    private String todoColor;
+    private boolean todoDone;
+    private String todoDate;
 
     public TodoDTO(final Todo todo){
-        this.id = todo.getId();
-        this.title = todo.getTitle();
-        this.done = todo.isDone();
-        this.time = todo.getTime();
-        this.userCode = todo.getUserCode();
+        this.todoId = todo.getTodoId();
+        this.userId = todo.getUserId();
+        this.todoTitle = todo.getTodoTitle();
+        this.todoStartTime = todo.getTodoStartTime();
+        this.todoEndTime = todo.getTodoEndTime();
+        this.todoColor = todo.getTodoColor();
+        this.todoDone = todo.isTodoDone();
+        this.todoDate = todo.getTodoDate();
     }
 
     public static Todo toEntity(final TodoDTO dto){
-        if(dto.getTitle()==null || dto.getTitle().equals("")){
+        if(dto.getTodoTitle()==null || dto.getTodoTitle().equals("")){
             throw new AppException(ErrorCode.NO_TITLE_ENTERED);
         }
-        if(dto.getTime()==null || dto.getTime().equals("")){
-            throw new AppException(ErrorCode.NO_TIME_ENTERED);
-        }
+
         return Todo.builder()
-                .id(dto.getId())
-                .title(dto.getTitle())
-                .done(dto.isDone())
-                .time(dto.getTime())
-                .userCode(dto.getUserCode())
+                .todoId(dto.getTodoId())
+                .userId(dto.getUserId())
+                .todoTitle(dto.getTodoTitle())
+                .todoStartTime(dto.getTodoStartTime())
+                .todoEndTime(dto.getTodoEndTime())
+                .todoColor(dto.getTodoColor())
+                .todoDone(dto.isTodoDone())
+                .todoDate(dto.getTodoDate())
                 .build();
     }
 }

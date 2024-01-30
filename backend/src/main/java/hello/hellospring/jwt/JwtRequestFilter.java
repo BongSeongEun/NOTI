@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import hello.hellospring.repository.UserRepository;
+import hello.hellospring.repository.KakaoRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired //(2)
-    UserRepository userRepository;
+    KakaoRepository kakaoRepository;
 
     @Override //(3)
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,11 +38,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         //(6)
         String token = jwtHeader.replace(JwtProperties.TOKEN_PREFIX, "");
 
-        Long userCode = null;
+        Long userId = null;
 
         //(7)
         try {
-            userCode = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
+            userId = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
                     .getClaim("id").asLong();
 
         } catch (TokenExpiredException e) {
@@ -54,7 +54,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         //(8)
-        request.setAttribute("userCode", userCode);
+        request.setAttribute("userId", userId);
 
         //(9)
         filterChain.doFilter(request, response);

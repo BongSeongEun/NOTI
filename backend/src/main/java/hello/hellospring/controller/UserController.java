@@ -1,19 +1,25 @@
 package hello.hellospring.controller;
 
-import hello.hellospring.model.User;
+import hello.hellospring.dto.UserDTO;
 import hello.hellospring.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import hello.hellospring.service.UserService;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-@RequiredArgsConstructor
+@RestController
+@AllArgsConstructor
 public class UserController {
+
+    private final UserService userService;
+
+    @Autowired
     private final UserRepository userRepository;
-    @PostMapping("/user/save")
-    public void userSave(@RequestBody User user) {
-        userRepository.save(user);
+    @PostMapping("/api/v1/user/save")
+    public Long saveUser(@RequestBody UserDTO userDTO) {
+        return userService.saveUser(userDTO);
     }
 }
 
