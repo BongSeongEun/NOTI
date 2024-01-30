@@ -3,7 +3,7 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import styled from "styled-components/native"
+import styled, { ThemeProvider } from "styled-components";
 
 import React, { useState } from 'react';
 import {
@@ -15,19 +15,28 @@ import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
 import images from "../components/images";
+import theme from "../components/theme";
 
 function Register({ }) {
 	const navigation = useNavigation();
-	const name = "홍길동";
 	const email = "streethong@naver.com";
+
 	const [inputName, setInput_name] = useState("");
 	const [inputSDNum1, setInput_SDNum1] = useState("");
 	const [inputSDNum2, setInput_SDNum2] = useState("");
 	const [inputEDNum1, setInput_EDNum1] = useState("");
 	const [inputEDNum2, setInput_EDNum2] = useState("");
 	const [clicked, setClicked] = useState(false);
+
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+	const handleThemeChange = selectedTheme => {
+		setCurrentTheme(selectedTheme);
+	};
 	
 	return (
+		<ThemeProvider theme={currentTheme}>
+
+		
 		<ScrollView>
 			<Style>
 			  	<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
@@ -42,12 +51,7 @@ function Register({ }) {
           			</GalleryButtonContainer>
         		</ProfileGalleryContainer>
 	
-			  	<RegularText>이름</RegularText>
-			  	<FixTextBox>
-					<FixTextBox_Input>{name}</FixTextBox_Input>
-			  	</FixTextBox>
-	
-			  	<RegularText>닉네임 *</RegularText>
+			  	<RegularText>사용자 이름 *</RegularText>
 			  	<RegularTextBox>
 					<RegularTextBox_Input
 				  		placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
@@ -75,7 +79,7 @@ function Register({ }) {
 				{ clicked && (
 					<>
 						<RegularTextBox>
-					<Text1>시작 시간                                                                                 </Text1>
+						<Text1>시작 시간                                                                                 </Text1>
 						<DisturbTimeButton_Input
 				  			placeholder="00"
 							value={inputSDNum1}
@@ -89,9 +93,9 @@ function Register({ }) {
 							onChangeText={(text) => setInput_SDNum2(text)}
 							keyboardType="numeric"
 						/>
-				</RegularTextBox>
-				<RegularTextBox>
-					<Text1>종료 시간                                                                                 </Text1>
+						</RegularTextBox>
+						<RegularTextBox>
+						<Text1>종료 시간                                                                                 </Text1>
 						<DisturbTimeButton_Input
 				  			placeholder="00"
 							value={inputEDNum1}
@@ -105,19 +109,42 @@ function Register({ }) {
 							onChangeText={(text) => setInput_EDNum2(text)}
 							keyboardType="numeric"
 						/>
-				</RegularTextBox>
+						</RegularTextBox>
 					</>
 				)}
 				
 
 				<RegularText>테마 선택</RegularText>
+				<HorisontalView>
+					<ThemedButton
+						style={{ backgroundColor: theme.OrangeTheme.color1 }}
+						onClick={() => handleThemeChange(theme.OrangeTheme)}
+					></ThemedButton>
+					<ThemedButton
+						style={{ backgroundColor: theme.RedTheme.color1 }}
+						onClick={() => handleThemeChange(theme.RedTheme)}
+					></ThemedButton>
+					<ThemedButton
+						style={{ backgroundColor: theme.PinkTheme.color1 }}
+						onClick={() => handleThemeChange(theme.PinkTheme)}
+					></ThemedButton>
+					<ThemedButton
+						style={{ backgroundColor: theme.GreenTheme.color1 }}
+						onClick={() => handleThemeChange(theme.GreenTheme)}
+					></ThemedButton>
+					<ThemedButton
+						style={{ backgroundColor: theme.BlueTheme.color1 }}
+						onClick={() => handleThemeChange(theme.BlueTheme)}
+					></ThemedButton>
+				</HorisontalView>
 				
 				<ResultButton onPress={() => navigation.navigate("Register_Success")}>
   					<ResultButton_Text>완료</ResultButton_Text>
 				</ResultButton>
 
 			</Style>
-		</ScrollView>
+			</ScrollView>
+		</ThemeProvider>
 	);
 }
 
@@ -125,6 +152,10 @@ const Style = styled.View`
 	display: flex;
   	justify-content: center;
 	background-color: white;
+`;
+
+const HorisontalView = styled(Style)`
+	flex-direction: row;
 `;
 
 const MainText = styled.Text`
@@ -174,7 +205,7 @@ const GalleryButtonContainer = styled.View`
 const GalleryButton = styled.TouchableOpacity`
 	width: 40px;
 	height: 40px;
-  	background-color: #FF7154;
+	background-color: ${props => props.theme.color1};
   	border-radius: 100px;
 `;
 
@@ -214,7 +245,7 @@ const RegularTextBox = styled.TouchableOpacity`
 	align-items: center;
 `;
 
-const RegularTextBox_Input = styled.TextInput.attrs({maxLength: 6,})`
+const RegularTextBox_Input = styled.TextInput.attrs({maxLength: 6})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
@@ -229,7 +260,7 @@ const DisturbTimeContainer = styled.View`
 `;
 
 const DisturbTimeButton = styled.TouchableOpacity`
-	background-color: ${({ clicked }) => (clicked ? '#FF7154' : '#D5D5DB')};
+	background-color: ${({ clicked, theme }) => (clicked ? theme.color1 : '#D5D5DB')};
 	border-radius: 10px;
 	width: 35px;
 	height: 15px;
@@ -245,7 +276,7 @@ const DisturbTimeButton_Circle = styled.TouchableOpacity`
 	transform: ${({clicked}) => (clicked) ? 'translateX(-34px)' : 'translateX(-16px)'}
 `;
 
-const DisturbTimeButton_Input = styled.TextInput.attrs({maxLength: 2,})`
+const DisturbTimeButton_Input = styled.TextInput.attrs({maxLength: 2})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
@@ -257,10 +288,11 @@ const DisturbTimeButton_Input = styled.TextInput.attrs({maxLength: 2,})`
 const ResultButton = styled.TouchableOpacity`
 	width: 300px;
 	height: 40px;
-	background-color: #FF7154;
+	background-color: ${props => props.theme.color1};
 	border-radius: 15px;
-	margin: 50px;
-	margin-bottom: 80px;
+	margin-top: 30px;
+	margin-bottom: 50px;
+	margin-left: 60px;
 `;
 
 const ResultButton_Text = styled.Text`
@@ -272,19 +304,14 @@ const ResultButton_Text = styled.Text`
 	margin: 13px;
 `;
 
-const ThemeContainer = styled.View`
-	width: 300px;
-	height: 50px;
-	display: flex;
-  	justify-content: center;
-	flex-direction: row;
-`;
-
-const Theme = styled.TouchableOpacity`
-	width: 40px;
-	height: 40px;
+const ThemedButton = styled.TouchableOpacity`
+	height: 30px;
+	width: 30px;
+	padding: 15px;
+	margin: 15px;
+	border: none;
 	border-radius: 100px;
-	
+	background-color: ${({ theme }) => theme.color1};
 `;
 
 //시발 테마 어케만드는데

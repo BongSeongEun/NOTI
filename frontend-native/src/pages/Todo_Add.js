@@ -33,7 +33,7 @@ function Todo_Add({ }) {
 			<MainText>노티 시간</MainText>
 			<InputBox>
 				<TextStyle>
-					<Text_time>시작 시간</Text_time>
+					<Text_time>시작 시간                                                                                 </Text_time>
 					<TimeInput
 						placeholder="00"
 						value={inputSDNum1}
@@ -49,6 +49,30 @@ function Todo_Add({ }) {
 					/>
 				</TextStyle>
 			</InputBox>
+			<InputBox>
+				<TextStyle>
+					<Text_time>종료 시간                                                                                 </Text_time>
+					<TimeInput
+						placeholder="00"
+						value={inputEDNum1}
+						onChangeText={(text) => setInput_EDNum1(text)}
+						keyboardType="numeric"
+					/>
+					<Text>:</Text>
+					<TimeInput
+						placeholder="00"
+						value={inputEDNum2}
+						onChangeText={(text) => setInput_EDNum2(text)}
+						keyboardType="numeric"
+					/>
+				</TextStyle>
+			</InputBox>
+
+			<MainText>노티 색상</MainText>
+
+			<ResultButton onPress={() => navigation.navigate("Todo")}>
+				<ResultText color="white">완료</ResultText>
+			</ResultButton>
 		</Styles>
 	);
 }
@@ -65,20 +89,25 @@ const TextStyle = styled(Styles)`
 `;
 
 const MainText = styled.Text`
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: bold;
 	color: ${props => props.color || "black"};
 	text-align: left;
+	margin-left: 30px;
+	margin-top: 30px;
 `;
 
 const InputBox = styled.TouchableOpacity`
 	width: 300px;
 	height: 40px;
 	border-radius: 15px;
-	background-color: #B7BABF;
+	background-color: #F2F3F5;
+	flex-direction: row;
+	align-items: center;
+	margin-left: 30px;
 `;
 
-const TitleInput = styled.TextInput.attrs({maxLength: 15, })`
+const TitleInput = styled.TextInput.attrs({maxLength: 15})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
@@ -87,22 +116,21 @@ const TitleInput = styled.TextInput.attrs({maxLength: 15, })`
 	margin-left: 15px;
 `;
 
-const TimeInput = styled.TextInput.attrs({ maxLength: 2, })`
+const TimeInput = styled.TextInput.attrs({ maxLength: 2})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
 	width: 100%;
   	height: 100%;
-	margin-left: 15px;
-	margin-left: 100px;
+	width: 50px;
+  	height: 40px;
+	text-align: center;
 `;
 
 const Text_time = styled.Text`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
-	width: 100%;
-  	height: 100%;
 	margin-left: 15px;
 `;
 
@@ -110,7 +138,13 @@ const ResultButton = styled.TouchableOpacity`
 	width: 300px;
 	height: 40px;
 	border-radius: 15px;
-	background-color: "#FF7154";
+	background-color: #FF7154;
+	align-items: center;
+	margin-left: 30px;
+`;
+
+const ResultText = styled(MainText)`
+	margin-top: 10px;
 `;
 
 export default Todo_Add;
