@@ -25,18 +25,26 @@ public class User {
     @Column(name = "user_color")
     private String userColor;
 
-    @Column(name = "user_role")
-    private String userRole;
+    @Column(name = "mute_start_time")
+    private Long muteStartTime;
+
+    @Column(name = "mute_end_time")
+    private Long muteEndTime;
+
+    @Column(name = "diary_time")
+    private Long diaryTime;
 
     @Builder
     public User(Long userId, Long kakaoId, String userProfile, String userNickname,
-                String userColor, String userRole) {
+                String userColor, Long muteStartTime, Long muteEndTime, Long diaryTime) {
 
         this.userId = userId;
         this.kakaoId = kakaoId;
         this.userProfile = userProfile;
         this.userNickname = userNickname;
         this.userColor = userColor;
-        this.userRole = userRole;
+        this.muteStartTime = muteStartTime;
+        this.muteEndTime = muteEndTime;
+        this.diaryTime = diaryTime;
     }
 }
