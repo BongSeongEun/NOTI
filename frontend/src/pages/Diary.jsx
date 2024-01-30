@@ -10,6 +10,7 @@ import {
   redirect,
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
+import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const MainDiv = styled.div`

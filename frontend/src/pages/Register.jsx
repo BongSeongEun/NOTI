@@ -258,9 +258,9 @@ function Register() {
               <HorizontalBox>
                 <ImageUpload />
                 <VerticalBox>
-                  <SubTextBox>이름</SubTextBox>
-                  <InputBox id="info_id" type="text" readOnly />
-                  <SubTextBox>닉네임*</SubTextBox>
+                  <SubTextBox style={{ marginTop: "15px" }}>
+                    사용자명*
+                  </SubTextBox>
                   <HorizontalBox>
                     <InputBox2
                       id="user_name"

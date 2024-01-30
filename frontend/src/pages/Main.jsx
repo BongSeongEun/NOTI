@@ -139,8 +139,16 @@ const StyledCalendar = styled(Calendar)`
     border-radius: 50%;
   }
 
-  .react-calendar__tile--weekend {
-    color: black; // 주말 날짜 텍스트 색상을 검은색으로 변경
+  .react-calendar__month-view__days__day--weekend {
+    // 주말 글씨 빨간색 없애기
+    color: var(--festie-gray-800, #3a3a3a);
+  }
+
+  .react-calendar__tile--now {
+    // 오늘 날짜 하이라이트 커스텀
+    border-radius: 50%;
+    background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
+    color: var(--festie-gray-800, #ffffff);
   }
 
   .react-calendar__tile--active {
@@ -155,15 +163,20 @@ function Main() {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
   const formatDay = (locale, date) => <span>{date.getDate()}</span>;
   const [nickname] = useState("사용자");
+  const [selectedDate, setSelectedDate] = useState(new Date()); // 날짜 상태 추가
   const [selectedComponent, setSelectedComponent] = useState("Todo");
   const handleMenuClick = component => {
     setSelectedComponent(component);
   };
 
+  const handleDateChange = value => {
+    setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
+  };
+
   const renderComponent = () => {
     switch (selectedComponent) {
       case "Todo":
-        return <Todo />;
+        return <Todo selectedDate={selectedDate} />;
       case "Diary":
         return <Diary />;
       case "Coop":
@@ -233,7 +246,11 @@ function Main() {
           </MainContent>
         </Content>
         <RightSidebar>
-          <StyledCalendar formatDay={formatDay} />
+          <StyledCalendar
+            onChange={handleDateChange}
+            value={selectedDate}
+            formatDay={formatDay}
+          />
         </RightSidebar>
       </PageLayout>
     </ThemeProvider>
