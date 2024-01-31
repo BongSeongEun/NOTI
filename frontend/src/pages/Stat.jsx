@@ -1,4 +1,4 @@
-// 협업페이지
+// 통계 페이지
 import React, { useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";
@@ -24,12 +24,12 @@ const MainDiv = styled.div`
   height: 100%;
   color: white;
 `;
-function Coop() {
+function Stat() {
   const navigate = useNavigate();
   return (
     <div>
-      <MainDiv>협업</MainDiv>
+      <MainDiv>통계</MainDiv>
     </div>
   );
 }
-export default Coop;
+export default Stat;
