@@ -13,9 +13,11 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "kakao_id")
-    private Kakao kakaoId;
+    @Column(name = "kakao_id")
+    private Long kakaoId;
+
+    @Column(name = "kakao_email")
+    private String kakaoEmail;
 
     @Column(name = "user_profile")
     private String userProfile;
@@ -36,11 +38,12 @@ public class User {
     private String diaryTime;
 
     @Builder
-    public User(Long userId, Kakao kakaoId, String userProfile, String userNickname,
+    public User(Long userId, Long kakaoId, String kakaoEmail, String userProfile, String userNickname,
                 String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
 
         this.userId = userId;
         this.kakaoId = kakaoId;
+        this.kakaoEmail = kakaoEmail;
         this.userProfile = userProfile;
         this.userNickname = userNickname;
         this.userColor = userColor;
