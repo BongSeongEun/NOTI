@@ -141,7 +141,7 @@ const StyledCalendar = styled(Calendar)`
 
   .react-calendar__month-view__days__day--weekend {
     // 주말 글씨 빨간색 없애기
-    color: var(--festie-gray-800, #3a3a3a);
+    color: var(--festie-gray-800, #000000);
   }
 
   .react-calendar__tile--now {
