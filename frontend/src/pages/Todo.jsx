@@ -11,6 +11,7 @@ import {
 import { backgrounds, lighten } from "polished";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import editIcon from "../asset/edit.png"; // 수정하기
+import TimeTable from "../pages/TimeTable"; // 타임테이블
 
 const ModalBackdrop = styled.div`
   position: fixed;
@@ -171,8 +172,16 @@ function Todo({ selectedDate }) {
   // 내 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
   const [eventCompleted, setEventCompleted] = useState({});
-
   const navigate = useNavigate();
+
+  // 일정에 따라 색칠할 시간 블록들의 상태를 관리
+  const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+
+  // 수정 모드 상태와 현재 수정 중인 이벤트의 ID를 저장하는 상태 추가
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingEventId, setEditingEventId] = useState(null);
+
+  // 달력에 년.월.일 나오게 하는 함수
   const formatDate = date => {
     const d = new Date(date);
     const year = d.getFullYear();
@@ -182,6 +191,7 @@ function Todo({ selectedDate }) {
   };
   // 모달창 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   // 새 일정의 제목, 시간, 색상 상태
   const [title, setTitle] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -203,10 +213,36 @@ function Todo({ selectedDate }) {
     setIsModalOpen(false);
   };
 
+  // 수정 버튼 클릭 시 처리 함수
   const handleEditClick = eventId => {
-    // 수정 버튼 클릭 처리, 모달이나 폼을 열어서 이벤트를 수정할 수 있게 함
-    console.log(`ID가 ${eventId}인 이벤트 수정`);
-    // 실제 수정 로직을 이곳에 구현해야 함
+    const eventToEdit = events.find(event => event.id === eventId);
+    if (eventToEdit) {
+      setTitle(eventToEdit.title);
+      setStartTime(eventToEdit.startTime);
+      setEndTime(eventToEdit.endTime);
+      setSelectedColor(eventToEdit.selectedColor);
+      setEditingEventId(eventId); // 수정 중인 이벤트 ID 설정
+      setIsEditing(true); // 수정 모드로 전환
+      openModal(); // 모달 창 열기
+    }
+  };
+
+  // 새 일정 만들기 버튼 클릭 시 처리 함수
+  const openNewEventModal = () => {
+    // 입력 필드 상태 초기화
+    setTitle("");
+    setStartTime("");
+    setEndTime("");
+    setSelectedColor(theme.OrangeTheme.color1); // 기본 색상으로 초기화
+    setIsEditing(false); // 편집 모드가 아닌 새 추가 모드로 설정
+    setEditingEventId(null); // 편집 중인 이벤트 ID 초기화
+    openModal(); // 모달 창 열기
+  };
+
+  // 시간을 schedule 배열의 인덱스로 변환하는 함수
+  const timeToIndex = time => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 6 + Math.floor(minutes / 10);
   };
 
   // 일정 상태
@@ -216,36 +252,45 @@ function Todo({ selectedDate }) {
       [index]: !eventCompleted[index],
     };
     setEventCompleted(newEventCompleted);
+
+    // 해당 일정의 시작과 종료 시간을 기반으로 schedule 업데이트
+    const event = events[index];
+    if (event) {
+      const startTimeIndex = timeToIndex(event.startTime);
+      const endTimeIndex = timeToIndex(event.endTime);
+      const newSchedule = [...schedule];
+      for (let i = startTimeIndex; i <= endTimeIndex; i += 1) {
+        newSchedule[i] = newEventCompleted[index] ? event.selectedColor : false;
+      }
+      setSchedule(newSchedule);
+    }
   };
 
-  // 새 일정을 추가하는 함수 (event 상태를 업데이트 함)
-  const addNewEvent = () => {
-    const newEvent = {
-      id: Math.random(), // 간단한 예시로 id 생성, 실제 애플리케이션에서는 더 견고한 방법 사용
-      title,
-      startTime,
-      endTime,
-      selectedColor,
-      date: formatDate(selectedDate),
-      isCompleted: false, // 완료 상태
-    };
-    // 여기에서 상태 업데이트 또는 서버로 전송 로직 구현
-    setEvents(currentEvents => [...currentEvents, newEvent]);
-    closeModal();
-  };
-
-  // 일정을 수정하고 완료 상태를 변경하기 위한 함수를 추가
-  const completeEvent = id => {
-    setEvents(currentEvents =>
-      currentEvents.map(event =>
-        event.id === id ? { ...event, isCompleted: !event.isCompleted } : event,
-      ),
-    );
-  };
-
-  const editEvent = id => {
-    // id를 기반으로 해당 이벤트 데이터를 찾아서 모달 창에 데이터를 채우고 열기
-    // 이 부분은 상세 구현에 따라 달라질 수 있습니다.
+  // 모달에서 '추가하기' 또는 '수정하기' 버튼 클릭 시 처리 함수
+  const handleSubmit = () => {
+    if (isEditing) {
+      // 수정 로직
+      setEvents(currentEvents =>
+        currentEvents.map(event =>
+          event.id === editingEventId
+            ? { ...event, title, startTime, endTime, selectedColor }
+            : event,
+        ),
+      );
+    } else {
+      // 추가 로직
+      const newEvent = {
+        id: Math.random(),
+        title,
+        startTime,
+        endTime,
+        selectedColor,
+        date: formatDate(selectedDate),
+        isCompleted: false,
+      };
+      setEvents(currentEvents => [...currentEvents, newEvent]);
+    }
+    closeModal(); // 모달 창 닫기
   };
 
   return (
@@ -277,8 +322,8 @@ function Todo({ selectedDate }) {
               </EventItem>
             ))}
           </EventList>
-          <AddEventButton onClick={openModal}>
-            + 새 일정 만들기
+          <AddEventButton onClick={openNewEventModal}>
+            + 새 노티 만들기
             {isModalOpen && (
               <ModalBackdrop onClick={closeModal}>
                 <ModalContainer onClick={e => e.stopPropagation()}>
@@ -297,7 +342,7 @@ function Todo({ selectedDate }) {
                   >
                     {formatDate(selectedDate)}
                   </DateHeader>
-                  <SubTextBox>일정 제목</SubTextBox>
+                  <SubTextBox>노티 제목</SubTextBox>
 
                   <InputField
                     placeholder="노티이름을 작성해주세요!"
@@ -306,12 +351,12 @@ function Todo({ selectedDate }) {
                     maxLength={15}
                     style={{ marginBottom: "30px" }}
                   />
-                  <SubTextBox>일정 시작</SubTextBox>
+                  <SubTextBox>노티 시작</SubTextBox>
                   <TimeInput
                     value={startTime}
                     onChange={e => setStartTime(e.target.value)}
                   />
-                  <SubTextBox>일정 종료</SubTextBox>
+                  <SubTextBox>노티 종료</SubTextBox>
                   <TimeInput
                     value={endTime}
                     onChange={e => setEndTime(e.target.value)}
@@ -327,13 +372,14 @@ function Todo({ selectedDate }) {
                       />
                     ))}
                   </ColorSelector>
-                  <SubmitButton color={selectedColor} onClick={addNewEvent}>
-                    일정 추가
+                  <SubmitButton color={selectedColor} onClick={handleSubmit}>
+                    {isEditing ? "수정하기" : "일정 추가"}{" "}
                   </SubmitButton>
                 </ModalContainer>
               </ModalBackdrop>
             )}
           </AddEventButton>
+          <TimeTable schedule={schedule} />
         </DiaryContainer>
       </div>
     </ThemeProvider>
