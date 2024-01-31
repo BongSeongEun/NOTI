@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import hello.hellospring.Oauth.OauthToken;
 import hello.hellospring.jwt.JwtProperties;
 import hello.hellospring.model.Kakao;
+import hello.hellospring.model.User;
 import hello.hellospring.service.KakaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
