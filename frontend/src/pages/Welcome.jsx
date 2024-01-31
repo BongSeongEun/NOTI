@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
+/* eslint-disable prettier/prettier */
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import theme from "../styles/theme";
@@ -62,10 +63,14 @@ const GestImgBox = styled.img`
 
 function Welcome() {
   const navigate = useNavigate();
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
+  const userColor =
+    localStorage.getItem("userColor") || theme.OrangeTheme.color1;
+
   return (
     <div>
       <MainDiv>
-        <MainTextBox style={{ fontSize: "30px", marginBottom: "30px" }}>
+        <MainTextBox style={{ color: userColor, marginBottom: "20px" }}>
           프로필 생성 완료!
         </MainTextBox>
         <MainTextBox style={{ fontWeight: "700", color: "#ffffff" }}>
@@ -81,7 +86,7 @@ function Welcome() {
               width: "200px",
               height: "200px",
               borderRadius: "50%",
-              boxShadow: "0px 0px 10px 5px #ff7154 ",
+              boxShadow: "color: userColor",
             }}
           />
           <GestImgBox
@@ -96,7 +101,7 @@ function Welcome() {
           />
         </ImgBox>
         <Link to="/main">
-          <WelBtn>완료</WelBtn>
+          <WelBtn style={{ backgroundColor: userColor }}>완료</WelBtn>
         </Link>
       </MainDiv>
     </div>
