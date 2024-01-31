@@ -14,6 +14,7 @@ import {
   redirect,
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
+import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
@@ -233,11 +234,38 @@ const ThemedButton = styled.button`
 
 function Register() {
   const navigate = useNavigate();
-  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+  const [userNickname, setUserNickname] = useState(""); // 사용자명 상태 변수
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
+  const [diaryTime, setDiaryTime] = useState(""); // 일기 생성 시간 상태
+  const [muteStartTime, setMuteStartTime] = useState(""); // 방해 금지 시작 시간 상태
+  const [muteEndTime, setMuteEndTime] = useState(""); // 방해 금지 종료 시간 상태
 
+  // 테마 변경 핸들러
   const handleThemeChange = selectedTheme => {
     setCurrentTheme(selectedTheme);
   };
+
+  // 사용자 정보 전송 함수
+  async function postUser() {
+    try {
+      await axios.post("/api/v1/user/save", {
+        userNickname,
+        userColor: currentTheme.color1, // 테마의 주 색상
+        diaryTime, // 일기 생성 시간
+        muteStartTime, // 방해 금지 시작 시간
+        muteEndTime, // 방해 금지 종료 시간
+      });
+    } catch (error) {
+      console.error("Error posting user data:", error);
+      // 에러 처리
+    }
+  }
+  // 가입하기 버튼 클릭 핸들러
+  const handleSubmit = async () => {
+    await postUser(); // 사용자 정보 전송
+    localStorage.setItem("userColor", currentTheme.color1); // 색상을 로컬 스토리지에 저장
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
       <div>
@@ -267,6 +295,8 @@ function Register() {
                       id="user_name"
                       type="text"
                       placeholder="닉네임 입력(6~20자)"
+                      value={userNickname}
+                      onChange={e => setUserNickname(e.target.value)}
                     />
                     <Button2 style={{ marginLeft: "5px" }}>중복 확인</Button2>
                   </HorizontalBox>
@@ -288,6 +318,8 @@ function Register() {
                   type="time"
                   min="yyy"
                   max="zzz"
+                  value={muteStartTime}
+                  onChange={e => setMuteStartTime(e.target.value)}
                   style={{ width: "320px", marginBottom: "5px" }}
                 />
                 <InputBox2
@@ -295,6 +327,8 @@ function Register() {
                   type="time"
                   min="yyy"
                   max="zzz"
+                  value={muteEndTime}
+                  onChange={e => setMuteEndTime(e.target.value)}
                   style={{ width: "320px" }}
                 />
                 <SubTextBox>일기 생성 시간 설정*</SubTextBox>
@@ -303,6 +337,8 @@ function Register() {
                   type="time"
                   min="yyy"
                   max="zzz"
+                  value={diaryTime}
+                  onChange={e => setDiaryTime(e.target.value)}
                   style={{ width: "320px", marginBottom: "5px" }}
                 />
               </VerticalBox>
@@ -329,10 +365,10 @@ function Register() {
                   onClick={() => handleThemeChange(theme.BlueTheme)}
                 ></ThemedButton>
               </HorizontalBox>
-              <Link to="/Welcom">
+              <Link to="/Welcome">
                 <RegBtn
                   style={{ marginTop: "30px" }}
-                  onClick={Navigate("/main")}
+                  onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
                 >
                   가입하기
                 </RegBtn>
