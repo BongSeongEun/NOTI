@@ -13,8 +13,9 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "kakao_id")
-    private Long kakaoId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kakao_id")
+    private Kakao kakaoId;
 
     @Column(name = "user_profile")
     private String userProfile;
@@ -35,7 +36,7 @@ public class User {
     private String diaryTime;
 
     @Builder
-    public User(Long userId, Long kakaoId, String userProfile, String userNickname,
+    public User(Long userId, Kakao kakaoId, String userProfile, String userNickname,
                 String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
 
         this.userId = userId;

@@ -1,12 +1,13 @@
 package hello.hellospring.dto;
 
+import hello.hellospring.model.Kakao;
 import hello.hellospring.model.User;
 import lombok.Data;
 
 @Data
 public class UserDTO {
 
-    private Long kakaoId;
+    private Kakao kakaoId;
     private Long userId;
     private String userProfile;
     private String userNickname;
