@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OpenAIApi {
+
     @Value("${openai.api.key}")
     private static String API_KEY;
 
