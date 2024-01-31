@@ -10,7 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class OpenAIApi {
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
     public static String ask(String userMessage) throws JSONException {
         String responseBody = "";
 
