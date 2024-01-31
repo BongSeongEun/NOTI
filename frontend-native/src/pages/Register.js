@@ -3,14 +3,14 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import styled, { ThemeProvider } from "styled-components";
-
 import React, { useState } from 'react';
 import {
 	Text,
 	ScrollView,
-	Image,
+	Switch,
 } from "react-native";
+
+import styled, { ThemeProvider } from "styled-components";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
@@ -21,288 +21,177 @@ function Register({ }) {
 	const navigation = useNavigation();
 	const email = "streethong@naver.com";
 
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+	const handleThemeChange = selectedTheme => {
+		setCurrentTheme(selectedTheme);
+	};
+
 	const [inputName, setInput_name] = useState("");
 	const [inputSDNum1, setInput_SDNum1] = useState("");
 	const [inputSDNum2, setInput_SDNum2] = useState("");
 	const [inputEDNum1, setInput_EDNum1] = useState("");
 	const [inputEDNum2, setInput_EDNum2] = useState("");
-	const [clicked, setClicked] = useState(false);
 
-	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
-	const handleThemeChange = selectedTheme => {
-		setCurrentTheme(selectedTheme);
-	};
-	
+	const [Buttonclicked, setButtonClicked] = useState(false);
+
 	return (
 		<ThemeProvider theme={currentTheme}>
+			<FullView>
+				<ScrollView>
 
-		
-		<ScrollView>
-			<Style>
-			  	<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
-	
-			  	<ProfileGalleryContainer>
-          			<ProfileImg source={images.profile} />
+					<MainView>
+						<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
 
-          			<GalleryButtonContainer>
-            			<GalleryButton source={images.gallery}>
-            		    	<Gallery source={images.gallery} />
-            			</GalleryButton>
-          			</GalleryButtonContainer>
-        		</ProfileGalleryContainer>
-	
-			  	<RegularText>사용자 이름 *</RegularText>
-			  	<RegularTextBox>
-					<RegularTextBox_Input
-				  		placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
-				  		value={inputName}
-				  		onChangeText={(text) => setInput_name(text)}
-					/>
-				</RegularTextBox>
-				
-				<RegularText>이메일</RegularText>
-			  	<FixTextBox>
-					<FixTextBox_Input>{email}</FixTextBox_Input>
-			  	</FixTextBox>
-		
-				<RegularText>방해금지 시간 설정
-					<DisturbTimeContainer>
-						<DisturbTimeButton
-							onPress={() => setClicked((bool) => !bool)}
-							clicked={clicked} />
-						<DisturbTimeButton_Circle
-							onPress={() => setClicked((bool) => !bool)}
-							clicked={clicked} />
-					</DisturbTimeContainer>
-				</RegularText>
+						<HorisontalView>
+							<Images source={images.profile} />
+							<GalleryButton>
+								<Images source={images.gallery} size="20px" />
+							</GalleryButton>
+						</HorisontalView>
 
-				{ clicked && (
-					<>
-						<RegularTextBox>
-						<Text1>시작 시간                                                                                 </Text1>
-						<DisturbTimeButton_Input
-				  			placeholder="00"
-							value={inputSDNum1}
-							onChangeText={(text) => setInput_SDNum1(text)}
-							keyboardType="numeric"
-						/>
-						<Text>:</Text>
-						<DisturbTimeButton_Input
-							placeholder="00"
-							value={inputSDNum2}
-							onChangeText={(text) => setInput_SDNum2(text)}
-							keyboardType="numeric"
-						/>
-						</RegularTextBox>
-						<RegularTextBox>
-						<Text1>종료 시간                                                                                 </Text1>
-						<DisturbTimeButton_Input
-				  			placeholder="00"
-							value={inputEDNum1}
-							onChangeText={(text) => setInput_EDNum1(text)}
-							keyboardType="numeric"
-						/>
-						<Text>:</Text>
-						<DisturbTimeButton_Input
-							placeholder="00"
-							value={inputEDNum2}
-							onChangeText={(text) => setInput_EDNum2(text)}
-							keyboardType="numeric"
-						/>
-						</RegularTextBox>
-					</>
-				)}
-				
+						<RegularText>사용자 이름 *</RegularText>
+						<TextBox>
+							<Input_Name
+								placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
+								value={inputName}
+								onChangeText={(text) => setInput_name(text)}
+							/>
+						</TextBox>
 
-				<RegularText>테마 선택</RegularText>
-				<HorisontalView>
-					<ThemedButton
-						style={{ backgroundColor: theme.OrangeTheme.color1 }}
-						onClick={() => handleThemeChange(theme.OrangeTheme)}
-					></ThemedButton>
-					<ThemedButton
-						style={{ backgroundColor: theme.RedTheme.color1 }}
-						onClick={() => handleThemeChange(theme.RedTheme)}
-					></ThemedButton>
-					<ThemedButton
-						style={{ backgroundColor: theme.PinkTheme.color1 }}
-						onClick={() => handleThemeChange(theme.PinkTheme)}
-					></ThemedButton>
-					<ThemedButton
-						style={{ backgroundColor: theme.GreenTheme.color1 }}
-						onClick={() => handleThemeChange(theme.GreenTheme)}
-					></ThemedButton>
-					<ThemedButton
-						style={{ backgroundColor: theme.BlueTheme.color1 }}
-						onClick={() => handleThemeChange(theme.BlueTheme)}
-					></ThemedButton>
-				</HorisontalView>
-				
-				<ResultButton onPress={() => navigation.navigate("Register_Success")}>
-  					<ResultButton_Text>완료</ResultButton_Text>
-				</ResultButton>
+						<RegularText>이메일</RegularText>
+						<TextBox color="#D5D5D5">
+							<TextBoxText>{email}</TextBoxText>
+						</TextBox>
 
-			</Style>
-			</ScrollView>
+						<HorisontalView>
+							<RegularText>방해 금지 시간</RegularText>
+							<HorisontalView_End>
+								<DisturbTimeButton
+									trackColor={{ false: '#F2F3F5', true: '#FF7154' }}
+									thumbColor="#FFFF"
+									onValueChange={() => setButtonClicked(previousState => !previousState)}
+									value={Buttonclicked}
+								/>
+							</HorisontalView_End>		
+						</HorisontalView>
+
+						<TextBox>
+							<TextBoxText>시작 시간</TextBoxText>
+						</TextBox>
+							
+					
+					</MainView>
+
+				</ScrollView>
+			</FullView>
 		</ThemeProvider>
 	);
 }
 
-const Style = styled.View`
-	display: flex;
-  	justify-content: center;
+const FullView = styled.View`
+	flex: 1;
+	justify-content: center;
+	align-items: center;
 	background-color: white;
 `;
 
-const HorisontalView = styled(Style)`
-	flex-direction: row;
+const MainView = styled(FullView)`
+	width: 300px;
+	height: auto;
+	align-items: stretch;
 `;
+
+const HorisontalView = styled(FullView)`
+	flex-direction: row;
+	margin-top: auto;
+`;
+
+const HorisontalView_End = styled(HorisontalView)`
+	justify-content: flex-end;
+`;
+
+
 
 const MainText = styled.Text`
-    color: black;
-    font-size: 15px;
-	font-weight: bold;
-    font-family: Pretendard;
-	text-align: center;
-	margin: 30px;
-`;
-
-const Text1 = styled.Text`
-    color: black;
-    font-size: 8px;
-	font-weight: normal;
-    font-family: Pretendard;
-	text-align: left;
-	margin-left: 15px;
-`;
-
-const RegularText = styled.Text`
 	color: black;
-    font-size: 8px;
+	font-size: 15px;
 	font-weight: bold;
-    font-family: Pretendard;
+	text-align: center;
+	margin: 20px;
+`;
+
+const RegularText = styled(MainText)`
+	font-size: 8px;
+	font-weight: bold;
 	text-align: left;
-	margin-left: 60px;
+	margin: 0px;
 	margin-top: 20px;
 `;
 
-const ProfileGalleryContainer = styled.View`
-	position: relative;
+const TextBoxText = styled(RegularText)`
+	font-weight: normal;
+	margin: 0px;
+	margin-left: 10px;
 `;
 
-const ProfileImg = styled.Image`
-	width: 100px;
-  	height: 100px;
-	margin: auto;
-`;
 
-const GalleryButtonContainer = styled.View`
-  	position: absolute;
-  	bottom: 0px;
-  	right: 150px; 
+
+
+const Images = styled.Image`
+	width: ${props => props.size || "100px" };
+	height: ${props => props.size || "100px" };
 `;
 
 const GalleryButton = styled.TouchableOpacity`
 	width: 40px;
 	height: 40px;
 	background-color: ${props => props.theme.color1};
-  	border-radius: 100px;
-`;
-
-const Gallery = styled.Image`
-	width: 20px;
-	height:20px;
-	margin: auto;
-`;
-
-const FixTextBox = styled.TouchableOpacity`
-	width: 300px;
-	height: 40px;
-	background-color: #E3E4E6;
-	border-radius: 15px;
-	margin-left: 50px;
-	margin-top: 10px;
-`;
-
-const FixTextBox_Input = styled.Text`
-	color: black;
-    font-size: 8px;
-	font-weight: normal;
-	width: 100%;
-  	height: 100%;
-	margin-left: 15px;
-	margin-top: 15px;
-`;
-
-const RegularTextBox = styled.TouchableOpacity`
-	width: 300px;
-	height: 40px;
-	background-color: #F2F3F5;
-	border-radius: 15px;
-	margin-left: 50px;
-	margin-top: 10px;
-	flex-direction: row;
-	align-items: center;
-`;
-
-const RegularTextBox_Input = styled.TextInput.attrs({maxLength: 6})`
-	color: black;
-    font-size: 8px;
-	font-weight: normal;
-	width: 100%;
-  	height: 100%;
-	margin-left: 15px;
-`;
-
-const DisturbTimeContainer = styled.View`
-  	flex-direction: row;
-  	justify-content: flex-start;
-`;
-
-const DisturbTimeButton = styled.TouchableOpacity`
-	background-color: ${({ clicked, theme }) => (clicked ? theme.color1 : '#D5D5DB')};
-	border-radius: 10px;
-	width: 35px;
-	height: 15px;
-	margin-left: 190px;
-`;
-
-const DisturbTimeButton_Circle = styled.TouchableOpacity`
-	background-color: white;
 	border-radius: 100px;
-	width: 11px;
-	height: 11px;
-	margin: 2px;
-	transform: ${({clicked}) => (clicked) ? 'translateX(-34px)' : 'translateX(-16px)'}
+	justify-content: center;
+	align-items: center;
+	margin-left: -30px;
+	margin-top: 55px;
 `;
 
-const DisturbTimeButton_Input = styled.TextInput.attrs({maxLength: 2})`
+
+
+
+const TextBox = styled.TouchableOpacity`
+	background-color: ${props => props.color || "#F2F3F5"};
+	width: 300px;
+	height: 40px;
+	border-radius: 15px;
+	margin-top: 10px;
+	justify-content: center;
+`;
+
+const Input_Name = styled.TextInput.attrs({maxLength: 6})`
+	color: black;
+    font-size: 8px;
+	font-weight: normal;
+	width: 100%;
+  	height: 100%;
+	margin-left: 10px;
+`;
+
+
+
+
+const DisturbTimeButton = styled.Switch`
+	margin-top: 20px;
+`;
+
+const Input_DisturbTime = styled.TextInput.attrs({maxLength: 2})`
 	color: black;
     font-size: 8px;
 	font-weight: normal;
 	width: 50px;
   	height: 40px;
-	text-align: center;
+	text-align: left;
 `;
 
-const ResultButton = styled.TouchableOpacity`
-	width: 300px;
-	height: 40px;
-	background-color: ${props => props.theme.color1};
-	border-radius: 15px;
-	margin-top: 30px;
-	margin-bottom: 50px;
-	margin-left: 60px;
-`;
 
-const ResultButton_Text = styled.Text`
-	color: white;
-    font-size: 10px;
-	font-weight: bold;
-    font-family: Pretendard;
-	text-align: center;
-	margin: 13px;
-`;
+
 
 const ThemedButton = styled.TouchableOpacity`
 	height: 30px;
@@ -311,8 +200,16 @@ const ThemedButton = styled.TouchableOpacity`
 	margin: 15px;
 	border: none;
 	border-radius: 100px;
-	background-color: ${({ theme }) => theme.color1};
+	background-color: ${props => props.theme.color1};
 `;
 
-//시발 테마 어케만드는데
+
+
+
+const ResultButton = styled(TextBox)`
+	background-color: ${props => props.theme.color1};
+	margin-top: 30px;
+	margin-bottom: 0px;
+`;
+
 export default Register;

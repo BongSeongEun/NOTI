@@ -88,7 +88,7 @@ export default function App() {
         	<Stack.Screen name="Login" component={Login} />
         
 			<Stack.Screen name="Register" component={Register} />
-			<Stack.Screen name="Register_Success" component={Register_Success} />
+			  <Stack.Screen name="Register_Success" component={Register_Success} />
 		
 			<Stack.Screen name="Todo" component={Todo} />
 			<Stack.Screen name="Todo_Add" component={Todo_Add} />
