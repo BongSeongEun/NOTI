@@ -11,9 +11,9 @@ public class UserDTO {
     private String userProfile;
     private String userNickname;
     private String userColor;
-    private Long muteStartTime;
-    private Long muteEndTime;
-    private Long diaryTime;
+    private String muteStartTime;
+    private String muteEndTime;
+    private String diaryTime;
 
     public User toEntity(){
         return User.builder()
