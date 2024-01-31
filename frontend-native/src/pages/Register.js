@@ -5,17 +5,17 @@
 
 import React, { useState } from 'react';
 import {
-	Text,
 	ScrollView,
-	Switch,
 } from "react-native";
 
-import styled, { ThemeProvider } from "styled-components";
+import styled, { ThemeProvider, css } from "styled-components";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import images from "../components/images";
 import theme from "../components/theme";
+
 
 function Register({ }) {
 	const navigation = useNavigation();
@@ -26,18 +26,46 @@ function Register({ }) {
 		setCurrentTheme(selectedTheme);
 	};
 
-	const [inputName, setInput_name] = useState("");
-	const [inputSDNum1, setInput_SDNum1] = useState("");
-	const [inputSDNum2, setInput_SDNum2] = useState("");
-	const [inputEDNum1, setInput_EDNum1] = useState("");
-	const [inputEDNum2, setInput_EDNum2] = useState("");
-
 	const [Buttonclicked, setButtonClicked] = useState(false);
+	const [inputName, setInput_name] = useState('');
+
+	const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+	const [selectedStartTime, setSelectedStartTime] = useState('');
+	const [selectedEndTime, setSelectedEndTime] = useState('');
+	const [selectedDiaryTime, setDelectedDiaryTime] = useState('');
+
+	const showDatePicker = () => {
+		setDatePickerVisibility(true);
+	};
+	
+	const hideDatePicker = () => {
+		setDatePickerVisibility(false);
+	};
+	
+	const StartTime = (date) => {
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+		setSelectedStartTime(`${hours}:${minutes}`);
+		hideDatePicker();
+	};
+	const EndTime = (date) => {
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+		setSelectedEndTime(`${hours}:${minutes}`);
+		hideDatePicker();
+	};
+	const DiatyTime = (date) => {
+		const hours = date.getHours();
+		const minutes = date.getMinutes();
+		setDelectedDiaryTime(`${hours}:${minutes}`);
+		hideDatePicker();
+	};
+
 
 	return (
 		<ThemeProvider theme={currentTheme}>
-			<FullView>
-				<ScrollView>
+			<ScrollView>
+				<FullView>
 
 					<MainView>
 						<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
@@ -67,7 +95,6 @@ function Register({ }) {
 							<RegularText>방해 금지 시간</RegularText>
 							<HorisontalView_End>
 								<DisturbTimeButton
-									trackColor={{ false: '#F2F3F5', true: '#FF7154' }}
 									thumbColor="#FFFF"
 									onValueChange={() => setButtonClicked(previousState => !previousState)}
 									value={Buttonclicked}
@@ -75,15 +102,59 @@ function Register({ }) {
 							</HorisontalView_End>		
 						</HorisontalView>
 
-						<TextBox>
-							<TextBoxText>시작 시간</TextBoxText>
+						{Buttonclicked && (
+							<>
+								<HorisontalView>
+									<TextBox onPress={showDatePicker}>
+										<TextBoxText>시작 시간</TextBoxText>
+										<Time>{selectedStartTime}</Time>
+									</TextBox>
+									<DateTimePickerModal
+										isVisible={isDatePickerVisible}
+										mode="time"
+										onConfirm={StartTime}
+										onCancel={hideDatePicker}
+									/>
+								</HorisontalView>
+                            
+								<HorisontalView>
+									<TextBox onPress={showDatePicker}>
+										<TextBoxText>종료 시간</TextBoxText>
+										<Time>{selectedEndTime}</Time>
+									</TextBox>
+									<DateTimePickerModal
+										isVisible={isDatePickerVisible}
+										mode="time"
+										onConfirm={EndTime}
+										onCancel={hideDatePicker}
+									/>
+								</HorisontalView>
+                            </>
+                        )}
+						
+
+						<RegularText>일기 생성 시간 *</RegularText>
+						<TextBox onPress={showDatePicker}>
+							<Time>{selectedDiaryTime}</Time>
+							<DateTimePickerModal
+								isVisible={isDatePickerVisible}
+								mode="time"
+								onConfirm={DiatyTime}
+								onCancel={hideDatePicker}
+							/>
 						</TextBox>
-							
+
+						<RegularText>테마 선택</RegularText>
+
+						<ResultButton>
+							<RegularText color="white">완료</RegularText>
+						</ResultButton>
 					
 					</MainView>
 
-				</ScrollView>
-			</FullView>
+		
+				</FullView>
+			</ScrollView>
 		</ThemeProvider>
 	);
 }
@@ -96,14 +167,12 @@ const FullView = styled.View`
 `;
 
 const MainView = styled(FullView)`
-	width: 300px;
-	height: auto;
 	align-items: stretch;
+	width: 300px;	
 `;
 
-const HorisontalView = styled(FullView)`
+const HorisontalView = styled(MainView)`
 	flex-direction: row;
-	margin-top: auto;
 `;
 
 const HorisontalView_End = styled(HorisontalView)`
@@ -113,7 +182,7 @@ const HorisontalView_End = styled(HorisontalView)`
 
 
 const MainText = styled.Text`
-	color: black;
+	color: ${props => props.color || "black"};
 	font-size: 15px;
 	font-weight: bold;
 	text-align: center;
@@ -122,16 +191,22 @@ const MainText = styled.Text`
 
 const RegularText = styled(MainText)`
 	font-size: 8px;
-	font-weight: bold;
 	text-align: left;
 	margin: 0px;
 	margin-top: 20px;
 `;
 
-const TextBoxText = styled(RegularText)`
+const TextBoxText = styled(MainText)`
+	font-size: 8px;
+	text-align: left;
 	font-weight: normal;
 	margin: 0px;
 	margin-left: 10px;
+`;
+
+const Time = styled(TextBoxText)`
+	text-align: right;
+	margin-right: 10px;
 `;
 
 
@@ -177,9 +252,14 @@ const Input_Name = styled.TextInput.attrs({maxLength: 6})`
 
 
 
-const DisturbTimeButton = styled.Switch`
-	margin-top: 20px;
-`;
+const DisturbTimeButton = styled.Switch.attrs(props => ({
+	trackColor: {
+	  	false: '#F2F3F5',
+		true: props.theme.color1,
+	}
+}))`
+	margin-top: 10px;
+`
 
 const Input_DisturbTime = styled.TextInput.attrs({maxLength: 2})`
 	color: black;
@@ -210,6 +290,8 @@ const ResultButton = styled(TextBox)`
 	background-color: ${props => props.theme.color1};
 	margin-top: 30px;
 	margin-bottom: 0px;
+	justify-content: center;
+	align-items: center;
 `;
 
 export default Register;
