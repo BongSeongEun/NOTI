@@ -138,7 +138,7 @@ public class UserService {
         String jwtToken = JWT.create()
                 .withSubject(user.getKakaoEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ JwtProperties.EXPIRATION_TIME))
-                .withClaim("id", user.getKakaoId())
+                .withClaim("id", user.getUserId())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
         return jwtToken; //(2-6)
