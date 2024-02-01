@@ -3,23 +3,24 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
 
-import styled from "styled-components/native"
-
 import React from 'react';
-import {
-	ScrollView,
-	Image,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { ScrollView, } from "react-native";
+import styled, { ThemeProvider } from "styled-components/native";
+import { useNavigation, useRoute, } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
 import images from "../components/images";
+import theme from "../components/theme";
 
 function Register_Success({ }) {
 	const navigation = useNavigation();
 	const name = "홍길동";
 
+	const route = useRoute();
+	const { currentTheme } = route.params;
+
 	return (
+		<ThemeProvider theme={currentTheme}>
 		<ScrollView>
 			<MainViewStyle>
 				<RegularText>
@@ -40,7 +41,8 @@ function Register_Success({ }) {
 				</ResultButton>
 
 			</MainViewStyle>
-		</ScrollView>
+			</ScrollView>
+		</ThemeProvider>
 	);
 }
 
@@ -80,7 +82,7 @@ const MainText = styled.Text`
 `;
 
 const RegularText = styled.Text`
-	color: #FF7154;
+	color: ${props => props.theme.color1};
 	font-size: 15px;
 	font-weight: bold;
 	margin-top: 50px;
@@ -98,7 +100,7 @@ const ResultText = styled.Text`
 const ResultButton = styled.TouchableOpacity`
 	width: 300px;
 	height: 40px;
-	background-color: #FF7154;
+	background-color: ${props => props.theme.color1};
 	border-radius: 15px;
 	margin: 50px;
 	margin-bottom: 80px;

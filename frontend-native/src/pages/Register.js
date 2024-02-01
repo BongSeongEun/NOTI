@@ -4,7 +4,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
 import React, { useState } from 'react';
-import { ScrollView, TouchableOpacity } from "react-native";
+import { ScrollView } from "react-native";
 import styled, { ThemeProvider } from "styled-components/native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
@@ -76,6 +76,8 @@ function Register() {
 			<ScrollView>
 				<FullView>
 					<MainView>
+
+
 						<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
 						<HorisontalView>
 							<Images source={images.profile} />
@@ -83,6 +85,8 @@ function Register() {
 								<Images source={images.gallery} size="20px" />
 							</GalleryButton>
 						</HorisontalView>
+
+
 						<RegularText>사용자 이름 *</RegularText>
 						<TextBox>
 							<Input_Name
@@ -91,10 +95,14 @@ function Register() {
 								onChangeText={(text) => setInput_name(text)}
 							/>
 						</TextBox>
+
+
 						<RegularText>이메일</RegularText>
 						<TextBox color="#D5D5D5">
 							<TextBoxText>{email}</TextBoxText>
 						</TextBox>
+
+
 						<HorisontalView>
 							<RegularText>방해 금지 시간</RegularText>
 							<HorisontalView_End>
@@ -105,6 +113,7 @@ function Register() {
 								/>
 							</HorisontalView_End>
 						</HorisontalView>
+						
 						{Buttonclicked && (
 							<>
 								<HorisontalView>
@@ -133,6 +142,8 @@ function Register() {
 								</HorisontalView>
 							</>
 						)}
+
+
 						<RegularText>일기 생성 시간 *</RegularText>
 						<TextBox onPress={() => showDatePicker('diary')}>
 							<Time>{selectedDiaryTime}</Time>
@@ -143,6 +154,8 @@ function Register() {
 								onCancel={hideDatePicker}
 							/>
 						</TextBox>
+
+
 						<RegularText>테마 선택</RegularText>
 						<HorisontalView>
 							{Object.keys(theme).map(themeKey => (
@@ -153,9 +166,13 @@ function Register() {
 								/>
 							))}
 						</HorisontalView>
-						<ResultButton onPress={() => navigation.navigate("Register_Success")}>
+
+						
+						<ResultButton onPress={() => navigation.navigate("Register_Success", { currentTheme })}>
 							<RegularText color="white">완료</RegularText>
 						</ResultButton>
+
+
 					</MainView>
 				</FullView>
 			</ScrollView>
