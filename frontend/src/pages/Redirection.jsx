@@ -17,6 +17,8 @@ const Redirection = () => {
 
   useEffect(() => {
     axios.post(`/auth?code=${code}`).then(res => {
+      const token = res.headers.authorization;
+      window.localStorage.setItem("token", token);
       navigate("/Register");
     });
   }, [code, navigate]);

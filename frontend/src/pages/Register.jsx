@@ -239,6 +239,7 @@ function Register() {
   const [diaryTime, setDiaryTime] = useState(""); // 일기 생성 시간 상태
   const [muteStartTime, setMuteStartTime] = useState(""); // 방해 금지 시작 시간 상태
   const [muteEndTime, setMuteEndTime] = useState(""); // 방해 금지 종료 시간 상태
+  const token = window.localStorage.getItem("token");
 
   // 테마 변경 핸들러
   const handleThemeChange = selectedTheme => {
@@ -249,6 +250,7 @@ function Register() {
   async function postUser() {
     try {
       await axios.post("/api/v1/user/save", {
+        Authorization: token,
         userNickname,
         userColor: currentTheme.color1, // 테마의 주 색상
         diaryTime, // 일기 생성 시간
