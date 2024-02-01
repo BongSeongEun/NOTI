@@ -8,6 +8,7 @@ public class UserDTO {
 
     private Long kakaoId;
     private Long userId;
+    private String kakaoEmail;
     private String userProfile;
     private String userNickname;
     private String userColor;
@@ -19,6 +20,7 @@ public class UserDTO {
         return User.builder()
                 .kakaoId(kakaoId)
                 .userId(userId)
+                .kakaoEmail(kakaoEmail)
                 .userProfile(userProfile)
                 .userNickname(userNickname)
                 .userColor(userColor)
