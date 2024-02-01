@@ -8,9 +8,16 @@ import java.net.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OpenAIApi {
-    private static final String API_KEY = "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";
+
+    @Value("${openai.api.key}")
+    private static String API_KEY;
+
+    //private final static String API_KEY = "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";
     public static String ask(String userMessage) throws JSONException {
         String responseBody = "";
 
