@@ -1,14 +1,12 @@
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable prettier/prettier */
+/* eslint-disable react-hooks/exhaustive-deps */
 
-import styled from "styled-components/native"
-
+import styled from "styled-components/native";
 import React, { useState, useEffect } from 'react';
-import { ScrollView, } from "react-native";
+import { ScrollView, TouchableOpacity, Text, Modal, } from "react-native";
 import { useNavigation, useRoute, } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import Svg, {G} from 'react-native-svg';
-
 import images from "../components/images";
 
 function Todo({ }) {
@@ -23,6 +21,7 @@ function Todo({ }) {
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
 	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
+	const [modalVisible, setModalVisible] = useState(false);
 
 	const NotiTitle = ["일정 1", "일정 2", "일정 3"];
 	const Noti_Time = ["16:30 ~ 17:00", "17:30 ~ 18:40", "19:00~20:00"];
@@ -43,7 +42,7 @@ function Todo({ }) {
 	};
 
 	const Noties = (color_num) => (
-		<Noti color={color_sheet[color_num]}>
+		<Noti color={color_sheet[color_num]} onPress={() => setModalVisible(true)}>
 			<NotiCheck onPress={() => {
 				handleCheckToggle(color_num);
 				handleAddNoti();
@@ -101,7 +100,36 @@ function Todo({ }) {
 			</NotiContainer>
 			
 
-		</MainViewStyle>
+			<Modal
+				animationType="slide"
+				transparent={true}
+				visible={modalVisible}
+				onRequestClose={() => {
+				setModalVisible(!modalVisible);
+				}}
+			>
+				<ModalContainer>
+					<ModalView>
+						<ModalContent>
+							<TouchableOpacity onPress={() => {
+								navigation.navigate("Todo_Add");
+								setModalVisible(!modalVisible);
+							}}>
+								<Text>수정하기</Text>
+							</TouchableOpacity>
+							<TouchableOpacity onPress={() => {
+								setModalVisible(!modalVisible);
+							}}>
+								<Text>삭제하기</Text>
+							</TouchableOpacity>
+							<TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
+								<Text>닫기</Text>
+							</TouchableOpacity>
+						</ModalContent>
+					</ModalView>
+				</ModalContainer>
+			</Modal>
+    	</MainViewStyle>
 	);
 
 }
@@ -212,6 +240,34 @@ const Icons = styled.View`
 
 const Icon_calendar = styled(images.calendar)`
 	margin-right: 230px;
+`;
+
+const ModalContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalView = styled.View`
+  margin: 20px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 35px;
+  align-items: center;
+  shadow-color: #000;
+  shadow-offset: {
+    width: 0;
+    height: 2;
+  }
+  shadow-opacity: 0.25;
+  shadow-radius: 4px;
+  elevation: 5;
+`;
+
+const ModalContent = styled.View`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default Todo;
