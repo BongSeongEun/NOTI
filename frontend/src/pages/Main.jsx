@@ -33,6 +33,8 @@ const Logo = styled.img`
 
 const Navigation = styled.nav`
   display: flex;
+  align-items: center;
+  height: 80px;
 
   & > ul {
     display: flex;
@@ -65,11 +67,24 @@ const LeftSidebar = styled.aside`
   overflow-y: auto; // 내용이 많을 경우 스크롤
   padding: 20px;
   box-sizing: border-box; // 패딩을 너비에 포함
+
+  // 미디어 쿼리 추가
+  @media (max-width: 1050px) {
+    // 화면 너비가 1200px 이하일 때 적용
+    display: none;
+  }
 `;
 
 const MainContent = styled.section`
   flex-grow: 1;
   padding: 20px;
+  // margin-left: 300px; // 기본적으로 LeftSidebar의 너비만큼 여백을 둡니다.
+
+  // 미디어 쿼리 추가
+  @media (max-width: 1000px) {
+    // LeftSidebar가 사라지는 화면 너비
+    margin-left: 0; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
+  }
 `;
 
 const RightSidebar = styled.aside`
@@ -241,10 +256,11 @@ function Main() {
             </GreetingSection>
             {/* 사이드바의 다른 내용 */}
           </LeftSidebar>
-          <MainContent>
-            {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
-          </MainContent>
         </Content>
+        <MainContent>
+          {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
+        </MainContent>
+
         <RightSidebar>
           <StyledCalendar
             onChange={handleDateChange}

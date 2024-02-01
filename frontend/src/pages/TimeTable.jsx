@@ -6,7 +6,7 @@ const TimeTableContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-right: 35px;
-  width: 80%;
+  width: 60%;
   margin-top: 20px;
 `;
 

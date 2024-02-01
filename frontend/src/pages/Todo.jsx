@@ -44,8 +44,15 @@ const DiaryContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-left: 30%;
-  padding-right: 30%;
+  margin-right: 300px;
+  margin-left: 300px;
+
+  // 미디어 쿼리 추가
+  @media (max-width: 1050px) {
+    margin-left: 0; // LeftSidebar가 사라질 때 여백 제거
+    padding-left: 20px; // 필요에 따라 적절한 padding 적용
+    padding-right: 20px; // RightSidebar와의 충돌을 방지하기 위함
+  }
 `;
 
 const EventList = styled.div`
@@ -317,7 +324,9 @@ function Todo({ selectedDate }) {
                 <EditButton
                   src={editIcon}
                   alt="수정"
-                  onClick={() => handleEditClick(event.id)}
+                  onClick={() =>
+                    !eventCompleted[index] && handleEditClick(event.id)
+                  }
                 />
               </EventItem>
             ))}
