@@ -4,17 +4,8 @@
 import styled from "styled-components/native"
 
 import React, { useState, useEffect } from 'react';
-import {
-	View,
-	Text,
-	Button,
-	Image,
-	TextInput,
-	TouchableOpacity,
-	ScrollView,
-	Keyboard,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { ScrollView, } from "react-native";
+import { useNavigation, useRoute, } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import Svg, {G} from 'react-native-svg';
 

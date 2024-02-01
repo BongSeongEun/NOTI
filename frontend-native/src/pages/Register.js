@@ -16,9 +16,9 @@ function Register() {
 	const navigation = useNavigation();
 	const email = "streethong@naver.com";
 
-	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+	const [selectedTheme, setSelectedTheme] = useState(theme.OrangeTheme);
 	const handleThemeChange = selectedTheme => {
-		setCurrentTheme(selectedTheme);
+		setSelectedTheme(selectedTheme);
 	};
 
 	const [Buttonclicked, setButtonClicked] = useState(false);
@@ -72,7 +72,7 @@ function Register() {
 	};
 
 	return (
-		<ThemeProvider theme={currentTheme}>
+		<ThemeProvider theme={selectedTheme}>
 			<ScrollView>
 				<FullView>
 					<MainView>
@@ -168,7 +168,7 @@ function Register() {
 						</HorisontalView>
 
 						
-						<ResultButton onPress={() => navigation.navigate("Register_Success", { currentTheme })}>
+						<ResultButton onPress={() => navigation.navigate("Register_Success", { currentTheme: selectedTheme })}>
 							<RegularText color="white">완료</RegularText>
 						</ResultButton>
 
