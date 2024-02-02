@@ -4,13 +4,18 @@
 import styled from "styled-components/native";
 import React, { useState, useEffect } from 'react';
 import { ScrollView, TouchableOpacity, Text, Modal, } from "react-native";
-import { useNavigation, useRoute, } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import 'react-native-gesture-handler';
-import Svg, {G} from 'react-native-svg';
+
+import Svg, { G } from 'react-native-svg';
 import images from "../components/images";
+import { theme } from "../components/theme";
+import { ThemeProvider } from "styled-components";
 
 function Todo({ }) {
 	const navigation = useNavigation();
+	const route = useRoute();
+	const { selectedTheme } = route.params;
 	const name = "홍길동";
 
 	const currentDate = new Date();
@@ -26,7 +31,8 @@ function Todo({ }) {
 	const NotiTitle = ["일정 1", "일정 2", "일정 3"];
 	const Noti_Time = ["16:30 ~ 17:00", "17:30 ~ 18:40", "19:00~20:00"];
 
-	const color_sheet = ["#FF7154", "#FFB673", "#7CCAE2", "#5B9DFF", "#7E85FF"];
+	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
+
 	const [color_num, setColorNum] = useState(0);
 	useEffect(() => { setColorNum(color_num + 1); }, []);
 	const handleAddNoti = () => {
@@ -39,7 +45,7 @@ function Todo({ }) {
 			newClickedChecks[color_num] = !prevClickedChecks[color_num];
 			return newClickedChecks;
 		});
-	};
+	}
 
 	const Noties = (color_num) => (
 		<Noti color={color_sheet[color_num]} onPress={() => setModalVisible(true)}>
@@ -56,80 +62,82 @@ function Todo({ }) {
 	);
 
 	return (
-		<MainViewStyle>
-			<ProfileContainer>
-				<Profile source={images.Profile_g}></Profile>
-				<ProfileTextContainer>
-					<MainText>
-						{name} 님,
-					</MainText>
-					<MainText color="#FF7154">
-						{formattedDate} 노티입니다!
-					</MainText>
-				</ProfileTextContainer>
-			</ProfileContainer>
+		<ThemeProvider theme={selectedTheme}>
+			<MainViewStyle>
+				<ProfileContainer>
+					<Profile source={images.profile}></Profile>
+					<ProfileTextContainer>
+						<MainText>
+							{name} 님,
+						</MainText>
+						<MainText color={color_sheet[0]}>
+							{formattedDate} 노티입니다!
+						</MainText>
+					</ProfileTextContainer>
+				</ProfileContainer>
 
-			<BarContainer>
-				<MainText> 나의 일정      </MainText>
-				<MainText onPress={() => navigation.navigate("Coop")} color="#B7BABF">      협업 일정</MainText>
-			</BarContainer>
+				<BarContainer>
+					<MainText> 나의 일정      </MainText>
+					<MainText onPress={() => navigation.navigate("Coop")} color="#B7BABF">      협업 일정</MainText>
+				</BarContainer>
 
-			<Bar>
-				<Bar_Mini></Bar_Mini>
-			</Bar>
+				<Bar>
+					<Bar_Mini></Bar_Mini>
+				</Bar>
 
-			<Icons>
-				<Icon_calendar width={20} height={20}
-					color={clicked_calendar ? "#FF7154" : "#B7BABF"}
-					onPress={() => setClicked_calendar(!clicked_calendar)} />
-				<images.share width={20} height={20}
-					color={clicked_share ? "#FF7154" : "#B7BABF"}
-					onPress={() => setClicked_share(!clicked_share)} />
-			</Icons>
-			
-			<NotiContainer>
-				<>
-					{Noties(0)}
-					{Noties(1)}
-					{Noties(2)}
-					{Noties(3)}
-				</>
-				<AddNoti onPress={() => navigation.navigate("Todo_Add")} color="#E3E4E6">
-					<NotiText color="black">+ 새 노티 추가하기  </NotiText>
-				</AddNoti>
-			</NotiContainer>
-			
+				<Icons>
+					<Icon_calendar width={20} height={20}
+						color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
+						onPress={() => setClicked_calendar(!clicked_calendar)} />
+					<images.share width={20} height={20}
+						color={clicked_share ? color_sheet[0] : "#B7BABF"}
+						onPress={() => setClicked_share(!clicked_share)} />
+				</Icons>
+				
+				<NotiContainer>
+					<>
+						{Noties(0)}
+						{Noties(1)}
+						{Noties(2)}
+						{Noties(3)}
+					</>
+					<AddNoti onPress={() => navigation.navigate("Todo_Add")} color="#E3E4E6">
+						<NotiText color="black">+ 새 노티 추가하기  </NotiText>
+					</AddNoti>
+				</NotiContainer>
+				
 
-			<Modal
-				animationType="slide"
-				transparent={true}
-				visible={modalVisible}
-				onRequestClose={() => {
-				setModalVisible(!modalVisible);
-				}}
-			>
-				<ModalContainer>
-					<ModalView>
-						<ModalContent>
-							<TouchableOpacity onPress={() => {
-								navigation.navigate("Todo_Add");
-								setModalVisible(!modalVisible);
-							}}>
-								<Text>수정하기</Text>
-							</TouchableOpacity>
-							<TouchableOpacity onPress={() => {
-								setModalVisible(!modalVisible);
-							}}>
-								<Text>삭제하기</Text>
-							</TouchableOpacity>
-							<TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
-								<Text>닫기</Text>
-							</TouchableOpacity>
-						</ModalContent>
-					</ModalView>
-				</ModalContainer>
-			</Modal>
-    	</MainViewStyle>
+				<Modal
+					animationType="slide"
+					transparent={true}
+					visible={modalVisible}
+					onRequestClose={() => {
+					setModalVisible(!modalVisible);
+					}}
+				>
+					<ModalContainer>
+						<ModalView>
+							<ModalContent>
+								<TouchableOpacity onPress={() => {
+									navigation.navigate("Todo_Add");
+									setModalVisible(!modalVisible);
+								}}>
+									<Text>수정하기</Text>
+								</TouchableOpacity>
+								<TouchableOpacity onPress={() => {
+									setModalVisible(!modalVisible);
+								}}>
+									<Text>삭제하기</Text>
+								</TouchableOpacity>
+								<TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
+									<Text>닫기</Text>
+								</TouchableOpacity>
+							</ModalContent>
+						</ModalView>
+					</ModalContainer>
+				</Modal>
+			</MainViewStyle>
+		</ThemeProvider>
 	);
 
 }
@@ -181,7 +189,7 @@ const Bar = styled.TouchableOpacity`
 const Bar_Mini = styled(Bar)`
 	width: 50%;
 	height: 2px;
-	background-color: #FF7154;
+	background-color: ${props => props.theme.color1};
 	margin-top: -1px;
 `;
 
@@ -254,14 +262,6 @@ const ModalView = styled.View`
   border-radius: 20px;
   padding: 35px;
   align-items: center;
-  shadow-color: #000;
-  shadow-offset: {
-    width: 0;
-    height: 2;
-  }
-  shadow-opacity: 0.25;
-  shadow-radius: 4px;
-  elevation: 5;
 `;
 
 const ModalContent = styled.View`

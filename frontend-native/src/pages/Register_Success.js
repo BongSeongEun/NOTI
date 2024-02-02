@@ -35,9 +35,9 @@ function Register_Success() {
 						<DecoesSvg currentTheme={selectedTheme} />
                     </ProfileContainer>
 
-                    <ResultButton onPress={() => navigation.navigate("Todo")}>
-                        <ResultText>완료</ResultText>
-                    </ResultButton>
+                    <ResultButton onPress={() => navigation.navigate("Todo", { selectedTheme: selectedTheme })}>
+						<ResultText>완료</ResultText>
+					</ResultButton>
                 </ScrollView>
             </MainViewStyle>
         </ThemeProvider>
