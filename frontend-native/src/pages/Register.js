@@ -1,13 +1,13 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable no-trailing-spaces */
-/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable quotes */
+/* eslint-disable prettier/prettier */
 
 import React, { useState } from 'react';
 import { ScrollView } from "react-native";
 import styled, { ThemeProvider } from "styled-components/native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
+
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import images from "../components/images";
 import theme from "../components/theme";
@@ -17,9 +17,6 @@ function Register() {
 	const email = "streethong@naver.com";
 
 	const [selectedTheme, setSelectedTheme] = useState(theme.OrangeTheme);
-	const handleThemeChange = selectedTheme => {
-		setSelectedTheme(selectedTheme);
-	};
 
 	const [Buttonclicked, setButtonClicked] = useState(false);
 	const [inputName, setInput_name] = useState('');
@@ -29,6 +26,10 @@ function Register() {
 	const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 	const [isDiaryTimePickerVisible, setDiaryTimePickerVisible] = useState(false);
+
+	const handleThemeChange = (selectedTheme) => {
+		setSelectedTheme(selectedTheme);
+	};
 
 	const showDatePicker = (type) => {
 		switch (type) {
@@ -76,8 +77,6 @@ function Register() {
 			<ScrollView>
 				<FullView>
 					<MainView>
-
-
 						<MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
 						<HorisontalView>
 							<Images source={images.profile} />
@@ -85,7 +84,6 @@ function Register() {
 								<Images source={images.gallery} size="20px" />
 							</GalleryButton>
 						</HorisontalView>
-
 
 						<RegularText>사용자 이름 *</RegularText>
 						<TextBox>
@@ -96,12 +94,10 @@ function Register() {
 							/>
 						</TextBox>
 
-
 						<RegularText>이메일</RegularText>
 						<TextBox color="#D5D5D5">
 							<TextBoxText>{email}</TextBoxText>
 						</TextBox>
-
 
 						<HorisontalView>
 							<RegularText>방해 금지 시간</RegularText>
@@ -116,45 +112,21 @@ function Register() {
 						
 						{Buttonclicked && (
 							<>
-								<HorisontalView>
-									<TextBox onPress={() => showDatePicker('startTime')}>
-										<TextBoxText>시작 시간</TextBoxText>
-										<Time>{selectedStartTime}</Time>
-									</TextBox>
-									<DateTimePickerModal
-										isVisible={isStartTimePickerVisible}
-										mode="time"
-										onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
-										onCancel={hideDatePicker}
-									/>
-								</HorisontalView>
-								<HorisontalView>
-									<TextBox onPress={() => showDatePicker('endTime')}>
-										<TextBoxText>종료 시간</TextBoxText>
-										<Time>{selectedEndTime}</Time>
-									</TextBox>
-									<DateTimePickerModal
-										isVisible={isEndTimePickerVisible}
-										mode="time"
-										onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
-										onCancel={hideDatePicker}
-									/>
-								</HorisontalView>
+								<TimeSelectionTextBox onPress={() => showDatePicker('startTime')}>
+									<TextBoxText>시작 시간</TextBoxText>
+									<Time>{selectedStartTime}</Time>
+								</TimeSelectionTextBox>
+								<TimeSelectionTextBox onPress={() => showDatePicker('endTime')}>
+									<TextBoxText>종료 시간</TextBoxText>
+									<Time>{selectedEndTime}</Time>
+								</TimeSelectionTextBox>
 							</>
 						)}
 
-
 						<RegularText>일기 생성 시간 *</RegularText>
-						<TextBox onPress={() => showDatePicker('diary')}>
+						<TimeSelectionTextBox onPress={() => showDatePicker('diary')}>
 							<Time>{selectedDiaryTime}</Time>
-							<DateTimePickerModal
-								isVisible={isDiaryTimePickerVisible}
-								mode="time"
-								onConfirm={(date) => handleTimePickerConfirm('diary', date)}
-								onCancel={hideDatePicker}
-							/>
-						</TextBox>
-
+						</TimeSelectionTextBox>
 
 						<RegularText>테마 선택</RegularText>
 						<HorisontalView>
@@ -167,11 +139,9 @@ function Register() {
 							))}
 						</HorisontalView>
 
-						
 						<ResultButton onPress={() => navigation.navigate("Register_Success", { currentTheme: selectedTheme })}>
 							<RegularText color="white">완료</RegularText>
 						</ResultButton>
-
 
 					</MainView>
 				</FullView>
@@ -269,6 +239,12 @@ const DisturbTimeButton = styled.Switch.attrs(props => ({
 	}
 }))`
 	margin-top: 10px;
+`;
+
+const TimeSelectionTextBox = styled(TextBox)`
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
 `;
 
 const ThemedButton = styled.TouchableOpacity`

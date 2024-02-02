@@ -1,131 +1,150 @@
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable prettier/prettier */
+/* eslint-disable react-hooks/exhaustive-deps */
 
-import styled from "styled-components/native"
-
-import React, { useState } from 'react';
-import {
-	View,
-	Text,
-	Button,
-	Image,
-	TextInput,
-	TouchableOpacity,
-	ScrollView,
-	Keyboard,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import TimeTableView, { genTimeBlock } from 'react-native-timetable';
+import styled, { ThemeProvider } from 'styled-components/native';
+import React, { useState, useEffect, } from 'react';
+import { TouchableOpacity, Text } from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
+import { theme } from "../components/theme";
 import images from "../components/images";
-import NotiCheck from "../asset/noticheck.svg"; //color
 
-function Todo({ }) {
-	const navigation = useNavigation();
-	const name = "홍길동";
-	const currentDate = new Date();
-	const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토']
-	const dayOfWeek = daysOfWeek[currentDate.getDay()];
-	const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
+function Coop_Main() {
+    const navigation = useNavigation();
+    const route = useRoute();
+	const { selectedTheme } = route.params;
 
-	return (
-		<MainViewStyle>
-			<ProfileContainer>
-				<Profile source={images.Profile_g}></Profile>
-				<ProfileTextContainer>
-					<MainText>
-						{name} 님,
-					</MainText>
-					<MainText color="#FF7154">
-						{formattedDate} 노티입니다!
-					</MainText>
-				</ProfileTextContainer>
-			</ProfileContainer>
+	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
+    const name = "홍길동";
 
-			<BarContainer>
-				<MainText  onPress={() => navigation.navigate("Todo")} color="#B7BABF"> 나의 일정      </MainText>
-				<MainText>      협업 일정</MainText>
-     		</BarContainer>
+    const currentDate = new Date();
+    const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayOfWeek = daysOfWeek[currentDate.getDay()];
+    const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
 
-		
+	const [clicked_add, setCliecked_add] = useState(false);
+	const [clicked_frame, setCliecked_frame] = useState(false);
+	const [clickd_pin, setClicked_pin] = useState(false);
+	const [clicked_out, setClicked_out] = useState(false);
+	const [clicked_calendar, setClicked_calendar] = useState(false);
+	const [clicked_share, setClicked_share] = useState(false);
+	const [modalVisible, setModalVisible] = useState(false);
 
-			<Bar>
-				<Bar_Mini></Bar_Mini>
-			</Bar>
-		</MainViewStyle>
-	);
+    return (
+        <ThemeProvider theme={selectedTheme}>
+            <MainViewStyle>
+                <ProfileContainer>
+                    <Profile source={images.profile} />
+                    <ProfileTextContainer>
+                        <MainText>
+                            {name} 님,
+                        </MainText>
+                        <MainText color={selectedTheme.color1}>
+                            {formattedDate} 노티입니다!
+                        </MainText>
+                    </ProfileTextContainer>
+                </ProfileContainer>
 
+                <BarContainer>
+					<MainText onPress={() => navigation.navigate("Todo", { selectedTheme })} color="#B7BABF"> 나의 일정      </MainText>
+                    <MainText>      협업 일정</MainText>
+                </BarContainer>
+
+                <Bar />
+				<Bar_Mini />
+				
+				<Icons>
+					<images.team_add width={20} height={20}
+						color={clicked_add ? color_sheet[0] : "#B7BABF"}
+						onPress={() => setCliecked_add(!clicked_add)} />
+				</Icons>
+				
+
+            </MainViewStyle>
+        </ThemeProvider>
+    );
 }
 
-const ProfileContainer = styled.View`
-	display: flex;
-	flex-direction: row;
-`;
 
-const MainViewStyle = styled.View`
+const FullView = styled.View`
 	flex: 1;
-	display: flex;
+	justify-content: center;
+	align-items: center;
 	background-color: white;
 `;
 
+const MainView = styled(FullView)`
+	align-items: stretch;
+	width: 300px;
+`;
+
+const HorisontalView = styled(MainView)`
+	flex-direction: row;
+`;
+
+const HorisontalView_End = styled(HorisontalView)`
+	justify-content: flex-end;
+`;
+
+const MainViewStyle = styled.View`
+    flex: 1;
+    display: flex;
+    background-color: white;
+`;
+
+const ProfileContainer = styled.View`
+    display: flex;
+    flex-direction: row;
+`;
+
 const BarContainer = styled(ProfileContainer)`
-	justify-content: center;
-	align-items: center;
-	margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
 `;
 
 const ProfileTextContainer = styled(ProfileContainer)`
-	flex-direction: column;
-	margin-top: 25px;
-	margin-left: 10px;
+    flex-direction: column;
+    margin-top: 25px;
+    margin-left: 10px;
 `;
 
 const Profile = styled.Image`
-	width: 50px;
-	height: 50px;
-	margin-top: 20px;
-	margin-left: 50px;
+    width: 40px;
+    height: 40px;
+    margin-top: 20px;
+    margin-left: 50px;
 `;
 
 const MainText = styled.Text`
-	font-size: 14px;
-	font-weight: bold;
-	color: ${props => props.color || "black"};
-	text-align: left;
+    font-size: 12px;
+    font-weight: bold;
+    color: ${props => props.color || "black"};
+    text-align: left;
 `;
 
-const Bar = styled.TouchableOpacity`
-	width: 100%;
-	height: 1px;
-	margin-top: 10px;
-	background-color: #B7BABF;
+const Bar = styled.View`
+    width: 100%;
+    height: 1px;
+    margin-top: 10px;
+    background-color: #B7BABF;
 `;
 
 const Bar_Mini = styled(Bar)`
-	margin-left: 50%;
-	width: 50%;
-	height: 2px;
-	background-color: #FF7154;
-	margin-top: -1px;
+    align-self: flex-end;
+    width: 50%;
+    height: 2px;
+    background-color: ${props => props.theme.color1};
+    margin-top: -1px;
 `;
 
-const NotiContainer = styled.View`
+const Icons = styled.View`
+	display: flex;
+	flex-direction: row;
+	margin-left: 70px;
+	margin-top: 15px;
 `;
 
-const Noti = styled.TouchableOpacity`
-`;
 
-const NotiText = styled.Text`
-`;
-
-const AddNoti = styled.TouchableOpacity`
-`;
-
-const Icons = styled.Image`
-	width: 15px;
-	height: 15px;
-	margin: 30px;
-`;
-
-export default Todo;
+export default Coop_Main;

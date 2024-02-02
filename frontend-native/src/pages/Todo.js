@@ -1,16 +1,17 @@
+/* eslint-disable quotes */
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import styled from "styled-components/native";
-import React, { useState, useEffect } from 'react';
-import { ScrollView, TouchableOpacity, Text, Modal, } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import React, { useState, useEffect, } from 'react';
+import { ScrollView, TouchableOpacity, Text, Modal, } from 'react-native';
+import styled, { ThemeProvider } from 'styled-components/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import 'react-native-gesture-handler';
 
-import Svg, { G } from 'react-native-svg';
-import images from "../components/images";
-import { theme } from "../components/theme";
-import { ThemeProvider } from "styled-components";
+import DecoesSvg from '../asset/Deco_Svg';
+import { theme } from '../components/theme';
+import images from '../components/images';
 
 function Todo({ }) {
 	const navigation = useNavigation();
@@ -78,7 +79,7 @@ function Todo({ }) {
 
 				<BarContainer>
 					<MainText> 나의 일정      </MainText>
-					<MainText onPress={() => navigation.navigate("Coop")} color="#B7BABF">      협업 일정</MainText>
+					<MainText onPress={() => navigation.navigate("Coop_Main", { selectedTheme: selectedTheme })} color="#B7BABF">      협업 일정</MainText>
 				</BarContainer>
 
 				<Bar>
@@ -166,14 +167,14 @@ const ProfileTextContainer = styled(ProfileContainer)`
 `;
 
 const Profile = styled.Image`
-	width: 50px;
-	height: 50px;
+	width: 40px;
+	height: 40px;
 	margin-top: 20px;
 	margin-left: 50px;
 `;
 
 const MainText = styled.Text`
-	font-size: 14px;
+	font-size: 12px;
 	font-weight: bold;
 	color: ${props => props.color || "black"};
 	text-align: left;

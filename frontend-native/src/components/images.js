@@ -8,6 +8,10 @@ import calendar from "../asset/calendar.svg";
 import share from "../asset/share.svg";
 import gradation from "../asset/gradation.svg";
 
+import team_add from "../asset/team_add.svg";
+import team_frame from "../asset/team_frame.svg";
+import team_out from "../asset/team_out.svg";
+import team_pin from "../asset/team_pin.svg";
 
 export const images = {
 	profile: profile,
@@ -17,6 +21,11 @@ export const images = {
 	calendar: calendar,
 	share: share,
 	gradation: gradation,
+
+	team_add: team_add,
+	team_frame: team_frame,
+	team_out: team_out,
+	team_pin: team_pin,
 };
 
 export default images;

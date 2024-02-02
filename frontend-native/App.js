@@ -72,6 +72,7 @@ import 'react-native-gesture-handler';
 
 import Login from "./src/pages/Login";
 import Coop from "./src/pages/Coop";
+import Coop_Main from "./src/pages/Coop_Main";
 import Diary from "./src/pages/Diary";
 import Register from "./src/pages/Register";
 import Register_Success from "./src/pages/Register_Success";
@@ -92,7 +93,8 @@ export default function App() {
 		
 			<Stack.Screen name="Todo" component={Todo} />
 			<Stack.Screen name="Todo_Add" component={Todo_Add} />
-			<Stack.Screen name="Coop" component={Coop} />
+			  <Stack.Screen name="Coop" component={Coop} />
+			  <Stack.Screen name="Coop_Main" component={Coop_Main} />
 
 			<Stack.Screen name="Diary" component={Diary} />
 			<Stack.Screen name="Setting" component={Setting} />
