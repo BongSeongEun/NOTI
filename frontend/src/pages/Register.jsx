@@ -273,37 +273,28 @@ function Register() {
     return decodedJSON.id.toString();
   };
 
-  // 사용자 정보 및 이미지 전송 함수
+  // 사용자 정보 전송 함수
   async function postUser() {
-    const formData = new FormData();
-    const userId = getUserIdFromToken(); // 사용자 ID 추출 (기존 코드 유지)
-
-    // FormData 객체에 사용자 정보 추가
-    formData.append("userNickname", userNickname);
-    formData.append("userColor", themeName);
-    formData.append("diaryTime", diaryTime);
-    formData.append("muteStartTime", muteStartTime);
-    formData.append("muteEndTime", muteEndTime);
-
-    // 선택된 이미지 파일이 있으면 FormData 객체에 추가
-    if (selectedFile) {
-      formData.append("userProfile", selectedFile);
-    }
-
+    const userId = getUserIdFromToken();
     try {
-      // axios를 사용하여 서버로 PUT 요청, FormData 객체 전송
-      await axios.put(`/api/v1/user/${userId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          // 'Content-Type': 'multipart/form-data'는 여기서 명시적으로 설정하지 않음
+      await axios.put(
+        `/api/v1/user/${userId}`,
+        {
+          userNickname,
+          userColor: themeName, // 테마의 주 색상
+          diaryTime, // 일기 생성 시간
+          muteStartTime, // 방해 금지 시작 시간
+          muteEndTime, // 방해 금지 종료 시간
         },
-      });
-      // 요청 성공 후 처리
-      console.log("User profile updated successfully.");
-      navigate("/Welcome"); // 성공 시 리다이렉션
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
     } catch (error) {
+      console.error("Error posting user data:", error);
       // 에러 처리
-      console.error("Error updating user profile:", error);
     }
   }
   // 가입하기 버튼 클릭 핸들러

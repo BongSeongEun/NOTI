@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import Calendar from "react-calendar";
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
@@ -183,6 +183,13 @@ function Main() {
   const handleMenuClick = component => {
     setSelectedComponent(component);
   };
+
+  useEffect(() => {
+    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
+    if (savedThemeName && theme[savedThemeName]) {
+      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
+    }
+  }, []);
 
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트

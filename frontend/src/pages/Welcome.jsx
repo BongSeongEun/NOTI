@@ -62,8 +62,6 @@ const GestImgBox = styled.img`
 `;
 
 function Welcome() {
-  const [userTheme, setUserTheme] = useState(theme.OrangeTheme.color1); // 기본값은 OrangeTheme
-  const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
 
   useEffect(() => {
