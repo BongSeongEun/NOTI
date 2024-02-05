@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import Calendar from "react-calendar";
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
@@ -81,7 +81,7 @@ const MainContent = styled.section`
   // margin-left: 300px; // 기본적으로 LeftSidebar의 너비만큼 여백을 둡니다.
 
   // 미디어 쿼리 추가
-  @media (max-width: 1000px) {
+  @media (max-width: 1050px) {
     // LeftSidebar가 사라지는 화면 너비
     margin-left: 0; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
   }
@@ -184,6 +184,13 @@ function Main() {
     setSelectedComponent(component);
   };
 
+  useEffect(() => {
+    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
+    if (savedThemeName && theme[savedThemeName]) {
+      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
+    }
+  }, []);
+
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
   };
@@ -228,7 +235,7 @@ function Main() {
                 onClick={() => handleMenuClick("Diary")}
                 style={{ cursor: "pointer" }}
               >
-                달력/일기
+                일기
               </li>
               <li
                 onClick={() => handleMenuClick("Stat")}
