@@ -48,7 +48,7 @@ public class TodoController {
         return ResponseEntity.ok().body(dtos);
     }
 
-    @DeleteMapping("/api/vq/deleteTodo/{userId}")
+    @DeleteMapping("/api/v1/deleteTodo/{userId}")
     public ResponseEntity<?> deleteTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
 

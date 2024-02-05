@@ -130,4 +130,9 @@ public class UserService {
 
         return jwtToken;
     }
+    public User getUser(HttpServletRequest request){
+        Long userId = (Long) request.getAttribute("userId");
+        User user = userRepository.findByUserId(userId);
+        return user;
+    }
 }

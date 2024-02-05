@@ -45,5 +45,12 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/api/v1/userInfo/{userId}")
+    public ResponseEntity getUserInfo(@PathVariable HttpServletRequest userId){
+        User user = userService.getUser(userId);
+        return ResponseEntity.ok().body(user);
+    }
+
 }
 
