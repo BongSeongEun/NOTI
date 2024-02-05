@@ -240,19 +240,38 @@ function Register() {
   const [muteStartTime, setMuteStartTime] = useState(""); // 방해 금지 시작 시간 상태
   const [muteEndTime, setMuteEndTime] = useState(""); // 방해 금지 종료 시간 상태
   const token = window.localStorage.getItem("token");
+  const [themeName, setThemeName] = useState("OrangeTheme"); // 기본 테마 이름
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // 테마 변경 핸들러
-  const handleThemeChange = selectedTheme => {
-    setCurrentTheme(selectedTheme);
+  const handleThemeChange = selectedThemeName => {
+    const newTheme = theme[selectedThemeName];
+    if (newTheme) {
+      setCurrentTheme(newTheme); // UI 상에서 테마를 적용
+      setThemeName(selectedThemeName); // 선택된 테마 이름을 상태에 저장
+      localStorage.setItem("userTheme", selectedThemeName); // 선택된 테마 이름을 localStorage에 저장
+    } else {
+      console.error("Selected theme does not exist:", selectedThemeName);
+    }
+  };
+
+  // 이미지 파일 변경 처리
+  const handleFileChange = file => {
+    setSelectedFile(file);
   };
 
   // 사용자 정보 전송 함수
   async function postUser() {
+    const formData = new FormData();
+    // 기존 데이터 추가 코드 생략
+    if (selectedFile) {
+      formData.append("userProfile", selectedFile);
+    }
     try {
       await axios.post("/api/v1/user/save", {
         Authorization: token,
         userNickname,
-        userColor: currentTheme.color1, // 테마의 주 색상
+        userColor: themeName, // 테마의 주 색상
         diaryTime, // 일기 생성 시간
         muteStartTime, // 방해 금지 시작 시간
         muteEndTime, // 방해 금지 종료 시간
@@ -287,7 +306,7 @@ function Register() {
                 프로필을 등록해보세요
               </MainTextBox>
               <HorizontalBox>
-                <ImageUpload />
+                <ImageUpload onFileChange={handleFileChange} />
                 <VerticalBox>
                   <SubTextBox style={{ marginTop: "15px" }}>
                     사용자명*
@@ -348,23 +367,23 @@ function Register() {
               <HorizontalBox>
                 <ThemedButton
                   style={{ backgroundColor: theme.OrangeTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.OrangeTheme)}
+                  onClick={() => handleThemeChange("OrangeTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.RedTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.RedTheme)}
+                  onClick={() => handleThemeChange("RedTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.PinkTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.PinkTheme)}
+                  onClick={() => handleThemeChange("PinkTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.GreenTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.GreenTheme)}
+                  onClick={() => handleThemeChange("GreenTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.BlueTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.BlueTheme)}
+                  onClick={() => handleThemeChange("BlueTheme")}
                 ></ThemedButton>
               </HorizontalBox>
               <Link to="/Welcome">
