@@ -17,7 +17,6 @@ public class OpenAIApi {
     @Value("${openai.api.key}")
     private static String API_KEY;
 
-    //private final static String API_KEY = "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";
     public static String ask(String userMessage) throws JSONException {
         String responseBody = "";
 

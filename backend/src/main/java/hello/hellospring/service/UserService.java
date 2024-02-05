@@ -29,12 +29,8 @@ import java.util.Date;
 public class UserService {
 
     @Autowired
-    UserRepository userRepository; //(1)
+    UserRepository userRepository;
 
-    public Long saveUser(UserDTO userDTO) {
-        userRepository.save(userDTO.toEntity());
-        return userDTO.getUserId();
-    }
     public void updateUser(Long userId, UserDTO userDTO) {
         User user = userRepository.findByUserId(userId);
         user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime());
@@ -73,7 +69,7 @@ public class UserService {
             e.printStackTrace();
         }
 
-        return oauthToken; //(8)
+        return oauthToken;
     }
     public KakaoProfile findProfile(String token) {
 
@@ -104,24 +100,12 @@ public class UserService {
 
         return kakaoProfile;
     }
-    public User getUser(HttpServletRequest request) { //(1)
-        //(2)
-        Long userId = (Long) request.getAttribute("userId");
-
-        //(3)
-        User user = userRepository.findByUserId(userId);
-
-        //(4)
-        return user;
-    }
     public String SaveUserAndGetToken(String token) {
         KakaoProfile profile = findProfile(token);
 
         // profile 객체가 null인지 확인
         if (profile == null || profile.getKakao_account() == null) {
-            // 적절한 오류 처리 로직
-            // 예: 오류 로그 기록, 사용자에게 오류 메시지 반환 등
-            return "Error message or handling logic"; // 이 부분을 적절하게 수정
+            return "Error message or handling logic";
         }
 
         User user = userRepository.findByKakaoEmail(profile.getKakao_account().getEmail());
@@ -130,14 +114,13 @@ public class UserService {
                     .kakaoId(profile.getId())
                     .kakaoEmail(profile.getKakao_account().getEmail())
                     .build();
-
             userRepository.save(user);
         }
 
         return createToken(user);
     }
 
-    public String createToken(User user) { //(2-1)
+    public String createToken(User user) {
 
         String jwtToken = JWT.create()
                 .withSubject(user.getKakaoEmail())
@@ -145,6 +128,6 @@ public class UserService {
                 .withClaim("id", user.getUserId())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        return jwtToken; //(2-6)
+        return jwtToken;
     }
 }
