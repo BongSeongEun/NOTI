@@ -6,7 +6,6 @@
 import React, { useEffect, useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";
-import base64 from "base-64";
 import {
   Navigate,
   useNavigate,
@@ -23,7 +22,8 @@ import USER from "../asset/userimage.png";
 import COM from "../asset/cam.png";
 
 // 이미지 업로드
-const ImageUpload = () => {
+const ImageUpload = ({ onFileChange }) => {
+  // onFileChange prop 추가
   const [uploadedImage, setUploadedImage] = useState(USER);
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -31,7 +31,8 @@ const ImageUpload = () => {
       const file = acceptedFiles[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result);
+        setUploadedImage(reader.result); // 이미지 미리보기를 위한 상태 업데이트
+        onFileChange(file); // 선택된 파일을 상위 컴포넌트로 전달
       };
       reader.readAsDataURL(file);
     },
@@ -56,6 +57,7 @@ const ImageUpload = () => {
     </div>
   );
 };
+
 const MainDiv = styled.div`
   //전체화면 테두리
   display: flex;
@@ -270,14 +272,9 @@ function Register() {
     console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
-
   // 사용자 정보 전송 함수
   async function postUser() {
-    const formData = new FormData();
     const userId = getUserIdFromToken();
-    if (selectedFile) {
-      formData.append("userProfile", selectedFile);
-    }
     try {
       await axios.put(
         `/api/v1/user/${userId}`,
@@ -324,7 +321,7 @@ function Register() {
                 프로필을 등록해보세요
               </MainTextBox>
               <HorizontalBox>
-                <ImageUpload onFileChange={handleFileChange} />
+                <ImageUpload onFileChange={file => setSelectedFile(file)} />
                 <VerticalBox>
                   <SubTextBox style={{ marginTop: "15px" }}>
                     사용자명*

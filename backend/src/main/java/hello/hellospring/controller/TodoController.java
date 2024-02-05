@@ -1,16 +1,13 @@
 package hello.hellospring.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TodoService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -33,6 +30,35 @@ public class TodoController {
         List<Todo> todoEntity = todoService.createTodo(entity);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/api/v1/updateTodo/{userId}")
+    public ResponseEntity<?> updateTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
+        Todo todoEntity = TodoDTO.toEntity(todoDTO);
+        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
+        List<Todo> todoEntities = todoService.update(todoEntity, userId);
+        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
+        return ResponseEntity.ok().body(dtos);
+    }
+
+    @GetMapping("/api/v1/getTodo/{userId}")
+    public ResponseEntity<?> getTodo(@PathVariable HttpServletRequest userId){
+        List<Todo> todoEntity = todoService.getTodo(userId);
+        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
+        return ResponseEntity.ok().body(dtos);
+    }
+
+    @DeleteMapping("/api/v1/deleteTodo/{userId}")
+    public ResponseEntity<?> deleteTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
+        Todo todoEntity = TodoDTO.toEntity(todoDTO);
+
+        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
+
+        List<Todo> todoEntities = todoService.delete(todoEntity, todoDTO, userId);
+
+        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
+
+        return ResponseEntity.ok().body(dtos);
     }
 
     private List<TodoDTO> makeDtoListFromEntityList( List<Todo> todoEntities ){
