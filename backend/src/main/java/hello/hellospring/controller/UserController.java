@@ -46,7 +46,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/api/v1/userInfo/{userId}")
+    @GetMapping("/api/v1/userInfo/{userId}")
     public ResponseEntity getUserInfo(@PathVariable HttpServletRequest userId){
         User user = userService.getUser(userId);
         return ResponseEntity.ok().body(user);
