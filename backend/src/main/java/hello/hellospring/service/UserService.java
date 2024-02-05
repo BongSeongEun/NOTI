@@ -35,6 +35,11 @@ public class UserService {
         userRepository.save(userDTO.toEntity());
         return userDTO.getUserId();
     }
+    public void updateUser(Long userId, UserDTO userDTO) {
+        User user = userRepository.findByUserId(userId);
+        user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime());
+        userRepository.save(user);
+    }
 
     public OauthToken getAccessToken(String code) {
 
@@ -130,12 +135,6 @@ public class UserService {
         }
 
         return createToken(user);
-    }
-
-    public void updateUser(Long userId, UserDTO userDTO) {
-        User user = userRepository.findByUserId(userId);
-        user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime());
-        userRepository.save(user);
     }
 
     public String createToken(User user) { //(2-1)

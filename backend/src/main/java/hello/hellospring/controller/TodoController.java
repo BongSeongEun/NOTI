@@ -3,8 +3,10 @@ package hello.hellospring.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Todo;
+import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TodoService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,60 +16,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@AllArgsConstructor
 public class TodoController {
 
     @Autowired
-    private TodoService service;
-    @GetMapping("/getTodo")
-    public ResponseEntity<?> getTodo(@AuthenticationPrincipal String userId) {
-        List<Todo> todoEntity = service.retrieve(userId);
+    private TodoService todoService;
 
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
+    @Autowired
+    private TodoRepository todoRepository;
 
-        return ResponseEntity.ok().body(dtos);
-
-    }
-
-    @PostMapping("/createTodo")
-    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO todoDTO){
+    @PostMapping("/api/v1/createTodo/{userId}")
+    public ResponseEntity<?> createTodo(@PathVariable String userId, @RequestBody TodoDTO todoDTO){
         Todo entity = TodoDTO.toEntity(todoDTO);
-
-        entity.setTodoId(null);
         entity.setUserId(Long.valueOf(userId));
-        List<Todo> todoEntity = service.create(entity);
+        List<Todo> todoEntity = todoService.createTodo(entity);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
-
-        return ResponseEntity.ok().body(dtos);
-
-    }
-
-    @PutMapping("/updateTodo")
-    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO todoDTO){
-        Todo todoEntity = TodoDTO.toEntity(todoDTO);
-
-        todoEntity.setUserId(Long.valueOf(userId));
-
-        List<Todo> todoEntities = service.update(todoEntity);
-
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
-
-        return ResponseEntity.ok().body(dtos);
-    }
-
-    @DeleteMapping("/deleteTodo")
-    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO todoDTO){
-        Todo todoEntity = TodoDTO.toEntity(todoDTO);
-
-        todoEntity.setUserId(Long.valueOf(userId));
-
-        List<Todo> todoEntities = service.delete(todoEntity, todoDTO);
-
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
-
-        return ResponseEntity.ok().body(dtos);
+        return ResponseEntity.ok().build();
     }
 
     private List<TodoDTO> makeDtoListFromEntityList( List<Todo> todoEntities ){
@@ -90,4 +55,6 @@ public class TodoController {
 
         return todoDTOList;
     }
+
+
 }

@@ -182,6 +182,18 @@ function Todo({ selectedDate }) {
   const [endTime, setEndTime] = useState("");
   const [selectedColor, setSelectedColor] = useState(theme.OrangeTheme.color1);
 
+  const token = window.localStorage.getItem("token");
+
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
+
   // 색상 선택기에서 색상을 선택하는 함수
   const handleColorSelect = color => {
     setSelectedColor(color);

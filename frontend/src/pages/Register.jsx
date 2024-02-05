@@ -244,7 +244,6 @@ function Register() {
   const [themeName, setThemeName] = useState("OrangeTheme"); // 기본 테마 이름
   const [selectedFile, setSelectedFile] = useState(null);
 
-
   // 테마 변경 핸들러
   const handleThemeChange = selectedThemeName => {
     const newTheme = theme[selectedThemeName];
@@ -263,7 +262,6 @@ function Register() {
   };
 
   const getUserIdFromToken = () => {
-    const token = localStorage.getItem("token");
     const payload = token.split(".")[1];
     const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
     const decodedPayload = atob(base642);
@@ -278,7 +276,7 @@ function Register() {
     const formData = new FormData();
     const userId = getUserIdFromToken();
     if (selectedFile) {
-     formData.append("userProfile", selectedFile);
+      formData.append("userProfile", selectedFile);
     }
     try {
       await axios.put(
