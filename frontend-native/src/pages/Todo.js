@@ -29,6 +29,7 @@ function Todo({ }) {
 	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
 	const [modalVisible, setModalVisible] = useState(false);
 
+	// json 형식
 	const NotiTitle = ["일정 1", "일정 2", "일정 3"];
 	const Noti_Time = ["16:30 ~ 17:00", "17:30 ~ 18:40", "19:00~20:00"];
 
@@ -49,13 +50,13 @@ function Todo({ }) {
 	}
 
 	const Noties = (color_num) => (
-		<Noti color={color_sheet[color_num]} onPress={() => setModalVisible(true)}>
+		<Noti color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : color_sheet[color_num]} onPress={() => setModalVisible(true)}>
 			<NotiCheck onPress={() => {
 				handleCheckToggle(color_num);
 				handleAddNoti();
 			}}>
 				<images.noticheck width={15} height={15}
-					color={clicked_check[color_num] ? color_sheet[color_num] : "#B7BABF"} />
+					color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : "#B7BABF"} />
 		  	</NotiCheck>
 		  	<NotiText> {NotiTitle[color_num]} </NotiText>
 		 	<NotiTime> {Noti_Time[color_num]} </NotiTime>
@@ -211,14 +212,6 @@ const Noti = styled.TouchableOpacity`
 	margin: 5px;
 `;
 
-const NotiText = styled.Text`
-	font-size: 13px;
-	font-weight: normal;
-	color: ${props => props.color || "white"};
-	text-align: left;
-	margin-left: 10px;
-`;
-
 const NotiCheck = styled.TouchableOpacity`
 	width: 25px;
 	height: 25px;
@@ -229,10 +222,18 @@ const NotiCheck = styled.TouchableOpacity`
 	align-items: center;
 `;
 
+const NotiText = styled.Text`
+	font-size: 13px;
+	font-weight: normal;
+	color: ${props => props.color || "white"};
+	text-align: left;
+	margin-left: 10px;
+`;
+
 const NotiTime = styled(NotiText)`
 	text-align: right;
 	margin-left: 100px;
-`
+`;
 
 const AddNoti = styled(Noti)`
 	margin: 15px;
