@@ -3,6 +3,8 @@ package hello.hellospring.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -51,4 +53,14 @@ public class User {
         this.muteEndTime = muteEndTime;
         this.diaryTime = diaryTime;
     }
+    public void updateUserInfo(String userNickname, String userProfile, String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
+        if(userNickname != null) this.userNickname = userNickname;
+        if(userProfile != null) this.userProfile = userProfile;
+        if(userColor != null) this.userColor = userColor;
+        if(muteStartTime != null) this.muteStartTime = muteStartTime;
+        if(muteEndTime != null) this.muteEndTime = muteEndTime;
+        if(diaryTime != null) this.diaryTime = diaryTime;
+
+    }
+
 }

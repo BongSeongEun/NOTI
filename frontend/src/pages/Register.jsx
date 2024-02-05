@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";
+import base64 from "base-64";
 import {
   Navigate,
   useNavigate,
@@ -243,6 +244,7 @@ function Register() {
   const [themeName, setThemeName] = useState("OrangeTheme"); // 기본 테마 이름
   const [selectedFile, setSelectedFile] = useState(null);
 
+
   // 테마 변경 핸들러
   const handleThemeChange = selectedThemeName => {
     const newTheme = theme[selectedThemeName];
@@ -260,22 +262,40 @@ function Register() {
     setSelectedFile(file);
   };
 
+  const getUserIdFromToken = () => {
+    const token = localStorage.getItem("token");
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
+
   // 사용자 정보 전송 함수
   async function postUser() {
     const formData = new FormData();
-    // 기존 데이터 추가 코드 생략
+    const userId = getUserIdFromToken();
     if (selectedFile) {
-      formData.append("userProfile", selectedFile);
+     formData.append("userProfile", selectedFile);
     }
     try {
-      await axios.post("/api/v1/user/save", {
-        Authorization: token,
-        userNickname,
-        userColor: themeName, // 테마의 주 색상
-        diaryTime, // 일기 생성 시간
-        muteStartTime, // 방해 금지 시작 시간
-        muteEndTime, // 방해 금지 종료 시간
-      });
+      await axios.put(
+        `/api/v1/user/${userId}`,
+        {
+          userNickname,
+          userColor: themeName, // 테마의 주 색상
+          diaryTime, // 일기 생성 시간
+          muteStartTime, // 방해 금지 시작 시간
+          muteEndTime, // 방해 금지 종료 시간
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
     } catch (error) {
       console.error("Error posting user data:", error);
       // 에러 처리

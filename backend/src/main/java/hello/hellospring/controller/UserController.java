@@ -47,5 +47,14 @@ public class UserController {
         User user = userService.getUser(request);
         return ResponseEntity.ok().body(user);
     }
+    @PutMapping("/api/v1/user/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody UserDTO userDTO) {
+        try {
+            userService.updateUser(Long.valueOf(userId), userDTO);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
 
