@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect } from "react";
+import styled, { ThemeProvider } from "styled-components";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import theme from "../styles/theme";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
@@ -22,7 +22,7 @@ const MainDiv = styled.div`
 const MainTextBox = styled.div`
   // 텍스트 박스
   letter-spacing: 1px;
-  color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  color: ${props => props.theme.color1}; // 직접 테마의 color1 사용
   text-align: center;
   font-size: 40px;
   width: 100%;
@@ -62,49 +62,61 @@ const GestImgBox = styled.img`
 `;
 
 function Welcome() {
+  const [userTheme, setUserTheme] = useState(theme.OrangeTheme.color1); // 기본값은 OrangeTheme
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
-  const userColor =
-    localStorage.getItem("userColor") || theme.OrangeTheme.color1;
+
+  useEffect(() => {
+    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
+    if (savedThemeName && theme[savedThemeName]) {
+      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
+    }
+  }, []);
 
   return (
-    <div>
-      <MainDiv>
-        <MainTextBox style={{ color: userColor, marginBottom: "20px" }}>
-          프로필 생성 완료!
-        </MainTextBox>
-        <MainTextBox style={{ fontWeight: "700", color: "#ffffff" }}>
-          홍길동 님! 노티에 오신 것을 환영해요
-        </MainTextBox>
-        <ImgBox>
-          <GestImgBox
-            src={NOTI}
-            style={{
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "200px",
-              height: "200px",
-              borderRadius: "50%",
-              boxShadow: "color: userColor",
-            }}
-          />
-          <GestImgBox
-            src={STAR}
-            style={{
-              top: "50%",
-              left: "45%",
-              transform: "translate(-50%, -50%)",
-              width: "100%",
-              height: "100%",
-            }}
-          />
-        </ImgBox>
-        <Link to="/main">
-          <WelBtn style={{ backgroundColor: userColor }}>완료</WelBtn>
-        </Link>
-      </MainDiv>
-    </div>
+    <ThemeProvider theme={currentTheme}>
+      <div>
+        <MainDiv>
+          <MainTextBox
+            style={{ color: currentTheme.color1, marginBottom: "20px" }}
+          >
+            프로필 생성 완료!
+          </MainTextBox>
+          <MainTextBox style={{ fontWeight: "700", color: "#ffffff" }}>
+            홍길동 님! 노티에 오신 것을 환영해요
+          </MainTextBox>
+          <ImgBox>
+            <GestImgBox
+              src={NOTI}
+              style={{
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "200px",
+                height: "200px",
+                borderRadius: "50%",
+                boxShadow: "color: userColor",
+              }}
+            />
+            <GestImgBox
+              src={STAR}
+              style={{
+                top: "50%",
+                left: "45%",
+                transform: "translate(-50%, -50%)",
+                width: "100%",
+                height: "100%",
+              }}
+            />
+          </ImgBox>
+          <Link to="/main">
+            <WelBtn style={{ backgroundColor: currentTheme.color1 }}>
+              완료
+            </WelBtn>
+          </Link>
+        </MainDiv>
+      </div>
+    </ThemeProvider>
   );
 }
 export default Welcome;
