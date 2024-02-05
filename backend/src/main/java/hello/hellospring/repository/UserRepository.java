@@ -8,5 +8,4 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Long> {
     public User findByKakaoEmail(String kakaoEmail);
     public User findByUserId(Long userId);
-    public User findBykakaoId(Long kakaoId);
 }

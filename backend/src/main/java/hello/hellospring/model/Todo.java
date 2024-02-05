@@ -2,13 +2,9 @@ package hello.hellospring.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
-@AllArgsConstructor
-@Getter
-@Setter
-@ToString
 @Entity
+@Data
 @NoArgsConstructor
 @Table(name = "Todo")
 public class Todo {
@@ -49,5 +45,6 @@ public class Todo {
         this.todoDone = todoDone;
         this.todoDate = todoDate;
     }
+
 
 }

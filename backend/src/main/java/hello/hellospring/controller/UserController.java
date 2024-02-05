@@ -24,11 +24,6 @@ public class UserController {
     @Autowired
     private final UserRepository userRepository;
 
-    @PostMapping("/api/v1/user/save")
-    public Long saveUser(@RequestBody UserDTO userDTO) {
-        return userService.saveUser(userDTO);
-    }
-
     // 프론트에서 인가코드 받아오는 url
     @PostMapping("/auth")
     public ResponseEntity getLogin(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
@@ -41,12 +36,6 @@ public class UserController {
         headers.add(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
         return ResponseEntity.ok().headers(headers).body("success");
     }
-    // jwt 토큰으로 유저정보 요청하기
-    @GetMapping("/me")
-    public ResponseEntity<Object> getCurrentUser(HttpServletRequest request) {
-        User user = userService.getUser(request);
-        return ResponseEntity.ok().body(user);
-    }
     @PutMapping("/api/v1/user/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody UserDTO userDTO) {
         try {
@@ -56,5 +45,12 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/api/v1/userInfo/{userId}")
+    public ResponseEntity getUserInfo(@PathVariable HttpServletRequest userId){
+        User user = userService.getUser(userId);
+        return ResponseEntity.ok().body(user);
+    }
+
 }
 
