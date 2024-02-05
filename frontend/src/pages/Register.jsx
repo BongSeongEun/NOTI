@@ -270,7 +270,6 @@ function Register() {
     console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
-
   // 사용자 정보 전송 함수
   async function postUser() {
     const formData = new FormData();
