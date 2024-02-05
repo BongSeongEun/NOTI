@@ -1,9 +1,10 @@
+/* eslint-disable no-trailing-spaces */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import styled, { ThemeProvider } from 'styled-components/native';
 import React, { useState, useEffect, } from 'react';
-import { TouchableOpacity, Text } from "react-native";
+import { ScrollView, } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
@@ -16,16 +17,18 @@ function Coop_Main() {
 	const { selectedTheme } = route.params;
 
 	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
-    const name = "홍길동";
+	const name = "홍길동";
+	const team_name = ['졸업작품 팀 프로젝트', '뭔지 모르겠는 프로젝트', '암튼 팀 프로젝트'];
+	const team_todo = ['유산소 운동', '강아지 산책'];
 
     const currentDate = new Date();
     const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
     const dayOfWeek = daysOfWeek[currentDate.getDay()];
     const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
 
-	const [clicked_add, setCliecked_add] = useState(false);
+	const [clicked_add, setClicked_add] = useState(false);
 	const [clicked_frame, setCliecked_frame] = useState(false);
-	const [clickd_pin, setClicked_pin] = useState(false);
+	const [clicked_pin, setClicked_pin] = useState(false);
 	const [clicked_out, setClicked_out] = useState(false);
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
@@ -33,39 +36,54 @@ function Coop_Main() {
 
     return (
         <ThemeProvider theme={selectedTheme}>
-            <MainViewStyle>
-                <ProfileContainer>
-                    <Profile source={images.profile} />
-                    <ProfileTextContainer>
-                        <MainText>
-                            {name} 님,
-                        </MainText>
-                        <MainText color={selectedTheme.color1}>
-                            {formattedDate} 노티입니다!
-                        </MainText>
-                    </ProfileTextContainer>
-                </ProfileContainer>
+			<ScrollView>
+				<FullView>
 
-                <BarContainer>
-					<MainText onPress={() => navigation.navigate("Todo", { selectedTheme })} color="#B7BABF"> 나의 일정      </MainText>
-                    <MainText>      협업 일정</MainText>
-                </BarContainer>
+					<MainView>
+						<ProfileContainer>
+							<Profile source={images.profile} style={{ marginTop: 20 }} />
+							<ProfileTextContainer>
+								<MainText>
+									{name} 님,
+								</MainText>
+								<MainText color={color_sheet[0]}>
+									{formattedDate} 노티입니다!
+								</MainText>
+							</ProfileTextContainer>
+						</ProfileContainer>
+					</MainView>
 
-                <Bar />
-				<Bar_Mini />
+					<ProfileContainer>
+						<MainText onPress={() => navigation.navigate('Todo', { selectedTheme: selectedTheme })}
+							style={{ marginRight: 20 }}>나의 일정</MainText>
+                        <MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
+                    </ProfileContainer>
+					<Bar />
+					<Bar_Mini />
+
+					<MainView>
+						<images.team_add width={20} height={20} color={clicked_add ? color_sheet[0] : "#B7BABF"} onPress={() => setClicked_add(!clicked_add)}
+							style={{ margin: 10, alignSelf: 'flex-end' }} />
 				
-				<Icons>
-					<images.team_add width={20} height={20}
-						color={clicked_add ? color_sheet[0] : "#B7BABF"}
-						onPress={() => setCliecked_add(!clicked_add)} />
-				</Icons>
-				
+						<TeamFrameContainer>
+							<images.team_frame color={clicked_pin ? color_sheet[0] : "#B7BABF"}
+							style={{ position: 'absolute' }}/>
+							<images.team_pin width={15} height={15} color={clicked_pin ? color_sheet[0] : "#B7BABF"} onPress={() => setClicked_pin(!clicked_pin)}
+								style={{ position: 'absolute', margin: 15, left: 10 }} />
+							
+							<MainText style={{ position: 'absolute', margin: 15, alignSelf: 'center' }}>{team_name[0]}</MainText>
 
-            </MainViewStyle>
-        </ThemeProvider>
+
+							<images.team_out width={15} height={15} color={clicked_out ? color_sheet[0] : "#B7BABF"} onPress={() => setClicked_out(!clicked_out)}
+								style={{ position: 'absolute', margin: 15, right: 10 }} />
+						</TeamFrameContainer>
+					</MainView>
+
+				</FullView>
+			</ScrollView>
+		</ThemeProvider>
     );
 }
-
 
 const FullView = styled.View`
 	flex: 1;
@@ -83,46 +101,34 @@ const HorisontalView = styled(MainView)`
 	flex-direction: row;
 `;
 
-const HorisontalView_End = styled(HorisontalView)`
-	justify-content: flex-end;
-`;
 
-const MainViewStyle = styled.View`
-    flex: 1;
-    display: flex;
-    background-color: white;
-`;
 
 const ProfileContainer = styled.View`
     display: flex;
     flex-direction: row;
 `;
 
-const BarContainer = styled(ProfileContainer)`
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-`;
-
 const ProfileTextContainer = styled(ProfileContainer)`
-    flex-direction: column;
-    margin-top: 25px;
-    margin-left: 10px;
+	flex-direction: column;
+	margin-top: 25px;
+	margin-left: 15px;
+	margin-bottom: 25px;
 `;
 
 const Profile = styled.Image`
     width: 40px;
     height: 40px;
-    margin-top: 20px;
-    margin-left: 50px;
+    margin-left: 20px;
 `;
 
 const MainText = styled.Text`
-    font-size: 12px;
+    font-size: ${props => props.fontSize || "12px"};
     font-weight: bold;
     color: ${props => props.color || "black"};
     text-align: left;
 `;
+
+
 
 const Bar = styled.View`
     width: 100%;
@@ -139,12 +145,17 @@ const Bar_Mini = styled(Bar)`
     margin-top: -1px;
 `;
 
-const Icons = styled.View`
-	display: flex;
-	flex-direction: row;
-	margin-left: 70px;
-	margin-top: 15px;
+
+
+const TeamFrameContainer = styled.View`
+	position: relative;
+	width: 300px;
+	height: 150px;
 `;
 
+const Team_Noti = styled.TouchableOpacity`
+	width: 250;
+	height: 30;
+`;
 
 export default Coop_Main;
