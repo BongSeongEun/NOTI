@@ -46,17 +46,10 @@ public class TodoController {
         return ResponseEntity.ok().body(dtos);
     }
 
-    @DeleteMapping("/deleteTodo/{userId}")
-    public ResponseEntity<?> deleteTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
-        Todo todoEntity = TodoDTO.toEntity(todoDTO);
-
-        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
-
-        List<Todo> todoEntities = todoService.delete(todoEntity, todoDTO, String.valueOf(userId));
-
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
-
-        return ResponseEntity.ok().body(dtos);
+    @DeleteMapping("/deleteTodo/{userId}/{todoId}")
+    public ResponseEntity<?> deleteTodo(@PathVariable String userId, @PathVariable String todoId) {
+        todoService.delete(userId, todoId);
+        return ResponseEntity.ok().build(); // 200 OK와 내용 없이 응답
     }
 
     private List<TodoDTO> makeDtoListFromEntityList( List<Todo> todoEntities ){

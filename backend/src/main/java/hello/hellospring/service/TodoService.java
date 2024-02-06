@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,13 +55,9 @@ public class TodoService {
         Todo todo = (Todo) todoRepository.findByTodoId(Long.valueOf(todoId));
         return (List<Todo>) todo;
     }
-
-    public List<Todo> delete(final Todo todo, TodoDTO todoDTO, String userId){
-        try{
-            todoRepository.delete(todo);
-        } catch(Exception e){
-            throw new RuntimeException("error deleting entity" + todo.getTodoId());
-        }
+    @Transactional
+    public List<Todo> delete(String userId, String todoId){
+            todoRepository.deleteByTodoIdAndUserId(Long.valueOf(todoId), Long.valueOf(userId));
         return getTodo(userId);
     }
 
