@@ -4,63 +4,73 @@ import hello.hellospring.Exception.AppException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.TodoRepository;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static hello.hellospring.Exception.ErrorCode.NO_TITLE_ENTERED;
 
-@Slf4j
 @Service
 public class TodoService {
+
+    private final TodoRepository todoRepository;
     @Autowired
-    TodoRepository todoRepository;
-
-    @Transactional(readOnly = true)
-    public List<Todo> retrieve(String userCode){
-        return todoRepository.findByUserCode(userCode);
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
-
-    @Transactional
-    public List<Todo> create(Todo todo) {
+    public List<Todo> createTodo(Todo todo){
         validateEmptyTodoTile(todo);
         todoRepository.save(todo);
 
-        return todoRepository.findByUserCode(todo.getUserCode());
+        return todoRepository.findByUserId(todo.getUserId());
     }
-    @Transactional
-    public List<Todo> update(Todo todo){
+
+    public List<Todo> update(Todo todo, HttpServletRequest request) {
         validateEmptyTodoTile(todo);
 
-        Optional<Todo> original = todoRepository.findById(todo.getId());
-
-        if(original.isPresent()){
-            Todo newTodo = original.get();
-            newTodo.setTitle(todo.getTitle());
-            newTodo.setDone(todo.isDone());
-            newTodo.setTime(todo.getTime());
+        List<Todo> original = getPresentTodo(request);
+        Todo newTodo = null;
+        if (original.isEmpty()) {
+            newTodo = (Todo) original;
+            newTodo.setTodoTitle(todo.getTodoTitle());
+            newTodo.setTodoStartTime(todo.getTodoStartTime());
+            newTodo.setTodoEndTime(todo.getTodoEndTime());
+            newTodo.setTodoColor(todo.getTodoColor());
+            newTodo.setTodoDone(todo.isTodoDone());
 
             todoRepository.save(newTodo);
         }
-        return retrieve(todo.getUserCode());
+        return (List<Todo>) newTodo;
     }
 
-    @Transactional
-    public List<Todo> delete(final Todo todo, TodoDTO todoDTO){
+    public List<Todo> getTodo(HttpServletRequest request){
+        Long userId = (Long) request.getAttribute("userId");
+        Todo todo = (Todo) todoRepository.findByUserId(userId);
+        return (List<Todo>) todo;
+    }
+
+    public List<Todo> getPresentTodo(HttpServletRequest request){
+        Long todoId = (Long) request.getAttribute("todoId");
+        Todo todo = (Todo) todoRepository.findByTodoId(todoId);
+        return (List<Todo>) todo;
+    }
+
+    public List<Todo> delete(final Todo todo, TodoDTO todoDTO, HttpServletRequest request){
         try{
             todoRepository.delete(todo);
         } catch(Exception e){
-            throw new RuntimeException("error deleting entity" + todo.getId());
+            throw new RuntimeException("error deleting entity" + todo.getTodoId());
         }
-        return retrieve(todo.getUserCode());
+        return getTodo((HttpServletRequest) request.getAttribute("userId"));
     }
 
     private void validateEmptyTodoTile(Todo todo) {
-        if (todo.getTitle().equals("") || todo.getTitle() == null) {
+        if (todo.getTodoTitle().equals("") || todo.getTodoTitle() == null) {
             throw new AppException(NO_TITLE_ENTERED);
         }
     }
