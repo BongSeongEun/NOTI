@@ -32,7 +32,7 @@ public class TodoService {
 
     public List<TodoDTO> getTodosByUserId(Long userId) {
         return todoRepository.findByUserId(userId).stream()
-                .map(TodoDTO::new) // Todo -> TodoDTO 변환 (TodoDTO 생성자 또는 메서드가 필요함)
+                .map(TodoDTO::new)
                 .collect(Collectors.toList());
     }
 

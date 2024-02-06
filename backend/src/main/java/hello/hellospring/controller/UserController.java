@@ -47,8 +47,8 @@ public class UserController {
     }
 
     @GetMapping("/api/v1/userInfo/{userId}")
-    public ResponseEntity getUserInfo(@PathVariable HttpServletRequest userId){
-        User user = userService.getUser(userId);
+    public ResponseEntity getUserInfo(@PathVariable Long userId){
+        User user = userService.getUserInfo(userId);
         return ResponseEntity.ok().body(user);
     }
 
