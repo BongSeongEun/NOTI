@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { Navigate, useNavigate, Link } from "react-router-dom";
+import axios from "axios"; // axios import 확인
 import theme from "../styles/theme";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import STAR from "../asset/star.png";
@@ -62,13 +63,45 @@ const GestImgBox = styled.img`
 `;
 
 function Welcome() {
+  const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
+
+  // Base64 이미지 데이터를 저장할 상태
+  const [base64Image, setBase64Image] = useState("");
+
+  // jwt토큰을 디코딩해서 userid를 가져오는 코드
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
 
   useEffect(() => {
     const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
     if (savedThemeName && theme[savedThemeName]) {
       setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
     }
+    // 서버로부터 사진 데이터 가져오기
+    async function fetchImageData() {
+      const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+      try {
+        const response = await axios.get(`/api/v1/userInfo/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        // 응답에서 이미지 데이터를 Base64 형식으로 받았다고 가정
+        setBase64Image(response.data.imageData); // 상태 업데이트
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchImageData();
   }, []);
 
   return (
@@ -85,7 +118,7 @@ function Welcome() {
           </MainTextBox>
           <ImgBox>
             <GestImgBox
-              src={NOTI}
+              src={`${base64Image}`} // 서버로부터 받은 이미지 데이터로 src 업데이트
               style={{
                 top: "50%",
                 left: "50%",

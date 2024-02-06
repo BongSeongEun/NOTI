@@ -10,6 +10,7 @@ import Diary from "../pages/Diary"; // Diary 컴포넌트 import
 import Coop from "../pages/Coop"; // Coop 컴포넌트 import
 import Setting from "../pages/Setting"; // Setting 컴포넌트 import
 import Stat from "../pages/Stat"; // Stat 컴포넌트 import
+import DiaryDetailPage from "../pages/DiaryDetailPage"; // DiaryDetailPage 컴포넌트 import
 
 const PageLayout = styled.div`
   display: flex;
@@ -180,6 +181,8 @@ function Main() {
   const [nickname] = useState("사용자");
   const [selectedDate, setSelectedDate] = useState(new Date()); // 날짜 상태 추가
   const [selectedComponent, setSelectedComponent] = useState("Todo");
+  const [diaryId, setDiaryId] = useState(null); // 선택된 일기의 ID 상태
+
   const handleMenuClick = component => {
     setSelectedComponent(component);
   };
@@ -195,12 +198,20 @@ function Main() {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
   };
 
+  // selectedComponent 상태를 'DiaryDetail'로 설정하는 함수를 Diary 컴포넌트에 전달합니다.
+  const renderDiaryDetail = id => {
+    setDiaryId(id);
+    setSelectedComponent("DiaryDetail");
+  };
+
   const renderComponent = () => {
     switch (selectedComponent) {
       case "Todo":
         return <Todo selectedDate={selectedDate} />;
       case "Diary":
-        return <Diary />;
+        return <Diary onDiarySelect={setDiaryId} />;
+      case "DiaryDetail":
+        return <DiaryDetailPage diaryId={diaryId} />;
       case "Coop":
         return <Coop />;
       case "Stat":
