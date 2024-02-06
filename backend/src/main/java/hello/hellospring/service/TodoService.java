@@ -30,10 +30,10 @@ public class TodoService {
         return todoRepository.findByUserId(todo.getUserId());
     }
 
-    public List<Todo> update(Todo todo, HttpServletRequest request) {
+    public List<Todo> update(Todo todo, String userId, String todoId) {
         validateEmptyTodoTile(todo);
 
-        List<Todo> original = getPresentTodo(request);
+        List<Todo> original = getPresentTodo(userId, todoId);
         Todo newTodo = null;
         if (original.isEmpty()) {
             newTodo = (Todo) original;
@@ -45,28 +45,25 @@ public class TodoService {
 
             todoRepository.save(newTodo);
         }
-        return (List<Todo>) newTodo;
+        return todoRepository.findByUserId(todo.getTodoId());
     }
 
-    public List<Todo> getTodo(HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("userId");
-        Todo todo = (Todo) todoRepository.findByUserId(userId);
+    public List<Todo> getTodo(String userId){
+        return todoRepository.findByUserId(Long.valueOf(userId));
+    }
+
+    public List<Todo> getPresentTodo(String userId, String todoId){
+        Todo todo = (Todo) todoRepository.findByTodoId(Long.valueOf(todoId));
         return (List<Todo>) todo;
     }
 
-    public List<Todo> getPresentTodo(HttpServletRequest request){
-        Long todoId = (Long) request.getAttribute("todoId");
-        Todo todo = (Todo) todoRepository.findByTodoId(todoId);
-        return (List<Todo>) todo;
-    }
-
-    public List<Todo> delete(final Todo todo, TodoDTO todoDTO, HttpServletRequest request){
+    public List<Todo> delete(final Todo todo, TodoDTO todoDTO, String userId){
         try{
             todoRepository.delete(todo);
         } catch(Exception e){
             throw new RuntimeException("error deleting entity" + todo.getTodoId());
         }
-        return getTodo((HttpServletRequest) request.getAttribute("userId"));
+        return getTodo(userId);
     }
 
     private void validateEmptyTodoTile(Todo todo) {
