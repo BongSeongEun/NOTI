@@ -6,14 +6,22 @@
  */
 
 module.exports = {
+  resolver: {
+    /* resolver options */
+    sourceExts: ['jsx', 'js', 'ts', 'tsx'],
+  },
+  maxWorkers: 2,
   transformer: {
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
-        inlineRequires: true,
+        inlineRequires: false,
       },
     }),
   },
+<<<<<<< HEAD
+}
+=======
 };
 
 const { getDefaultConfig } = require("metro-config");
@@ -32,3 +40,4 @@ module.exports = (async () => {
     }
   };
 })();
+>>>>>>> 181fc5c5f7ba9b4b71c13e44dd04dbb1d41b2b53

@@ -3,7 +3,9 @@
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/backend" />
     <file type="web" url="file://$PROJECT_DIR$/frontend-native/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-gesture-handler/android" />
     <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-gradle-plugin" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-safe-area-context/android" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
