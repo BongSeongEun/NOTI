@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-//@RequestMapping("/api/v1/todos")
+@RequestMapping("/api/v1/")
 public class TodoController {
 
     private final TodoService todoService;
@@ -24,7 +24,7 @@ public class TodoController {
         this.todoService = todoService;
     }
 
-    @PostMapping("/api/v1/createTodo/{userId}")
+    @PostMapping("/createTodo/{userId}")
     public ResponseEntity<?> createTodo(@PathVariable String userId, @RequestBody TodoDTO todoDTO){
         Todo entity = TodoDTO.toEntity(todoDTO);
         entity.setUserId(Long.valueOf(userId));
@@ -32,34 +32,24 @@ public class TodoController {
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().build();
     }
-
-    @PutMapping("/api/v1/updateTodo/{userId}")
-    public ResponseEntity<?> updateTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
-        Todo todoEntity = TodoDTO.toEntity(todoDTO);
-        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
-        List<Todo> todoEntities = todoService.update(todoEntity, userId);
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
-        return ResponseEntity.ok().body(dtos);
+    @PutMapping("/updateTodo/{userId}/{todoId}")
+    public ResponseEntity<TodoDTO> updateTodo(@PathVariable Long userId, @PathVariable Long todoId, @RequestBody TodoDTO todoDTO){
+        Todo updatedTodo = todoService.update(todoDTO, userId, todoId);
+        TodoDTO dto = TodoDTO.from(updatedTodo); // 해당 변환 로직 구현 필요
+        return ResponseEntity.ok().body(dto);
     }
 
-    @GetMapping("/api/v1/getTodo/{userId}")
-    public ResponseEntity<?> getTodo(@PathVariable HttpServletRequest userId){
+    @GetMapping("/getTodo/{userId}")
+    public ResponseEntity<?> getTodo(@PathVariable String userId){
         List<Todo> todoEntity = todoService.getTodo(userId);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().body(dtos);
     }
 
-    @DeleteMapping("/api/v1/deleteTodo/{userId}")
-    public ResponseEntity<?> deleteTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
-        Todo todoEntity = TodoDTO.toEntity(todoDTO);
-
-        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
-
-        List<Todo> todoEntities = todoService.delete(todoEntity, todoDTO, userId);
-
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
-
-        return ResponseEntity.ok().body(dtos);
+    @DeleteMapping("/deleteTodo/{userId}/{todoId}")
+    public ResponseEntity<?> deleteTodo(@PathVariable String userId, @PathVariable String todoId) {
+        todoService.delete(userId, todoId);
+        return ResponseEntity.ok().build(); // 200 OK와 내용 없이 응답
     }
 
     private List<TodoDTO> makeDtoListFromEntityList( List<Todo> todoEntities ){
