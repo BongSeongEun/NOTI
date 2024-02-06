@@ -33,6 +33,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation group: 'org.json', name: 'json', version: '20090211'
+
 }
 
 tasks.named('bootBuildImage') {
