@@ -51,4 +51,14 @@ public class TodoDTO {
                 .todoDate(dto.getTodoDate())
                 .build();
     }
+    public TodoDTO(Todo todo) {
+        this.todoId = todo.getTodoId();
+        this.userId = todo.getUserId();
+        this.todoTitle = todo.getTodoTitle();
+        this.todoStartTime = todo.getTodoStartTime();
+        this.todoEndTime = todo.getTodoEndTime();
+        this.todoColor = todo.getTodoColor();
+        this.todoDone = todo.isTodoDone();
+        this.todoDate = todo.getTodoDate();
+    }
 }
