@@ -30,22 +30,20 @@ public class TodoService {
         return todoRepository.findByUserId(todo.getUserId());
     }
 
-    public List<Todo> update(Todo todo, String userId, String todoId) {
-        validateEmptyTodoTile(todo);
+    public Todo update(TodoDTO todoDTO, Long userId, Long todoId) {
+        Todo originalTodo = todoRepository.findByTodoIdAndUserId(todoId, userId);
 
-        List<Todo> original = getPresentTodo(userId, todoId);
-        Todo newTodo = null;
-        if (original.isEmpty()) {
-            newTodo = (Todo) original;
-            newTodo.setTodoTitle(todo.getTodoTitle());
-            newTodo.setTodoStartTime(todo.getTodoStartTime());
-            newTodo.setTodoEndTime(todo.getTodoEndTime());
-            newTodo.setTodoColor(todo.getTodoColor());
-            newTodo.setTodoDone(todo.isTodoDone());
+        // DTO의 값을 사용하여 Todo 업데이트
+        originalTodo.setTodoTitle(todoDTO.getTodoTitle());
+        originalTodo.setTodoStartTime(todoDTO.getTodoStartTime());
+        originalTodo.setTodoEndTime(todoDTO.getTodoEndTime());
+        originalTodo.setTodoColor(todoDTO.getTodoColor());
+        originalTodo.setTodoDone(todoDTO.isTodoDone());
+        originalTodo.setTodoDate(todoDTO.getTodoDate());
 
-            todoRepository.save(newTodo);
-        }
-        return todoRepository.findByUserId(todo.getTodoId());
+        todoRepository.save(originalTodo);
+
+        return originalTodo;
     }
 
     public List<Todo> getTodo(String userId){

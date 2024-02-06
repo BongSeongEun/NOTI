@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TodoDTO {
 
     private Long todoId;
@@ -39,7 +41,6 @@ public class TodoDTO {
         if(dto.getTodoTitle()==null || dto.getTodoTitle().equals("")){
             throw new AppException(ErrorCode.NO_TITLE_ENTERED);
         }
-
         return Todo.builder()
                 .todoId(dto.getTodoId())
                 .userId(dto.getUserId())
@@ -49,6 +50,18 @@ public class TodoDTO {
                 .todoColor(dto.getTodoColor())
                 .todoDone(dto.isTodoDone())
                 .todoDate(dto.getTodoDate())
+                .build();
+    }
+    public static TodoDTO from(Todo todo) {
+        return TodoDTO.builder()
+                .todoId(todo.getTodoId())
+                .userId(todo.getUserId())
+                .todoTitle(todo.getTodoTitle())
+                .todoStartTime(todo.getTodoStartTime())
+                .todoEndTime(todo.getTodoEndTime())
+                .todoColor(todo.getTodoColor())
+                .todoDone(todo.isTodoDone())
+                .todoDate(todo.getTodoDate())
                 .build();
     }
 
