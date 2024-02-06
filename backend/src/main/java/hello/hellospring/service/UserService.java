@@ -135,4 +135,10 @@ public class UserService {
         User user = userRepository.findByUserId(userId);
         return user;
     }
+
+    public User getUserInfo(Long userId){
+        return userRepository.findByUserId(userId);
+    }
+
+
 }

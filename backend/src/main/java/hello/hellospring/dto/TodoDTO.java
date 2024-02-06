@@ -10,8 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Builder
 @Data
+@Builder
 public class TodoDTO {
 
     private Long todoId;
@@ -51,4 +51,5 @@ public class TodoDTO {
                 .todoDate(dto.getTodoDate())
                 .build();
     }
+
 }
