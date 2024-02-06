@@ -32,18 +32,17 @@ public class TodoController {
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().build();
     }
-
-    @PutMapping("/updateTodo/{userId}")
-    public ResponseEntity<?> updateTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
+    @PutMapping("/updateTodo/{userId}/{todoId}")
+    public ResponseEntity<?> updateTodo(@PathVariable String userId, @PathVariable String todoId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
-        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
-        List<Todo> todoEntities = todoService.update(todoEntity, userId);
+        todoEntity.setUserId(Long.valueOf(userId));
+        List<Todo> todoEntities = todoService.update(todoEntity, userId, todoId);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
         return ResponseEntity.ok().body(dtos);
     }
 
     @GetMapping("/getTodo/{userId}")
-    public ResponseEntity<?> getTodo(@PathVariable HttpServletRequest userId){
+    public ResponseEntity<?> getTodo(@PathVariable String userId){
         List<Todo> todoEntity = todoService.getTodo(userId);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().body(dtos);
@@ -55,7 +54,7 @@ public class TodoController {
 
         todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
 
-        List<Todo> todoEntities = todoService.delete(todoEntity, todoDTO, userId);
+        List<Todo> todoEntities = todoService.delete(todoEntity, todoDTO, String.valueOf(userId));
 
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
 
