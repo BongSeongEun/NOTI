@@ -11,15 +11,18 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static hello.hellospring.Exception.ErrorCode.NO_TITLE_ENTERED;
 
 @Service
-@AllArgsConstructor
 public class TodoService {
-    @Autowired
-    TodoRepository todoRepository;
 
+    private final TodoRepository todoRepository;
+    @Autowired
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
+    }
     public List<Todo> createTodo(Todo todo){
         validateEmptyTodoTile(todo);
         todoRepository.save(todo);

@@ -14,14 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+//@RequestMapping("/api/v1/todos")
 public class TodoController {
 
-    @Autowired
-    private TodoService todoService;
+    private final TodoService todoService;
 
     @Autowired
-    private TodoRepository todoRepository;
+    public TodoController(TodoService todoService) {
+        this.todoService = todoService;
+    }
 
     @PostMapping("/api/v1/createTodo/{userId}")
     public ResponseEntity<?> createTodo(@PathVariable String userId, @RequestBody TodoDTO todoDTO){
