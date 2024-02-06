@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Builder
 @Data
 public class TodoDTO {
 
@@ -50,5 +49,15 @@ public class TodoDTO {
                 .todoDone(dto.isTodoDone())
                 .todoDate(dto.getTodoDate())
                 .build();
+    }
+    public TodoDTO(Todo todo) {
+        this.todoId = todo.getTodoId();
+        this.userId = todo.getUserId();
+        this.todoTitle = todo.getTodoTitle();
+        this.todoStartTime = todo.getTodoStartTime();
+        this.todoEndTime = todo.getTodoEndTime();
+        this.todoColor = todo.getTodoColor();
+        this.todoDone = todo.isTodoDone();
+        this.todoDate = todo.getTodoDate();
     }
 }
