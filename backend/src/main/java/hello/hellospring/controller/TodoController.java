@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-//@RequestMapping("/api/v1/todos")
+@RequestMapping("/api/v1/")
 public class TodoController {
 
     private final TodoService todoService;
@@ -24,7 +24,7 @@ public class TodoController {
         this.todoService = todoService;
     }
 
-    @PostMapping("/api/v1/createTodo/{userId}")
+    @PostMapping("/createTodo/{userId}")
     public ResponseEntity<?> createTodo(@PathVariable String userId, @RequestBody TodoDTO todoDTO){
         Todo entity = TodoDTO.toEntity(todoDTO);
         entity.setUserId(Long.valueOf(userId));
@@ -33,7 +33,7 @@ public class TodoController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/api/v1/updateTodo/{userId}")
+    @PutMapping("/updateTodo/{userId}")
     public ResponseEntity<?> updateTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
         todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
@@ -42,14 +42,14 @@ public class TodoController {
         return ResponseEntity.ok().body(dtos);
     }
 
-    @GetMapping("/api/v1/getTodo/{userId}")
+    @GetMapping("/getTodo/{userId}")
     public ResponseEntity<?> getTodo(@PathVariable HttpServletRequest userId){
         List<Todo> todoEntity = todoService.getTodo(userId);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().body(dtos);
     }
 
-    @DeleteMapping("/api/v1/deleteTodo/{userId}")
+    @DeleteMapping("/deleteTodo/{userId}")
     public ResponseEntity<?> deleteTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
 
