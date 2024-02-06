@@ -2,46 +2,65 @@ package hello.hellospring.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import java.sql.Timestamp;
+
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "user_master")
+@Table(name = "user")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_code")
-    private Long userCode;
+    @Column(name = "user_id")
+    private Long userId;
 
     @Column(name = "kakao_id")
     private Long kakaoId;
 
-    @Column(name = "kakao_profile_img")
-    private String kakaoProfileImg;
-
-    @Column(name = "kakao_nickname")
-    private String kakaoNickname;
-
     @Column(name = "kakao_email")
     private String kakaoEmail;
 
-    @Column(name = "user_role")
-    private String userRole;
+    @Column(name = "user_profile")
+    private String userProfile;
 
-    @Column(name = "create_time")
-    @CreationTimestamp
-    private Timestamp createTime;
+    @Column(name = "user_nickname")
+    private String userNickname;
+
+    @Column(name = "user_color")
+    private String userColor;
+
+    @Column(name = "mute_start_time")
+    private String muteStartTime;
+
+    @Column(name = "mute_end_time")
+    private String muteEndTime;
+
+    @Column(name = "diary_time")
+    private String diaryTime;
 
     @Builder
-    public User(Long kakaoId, String kakaoProfileImg, String kakaoNickname,
-                String kakaoEmail, String userRole) {
+    public User(Long userId, Long kakaoId, String kakaoEmail, String userProfile, String userNickname,
+                String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
 
+        this.userId = userId;
         this.kakaoId = kakaoId;
-        this.kakaoProfileImg = kakaoProfileImg;
-        this.kakaoNickname = kakaoNickname;
         this.kakaoEmail = kakaoEmail;
-        this.userRole = userRole;
+        this.userProfile = userProfile;
+        this.userNickname = userNickname;
+        this.userColor = userColor;
+        this.muteStartTime = muteStartTime;
+        this.muteEndTime = muteEndTime;
+        this.diaryTime = diaryTime;
     }
+    public void updateUserInfo(String userNickname, String userProfile, String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
+        if(userNickname != null) this.userNickname = userNickname;
+        if(userProfile != null) this.userProfile = userProfile;
+        if(userColor != null) this.userColor = userColor;
+        if(muteStartTime != null) this.muteStartTime = muteStartTime;
+        if(muteEndTime != null) this.muteEndTime = muteEndTime;
+        if(diaryTime != null) this.diaryTime = diaryTime;
+
+    }
+
 }

@@ -1,69 +1,60 @@
 package hello.hellospring.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Todo;
+import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TodoService;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/v1")
+@AllArgsConstructor
 public class TodoController {
 
     @Autowired
-    private TodoService service;
-    @GetMapping("/getTodo")
-    public ResponseEntity<?> getTodo(@AuthenticationPrincipal String userCode) {
-        List<Todo> todoEntity = service.retrieve(userCode);
+    private TodoService todoService;
 
-        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
+    @Autowired
+    private TodoRepository todoRepository;
 
-        return ResponseEntity.ok().body(dtos);
-
-    }
-
-    @PostMapping("/createTodo")
-    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userCode, @RequestBody TodoDTO todoDTO){
+    @PostMapping("/api/v1/createTodo/{userId}")
+    public ResponseEntity<?> createTodo(@PathVariable String userId, @RequestBody TodoDTO todoDTO){
         Todo entity = TodoDTO.toEntity(todoDTO);
-
-        entity.setId(null);
-        entity.setUserCode(userCode);
-        List<Todo> todoEntity = service.create(entity);
+        entity.setUserId(Long.valueOf(userId));
+        List<Todo> todoEntity = todoService.createTodo(entity);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
-
-        return ResponseEntity.ok().body(dtos);
-
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/updateTodo")
-    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userCode, @RequestBody TodoDTO todoDTO){
+    @PutMapping("/api/v1/updateTodo/{userId}")
+    public ResponseEntity<?> updateTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
-
-        todoEntity.setUserCode(userCode);
-
-        List<Todo> todoEntities = service.update(todoEntity);
-
+        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
+        List<Todo> todoEntities = todoService.update(todoEntity, userId);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
-
         return ResponseEntity.ok().body(dtos);
     }
 
-    @DeleteMapping("/deleteTodo")
-    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userCode, @RequestBody TodoDTO todoDTO){
+    @GetMapping("/api/v1/getTodo/{userId}")
+    public ResponseEntity<?> getTodo(@PathVariable HttpServletRequest userId){
+        List<Todo> todoEntity = todoService.getTodo(userId);
+        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
+        return ResponseEntity.ok().body(dtos);
+    }
+
+    @DeleteMapping("/api/v1/deleteTodo/{userId}")
+    public ResponseEntity<?> deleteTodo(@PathVariable HttpServletRequest userId, @RequestBody TodoDTO todoDTO){
         Todo todoEntity = TodoDTO.toEntity(todoDTO);
 
-        todoEntity.setUserCode(userCode);
+        todoEntity.setUserId(Long.valueOf(String.valueOf(userId)));
 
-        List<Todo> todoEntities = service.delete(todoEntity, todoDTO);
+        List<Todo> todoEntities = todoService.delete(todoEntity, todoDTO, userId);
 
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntities);
 
@@ -75,11 +66,14 @@ public class TodoController {
 
         for(Todo todoEntity : todoEntities){
             TodoDTO todoDTO = TodoDTO.builder()
-                    .id(todoEntity.getId())
-                    .title(todoEntity.getTitle())
-                    .done(todoEntity.isDone())
-                    .time(String.valueOf(todoEntity.getTime()))
-                    .userCode(todoEntity.getUserCode())
+                    .todoId(todoEntity.getTodoId())
+                    .todoTitle(todoEntity.getTodoTitle())
+                    .todoDone(todoEntity.isTodoDone())
+                    .todoStartTime(todoEntity.getTodoStartTime())
+                    .todoEndTime(todoEntity.getTodoEndTime())
+                    .todoColor(todoEntity.getTodoColor())
+                    .userId(todoEntity.getUserId())
+                    .todoDate(todoEntity.getTodoDate())
                     .build();
 
             todoDTOList.add(todoDTO);
@@ -87,4 +81,6 @@ public class TodoController {
 
         return todoDTOList;
     }
+
+
 }

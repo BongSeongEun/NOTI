@@ -25,6 +25,11 @@ function Login({}) {
           // eslint-disable-next-line quotes
           onPress={() => navigation.navigate("Register")}>
         </Button>
+        <Button
+          title="채팅"
+          // eslint-disable-next-line quotes
+          onPress={() => navigation.navigate("Chatting")}>
+        </Button>
     </View>
   );
 }

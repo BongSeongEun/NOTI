@@ -1,13 +1,17 @@
 package hello.hellospring.service;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.hellospring.Oauth.KakaoProfile;
 import hello.hellospring.Oauth.OauthToken;
+import hello.hellospring.dto.UserDTO;
 import hello.hellospring.jwt.JwtProperties;
 import hello.hellospring.model.User;
 import hello.hellospring.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,16 +21,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 
 import java.util.Date;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
     @Autowired
-    UserRepository userRepository; //(1)
+    UserRepository userRepository;
+
+    public void updateUser(Long userId, UserDTO userDTO) {
+        User user = userRepository.findByUserId(userId);
+        user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime());
+        userRepository.save(user);
+    }
 
     public OauthToken getAccessToken(String code) {
 
@@ -37,7 +46,7 @@ public class UserService {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", "e0701f9b1bb96d831f98e5c0c295925f");
+        params.add("client_id", "77cf97c36317f2622a926b9ddb30f96f");
         params.add("redirect_uri", "http://localhost:3000/auth");
         params.add("code", code);
 
@@ -60,23 +69,19 @@ public class UserService {
             e.printStackTrace();
         }
 
-        return oauthToken; //(8)
+        return oauthToken;
     }
     public KakaoProfile findProfile(String token) {
 
-        //(1-2)
         RestTemplate rt = new RestTemplate();
 
-        //(1-3)
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token); //(1-4)
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        //(1-5)
         HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest =
                 new HttpEntity<>(headers);
 
-        //(1-6)
         // Http 요청 (POST 방식) 후, response 변수에 응답을 받음
         ResponseEntity<String> kakaoProfileResponse = rt.exchange(
                 "https://kapi.kakao.com/v2/user/me",
@@ -85,7 +90,6 @@ public class UserService {
                 String.class
         );
 
-        //(1-7)
         ObjectMapper objectMapper = new ObjectMapper();
         KakaoProfile kakaoProfile = null;
         try {
@@ -96,47 +100,39 @@ public class UserService {
 
         return kakaoProfile;
     }
-    public User getUser(HttpServletRequest request) { //(1)
-        //(2)
-        Long userCode = (Long) request.getAttribute("userCode");
-
-        //(3)
-        User user = userRepository.findByUserCode(userCode);
-
-        //(4)
-        return user;
-    }
-    public String SaveUserAndGetToken(String token) { //(1)
+    public String SaveUserAndGetToken(String token) {
         KakaoProfile profile = findProfile(token);
 
+        // profile 객체가 null인지 확인
+        if (profile == null || profile.getKakao_account() == null) {
+            return "Error message or handling logic";
+        }
+
         User user = userRepository.findByKakaoEmail(profile.getKakao_account().getEmail());
-        if(user == null) {
+        if (user == null) {
             user = User.builder()
                     .kakaoId(profile.getId())
-                    .kakaoProfileImg(profile.getKakao_account().getProfile().getProfile_image_url())
-                    .kakaoNickname(profile.getKakao_account().getProfile().getNickname())
                     .kakaoEmail(profile.getKakao_account().getEmail())
-                    .userRole("ROLE_USER").build();
-
+                    .build();
             userRepository.save(user);
         }
 
-        return createToken(user); //(2)
+        return createToken(user);
     }
 
-    public String createToken(User user) { //(2-1)
+    public String createToken(User user) {
 
-        //(2-2)
         String jwtToken = JWT.create()
-
-                //(2-3)
                 .withSubject(user.getKakaoEmail())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ JwtProperties.EXPIRATION_TIME))
-                .withClaim("id", user.getUserCode())
-                .withClaim("nickname", user.getKakaoNickname())
+                .withClaim("id", user.getUserId())
                 .sign(Algorithm.HMAC512(JwtProperties.SECRET));
 
-        return jwtToken; //(2-6)
+        return jwtToken;
     }
-
+    public User getUser(HttpServletRequest request){
+        Long userId = (Long) request.getAttribute("userId");
+        User user = userRepository.findByUserId(userId);
+        return user;
+    }
 }
