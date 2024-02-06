@@ -3,7 +3,7 @@
 
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";
 import {
@@ -14,6 +14,7 @@ import {
   redirect,
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
+import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
@@ -21,7 +22,8 @@ import USER from "../asset/userimage.png";
 import COM from "../asset/cam.png";
 
 // 이미지 업로드
-const ImageUpload = () => {
+const ImageUpload = ({ onFileChange }) => {
+  // onFileChange prop 추가
   const [uploadedImage, setUploadedImage] = useState(USER);
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -29,7 +31,8 @@ const ImageUpload = () => {
       const file = acceptedFiles[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result);
+        setUploadedImage(reader.result); // 이미지 미리보기를 위한 상태 업데이트
+        onFileChange(file); // 선택된 파일을 상위 컴포넌트로 전달
       };
       reader.readAsDataURL(file);
     },
@@ -54,6 +57,7 @@ const ImageUpload = () => {
     </div>
   );
 };
+
 const MainDiv = styled.div`
   //전체화면 테두리
   display: flex;
@@ -233,11 +237,71 @@ const ThemedButton = styled.button`
 
 function Register() {
   const navigate = useNavigate();
-  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+  const [userNickname, setUserNickname] = useState(""); // 사용자명 상태 변수
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
+  const [diaryTime, setDiaryTime] = useState(""); // 일기 생성 시간 상태
+  const [muteStartTime, setMuteStartTime] = useState(""); // 방해 금지 시작 시간 상태
+  const [muteEndTime, setMuteEndTime] = useState(""); // 방해 금지 종료 시간 상태
+  const token = window.localStorage.getItem("token");
+  const [themeName, setThemeName] = useState("OrangeTheme"); // 기본 테마 이름
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleThemeChange = selectedTheme => {
-    setCurrentTheme(selectedTheme);
+  // 테마 변경 핸들러
+  const handleThemeChange = selectedThemeName => {
+    const newTheme = theme[selectedThemeName];
+    if (newTheme) {
+      setCurrentTheme(newTheme); // UI 상에서 테마를 적용
+      setThemeName(selectedThemeName); // 선택된 테마 이름을 상태에 저장
+      localStorage.setItem("userTheme", selectedThemeName); // 선택된 테마 이름을 localStorage에 저장
+    } else {
+      console.error("Selected theme does not exist:", selectedThemeName);
+    }
   };
+
+  // 이미지 파일 변경 처리
+  const handleFileChange = file => {
+    setSelectedFile(file);
+  };
+
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
+  // 사용자 정보 전송 함수
+  async function postUser() {
+    const userId = getUserIdFromToken();
+    try {
+      await axios.put(
+        `/api/v1/user/${userId}`,
+        {
+          userNickname,
+          userColor: themeName, // 테마의 주 색상
+          diaryTime, // 일기 생성 시간
+          muteStartTime, // 방해 금지 시작 시간
+          muteEndTime, // 방해 금지 종료 시간
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+    } catch (error) {
+      console.error("Error posting user data:", error);
+      // 에러 처리
+    }
+  }
+  // 가입하기 버튼 클릭 핸들러
+  const handleSubmit = async () => {
+    await postUser(); // 사용자 정보 전송
+    localStorage.setItem("userColor", currentTheme.color1); // 색상을 로컬 스토리지에 저장
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
       <div>
@@ -257,7 +321,7 @@ function Register() {
                 프로필을 등록해보세요
               </MainTextBox>
               <HorizontalBox>
-                <ImageUpload />
+                <ImageUpload onFileChange={file => setSelectedFile(file)} />
                 <VerticalBox>
                   <SubTextBox style={{ marginTop: "15px" }}>
                     사용자명*
@@ -267,6 +331,8 @@ function Register() {
                       id="user_name"
                       type="text"
                       placeholder="닉네임 입력(6~20자)"
+                      value={userNickname}
+                      onChange={e => setUserNickname(e.target.value)}
                     />
                     <Button2 style={{ marginLeft: "5px" }}>중복 확인</Button2>
                   </HorizontalBox>
@@ -288,6 +354,8 @@ function Register() {
                   type="time"
                   min="yyy"
                   max="zzz"
+                  value={muteStartTime}
+                  onChange={e => setMuteStartTime(e.target.value)}
                   style={{ width: "320px", marginBottom: "5px" }}
                 />
                 <InputBox2
@@ -295,6 +363,8 @@ function Register() {
                   type="time"
                   min="yyy"
                   max="zzz"
+                  value={muteEndTime}
+                  onChange={e => setMuteEndTime(e.target.value)}
                   style={{ width: "320px" }}
                 />
                 <SubTextBox>일기 생성 시간 설정*</SubTextBox>
@@ -303,6 +373,8 @@ function Register() {
                   type="time"
                   min="yyy"
                   max="zzz"
+                  value={diaryTime}
+                  onChange={e => setDiaryTime(e.target.value)}
                   style={{ width: "320px", marginBottom: "5px" }}
                 />
               </VerticalBox>
@@ -310,29 +382,29 @@ function Register() {
               <HorizontalBox>
                 <ThemedButton
                   style={{ backgroundColor: theme.OrangeTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.OrangeTheme)}
+                  onClick={() => handleThemeChange("OrangeTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.RedTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.RedTheme)}
+                  onClick={() => handleThemeChange("RedTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.PinkTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.PinkTheme)}
+                  onClick={() => handleThemeChange("PinkTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.GreenTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.GreenTheme)}
+                  onClick={() => handleThemeChange("GreenTheme")}
                 ></ThemedButton>
                 <ThemedButton
                   style={{ backgroundColor: theme.BlueTheme.color1 }}
-                  onClick={() => handleThemeChange(theme.BlueTheme)}
+                  onClick={() => handleThemeChange("BlueTheme")}
                 ></ThemedButton>
               </HorizontalBox>
-              <Link to="/Welcom">
+              <Link to="/Welcome">
                 <RegBtn
                   style={{ marginTop: "30px" }}
-                  onClick={Navigate("/main")}
+                  onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
                 >
                   가입하기
                 </RegBtn>

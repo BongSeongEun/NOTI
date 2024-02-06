@@ -4,61 +4,61 @@ import hello.hellospring.Exception.AppException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.TodoRepository;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static hello.hellospring.Exception.ErrorCode.NO_TITLE_ENTERED;
 
-@Slf4j
 @Service
 public class TodoService {
+
+    private final TodoRepository todoRepository;
     @Autowired
-    TodoRepository todoRepository;
-
-    @Transactional(readOnly = true)
-    public List<Todo> retrieve(String userId){
-        return todoRepository.findByUserId(Long.valueOf(userId));
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
-
-    @Transactional
-    public List<Todo> create(Todo todo) {
+    public List<Todo> createTodo(Todo todo){
         validateEmptyTodoTile(todo);
         todoRepository.save(todo);
 
         return todoRepository.findByUserId(todo.getUserId());
     }
-    @Transactional
-    public List<Todo> update(Todo todo){
-        validateEmptyTodoTile(todo);
 
-        Optional<Todo> original = todoRepository.findById(String.valueOf(todo.getUserId()));
+    public Todo update(TodoDTO todoDTO, Long userId, Long todoId) {
+        Todo originalTodo = todoRepository.findByTodoIdAndUserId(todoId, userId);
 
-        if(original.isPresent()){
-            Todo newTodo = original.get();
-            newTodo.setTodoTitle(todo.getTodoTitle());
-            newTodo.setTodoDate(todo.getTodoDate());
-            newTodo.setTodoStartTime(todo.getTodoStartTime());
-            newTodo.setTodoEndTime(todo.getTodoEndTime());
-            newTodo.setTodoDone(todo.isTodoDone());
+        // DTO의 값을 사용하여 Todo 업데이트
+        originalTodo.setTodoTitle(todoDTO.getTodoTitle());
+        originalTodo.setTodoStartTime(todoDTO.getTodoStartTime());
+        originalTodo.setTodoEndTime(todoDTO.getTodoEndTime());
+        originalTodo.setTodoColor(todoDTO.getTodoColor());
+        originalTodo.setTodoDone(todoDTO.isTodoDone());
+        originalTodo.setTodoDate(todoDTO.getTodoDate());
 
-            todoRepository.save(newTodo);
-        }
-        return retrieve(String.valueOf(todo.getUserId()));
+        todoRepository.save(originalTodo);
+
+        return originalTodo;
     }
 
+    public List<Todo> getTodo(String userId){
+        return todoRepository.findByUserId(Long.valueOf(userId));
+    }
+
+    public List<Todo> getPresentTodo(String userId, String todoId){
+        Todo todo = (Todo) todoRepository.findByTodoId(Long.valueOf(todoId));
+        return (List<Todo>) todo;
+    }
     @Transactional
-    public List<Todo> delete(final Todo todo, TodoDTO todoDTO){
-        try{
-            todoRepository.delete(todo);
-        } catch(Exception e){
-            throw new RuntimeException("error deleting entity" + todo.getTodoId());
-        }
-        return retrieve(String.valueOf(todo.getUserId()));
+    public List<Todo> delete(String userId, String todoId){
+            todoRepository.deleteByTodoIdAndUserId(Long.valueOf(todoId), Long.valueOf(userId));
+        return getTodo(userId);
     }
 
     private void validateEmptyTodoTile(Todo todo) {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import Calendar from "react-calendar";
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
@@ -33,6 +33,8 @@ const Logo = styled.img`
 
 const Navigation = styled.nav`
   display: flex;
+  align-items: center;
+  height: 80px;
 
   & > ul {
     display: flex;
@@ -65,11 +67,24 @@ const LeftSidebar = styled.aside`
   overflow-y: auto; // 내용이 많을 경우 스크롤
   padding: 20px;
   box-sizing: border-box; // 패딩을 너비에 포함
+
+  // 미디어 쿼리 추가
+  @media (max-width: 1050px) {
+    // 화면 너비가 1200px 이하일 때 적용
+    display: none;
+  }
 `;
 
 const MainContent = styled.section`
   flex-grow: 1;
   padding: 20px;
+  // margin-left: 300px; // 기본적으로 LeftSidebar의 너비만큼 여백을 둡니다.
+
+  // 미디어 쿼리 추가
+  @media (max-width: 1050px) {
+    // LeftSidebar가 사라지는 화면 너비
+    margin-left: 0; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
+  }
 `;
 
 const RightSidebar = styled.aside`
@@ -141,7 +156,7 @@ const StyledCalendar = styled(Calendar)`
 
   .react-calendar__month-view__days__day--weekend {
     // 주말 글씨 빨간색 없애기
-    color: var(--festie-gray-800, #3a3a3a);
+    color: var(--festie-gray-800, #000000);
   }
 
   .react-calendar__tile--now {
@@ -168,6 +183,13 @@ function Main() {
   const handleMenuClick = component => {
     setSelectedComponent(component);
   };
+
+  useEffect(() => {
+    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
+    if (savedThemeName && theme[savedThemeName]) {
+      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
+    }
+  }, []);
 
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
@@ -213,7 +235,7 @@ function Main() {
                 onClick={() => handleMenuClick("Diary")}
                 style={{ cursor: "pointer" }}
               >
-                달력/일기
+                일기
               </li>
               <li
                 onClick={() => handleMenuClick("Stat")}
@@ -241,10 +263,11 @@ function Main() {
             </GreetingSection>
             {/* 사이드바의 다른 내용 */}
           </LeftSidebar>
-          <MainContent>
-            {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
-          </MainContent>
         </Content>
+        <MainContent>
+          {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
+        </MainContent>
+
         <RightSidebar>
           <StyledCalendar
             onChange={handleDateChange}

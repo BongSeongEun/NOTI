@@ -3,6 +3,8 @@ package hello.hellospring.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -16,6 +18,9 @@ public class User {
     @Column(name = "kakao_id")
     private Long kakaoId;
 
+    @Column(name = "kakao_email")
+    private String kakaoEmail;
+
     @Column(name = "user_profile")
     private String userProfile;
 
@@ -26,20 +31,21 @@ public class User {
     private String userColor;
 
     @Column(name = "mute_start_time")
-    private Long muteStartTime;
+    private String muteStartTime;
 
     @Column(name = "mute_end_time")
-    private Long muteEndTime;
+    private String muteEndTime;
 
     @Column(name = "diary_time")
-    private Long diaryTime;
+    private String diaryTime;
 
     @Builder
-    public User(Long userId, Long kakaoId, String userProfile, String userNickname,
-                String userColor, Long muteStartTime, Long muteEndTime, Long diaryTime) {
+    public User(Long userId, Long kakaoId, String kakaoEmail, String userProfile, String userNickname,
+                String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
 
         this.userId = userId;
         this.kakaoId = kakaoId;
+        this.kakaoEmail = kakaoEmail;
         this.userProfile = userProfile;
         this.userNickname = userNickname;
         this.userColor = userColor;
@@ -47,4 +53,14 @@ public class User {
         this.muteEndTime = muteEndTime;
         this.diaryTime = diaryTime;
     }
+    public void updateUserInfo(String userNickname, String userProfile, String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
+        if(userNickname != null) this.userNickname = userNickname;
+        if(userProfile != null) this.userProfile = userProfile;
+        if(userColor != null) this.userColor = userColor;
+        if(muteStartTime != null) this.muteStartTime = muteStartTime;
+        if(muteEndTime != null) this.muteEndTime = muteEndTime;
+        if(diaryTime != null) this.diaryTime = diaryTime;
+
+    }
+
 }

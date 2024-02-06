@@ -8,17 +8,19 @@ public class UserDTO {
 
     private Long kakaoId;
     private Long userId;
+    private String kakaoEmail;
     private String userProfile;
     private String userNickname;
     private String userColor;
-    private Long muteStartTime;
-    private Long muteEndTime;
-    private Long diaryTime;
+    private String muteStartTime;
+    private String muteEndTime;
+    private String diaryTime;
 
     public User toEntity(){
         return User.builder()
                 .kakaoId(kakaoId)
                 .userId(userId)
+                .kakaoEmail(kakaoEmail)
                 .userProfile(userProfile)
                 .userNickname(userNickname)
                 .userColor(userColor)

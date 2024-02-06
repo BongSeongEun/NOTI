@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import hello.hellospring.repository.KakaoRepository;
+import hello.hellospring.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,27 +20,23 @@ import java.io.IOException;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    @Autowired //(2)
-    KakaoRepository kakaoRepository;
+    @Autowired
+    UserRepository userRepository;
 
-    @Override //(3)
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //(4)
         String jwtHeader = ((HttpServletRequest)request).getHeader(JwtProperties.HEADER_STRING);
 
-        //(5)
         if(jwtHeader == null || !jwtHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        //(6)
         String token = jwtHeader.replace(JwtProperties.TOKEN_PREFIX, "");
 
         Long userId = null;
 
-        //(7)
         try {
             userId = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
                     .getClaim("id").asLong();
@@ -53,10 +49,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             request.setAttribute(JwtProperties.HEADER_STRING, "유효하지 않은 토큰입니다.");
         }
 
-        //(8)
         request.setAttribute("userId", userId);
 
-        //(9)
         filterChain.doFilter(request, response);
     }
 }
