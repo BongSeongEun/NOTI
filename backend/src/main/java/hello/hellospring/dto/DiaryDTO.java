@@ -2,6 +2,7 @@ package hello.hellospring.dto;
 
 // DTO : 데이터를 전송할때 사용하는 객체
 
+import hello.hellospring.model.Diary;
 import lombok.*;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -13,9 +14,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 public class DiaryDTO {
     private Long diaryId;
-    private String diaryDate;
     private Long userId;
+    private String diaryDate;
     private String diaryContent;
     private String diaryImg;
+
+    public static DiaryDTO diaryDTO(Diary diary){
+        DiaryDTO diaryDTO = new DiaryDTO();
+        diaryDTO.setDiaryId(diary.getDiaryId());
+        diaryDTO.setUserId(diary.getUserId());
+        diaryDTO.setDiaryDate(diary.getDiaryDate());
+        diaryDTO.setDiaryContent(diary.getDiaryContent());
+        diaryDTO.setDiaryImg(diary.getDiaryImg());
+        return diaryDTO;
+    }
 
 }
