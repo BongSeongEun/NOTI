@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,22 +31,20 @@ public class TodoService {
         return todoRepository.findByUserId(todo.getUserId());
     }
 
-    public List<Todo> update(Todo todo, String userId, String todoId) {
-        validateEmptyTodoTile(todo);
+    public Todo update(TodoDTO todoDTO, Long userId, Long todoId) {
+        Todo originalTodo = todoRepository.findByTodoIdAndUserId(todoId, userId);
 
-        List<Todo> original = getPresentTodo(userId, todoId);
-        Todo newTodo = null;
-        if (original.isEmpty()) {
-            newTodo = (Todo) original;
-            newTodo.setTodoTitle(todo.getTodoTitle());
-            newTodo.setTodoStartTime(todo.getTodoStartTime());
-            newTodo.setTodoEndTime(todo.getTodoEndTime());
-            newTodo.setTodoColor(todo.getTodoColor());
-            newTodo.setTodoDone(todo.isTodoDone());
+        // DTO의 값을 사용하여 Todo 업데이트
+        originalTodo.setTodoTitle(todoDTO.getTodoTitle());
+        originalTodo.setTodoStartTime(todoDTO.getTodoStartTime());
+        originalTodo.setTodoEndTime(todoDTO.getTodoEndTime());
+        originalTodo.setTodoColor(todoDTO.getTodoColor());
+        originalTodo.setTodoDone(todoDTO.isTodoDone());
+        originalTodo.setTodoDate(todoDTO.getTodoDate());
 
-            todoRepository.save(newTodo);
-        }
-        return todoRepository.findByUserId(todo.getTodoId());
+        todoRepository.save(originalTodo);
+
+        return originalTodo;
     }
 
     public List<Todo> getTodo(String userId){
@@ -56,13 +55,9 @@ public class TodoService {
         Todo todo = (Todo) todoRepository.findByTodoId(Long.valueOf(todoId));
         return (List<Todo>) todo;
     }
-
-    public List<Todo> delete(final Todo todo, TodoDTO todoDTO, String userId){
-        try{
-            todoRepository.delete(todo);
-        } catch(Exception e){
-            throw new RuntimeException("error deleting entity" + todo.getTodoId());
-        }
+    @Transactional
+    public List<Todo> delete(String userId, String todoId){
+            todoRepository.deleteByTodoIdAndUserId(Long.valueOf(todoId), Long.valueOf(userId));
         return getTodo(userId);
     }
 
