@@ -48,4 +48,14 @@ public class Diary {
         this.diaryContent = diaryContent;
         this.diaryImg = diaryImg;
     }
+
+    public static Diary toUpdateEntity(DiaryDTO diaryDTO) {
+        Diary diary = new Diary();
+        diary.setDiaryId(diaryDTO.getDiaryId());
+        diary.setUserId(diaryDTO.getUserId());
+        diary.setDiaryDate(diaryDTO.getDiaryDate());
+        diary.setDiaryContent(diaryDTO.getDiaryContent());
+        diary.setDiaryImg(diaryDTO.getDiaryImg());
+        return diary;
+    }
 }

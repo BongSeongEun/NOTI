@@ -34,4 +34,10 @@ public class DiaryService {
         return diaryDTOList;
 
     }
+
+    public List<DiaryDTO> update(DiaryDTO diaryDTO) {
+        Diary diary = Diary.toUpdateEntity(diaryDTO);
+        diaryRepository.save(diary);
+        return findByUserId(diaryDTO.getUserId());
+    }
 }
