@@ -15,17 +15,13 @@ public class Team {
     @Column(name = "team_id")
     private Long teamId;
 
-    @Column(name = "team_name")
-    private String teamName;
-
-    @Column(name = "team_memo")
-    private String teamMemo;
+    @Column(name = "team_title")
+    private String teamTitle;
 
     @Builder
-    public Team(Long teamId, String teamName, String teamMemo){
+    public Team(Long teamId, String teamTitle){
         this.teamId = teamId;
-        this.teamName = teamName;
-        this.teamMemo = teamMemo;
+        this.teamTitle = teamTitle;
     }
 
 }

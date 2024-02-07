@@ -22,10 +22,18 @@ public class Diary {
     @Column(name = "diary_content")
     private String diaryContent;
 
+    @Column(name = "diary_img")
+    private String diaryImg;
+
+    @Column(name = "diary_title")
+    private String diaryTitle;
+
     @Builder
-    public Diary(Long userId, Long diaryDate, String diaryContent){
+    public Diary(Long userId, Long diaryDate, String diaryContent, String diaryImg, String diaryTitle){
         this.userId = userId;
         this.diaryDate = diaryDate;
         this.diaryContent = diaryContent;
+        this.diaryImg = diaryImg;
+        this.diaryTitle = diaryTitle;
     }
 }

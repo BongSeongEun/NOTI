@@ -25,13 +25,18 @@ public class Team_todo {
     @Column(name = "team_todo_title")
     private String teamTodoTitle;
 
+    @Column(name = "team_todo_date")
+    private String teamTodoDate;
+
+
     @Builder
-    public Team_todo(Long teamTodoId, Long teamId, boolean teamTodoDone, String teamTodoColor, String teamTodoTitle){
+    public Team_todo(Long teamTodoId, Long teamId, boolean teamTodoDone, String teamTodoColor, String teamTodoTitle, String teamTodoDate){
         this.teamTodoId = teamTodoId;
         this.teamId = teamId;
         this.teamTodoDone = teamTodoDone;
         this.teamTodoColor = teamTodoColor;
         this.teamTodoTitle = teamTodoTitle;
+        this.teamTodoDate = teamTodoDate;
     }
 
 }
