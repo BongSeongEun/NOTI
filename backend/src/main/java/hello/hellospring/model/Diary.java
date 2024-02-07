@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Getter
+@Setter
 @Data
 @NoArgsConstructor
 @Table(name = "diary")
@@ -24,6 +26,8 @@ public class Diary {
 
     @Column(name = "diary_img")
     private String diaryImg;
+
+
 
     @Builder
     public Diary(Long userId, Long diaryDate, String diaryContent, String diaryImg){
