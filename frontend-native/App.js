@@ -15,6 +15,7 @@ import Setting from './src/pages/Setting';
 import Todo from './src/pages/Todo';
 import Chatting from './src/pages/Chatting';
 import Todo_Add from './src/pages/Todo_Add';
+import KakaoLogin from './src/pages/KakaoLogin1';
 
 const Stack = createStackNavigator();
 
@@ -23,6 +24,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="kakaoLogin" component={KakaoLogin} />
 
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Register_Success" component={Register_Success} />
