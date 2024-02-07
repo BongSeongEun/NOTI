@@ -15,6 +15,12 @@ import team_pin from "../asset/team_pin.svg";
 import team_memo from "../asset/team_memo.svg";
 import team_search from "../asset/team_search.svg";
 
+import diary from "../asset/diary.svg";
+import stat from "../asset/stat.svg";
+import todo from "../asset/todo.svg";
+import chatting from "../asset/chatting.svg";
+import setting from "../asset/setting";
+
 export const images = {
 	profile: profile,
 	gallery: gallery,
@@ -29,7 +35,13 @@ export const images = {
 	team_out: team_out,
 	team_pin: team_pin,
 	team_memo: team_memo,
-	team_search: team_search
+	team_search: team_search,
+
+	diary: diary,
+	stat: stat,
+	todo: todo,
+	chatting: chatting,
+	setting: setting,
 };
 
 export default images;

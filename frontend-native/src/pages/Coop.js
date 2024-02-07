@@ -2,7 +2,6 @@
 /* eslint-disable prettier/prettier */
 
 import styled from "styled-components/native"
-
 import React, { useState } from 'react';
 import {
 	View,
@@ -15,7 +14,6 @@ import {
 	Keyboard,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import TimeTableView, { genTimeBlock } from 'react-native-timetable';
 import 'react-native-gesture-handler';
 
 import images from "../components/images";

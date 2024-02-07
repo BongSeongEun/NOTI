@@ -19,10 +19,7 @@ module.exports = {
       },
     }),
   },
-<<<<<<< HEAD
 }
-=======
-};
 
 const { getDefaultConfig } = require("metro-config");
 
@@ -40,4 +37,4 @@ module.exports = (async () => {
     }
   };
 })();
->>>>>>> 181fc5c5f7ba9b4b71c13e44dd04dbb1d41b2b53
+

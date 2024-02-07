@@ -12,6 +12,8 @@ import 'react-native-gesture-handler';
 import { theme } from "../components/theme";
 import images from "../components/images";
 import { TextInput } from 'react-native-gesture-handler';
+import Navigation_Bar from "../components/Navigation_Bar";
+
 
 function Coop_Main() {
     const navigation = useNavigation();
@@ -172,6 +174,8 @@ function Coop_Main() {
 
 					</MainView>
 
+					
+					<Navigation_Bar selectedTheme={selectedTheme} />
 				</FullView>
 			</ScrollView>
 		</ThemeProvider>

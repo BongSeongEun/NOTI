@@ -20,7 +20,7 @@ function Setting({ }) {
 
 	return (
 		<View>
-			<Text>설저</Text>
+			<Text>설정</Text>
 		</View>
 	);
 }

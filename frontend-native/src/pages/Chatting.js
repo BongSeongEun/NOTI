@@ -2,8 +2,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable quotes */
 /* eslint-disable no-trailing-spaces */
-import React, {useState, useEffect } from 'react';
 import styled from 'styled-components/native';
+
+import React, {useState, useEffect } from 'react';
 import {View, Text} from 'react-native';
 import axios from 'axios';
 import ChatMessage from '../components/ChatMessage';

@@ -14,6 +14,7 @@ import Setting from "./src/pages/Setting";
 import Todo from "./src/pages/Todo";
 import Chatting from "./src/pages/Chatting";
 import Todo_Add from "./src/pages/Todo_Add";
+import Stat from "./src/pages/Stat";
 
 const Stack = createStackNavigator();
 
@@ -34,7 +35,8 @@ export default function App() {
 			  <Stack.Screen name="Coop_Main" component={Coop_Main} />
 
 			<Stack.Screen name="Diary" component={Diary} />
-			<Stack.Screen name="Setting" component={Setting} />
+			  <Stack.Screen name="Setting" component={Setting} />
+			  <Stack.Screen name="Stat" component={Stat} />
       	</Stack.Navigator>
     </NavigationContainer>
   );

@@ -2,16 +2,18 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
+import styled, { ThemeProvider } from 'styled-components/native';
 
 import React, { useState, useEffect, } from 'react';
 import { ScrollView, TouchableOpacity, Text, Modal, } from 'react-native';
-import styled, { ThemeProvider } from 'styled-components/native';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
 import 'react-native-gesture-handler';
 
 import DecoesSvg from '../asset/Deco_Svg';
 import { theme } from '../components/theme';
 import images from '../components/images';
+import Navigation_Bar from "../components/Navigation_Bar";
 
 function Todo({ }) {
 	const navigation = useNavigation();
@@ -138,6 +140,9 @@ function Todo({ }) {
 						</ModalView>
 					</ModalContainer>
 				</Modal>
+
+				 <Navigation_Bar selectedTheme={selectedTheme} />
+
 			</MainViewStyle>
 		</ThemeProvider>
 	);

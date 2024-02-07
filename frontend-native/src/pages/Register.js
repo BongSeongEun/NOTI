@@ -2,10 +2,10 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable quotes */
 /* eslint-disable prettier/prettier */
+import styled, { ThemeProvider } from "styled-components/native";
 
 import React, { useState } from 'react';
 import { ScrollView } from "react-native";
-import styled, { ThemeProvider } from "styled-components/native";
 import { useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
