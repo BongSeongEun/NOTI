@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(name = "team_together")
-public class Team_together {
+public class TeamTogether {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "team_together_id")
@@ -22,7 +22,7 @@ public class Team_together {
     private Long userId;
 
     @Builder
-    public Team_together(Long teamTogetherId, Long teamId, Long userId){
+    public TeamTogether(Long teamTogetherId, Long teamId, Long userId){
         this.teamTogetherId = teamTogetherId;
         this.teamId = teamId;
         this.userId = userId;

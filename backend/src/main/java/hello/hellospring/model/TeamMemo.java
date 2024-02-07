@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table(name = "team_memo")
-public class Team_memo {
+public class TeamMemo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "team_memo_id")
@@ -25,7 +25,7 @@ public class Team_memo {
     private String memoTitle;
 
     @Builder
-    public Team_memo(Long teamMemoId, Long teamId, String memoContent, String memoTitle){
+    public TeamMemo(Long teamMemoId, Long teamId, String memoContent, String memoTitle){
         this.teamMemoId = teamMemoId;
         this.teamId = teamId;
         this.memoContent = memoContent;
