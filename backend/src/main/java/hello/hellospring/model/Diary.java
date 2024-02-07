@@ -28,6 +28,9 @@ public class Diary {
     @Column(name = "diary_img")
     private String diaryImg;
 
+    @Column(name = "diary_title")
+    private String diaryTitle;
+
     //모든 값을 여기로 담아와서 전달해줌
     public static Diary toSaveEntity(DiaryDTO diaryDTO){
         Diary diary = new Diary();
@@ -36,6 +39,7 @@ public class Diary {
         diary.setDiaryDate(diaryDTO.getDiaryDate());
         diary.setDiaryContent(diaryDTO.getDiaryContent());
         diary.setDiaryImg(diaryDTO.getDiaryImg());
+        diary.setDiaryTitle(diaryDTO.getDiaryTitle());
         return diary;
     }
 

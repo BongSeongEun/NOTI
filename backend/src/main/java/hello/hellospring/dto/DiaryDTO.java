@@ -18,6 +18,7 @@ public class DiaryDTO {
     private String diaryDate;
     private String diaryContent;
     private String diaryImg;
+    private String diaryTitle;
 
     public static DiaryDTO diaryDTO(Diary diary){
         DiaryDTO diaryDTO = new DiaryDTO();
@@ -26,6 +27,7 @@ public class DiaryDTO {
         diaryDTO.setDiaryDate(diary.getDiaryDate());
         diaryDTO.setDiaryContent(diary.getDiaryContent());
         diaryDTO.setDiaryImg(diary.getDiaryImg());
+        diaryDTO.setDiaryTitle(diary.getDiaryTitle());
         return diaryDTO;
     }
 
