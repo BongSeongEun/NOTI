@@ -79,11 +79,9 @@ function Coop_Main() {
 
     return (
         <ThemeProvider theme={selectedTheme}>
-			<ScrollView>
-				<FullView>
-
+			<FullView>
 					<MainView>
-						<ProfileContainer>
+						<HorisontalView>
 							<Profile source={images.profile} style={{ marginTop: 20 }} />
 							<ProfileTextContainer>
 								<MainText>
@@ -93,19 +91,23 @@ function Coop_Main() {
 									{formattedDate} 노티입니다!
 								</MainText>
 							</ProfileTextContainer>
-						</ProfileContainer>
-					</MainView>
-
-					<ProfileContainer>
-						<MainText onPress={() => navigation.navigate('Todo', { selectedTheme: selectedTheme })}
-							style={{ marginRight: 20 }}>나의 일정</MainText>
-                        <MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
-                    </ProfileContainer>
-					<Bar />
-					<Bar_Mini />
-
-					<MainView>
-						<images.team_add
+						</HorisontalView>
+				</MainView>
+			</FullView>
+			<FullView style={{flex: 1}}>
+				<BarContainer>
+					<MainText onPress={() => navigation.navigate('Todo', { selectedTheme: selectedTheme })}
+						style={{ marginRight: 20 }}>나의 일정</MainText>
+                    <MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
+                </BarContainer>
+				<Bar />
+				<Bar_Mini />
+				
+				
+				<ScrollView>
+				<MainView>
+					
+					<images.team_add
 							width={20}
 							height={20}
 							color={clicked_add ? color_sheet[0] : "#B7BABF"}
@@ -125,6 +127,22 @@ function Coop_Main() {
 							colorSheet={color_sheet}
 						/>
 
+						<TeamFrame
+							teamName={team_name[1]}
+							clickedPin={clicked_pin[1]}
+							setClickedPin={(value) => setClicked_pin([clicked_pin[0], value, clicked_pin[2]])}
+							clickedOut={clicked_out[1]}
+							setClickedOut={(value) => setClicked_out([clicked_out[0], value, clicked_out[2]])}
+							colorSheet={color_sheet}
+						/>
+						<TeamFrame
+							teamName={team_name[1]}
+							clickedPin={clicked_pin[1]}
+							setClickedPin={(value) => setClicked_pin([clicked_pin[0], value, clicked_pin[2]])}
+							clickedOut={clicked_out[1]}
+							setClickedOut={(value) => setClicked_out([clicked_out[0], value, clicked_out[2]])}
+							colorSheet={color_sheet}
+						/>
 						<TeamFrame
 							teamName={team_name[1]}
 							clickedPin={clicked_pin[1]}
@@ -171,26 +189,24 @@ function Coop_Main() {
 								</ModalView>
 							</ModalContainer>
 						</Modal>
-
-					</MainView>
-
 					
-					<Navigation_Bar selectedTheme={selectedTheme} />
-				</FullView>
-			</ScrollView>
+					</MainView>
+					</ScrollView>
+				<Navigation_Bar selectedTheme={selectedTheme} />
+			</FullView>
 		</ThemeProvider>
     );
 }
 
 const FullView = styled.View`
-	flex: 1;
-	justify-content: center;
-	align-items: center;
+	width: 100%;
 	background-color: white;
 `;
 
 const MainView = styled(FullView)`
+	height: auto;
 	align-items: stretch;
+	align-self: center;
 	width: 300px;
 `;
 
@@ -203,6 +219,12 @@ const HorisontalView = styled(MainView)`
 const ProfileContainer = styled.View`
     display: flex;
     flex-direction: row;
+`;
+
+const BarContainer = styled.View`
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
 `;
 
 const ProfileTextContainer = styled(ProfileContainer)`
@@ -239,7 +261,7 @@ const Bar_Mini = styled(Bar)`
     width: 50%;
     height: 2px;
     background-color: ${props => props.theme.color1};
-    margin-top: -1px;
+    margin-top: 0px;
 `;
 
 

@@ -99,13 +99,14 @@ const Navigation_Bar =  ({ selectedTheme }) => {
 
 const NavigationView = styled.View`
 	width: 100%;
-	height: 60px;
+	height: 40px;
 	flex-direction: row;
 	justify-content: space-between;
-	padding: 50px;
+	padding: 40px;
     align-items: center;
 	position: absolute;
 	bottom: 0;
+	background-color: white;
 `;
 
 export default Navigation_Bar;
