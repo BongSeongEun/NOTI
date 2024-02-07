@@ -416,7 +416,7 @@ function Todo({ selectedDate }) {
                   </CloseButton>
                   <DateHeader
                     style={{
-                      borderBottom: `2px solid ${selectedColor}`,
+                      borderBottom: `2px solid ${currentTheme[selectedColor]}`,
                       fontSize: "20px",
                       height: "30px",
                     }}
@@ -455,7 +455,10 @@ function Todo({ selectedDate }) {
                         />
                       ))}
                   </ColorSelector>
-                  <SubmitButton color={selectedColor} onClick={handleSubmit}>
+                  <SubmitButton
+                    color={currentTheme[selectedColor]}
+                    onClick={handleSubmit}
+                  >
                     {isEditing ? "수정하기" : "일정 추가"}{" "}
                   </SubmitButton>
                 </ModalContainer>

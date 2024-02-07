@@ -185,6 +185,8 @@ function Main() {
   const [selectedComponent, setSelectedComponent] = useState("Todo");
   const [diaryId, setDiaryId] = useState(null); // 선택된 일기의 ID 상태
   const token = window.localStorage.getItem("token"); // 토큰 추가
+  // Base64 이미지 데이터를 저장할 상태
+  const [base64Image, setBase64Image] = useState("");
 
   const handleMenuClick = component => {
     setSelectedComponent(component);
@@ -217,16 +219,22 @@ function Main() {
           },
         });
         const userThemeName = response.data.userColor; // 사용자가 선택한 테마 이름
+        const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
+
         if (userThemeName && theme[userThemeName]) {
           setCurrentTheme(theme[userThemeName]); // 가져온 테마로 상태 업데이트
         }
+
+        // 사용자의 프로필 이미지를 상태에 적용
+        setBase64Image(userProfileImage);
       } catch (error) {
         console.error("Error fetching user theme:", error);
       }
     }
 
     fetchUserData();
-  }, []);
+  }, [token]);
+
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
   };
@@ -299,7 +307,7 @@ function Main() {
         <Content>
           <LeftSidebar>
             <GreetingSection>
-              <UserProfileImage src={USER} alt="User Profile" />
+              <UserProfileImage src={base64Image || USER} alt="User Profile" />
               <GreetingText>
                 <div>{nickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
                 <div style={{ color: "black" }}>반갑습니다!</div>
