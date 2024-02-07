@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import Calendar from "react-calendar";
+import axios from "axios"; // axios import
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
 import theme from "../styles/theme";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
@@ -182,18 +184,49 @@ function Main() {
   const [selectedDate, setSelectedDate] = useState(new Date()); // 날짜 상태 추가
   const [selectedComponent, setSelectedComponent] = useState("Todo");
   const [diaryId, setDiaryId] = useState(null); // 선택된 일기의 ID 상태
+  const token = window.localStorage.getItem("token"); // 토큰 추가
 
   const handleMenuClick = component => {
     setSelectedComponent(component);
   };
 
-  useEffect(() => {
-    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
-    if (savedThemeName && theme[savedThemeName]) {
-      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
-    }
-  }, []);
+  // jwt토큰을 디코딩해서 userid를 가져오는 코드
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
 
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
+
+  useEffect(() => {
+    async function fetchUserData() {
+      const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+      try {
+        if (!token) return; // 토큰이 없으면 종료
+
+        // 사용자 ID 가져오기 (토큰에서 디코딩 또는 다른 방식으로)
+        // const userId = getUserIdFromToken();
+
+        const response = await axios.get(`/api/v1/userInfo/${userId}`, {
+          // 사용자의 테마 정보를 가져오는 API 호출
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const userThemeName = response.data.userColor; // 사용자가 선택한 테마 이름
+        if (userThemeName && theme[userThemeName]) {
+          setCurrentTheme(theme[userThemeName]); // 가져온 테마로 상태 업데이트
+        }
+      } catch (error) {
+        console.error("Error fetching user theme:", error);
+      }
+    }
+
+    fetchUserData();
+  }, []);
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
   };
@@ -278,7 +311,6 @@ function Main() {
         <MainContent>
           {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
         </MainContent>
-
         <RightSidebar>
           <StyledCalendar
             onChange={handleDateChange}

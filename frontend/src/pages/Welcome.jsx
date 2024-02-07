@@ -63,6 +63,7 @@ const GestImgBox = styled.img`
 `;
 
 function Welcome() {
+  const navigate = useNavigate();
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
 
@@ -81,28 +82,37 @@ function Welcome() {
   };
 
   useEffect(() => {
-    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
-    if (savedThemeName && theme[savedThemeName]) {
-      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
-    }
-    // 서버로부터 사진 데이터 가져오기
-    async function fetchImageData() {
+    async function fetchUserData() {
       const userId = getUserIdFromToken(); // 사용자 ID 가져오기
       try {
         const response = await axios.get(`/api/v1/userInfo/${userId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         });
-        // 응답에서 이미지 데이터를 Base64 형식으로 받았다고 가정
-        setBase64Image(response.data.imageData); // 상태 업데이트
+        // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
+        const userThemeName = response.data.userColor; // 사용자의 테마 이름
+        const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
+
+        // 사용자의 테마를 상태에 적용
+        if (theme[userThemeName]) {
+          setCurrentTheme(theme[userThemeName]);
+        }
+
+        // 사용자의 프로필 이미지를 상태에 적용
+        setBase64Image(userProfileImage);
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching user data:", error);
       }
     }
 
-    fetchImageData();
-  }, []);
+    fetchUserData();
+  }, [token]);
+
+  // 완료 버튼 클릭 핸들러
+  const handleCompleteClick = () => {
+    navigate("/main"); // 메인 페이지로 이동
+  };
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -118,7 +128,7 @@ function Welcome() {
           </MainTextBox>
           <ImgBox>
             <GestImgBox
-              src={`${base64Image}`} // 서버로부터 받은 이미지 데이터로 src 업데이트
+              src={base64Image || NOTI} // 기본값으로 NOTI 이미지 사용
               style={{
                 top: "50%",
                 left: "50%",
@@ -140,11 +150,12 @@ function Welcome() {
               }}
             />
           </ImgBox>
-          <Link to="/main">
-            <WelBtn style={{ backgroundColor: currentTheme.color1 }}>
-              완료
-            </WelBtn>
-          </Link>
+          <WelBtn
+            onClick={handleCompleteClick}
+            style={{ backgroundColor: currentTheme.color1 }}
+          >
+            완료
+          </WelBtn>
         </MainDiv>
       </div>
     </ThemeProvider>

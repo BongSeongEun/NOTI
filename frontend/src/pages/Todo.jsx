@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";
 import {
@@ -9,6 +9,7 @@ import {
   redirect,
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
+import axios from "axios"; // axios import 확인
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import editIcon from "../asset/edit.png"; // 수정하기
 import TimeTable from "../pages/TimeTable"; // 타임테이블
@@ -163,13 +164,14 @@ function Todo({ selectedDate }) {
   const [events, setEvents] = useState([]);
   const [eventCompleted, setEventCompleted] = useState({});
   const navigate = useNavigate();
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
 
   // 일정에 따라 색칠할 시간 블록들의 상태를 관리
   const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 
   // 수정 모드 상태와 현재 수정 중인 이벤트의 ID를 저장하는 상태 추가
   const [isEditing, setIsEditing] = useState(false);
-  const [editingEventId, setEditingEventId] = useState(null);
+  const [editingTodoId, setEditingTodoId] = useState(null);
 
   // 달력에 년.월.일 나오게 하는 함수
   const formatDate = date => {
@@ -190,6 +192,7 @@ function Todo({ selectedDate }) {
 
   const token = window.localStorage.getItem("token");
 
+  // 토큰 가져오는 함수
   const getUserIdFromToken = () => {
     const payload = token.split(".")[1];
     const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
@@ -200,9 +203,58 @@ function Todo({ selectedDate }) {
     return decodedJSON.id.toString();
   };
 
-  // 색상 선택기에서 색상을 선택하는 함수
-  const handleColorSelect = color => {
-    setSelectedColor(color);
+  // 사용자 데이터 및 일정 데이터를 가져오는 함수
+  const fetchUserData = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+
+    try {
+      // 사용자 정보 불러오기
+      const userResponse = await axios.get(`/api/v1/userInfo/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      // 사용자의 테마 정보를 서버로부터 받아옴
+      if (userResponse.status === 200) {
+        const userThemeName = userResponse.data.userColor; // 사용자의 테마 이름
+
+        // 사용자의 테마를 상태에 적용
+        if (theme[userThemeName]) {
+          setCurrentTheme(theme[userThemeName]);
+
+          // 일정 데이터 불러오기
+          const eventsResponse = await axios.get(`/api/v1/getTodo/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+
+          console.log(eventsResponse.data); // 서버로부터 받은 일정 데이터 로깅
+
+          if (eventsResponse.status === 200) {
+            // 현재 테마를 바탕으로 각 일정의 색상 설정
+            const updatedEvents = eventsResponse.data.map(event => ({
+              ...event,
+              selectedColor:
+                theme[userThemeName][event.todoColor] || event.todoColor,
+            }));
+            setEvents(updatedEvents);
+          } else {
+            console.error("Unexpected response:", eventsResponse);
+          }
+        }
+      } else {
+        console.error("Unexpected response:", userResponse);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  // 색상 선택기에서 색상을 선택할 때 실행하는 함수
+  const handleColorSelect = colorKey => {
+    setSelectedColor(colorKey); // 색상 키워드를 상태에 저장
   };
 
   // 모달을 여는 함수
@@ -216,16 +268,18 @@ function Todo({ selectedDate }) {
   };
 
   // 수정 버튼 클릭 시 처리 함수
-  const handleEditClick = eventId => {
-    const eventToEdit = events.find(event => event.id === eventId);
+  const handleEditClick = todoId => {
+    // 일정 목록에서 특정 ID를 가진 일정을 찾습니다.
+    const eventToEdit = events.find(event => event.todoId === todoId);
     if (eventToEdit) {
-      setTitle(eventToEdit.title);
-      setStartTime(eventToEdit.startTime);
-      setEndTime(eventToEdit.endTime);
-      setSelectedColor(eventToEdit.selectedColor);
-      setEditingEventId(eventId); // 수정 중인 이벤트 ID 설정
-      setIsEditing(true); // 수정 모드로 전환
-      openModal(); // 모달 창 열기
+      // 상태 변수를 업데이트하여 모달에 현재 값을 표시합니다.
+      setTitle(eventToEdit.todoTitle);
+      setStartTime(eventToEdit.todoStartTime);
+      setEndTime(eventToEdit.todoEndTime);
+      setSelectedColor(eventToEdit.selectedColor); // 여기서 색상은 이미 변환된 상태여야 합니다.
+      setEditingTodoId(eventToEdit.todoId); // 수정 중인 이벤트의 ID를 상태에 저장합니다.
+      setIsEditing(true); // 수정 모드로 전환합니다.
+      openModal(); // 모달 창을 엽니다.
     }
   };
 
@@ -235,9 +289,9 @@ function Todo({ selectedDate }) {
     setTitle("");
     setStartTime("");
     setEndTime("");
-    setSelectedColor(theme.OrangeTheme.color1); // 기본 색상으로 초기화
+    setSelectedColor(currentTheme.color1); // 기본 색상으로 초기화
     setIsEditing(false); // 편집 모드가 아닌 새 추가 모드로 설정
-    setEditingEventId(null); // 편집 중인 이벤트 ID 초기화
+    setEditingTodoId(null); // 편집 중인 이벤트 ID 초기화
     openModal(); // 모달 창 열기
   };
 
@@ -269,34 +323,57 @@ function Todo({ selectedDate }) {
   };
 
   // 모달에서 '추가하기' 또는 '수정하기' 버튼 클릭 시 처리 함수
-  const handleSubmit = () => {
-    if (isEditing) {
-      // 수정 로직
-      setEvents(currentEvents =>
-        currentEvents.map(event =>
-          event.id === editingEventId
-            ? { ...event, title, startTime, endTime, selectedColor }
-            : event,
-        ),
-      );
-    } else {
-      // 추가 로직
-      const newEvent = {
-        id: Math.random(),
-        title,
-        startTime,
-        endTime,
-        selectedColor,
-        date: formatDate(selectedDate),
-        isCompleted: false,
-      };
-      setEvents(currentEvents => [...currentEvents, newEvent]);
+  const handleSubmit = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    const eventData = {
+      todoTitle: title,
+      todoStartTime: startTime,
+      todoEndTime: endTime,
+      todoColor: selectedColor,
+      todoDone: false, // 완료 여부는 기본적으로 false로 설정
+      todoDate: formatDate(selectedDate), // formatDate 함수를 사용하여 날짜 포맷 변경
+    };
+
+    try {
+      let response;
+      if (isEditing) {
+        // 수정하는 경우
+        const url = `/api/v1/updateTodo/${userId}/${editingTodoId}`; // 수정 API 엔드포인트, todoId 포함
+        response = await axios.put(url, eventData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      } else {
+        // 새로 추가하는 경우
+        const url = `/api/v1/createTodo/${userId}`; // 생성 API 엔드포인트
+        response = await axios.post(url, eventData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      }
+      if (response.status === 200 || response.status === 201) {
+        closeModal(); // 모달 창 닫기
+        // 요청 성공 후 로직 (예: 사용자 정보와 일정 데이터 새로고침)
+        await fetchUserData(); // 서버로부터 최신 데이터를 다시 받아옵니다.
+      } else {
+        // 서버로부터 예상치 못한 응답을 받은 경우
+        console.error("Unexpected response:", response);
+      }
+    } catch (error) {
+      console.error("Error updating/adding event:", error);
+      // 에러 처리
     }
-    closeModal(); // 모달 창 닫기
   };
 
+  // useEffect 내부에서 사용자 정보와 일정 데이터를 불러오는 로직
+  useEffect(() => {
+    fetchUserData();
+  }, []); // token이 변경될 때마다 정보를 새로 불러옴
+
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={currentTheme}>
       <div>
         <DiaryContainer>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
@@ -305,22 +382,22 @@ function Todo({ selectedDate }) {
             EventList 컴포넌트 내에서 events 상태를 기반으로 일정 항목을 동적으로 렌더링 */}
             {events.map((event, index) => (
               <EventItem
-                key={index}
+                key={event.TodoId}
                 completed={eventCompleted[index]}
                 style={{ backgroundColor: event.selectedColor }}
               >
                 <CompleteButton onClick={() => toggleComplete(index)}>
                   <CheckMark show={eventCompleted[index]}>✔</CheckMark>
                 </CompleteButton>
-                <EventTitle>{event.title}</EventTitle>
+                <EventTitle>{event.todoTitle}</EventTitle>
                 <EventTime>
-                  {event.startTime} ~ {event.endTime}
+                  {event.todoStartTime} ~ {event.todoEndTime}
                 </EventTime>
                 <EditButton
                   src={editIcon}
                   alt="수정"
                   onClick={() =>
-                    !eventCompleted[index] && handleEditClick(event.id)
+                    !eventCompleted[index] && handleEditClick(event.todoId)
                   }
                 />
               </EventItem>
@@ -368,13 +445,15 @@ function Todo({ selectedDate }) {
                   />
                   <SubTextBox>노티 색상</SubTextBox>
                   <ColorSelector style={{ marginBottom: "30px" }}>
-                    {Object.values(theme.OrangeTheme).map((color, index) => (
-                      <ColorOption
-                        key={index}
-                        color={color}
-                        onClick={() => handleColorSelect(color)}
-                      />
-                    ))}
+                    {Object.keys(currentTheme)
+                      .filter(key => key.startsWith("color"))
+                      .map((colorKey, index) => (
+                        <ColorOption
+                          key={index}
+                          color={currentTheme[colorKey]}
+                          onClick={() => handleColorSelect(colorKey)}
+                        />
+                      ))}
                   </ColorSelector>
                   <SubmitButton color={selectedColor} onClick={handleSubmit}>
                     {isEditing ? "수정하기" : "일정 추가"}{" "}

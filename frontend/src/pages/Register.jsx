@@ -212,10 +212,6 @@ const RegBtn = styled.button`
   text-align: center; // 텍스트 가운데 정렬
 `;
 
-function myLighten(amount, color) {
-  return lighten(amount, color);
-}
-
 const ThemedButton = styled.button`
   border: 4px solid #ffffff;
   height: 30px;
@@ -253,7 +249,6 @@ function Register() {
     if (newTheme) {
       setCurrentTheme(newTheme); // UI 상에서 테마를 적용
       setThemeName(selectedThemeName); // 선택된 테마 이름을 상태에 저장
-      localStorage.setItem("userTheme", selectedThemeName); // 선택된 테마 이름을 localStorage에 저장
     } else {
       console.error("Selected theme does not exist:", selectedThemeName);
     }
@@ -281,7 +276,7 @@ function Register() {
   async function postUser() {
     const userId = getUserIdFromToken();
     try {
-      await axios.put(
+      const response = await axios.put(
         `/api/v1/user/${userId}`,
         {
           userNickname,
@@ -297,13 +292,21 @@ function Register() {
           },
         },
       );
+      if (response.status === 200 || response.status === 201) {
+        // 회원 정보 업데이트 성공 시
+        // 로컬 스토리지에 사용자가 선택한 테마 정보 저장
+        localStorage.setItem("userTheme", themeName);
+        // 회원 정보 업데이트가 성공했을 때, Welcome 페이지로 이동
+        navigate("/Welcome");
+      }
     } catch (error) {
       console.error("Error posting user data:", error);
       // 에러 처리
     }
   }
   // 가입하기 버튼 클릭 핸들러
-  const handleSubmit = async () => {
+  const handleSubmit = async e => {
+    e.preventDefault(); // 폼 제출에 의한 페이지 새로고침 방지
     await postUser(); // 사용자 정보 전송
     localStorage.setItem("userColor", currentTheme.color1); // 색상을 로컬 스토리지에 저장
   };
@@ -407,14 +410,13 @@ function Register() {
                   onClick={() => handleThemeChange("BlueTheme")}
                 ></ThemedButton>
               </HorizontalBox>
-              <Link to="/Welcome">
-                <RegBtn
-                  style={{ marginTop: "30px" }}
-                  onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
-                >
-                  가입하기
-                </RegBtn>
-              </Link>
+
+              <RegBtn
+                style={{ marginTop: "30px" }}
+                onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
+              >
+                가입하기
+              </RegBtn>
             </RegBox>
           </RegDiv>
         </MainDiv>
