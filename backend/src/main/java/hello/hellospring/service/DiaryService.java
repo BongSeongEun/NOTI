@@ -25,8 +25,8 @@ public class DiaryService {
         diaryRepository.save(diary);
     }
 
-    public List<DiaryDTO> findAll() {
-        List<Diary> diaryList = diaryRepository.findAll(); //리스트 형태의 entity넘어옴
+    public List<DiaryDTO> findByUserId(Long userId) {
+        List<Diary> diaryList = diaryRepository.findByUserId(userId); //리스트 형태의 entity넘어옴
         List<DiaryDTO> diaryDTOList = new ArrayList<>(); // 온 데이터를 diaryDTOList에 담기
         for (Diary diary: diaryList){
             diaryDTOList.add(DiaryDTO.diaryDTO(diary));

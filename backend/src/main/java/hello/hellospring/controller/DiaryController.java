@@ -31,9 +31,9 @@ public class DiaryController {
 //        return null;
 //    }
     @GetMapping("/diarylist/{userId}")
-    public ResponseEntity<List<DiaryDTO>> getDiary(Model model, @PathVariable String userId){
+    public ResponseEntity<List<DiaryDTO>> getDiary(@PathVariable Long userId){
         // DB에서 전체 게시글 데이터를 가져와서 보여준다
-        List<DiaryDTO> diaryDTOList = diaryService.findAll(); //dto가 담겨있는 여러개의 리스트
+        List<DiaryDTO> diaryDTOList = diaryService.findByUserId(userId); //dto가 담겨있는 여러개의 리스트
         //model.addAttribute("diaryList", diaryDTOList); //가져온걸 모델 객체에 담아감
         //return "diaryList";
         return new ResponseEntity<>(diaryDTOList, HttpStatus.OK);
