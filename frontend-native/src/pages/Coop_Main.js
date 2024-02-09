@@ -215,7 +215,6 @@ const HorisontalView = styled(MainView)`
 `;
 
 
-
 const ProfileContainer = styled.View`
     display: flex;
     flex-direction: row;
@@ -246,8 +245,6 @@ const MainText = styled.Text`
     color: ${props => props.color || "black"};
     text-align: left;
 `;
-
-
 
 const Bar = styled.View`
     width: 100%;

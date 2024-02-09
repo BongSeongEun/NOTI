@@ -111,8 +111,8 @@ function Register() {
 
                         {Buttonclicked && (
                             <>
-                                <HorisontalView>
-                                    <TextBox onPress={() => showDatePicker('startTime')}>
+								<TextBox onPress={() => showDatePicker('startTime')}
+									style={{flexDirection: 'row'}}>
                                         <TextBoxText>시작 시간</TextBoxText>
                                         <Time>{selectedStartTime}</Time>
                                     </TextBox>
@@ -122,9 +122,9 @@ function Register() {
                                         onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
                                         onCancel={hideDatePicker}
                                     />
-                                </HorisontalView>
+                               
 
-                                <HorisontalView>
+                                
                                     <TextBox onPress={() => showDatePicker('endTime')}>
                                         <TextBoxText>종료 시간</TextBoxText>
                                         <Time>{selectedEndTime}</Time>
@@ -135,12 +135,12 @@ function Register() {
                                         onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
                                         onCancel={hideDatePicker}
                                     />
-                                </HorisontalView>
+                                
                             </>
                         )}
 
                         <RegularText>일기 생성 시간 *</RegularText>
-                        <TimeSelectionTextBox onPress={() => showDatePicker('diary')}>
+                        <TextBox onPress={() => showDatePicker('diary')}>
 							<Time>{selectedDiaryTime}</Time>
 							<DateTimePickerModal
                                 isVisible={isDiaryTimePickerVisible}
@@ -148,7 +148,7 @@ function Register() {
                                 onConfirm={(date) => handleTimePickerConfirm('diary', date)}
                                 onCancel={hideDatePicker}
                             />
-                        </TimeSelectionTextBox>
+                        </TextBox>
 
                         <RegularText>테마 선택</RegularText>
                         <HorisontalView>
@@ -242,7 +242,9 @@ const TextBox = styled.TouchableOpacity`
     height: 40px;
     border-radius: 15px;
     margin-top: 10px;
-    justify-content: center;
+	justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
 `;
 
 const InputName = styled.TextInput.attrs({ maxLength: 6 })`

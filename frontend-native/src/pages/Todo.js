@@ -67,29 +67,35 @@ function Todo({ }) {
 
 	return (
 		<ThemeProvider theme={selectedTheme}>
-			<MainViewStyle>
-				<ProfileContainer>
-					<Profile source={images.profile}></Profile>
-					<ProfileTextContainer>
-						<MainText>
-							{name} 님,
-						</MainText>
-						<MainText color={color_sheet[0]}>
-							{formattedDate} 노티입니다!
-						</MainText>
-					</ProfileTextContainer>
-				</ProfileContainer>
-
+			<FullView>
+				<MainView>
+					<HorisontalView>
+						<Profile source={images.profile} style={{ marginTop: 20 }} />
+						<ProfileTextContainer>
+							<MainText>
+								{name} 님,
+							</MainText>
+							<MainText color={color_sheet[0]}>
+								{formattedDate} 노티입니다!
+							</MainText>
+						</ProfileTextContainer>
+					</HorisontalView>
+				</MainView>
+			</FullView>
+			
+			<FullView style={{flex: 1}}>
 				<BarContainer>
-					<MainText> 나의 일정      </MainText>
-					<MainText onPress={() => navigation.navigate("Coop_Main", { selectedTheme: selectedTheme })} color="#B7BABF">      협업 일정</MainText>
-				</BarContainer>
-
-				<Bar>
-					<Bar_Mini></Bar_Mini>
-				</Bar>
-
-				<Icons>
+					<MainText style={{ marginRight: 20 }} >나의 일정</MainText>
+                    <MainText onPress={() => navigation.navigate('Coop_Main', { selectedTheme: selectedTheme })}
+						style={{ marginLeft: 20, color: "#B7BABF" }}>협업 일정</MainText>
+                </BarContainer>
+				<Bar />
+				<Bar_Mini />
+				
+				
+				<ScrollView>
+					<MainView>
+					<Icons>
 					<Icon_calendar width={20} height={20}
 						color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
 						onPress={() => setClicked_calendar(!clicked_calendar)} />
@@ -105,7 +111,7 @@ function Todo({ }) {
 						{Noties(2)}
 						{Noties(3)}
 					</>
-					<AddNoti onPress={() => navigation.navigate("Todo_Add")} color="#E3E4E6">
+					<AddNoti onPress={() => navigation.navigate("Todo_Add", { selectedTheme: selectedTheme })} color="#E3E4E6">
 						<NotiText color="black">+ 새 노티 추가하기  </NotiText>
 					</AddNoti>
 				</NotiContainer>
@@ -140,64 +146,77 @@ function Todo({ }) {
 						</ModalView>
 					</ModalContainer>
 				</Modal>
+					</MainView>
+				</ScrollView>
 
-				 <Navigation_Bar selectedTheme={selectedTheme} />
-
-			</MainViewStyle>
+				<Navigation_Bar selectedTheme={selectedTheme} />
+			</FullView>
 		</ThemeProvider>
 	);
 
 }
 
-const ProfileContainer = styled.View`
-	display: flex;
-	flex-direction: row;
-`;
-
-const MainViewStyle = styled.View`
-	flex: 1;
-	display: flex;
+const FullView = styled.View`
+	width: 100%;
 	background-color: white;
 `;
 
-const BarContainer = styled(ProfileContainer)`
-	justify-content: center;
+const MainView = styled(FullView)`
+	height: auto;
+	align-items: stretch;
+	align-self: center;
+	width: 300px;
+`;
+
+const HorisontalView = styled(MainView)`
+	flex-direction: row;
+`;
+
+
+const ProfileContainer = styled.View`
+    display: flex;
+    flex-direction: row;
+`;
+
+const BarContainer = styled.View`
+	flex-direction: row;
 	align-items: center;
-	margin-top: 20px;
+	justify-content: center;
 `;
 
 const ProfileTextContainer = styled(ProfileContainer)`
 	flex-direction: column;
 	margin-top: 25px;
-	margin-left: 10px;
+	margin-left: 15px;
+	margin-bottom: 25px;
 `;
 
 const Profile = styled.Image`
-	width: 40px;
-	height: 40px;
-	margin-top: 20px;
-	margin-left: 50px;
+    width: 40px;
+    height: 40px;
+    margin-left: 20px;
 `;
 
 const MainText = styled.Text`
-	font-size: 12px;
-	font-weight: bold;
-	color: ${props => props.color || "black"};
-	text-align: left;
+    font-size: ${props => props.fontSize || "12px"};
+    font-weight: bold;
+    color: ${props => props.color || "black"};
+    text-align: left;
 `;
 
-const Bar = styled.TouchableOpacity`
-	width: 100%;
-	height: 1px;
-	margin-top: 10px;
-	background-color: #B7BABF;
+const Bar = styled.View`
+    width: 100%;
+    height: 1px;
+    margin-top: 10px;
+    background-color: #B7BABF;
 `;
 
 const Bar_Mini = styled(Bar)`
-	width: 50%;
-	height: 2px;
-	background-color: ${props => props.theme.color1};
-	margin-top: -1px;
+    align-self: flex-start;
+    width: 50%;
+    height: 2px;
+    background-color: ${props => props.theme.color1};
+    margin-top: 0px;
 `;
 
 const NotiContainer = styled.View`
@@ -249,7 +268,7 @@ const AddNoti = styled(Noti)`
 const Icons = styled.View`
 	display: flex;
 	flex-direction: row;
-	margin-left: 70px;
+	margin-left: 10px;
 	margin-top: 15px;
 `;
 
