@@ -1,27 +1,34 @@
 /* eslint-disable prettier/prettier */
 import React, {useEffect} from 'react';
-import {View, Text, Button} from 'react-native';
+import {View, Text, Linking} from 'react-native';
 import axios from 'axios';
-import {useNavigation, useRoute, Linking} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Redirection = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const getInitialURL = async () => {
-      const initialURL = await Linking.getInitialURL();
-      const code = new URL(initialURL).searchParams.get('code');
-
+    const handleDeepLink = event => {
+      const code = new URL(event.url).searchParams.get('code');
       if (code) {
-        axios.post(`/auth?code=${code}`).then(res => {
-          const token = res.headers.authorization;
-          window.localStorage.setItem('token', token); // 리액트 네이티브에서는 AsyncStorage를 사용합니다.
-          navigation.navigate('Register'); // 'Register'는 네비게이션에 정의된 스크린 이름입니다.
-        });
+        axios
+          .post(`http://192.168.75.126:4000/authnative?code=${code}`)
+          .then(async res => {
+            const token = res.headers.authorization;
+            await AsyncStorage.setItem('token', token);
+            navigation.navigate('Register');
+          })
+          .catch(err => console.log(err));
       }
     };
 
-    getInitialURL();
+    Linking.addEventListener('url', handleDeepLink);
+
+    // Cleanup
+    return () => {
+      Linking.removeEventListener('url', handleDeepLink);
+    };
   }, [navigation]);
 
   return (

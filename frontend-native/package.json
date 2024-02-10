@@ -7,9 +7,10 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "dev": "HOST=0.0.0.0 nuxt"
   },
-  "proxy": "http://localhost:4000",
+  "proxy": "http://192.168.75.126:4000",
   "dependencies": {
     "@actbase/react-kakaosdk": "^0.9.26",
     "@mui/material": "^5.15.6",

@@ -14,7 +14,7 @@ const KakaoLogin = () => {
       <WebView
         style={{flex: 1}}
         source={{
-          uri: 'https://kauth.kakao.com/oauth/authorize?client_id=77cf97c36317f2622a926b9ddb30f96f&redirect_uri=http://192.168.102.11:3000/auth&response_type=code',
+          uri: 'https://kauth.kakao.com/oauth/authorize?client_id=77cf97c36317f2622a926b9ddb30f96f&redirect_uri=http://192.168.75.126:4000/authnative&response_type=code',
         }}
       />
     </SafeAreaView>
