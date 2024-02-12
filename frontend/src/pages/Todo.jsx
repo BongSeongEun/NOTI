@@ -301,24 +301,66 @@ function Todo({ selectedDate }) {
     return hours * 6 + Math.floor(minutes / 10);
   };
 
-  // 일정 상태
-  const toggleComplete = index => {
-    const newEventCompleted = {
-      ...eventCompleted,
-      [index]: !eventCompleted[index],
-    };
-    setEventCompleted(newEventCompleted);
+  // 일정 완료 상태를 토글하는 함수
+  const toggleComplete = async (todoId, index) => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    // 새로운 완료 상태 값을 정의합니다.
+    const newCompletedStatus = !eventCompleted[index];
 
-    // 해당 일정의 시작과 종료 시간을 기반으로 schedule 업데이트
-    const event = events[index];
-    if (event) {
-      const startTimeIndex = timeToIndex(event.startTime);
-      const endTimeIndex = timeToIndex(event.endTime);
-      const newSchedule = [...schedule];
-      for (let i = startTimeIndex; i <= endTimeIndex; i += 1) {
-        newSchedule[i] = newEventCompleted[index] ? event.selectedColor : false;
+    // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
+    try {
+      const response = await axios.put(
+        `/api/v1/updateTodo/${userId}/${todoId}`,
+        {
+          ...events[index], // 기존 일정 데이터를 펼침
+          todoDone: newCompletedStatus, // 완료 상태만 변경
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 올바른 토큰 사용
+          },
+        },
+      );
+
+      // 서버 응답이 성공적이면, 상태를 업데이트합니다.
+      if (response.status === 200) {
+        const updatedEvents = [...events];
+        updatedEvents[index] = {
+          ...updatedEvents[index],
+          todoDone: newCompletedStatus,
+        };
+
+        setEvents(updatedEvents);
+        setEventCompleted({
+          ...eventCompleted,
+          [index]: newCompletedStatus,
+        });
+        /** toggleComplete 함수는 todoId와 index를 인자로 받아,
+         * 해당 일정의 todoDone 상태를 서버에 업데이트합니다.
+         * 서버로부터 성공적인 응답을 받으면,
+         * events 배열과 schedule 배열을 새로운 상태로 업데이트합니다.
+         * schedule 배열은 시작 시간과 종료 시간에 해당하는 인덱스를 색칠하여
+         * 시간표에 반영합니다. */
+        // 일정 시간에 해당하는 schedule 배열의 칸을 색칠합니다.
+        const startTimeIndex = timeToIndex(updatedEvents[index].todoStartTime);
+        const endTimeIndex = timeToIndex(updatedEvents[index].todoEndTime);
+        const newSchedule = schedule.map((slot, idx) => {
+          if (idx >= startTimeIndex && idx < endTimeIndex) {
+            return newCompletedStatus
+              ? updatedEvents[index].selectedColor
+              : false;
+          }
+          return slot;
+        });
+
+        setSchedule(newSchedule);
+      } else {
+        // 서버 응답이 실패한 경우, 오류를 출력합니다.
+        console.error("Failed to update todo status:", response);
       }
-      setSchedule(newSchedule);
+    } catch (error) {
+      // 요청 중 오류가 발생한 경우, 오류를 출력합니다.
+      console.error("Error updating todo status:", error);
     }
   };
 
@@ -386,7 +428,9 @@ function Todo({ selectedDate }) {
                 completed={eventCompleted[index]}
                 style={{ backgroundColor: event.selectedColor }}
               >
-                <CompleteButton onClick={() => toggleComplete(index)}>
+                <CompleteButton
+                  onClick={() => toggleComplete(event.todoId, index)}
+                >
                   <CheckMark show={eventCompleted[index]}>✔</CheckMark>
                 </CompleteButton>
                 <EventTitle>{event.todoTitle}</EventTitle>
