@@ -80,7 +80,7 @@ function Todo({ }) {
 		<ThemeProvider theme={selectedTheme}>
 			<FullView>
 				<MainView>
-					<HorisontalView>
+					<HorisontalView style={{marginTop: 30, marginBottom: 10}}>
 						<Profile source={images.profile} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>
@@ -106,14 +106,14 @@ function Todo({ }) {
 				
 				<ScrollView>
 					<MainView>
-					<Icons>
-					<Icon_calendar width={20} height={20}
+						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
+						<images.calendar width={20} height={20}
 						color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
 						onPress={() => setClicked_calendar(!clicked_calendar)} />
-					<images.share width={20} height={20}
+						<images.share width={20} height={20}
 						color={clicked_share ? color_sheet[0] : "#B7BABF"}
-						onPress={() => setClicked_share(!clicked_share)} />
-				</Icons>
+								onPress={() => setClicked_share(!clicked_share)} />
+						</HorisontalView>
 				
 				<NotiContainer>
 					<>
@@ -206,7 +206,6 @@ const ProfileTextContainer = styled(ProfileContainer)`
 const Profile = styled.Image`
     width: 40px;
     height: 40px;
-    margin-left: 20px;
 `;
 
 const MainText = styled.Text`
@@ -235,7 +234,6 @@ const NotiContainer = styled.View`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-top: 15px;
 `;
 
 const Noti = styled.TouchableOpacity`

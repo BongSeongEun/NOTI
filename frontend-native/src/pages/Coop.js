@@ -18,7 +18,9 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
 import images from "../components/images";
-import NotiCheck from "../asset/noticheck.svg"; //color
+import NotiCheck from "../asset/noticheck.svg";
+import Navigation_Bar from "../components/Navigation_Bar";
+
 
 function Coop({ }) {
 	const navigation = useNavigation();
@@ -71,7 +73,7 @@ function Coop({ }) {
 		<ThemeProvider theme={selectedTheme}>
 			<FullView>
 					<MainView>
-						<HorisontalView>
+						<HorisontalView style={{marginTop: 30, marginBottom: 10}}>
 							<Profile source={images.profile} style={{ marginTop: 20 }} />
 							<ProfileTextContainer>
 								<MainText>
@@ -119,7 +121,7 @@ function Coop({ }) {
 						
 					</MainView>
 				</ScrollView>
-
+				<Navigation_Bar selectedTheme={selectedTheme} />
 			</FullView>
 		</ThemeProvider>
 	);
