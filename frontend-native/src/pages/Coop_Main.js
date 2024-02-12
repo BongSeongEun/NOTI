@@ -40,7 +40,10 @@ function Coop_Main() {
 
     const TeamFrame = ({ teamName, clickedPin, setClickedPin, clickedOut, setClickedOut, colorSheet }) => (
 		<TeamFrameContainer>
-			<images.team_frame color={clickedPin ? colorSheet[0] : "#B7BABF"} style={{ position: 'absolute' }} />
+			<images.team_frame
+				color={clickedPin ? colorSheet[0] : "#B7BABF"}
+				style={{ position: 'absolute' }}
+				onPress={handleTeamFramePress} />
 			<images.team_pin
 				width={15}
 				height={15}
@@ -68,6 +71,11 @@ function Coop_Main() {
 		</TeamFrameContainer>
 	);
 
+	const handleTeamFramePress = () => {
+        // Navigate to Coop.js file when a team frame is clicked
+        navigation.navigate('Coop', { selectedTheme: selectedTheme });
+    };
+
 	const Noties = (colorNum, clickedPin, colorSheet) => (
 		<Team_Noti color={clickedPin ? `${colorSheet[colorNum]}` : colorSheet[colorNum]}>
 			<NotiCheck onPress={() => setClicked_check(!clicked_check)}>
@@ -94,6 +102,7 @@ function Coop_Main() {
 						</HorisontalView>
 				</MainView>
 			</FullView>
+
 			<FullView style={{flex: 1}}>
 				<BarContainer>
 					<MainText onPress={() => navigation.navigate('Todo', { selectedTheme: selectedTheme })}

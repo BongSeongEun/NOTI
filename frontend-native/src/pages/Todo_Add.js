@@ -15,7 +15,7 @@ import theme from "../components/theme";
 function Todo_Add({ }) {
     const navigation = useNavigation();
     const route = useRoute();
-    const { selectedTheme } = route.params;
+    const { selectedTheme } = route.params || { selectedTheme: theme.OrangeTheme };
     
     const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
     
@@ -25,7 +25,8 @@ function Todo_Add({ }) {
     const [selectedEndTime, setSelectedEndTime] = useState('');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
-    const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+	const [selectedColor, setSelectedColor] = useState('');
     
     const showDatePicker = (type) => {
         switch (type) {
@@ -60,7 +61,16 @@ function Todo_Add({ }) {
                 break;
         }
         hideDatePicker();
-    };
+	};
+	
+	const handleAddTodo = () => {
+		navigation.navigate('Todo', {
+			inputTitle: inputTitle,
+			selectedStartTime: selectedStartTime,
+			selectedEndTime: selectedEndTime,
+			selectedColor: selectedColor,
+		});
+	};
 
     return (
         <ThemeProvider theme={selectedTheme}>
@@ -108,9 +118,10 @@ function Todo_Add({ }) {
                         ))}
                     </HorisontalView>
 
-                    <ResultButton onPress={() => navigation.navigate("Todo", { currentTheme: selectedTheme })}>
-                        <MainText color="white">완료</MainText>
-                    </ResultButton>
+					<ResultButton onPress={() => { handleAddTodo(); navigation.navigate("Todo", { selectedTheme: selectedTheme })}}>
+						<MainText style={{marginTop: 0}} color="white">완료</MainText>
+					</ResultButton>
+
                 </MainView>
             </FullView>
         </ThemeProvider>

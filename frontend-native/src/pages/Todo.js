@@ -18,7 +18,7 @@ import Navigation_Bar from "../components/Navigation_Bar";
 function Todo({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
-	const { selectedTheme } = route.params;
+	const { selectedTheme } = route.params || { selectedTheme: theme.DefaultTheme };
 	const name = "홍길동";
 
 	const currentDate = new Date();
@@ -31,7 +31,7 @@ function Todo({ }) {
 	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
 	const [modalVisible, setModalVisible] = useState(false);
 
-	// json 형식
+	// json 형식으로 받아옴,,,? 어케하는데
 	const NotiTitle = ["일정 1", "일정 2", "일정 3"];
 	const Noti_Time = ["16:30 ~ 17:00", "17:30 ~ 18:40", "19:00~20:00"];
 
@@ -64,6 +64,17 @@ function Todo({ }) {
 		 	<NotiTime> {Noti_Time[color_num]} </NotiTime>
 		</Noti>
 	);
+
+	const CreateNoties = () => {
+        return (
+            <>
+                <Text>Title: {inputTitle}</Text>
+                <Text>Start Time: {selectedStartTime}</Text>
+                <Text>End Time: {selectedEndTime}</Text>
+                <Text>Color: {selectedColor}</Text>
+            </>
+        );
+    };
 
 	return (
 		<ThemeProvider theme={selectedTheme}>
@@ -110,6 +121,7 @@ function Todo({ }) {
 						{Noties(1)}
 						{Noties(2)}
 						{Noties(3)}
+					
 					</>
 					<AddNoti onPress={() => navigation.navigate("Todo_Add", { selectedTheme: selectedTheme })} color="#E3E4E6">
 						<NotiText color="black">+ 새 노티 추가하기  </NotiText>
