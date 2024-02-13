@@ -19,4 +19,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
 
     void deleteByDiaryIdAndUserId(Long userId, Long diaryId);
+
+    Optional<Object> findByUserIdAndDiaryDate(Long userId, String diaryDate);
 }

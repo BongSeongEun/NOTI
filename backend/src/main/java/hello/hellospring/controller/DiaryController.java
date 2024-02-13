@@ -36,6 +36,16 @@ public class DiaryController {
         return ResponseEntity.ok(diaryDTO);
     }
 
+    @GetMapping("/diaryDate/{userId}/{diaryDate}")
+    public ResponseEntity<DiaryDTO> getDiaryByDate(@PathVariable Long userId, @PathVariable String diaryDate) {
+        // 서비스 계층을 통해 특정 사용자의 특정 날짜에 해당하는 다이어리 항목 조회
+        DiaryDTO diaryDTO = diaryService.findByUserIdAndDiaryDate(userId, diaryDate);
+        return ResponseEntity.ok(diaryDTO);
+    }
+
+
+
+
 
     @DeleteMapping("/diaryDelete/{userId}/{diaryId}") //삭제
     public ResponseEntity<?> deleteDiary(@PathVariable Long userId, @PathVariable Long diaryId) {

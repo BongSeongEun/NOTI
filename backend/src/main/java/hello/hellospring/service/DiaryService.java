@@ -88,4 +88,10 @@ public class DiaryService {
         return DiaryDTO.diaryDTO(diary);
     }
 
+    public DiaryDTO findByUserIdAndDiaryDate(Long userId, String diaryDate) {
+        Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryDate(userId, diaryDate)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with userId: " + userId + " and date: " + diaryDate));
+        // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
+        return DiaryDTO.diaryDTO(diary);
+    }
 }
