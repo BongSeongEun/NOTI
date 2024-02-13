@@ -10,8 +10,10 @@ import {
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
 import axios from "axios"; // axios import 확인
+import DeleteModal from "../components/DeleteModal";
 import theme from "../styles/theme"; // 테마 파일 불러오기
-import editIcon from "../asset/edit.png"; // 수정하기
+import editIcon from "../asset/fi-rr-pencil.png"; // 수정하기
+import deleteIcon from "../asset/fi-rr-trash.png"; // 삭제하기
 import TimeTable from "../pages/TimeTable"; // 타임테이블
 import DiaryContainer from "../components/DiaryContainer";
 import AddEventButton from "../components/AddEventButton";
@@ -72,8 +74,8 @@ const EventTitle = styled.div`
 const EditButton = styled.img`
   cursor: pointer;
   margin-left: 10px; // 시간과 아이콘 사이의 간격
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
 `;
 
 const EventTime = styled.div`
@@ -94,7 +96,6 @@ const CompleteButton = styled.div`
 
 const CheckMark = styled.div`
   color: black;
-  display: ${props => (props.show ? "block" : "none")};
 `;
 
 const InputField = styled.input`
@@ -159,6 +160,14 @@ const Edit = styled.img`
   height: 20px;
 `;
 
+const DeleteButton = styled.img`
+  //삭제 버튼
+  cursor: pointer;
+  margin-left: 10px; // 시간과 아이콘 사이의 간격 조정
+  width: 15px;
+  height: 15px;
+`;
+
 function Todo({ selectedDate }) {
   // 내 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
@@ -183,6 +192,7 @@ function Todo({ selectedDate }) {
   };
   // 모달창 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTodoId, setCurrentTodoId] = useState(null); // 현재 선택된 todoId를 저장
 
   // 새 일정의 제목, 시간, 색상 상태
   const [title, setTitle] = useState("");
@@ -191,6 +201,12 @@ function Todo({ selectedDate }) {
   const [selectedColor, setSelectedColor] = useState(theme.OrangeTheme.color1);
 
   const token = window.localStorage.getItem("token");
+
+  // isDeleteConfirmModalOpen은 삭제 확인 모달의 열림/닫힘 상태
+  // deletingTodoId는 삭제할 일정의 ID를 저장
+  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
+    useState(false);
+  const [deletingTodoId, setDeletingTodoId] = useState(null);
 
   // 토큰 가져오는 함수
   const getUserIdFromToken = () => {
@@ -206,6 +222,7 @@ function Todo({ selectedDate }) {
   // 사용자 데이터 및 일정 데이터를 가져오는 함수
   const fetchUserData = async () => {
     const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    const formattedDate = formatDate(selectedDate); // 선택된 날짜를 YYYY-MM-DD 형식으로 변환
 
     try {
       // 사용자 정보 불러오기
@@ -223,18 +240,21 @@ function Todo({ selectedDate }) {
         if (theme[userThemeName]) {
           setCurrentTheme(theme[userThemeName]);
 
-          // 일정 데이터 불러오기
-          const eventsResponse = await axios.get(`/api/v1/getTodo/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+          // 날짜에 맞는 일정 데이터 불러오기
+          const eventsResponse = await axios.get(
+            `/api/v1/getTodo/${userId}?date=${formattedDate}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
             },
-          });
-
-          console.log(eventsResponse.data); // 서버로부터 받은 일정 데이터 로깅
+          );
 
           if (eventsResponse.status === 200) {
-            // 현재 테마를 바탕으로 각 일정의 색상 설정
-            const updatedEvents = eventsResponse.data.map(event => ({
+            const filteredEvents = eventsResponse.data.filter(
+              event => event.todoDate === formattedDate,
+            );
+            const updatedEvents = filteredEvents.map(event => ({
               ...event,
               selectedColor:
                 theme[userThemeName][event.todoColor] || event.todoColor,
@@ -248,7 +268,7 @@ function Todo({ selectedDate }) {
         console.error("Unexpected response:", userResponse);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching user data and events:", error);
     }
   };
 
@@ -257,6 +277,15 @@ function Todo({ selectedDate }) {
     setSelectedColor(colorKey); // 색상 키워드를 상태에 저장
   };
 
+  const handleDeleteClick = todoId => {
+    setDeletingTodoId(todoId);
+    setIsDeleteConfirmModalOpen(true);
+  };
+
+  const closeDeleteConfirmModal = () => {
+    setIsDeleteConfirmModalOpen(false);
+    setDeletingTodoId(null);
+  };
   // 모달을 여는 함수
   const openModal = () => {
     setIsModalOpen(true);
@@ -305,7 +334,7 @@ function Todo({ selectedDate }) {
   const toggleComplete = async (todoId, index) => {
     const userId = getUserIdFromToken(); // 사용자 ID 가져오기
     // 새로운 완료 상태 값을 정의합니다.
-    const newCompletedStatus = !eventCompleted[index];
+    const newCompletedStatus = !events[index].todoDone;
 
     // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
     try {
@@ -322,19 +351,14 @@ function Todo({ selectedDate }) {
         },
       );
 
-      // 서버 응답이 성공적이면, 상태를 업데이트합니다.
       if (response.status === 200) {
-        const updatedEvents = [...events];
-        updatedEvents[index] = {
-          ...updatedEvents[index],
-          todoDone: newCompletedStatus,
-        };
-
+        // 서버 응답이 성공적으로 왔을 때 events 상태 업데이트
+        const updatedEvents = events.map((event, evtIndex) =>
+          evtIndex === index
+            ? { ...event, todoDone: newCompletedStatus }
+            : event,
+        );
         setEvents(updatedEvents);
-        setEventCompleted({
-          ...eventCompleted,
-          [index]: newCompletedStatus,
-        });
         /** toggleComplete 함수는 todoId와 index를 인자로 받아,
          * 해당 일정의 todoDone 상태를 서버에 업데이트합니다.
          * 서버로부터 성공적인 응답을 받으면,
@@ -364,6 +388,31 @@ function Todo({ selectedDate }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deletingTodoId) return;
+    const userId = getUserIdFromToken();
+    try {
+      const response = await axios.delete(
+        `/api/v1/deleteTodo/${userId}/${deletingTodoId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      if (response.status === 200) {
+        const updatedEvents = events.filter(
+          event => event.todoId !== deletingTodoId,
+        );
+        setEvents(updatedEvents);
+        closeDeleteConfirmModal(); // 삭제 후 모달 닫기
+      } else {
+        console.error("Failed to delete the event:", response);
+      }
+    } catch (error) {
+      console.error("Error deleting the event:", error);
+    }
+  };
   // 모달에서 '추가하기' 또는 '수정하기' 버튼 클릭 시 처리 함수
   const handleSubmit = async () => {
     const userId = getUserIdFromToken(); // 사용자 ID 가져오기
@@ -412,7 +461,27 @@ function Todo({ selectedDate }) {
   // useEffect 내부에서 사용자 정보와 일정 데이터를 불러오는 로직
   useEffect(() => {
     fetchUserData();
-  }, []); // token이 변경될 때마다 정보를 새로 불러옴
+  }, [selectedDate]); // token이 변경될 때마다 정보를 새로 불러옴
+
+  // events 상태가 변경될 때마다 TimeTable 컴포넌트를 업데이트하는 useEffect
+  useEffect(() => {
+    const newSchedule = Array(24 * 6).fill(null); // 새로운 시간표 배열을 초기화합니다.
+
+    // 완료된 일정에 대해 시간표 배열을 업데이트합니다.
+    events.forEach(event => {
+      if (event.todoDone) {
+        const startIdx = timeToIndex(event.todoStartTime);
+        const endIdx = timeToIndex(event.todoEndTime);
+        for (let i = startIdx; i < endIdx; i += 1) {
+          newSchedule[i] = event.todoDone
+            ? event.selectedColor
+            : `${event.selectedColor}80`; // 80은 투명도를 의미
+        }
+      }
+    });
+
+    setSchedule(newSchedule); // schedule 상태를 업데이트합니다.
+  }, [events]); // events 상태가 변경될 때마다 실행됩니다.
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -424,14 +493,16 @@ function Todo({ selectedDate }) {
             EventList 컴포넌트 내에서 events 상태를 기반으로 일정 항목을 동적으로 렌더링 */}
             {events.map((event, index) => (
               <EventItem
-                key={event.TodoId}
-                completed={eventCompleted[index]}
-                style={{ backgroundColor: event.selectedColor }}
+                key={event.todoId}
+                style={{
+                  backgroundColor: event.selectedColor, // 일정의 선택된 색상을 항상 사용
+                  opacity: event.todoDone ? "0.5" : "1", // 완료 상태에 따라 투명도 조정
+                }}
               >
                 <CompleteButton
                   onClick={() => toggleComplete(event.todoId, index)}
                 >
-                  <CheckMark show={eventCompleted[index]}>✔</CheckMark>
+                  {event.todoDone && <CheckMark>✔</CheckMark>}
                 </CompleteButton>
                 <EventTitle>{event.todoTitle}</EventTitle>
                 <EventTime>
@@ -441,8 +512,13 @@ function Todo({ selectedDate }) {
                   src={editIcon}
                   alt="수정"
                   onClick={() =>
-                    !eventCompleted[index] && handleEditClick(event.todoId)
+                    !event.todoDone && handleEditClick(event.todoId)
                   }
+                />
+                <DeleteButton
+                  src={deleteIcon}
+                  alt="삭제"
+                  onClick={() => handleDeleteClick(event.todoId)}
                 />
               </EventItem>
             ))}
