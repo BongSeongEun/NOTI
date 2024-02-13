@@ -1,8 +1,10 @@
 package hello.hellospring.controller;
 
 import hello.hellospring.dto.TeamDTO;
+import hello.hellospring.dto.TeamTodoDTO;
 import hello.hellospring.dto.TeamTogetherDTO;
 import hello.hellospring.model.Team;
+import hello.hellospring.model.TeamTodo;
 import hello.hellospring.model.TeamTogether;
 import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +57,32 @@ public class TeamController {
         return ResponseEntity.ok().build();
     }
 
-//    @GetMapping("/getTeamTitle/{teamId}")
-//    public ResponseEntity<?> getAllTeamTitle(@PathVariable String userId){
-//
-//    }
+    @PostMapping("/createTeamTodo/{userId}/{teamId}")
+    public ResponseEntity<?> createTeamTodo(@PathVariable String userId, @PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
+        TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
+        entity.setTeamId(Long.valueOf(teamId));
+        entity.setUserId(Long.valueOf(userId));
+        List<TeamTodo> teamTodoEntity = teamService.createTeamTodo(entity);
+        List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
+        return ResponseEntity.ok().build();
+    }
+
+    private List<TeamTodoDTO> makeTeamTodoDtoListFromEntityList(List<TeamTodo> teamTodoEntities){
+        List<TeamTodoDTO> teamTodoDTOList = new ArrayList<>();
+
+        for(TeamTodo teamTodoEntity : teamTodoEntities){
+            TeamTodoDTO teamTodoDTO = TeamTodoDTO.builder()
+                    .teamTodoId(teamTodoEntity.getTeamTodoId())
+                    .teamId(teamTodoEntity.getTeamId())
+                    .userId(teamTodoEntity.getUserId())
+                    .teamTodoDone(teamTodoEntity.isTeamTodoDone())
+                    .teamTodoTitle(teamTodoEntity.getTeamTodoTitle())
+                    .teamTodoDate(teamTodoEntity.getTeamTodoDate())
+                    .build();
+            teamTodoDTOList.add(teamTodoDTO);
+        }
+        return teamTodoDTOList;
+    }
 
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
         List<TeamDTO> teamDTOList = new ArrayList<>();

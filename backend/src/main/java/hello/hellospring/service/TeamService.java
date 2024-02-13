@@ -1,7 +1,7 @@
 package hello.hellospring.service;
 
 import hello.hellospring.model.Team;
-import hello.hellospring.model.TeamMemo;
+import hello.hellospring.model.TeamTodo;
 import hello.hellospring.model.TeamTogether;
 import hello.hellospring.repository.TeamMemoRepository;
 import hello.hellospring.repository.TeamRepository;
@@ -47,6 +47,9 @@ public class TeamService {
         return teamRepository.findByTeamId(team.getTeamId());
     }
 
-
+    public List<TeamTodo> createTeamTodo(TeamTodo teamTodo){
+        teamTodoRepository.save(teamTodo);
+        return teamTodoRepository.findByteamId(teamTodo.getTeamId());
+    }
 
 }
