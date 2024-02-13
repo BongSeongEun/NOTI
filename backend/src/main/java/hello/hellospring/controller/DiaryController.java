@@ -4,6 +4,7 @@ import hello.hellospring.dto.DiaryDTO;
 import hello.hellospring.model.Diary;
 import hello.hellospring.service.DiaryService;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
@@ -41,6 +42,10 @@ public class DiaryController {
 
     }
 
+
+
+
+
     @GetMapping("/diaryUpdate/{userId}")
     public ResponseEntity<List<DiaryDTO>> updateForm(@PathVariable Long userId) {
         List<DiaryDTO> diaryDTOList = diaryService.findByUserId(userId);
@@ -63,8 +68,16 @@ public class DiaryController {
         model.addAttribute("diaryDTO1", diaryDTO1);
         return null;
     }
-
-
-
-
+    @DeleteMapping("/diaryDelete/{userId}/{diaryId}")
+    public ResponseEntity<?> deleteDiary(@PathVariable Long userId, @PathVariable Long diaryId) {
+        diaryService.delete(userId, diaryId); // 서비스 계층에서 일기 삭제 처리
+        return ResponseEntity.ok().build();
+    }
 }
+
+
+
+
+
+
+

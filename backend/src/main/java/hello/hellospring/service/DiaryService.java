@@ -3,10 +3,9 @@ package hello.hellospring.service;
 import hello.hellospring.dto.DiaryDTO;
 import hello.hellospring.model.Diary;
 import hello.hellospring.repository.DiaryRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,8 @@ import java.util.List;
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
+
+
 
     public void save(DiaryDTO diaryDTO) {
         Diary diary = Diary.toSaveEntity(diaryDTO);
@@ -35,9 +36,33 @@ public class DiaryService {
 
     }
 
+//    public List<DiaryDTO> delete(Long diaryId, Long userId) {
+//        // 존재하는 Diary인지 확인 후 삭제
+//        if (!diaryRepository.existsById(diaryId)) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with id: " + diaryId);
+//        }
+//        diaryRepository.deleteById(diaryId);
+//        return findByUserId(userId);
+//    }
+
+    @Transactional
+    public List<DiaryDTO> delete(Long userId, Long diaryId){
+        diaryRepository.deleteByDiaryIdAndUserId(Long.valueOf(diaryId), Long.valueOf(userId));
+        return findByUserId(userId);
+}
+
     public List<DiaryDTO> update(DiaryDTO diaryDTO) {
         Diary diary = Diary.toUpdateEntity(diaryDTO);
         diaryRepository.save(diary);
         return findByUserId(diaryDTO.getUserId());
     }
+
+//    public DiaryDTO findByUserIdAndDiaryId(Long userId, Long diaryId) {
+//        Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryId(userId, diaryId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found"));
+//        // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
+//        return findByUserId(diary);
+//    }
+
+
 }
