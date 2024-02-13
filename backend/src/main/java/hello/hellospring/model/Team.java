@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.UUID;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -15,17 +19,18 @@ public class Team {
     @Column(name = "team_id")
     private Long teamId;
 
-    @Column(name = "team_name")
-    private String teamName;
+    @Column(name = "team_title")
+    private String teamTitle;
 
-    @Column(name = "team_memo")
-    private String teamMemo;
+    @Column(name = "team_randnum")
+    private Long teamRandNum;
 
     @Builder
-    public Team(Long teamId, String teamName, String teamMemo){
+    public Team(Long teamId, String teamTitle, Long teamRandNum){
         this.teamId = teamId;
-        this.teamName = teamName;
-        this.teamMemo = teamMemo;
+        this.teamTitle = teamTitle;
+        this.teamRandNum = teamRandNum;
     }
+
 
 }

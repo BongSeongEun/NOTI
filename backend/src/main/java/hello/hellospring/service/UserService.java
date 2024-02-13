@@ -36,7 +36,6 @@ public class UserService {
         user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime());
         userRepository.save(user);
     }
-
     public OauthToken getAccessToken(String code) {
 
         RestTemplate rt = new RestTemplate();
@@ -119,7 +118,6 @@ public class UserService {
 
         return createToken(user);
     }
-
     public String createToken(User user) {
 
         String jwtToken = JWT.create()
@@ -130,15 +128,7 @@ public class UserService {
 
         return jwtToken;
     }
-    public User getUser(HttpServletRequest request){
-        Long userId = (Long) request.getAttribute("userId");
-        User user = userRepository.findByUserId(userId);
-        return user;
-    }
-
     public User getUserInfo(Long userId){
         return userRepository.findByUserId(userId);
     }
-
-
 }

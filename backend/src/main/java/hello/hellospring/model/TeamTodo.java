@@ -7,7 +7,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @Table(name = "team_todo")
-public class Team_todo {
+public class TeamTodo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "team_todo_id")
@@ -16,22 +16,27 @@ public class Team_todo {
     @Column(name = "team_id")
     private Long teamId;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "team_todo_done")
     private boolean teamTodoDone;
-
-    @Column(name = "team_todo_color")
-    private String teamTodoColor;
 
     @Column(name = "team_todo_title")
     private String teamTodoTitle;
 
+    @Column(name = "team_todo_date")
+    private String teamTodoDate;
+
+
     @Builder
-    public Team_todo(Long teamTodoId, Long teamId, boolean teamTodoDone, String teamTodoColor, String teamTodoTitle){
+    public TeamTodo(Long teamTodoId, Long teamId, boolean teamTodoDone, Long userId, String teamTodoTitle, String teamTodoDate){
         this.teamTodoId = teamTodoId;
         this.teamId = teamId;
         this.teamTodoDone = teamTodoDone;
-        this.teamTodoColor = teamTodoColor;
+        this.userId = userId;
         this.teamTodoTitle = teamTodoTitle;
+        this.teamTodoDate = teamTodoDate;
     }
 
 }
