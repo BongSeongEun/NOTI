@@ -20,11 +20,19 @@ const ModalContainer = styled.div`
   padding: 20px;
   border-radius: 10px;
   display: flex;
+  align-items: center; // 가운데 놓기
   flex-direction: column;
   gap: 10px;
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center; // 버튼을 가운데 정렬
+  gap: 10px; // 버튼 사이의 간격
+`;
+
 const Button = styled.button`
+  width: 100px;
   padding: 10px;
   border-radius: 5px;
   border: none;
@@ -37,11 +45,11 @@ const DeleteModal = ({ isOpen, onClose, onConfirm }) => {
   return (
     <ModalBackdrop onClick={onClose}>
       <ModalContainer onClick={e => e.stopPropagation()}>
-        <p>정말 삭제하시겠습니까?</p>
-        <div>
-          <Button onClick={onConfirm}>확인</Button>
-          <Button onClick={onClose}>취소</Button>
-        </div>
+        <p style={{ color: "black" }}>정말 삭제하시겠습니까?</p>
+        <ButtonContainer>
+          <Button onClick={onConfirm}>예</Button>
+          <Button onClick={onClose}>아니오</Button>
+        </ButtonContainer>
       </ModalContainer>
     </ModalBackdrop>
   );

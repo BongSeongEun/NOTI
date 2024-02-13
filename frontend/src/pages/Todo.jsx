@@ -406,6 +406,8 @@ function Todo({ selectedDate }) {
         );
         setEvents(updatedEvents);
         closeDeleteConfirmModal(); // 삭제 후 모달 닫기
+        setIsDeleteConfirmModalOpen(false);
+        setDeletingTodoId(null); // 현재 삭제 중인 todo ID 초기화
       } else {
         console.error("Failed to delete the event:", response);
       }
@@ -483,6 +485,12 @@ function Todo({ selectedDate }) {
     setSchedule(newSchedule); // schedule 상태를 업데이트합니다.
   }, [events]); // events 상태가 변경될 때마다 실행됩니다.
 
+  const handleTitleChange = e => {
+    console.log("Before setTitle:", e.target.value);
+    setTitle(e.target.value);
+    console.log("After setTitle, title is now:", title);
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
       <div>
@@ -520,6 +528,11 @@ function Todo({ selectedDate }) {
                   alt="삭제"
                   onClick={() => handleDeleteClick(event.todoId)}
                 />
+                <DeleteModal
+                  isOpen={isDeleteConfirmModalOpen}
+                  onClose={closeDeleteConfirmModal}
+                  onConfirm={handleDelete}
+                />
               </EventItem>
             ))}
           </EventList>
@@ -548,7 +561,7 @@ function Todo({ selectedDate }) {
                   <InputField
                     placeholder="노티이름을 작성해주세요!"
                     value={title}
-                    onChange={e => setTitle(e.target.value)}
+                    onChange={handleTitleChange}
                     maxLength={15}
                     style={{ marginBottom: "30px" }}
                   />
