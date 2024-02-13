@@ -1,3 +1,4 @@
+/* eslint-disable no-trailing-spaces */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable prettier/prettier */
@@ -20,7 +21,8 @@ import 'react-native-gesture-handler';
 import images from "../components/images";
 import NotiCheck from "../asset/noticheck.svg";
 import Navigation_Bar from "../components/Navigation_Bar";
-
+import { format } from "date-fns";
+import { Calendar } from "react-native-calendars";
 
 function Coop({ }) {
 	const navigation = useNavigation();
@@ -69,6 +71,37 @@ function Coop({ }) {
 		</Noti>
 	);
 
+	const posts = [
+		{
+			id: 1,
+			title: "제목입니다.",
+			contents: "내용입니다.",
+			date: "2024-02-10",
+		},
+		{
+			id: 2,
+			title: "제목입니다.",
+			contents: "내용입니다.",
+			date: "2024-02-12",
+		}
+	];
+	const markedDates = posts.reduce((acc, current) => {
+		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
+		acc[formattedDate] = {marked: true};
+		return acc;
+	}, {});
+	
+	const [selectedDate, setSelectedDate] = useState(
+		format(new Date(), "yyyy-MM-dd"),
+	);
+	const markedSelectedDates = {
+		...markedDates,
+		[selectedDate]: {
+			selected: true,
+			marked: markedDates[selectedDate]?.marked,
+		}
+	};
+
 	return (
 		<ThemeProvider theme={selectedTheme}>
 			<FullView>
@@ -107,6 +140,21 @@ function Coop({ }) {
 								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
 						
+						{clicked_calendar && (
+							<>
+								<Calendar 
+									markedDates={markedSelectedDates}
+									theme={{
+										selectedDayBackgroundColor: selectedTheme.color1,
+										arrowColor: selectedTheme.color1,
+										dotColor: selectedTheme.color1,
+										todayTextColor: selectedTheme.color1,
+									}} 
+									onDayPress={(day) => {
+										setSelectedDate(day.dateString)
+								}} />
+							</>
+						)}
 
 						<MainText style={{ fontSize: 15, textAlign: 'center' }}>{Team_Title}</MainText>
 						

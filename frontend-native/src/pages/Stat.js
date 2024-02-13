@@ -13,14 +13,21 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import 'react-native-gesture-handler';
+
 import Navigation_Bar from "../components/Navigation_Bar";
 import { theme } from '../components/theme';
+import {ProgressChart, } from "react-native-chart-kit";
 
 
 function Stat({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
 	const { selectedTheme } = route.params || { selectedTheme: theme.DefaultTheme };
+
+	const data = {
+		labels: ["Swim", "Bike", "Run"],
+		data: [0.4, 0.6, 0.8]
+	  };
 
 	return (
 		<ThemeProvider theme={selectedTheme}>
@@ -29,7 +36,6 @@ function Stat({ }) {
 			</View>
 			<Navigation_Bar selectedTheme={selectedTheme} />
 		</ThemeProvider>
-		
 	);
 }
 

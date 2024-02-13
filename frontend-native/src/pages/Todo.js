@@ -14,6 +14,8 @@ import DecoesSvg from '../asset/Deco_Svg';
 import { theme } from '../components/theme';
 import images from '../components/images';
 import Navigation_Bar from "../components/Navigation_Bar";
+import { format } from "date-fns";
+import { Calendar } from "react-native-calendars";
 
 function Todo({ }) {
 	const navigation = useNavigation();
@@ -34,6 +36,37 @@ function Todo({ }) {
 	// json 형식으로 받아옴,,,? 어케하는데
 	const NotiTitle = ["일정 1", "일정 2", "일정 3"];
 	const Noti_Time = ["16:30 ~ 17:00", "17:30 ~ 18:40", "19:00~20:00"];
+
+	const posts = [
+		{
+			id: 1,
+			title: "제목입니다.",
+			contents: "내용입니다.",
+			date: "2024-02-10",
+		},
+		{
+			id: 2,
+			title: "제목입니다.",
+			contents: "내용입니다.",
+			date: "2024-02-12",
+		}
+	];
+	const markedDates = posts.reduce((acc, current) => {
+		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
+		acc[formattedDate] = {marked: true};
+		return acc;
+	}, {});
+	
+	const [selectedDate, setSelectedDate] = useState(
+		format(new Date(), "yyyy-MM-dd"),
+	);
+	const markedSelectedDates = {
+		...markedDates,
+		[selectedDate]: {
+			selected: true,
+			marked: markedDates[selectedDate]?.marked,
+		}
+	};
 
 	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
 
@@ -64,7 +97,8 @@ function Todo({ }) {
 		 	<NotiTime> {Noti_Time[color_num]} </NotiTime>
 		</Noti>
 	);
-
+	
+	/*
 	const CreateNoties = () => {
         return (
             <>
@@ -75,6 +109,7 @@ function Todo({ }) {
             </>
         );
     };
+	*/
 
 	return (
 		<ThemeProvider theme={selectedTheme}>
@@ -114,6 +149,22 @@ function Todo({ }) {
 						color={clicked_share ? color_sheet[0] : "#B7BABF"}
 								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
+
+						{clicked_calendar && (
+							<>
+								<Calendar 
+									markedDates={markedSelectedDates}
+									theme={{
+										selectedDayBackgroundColor: selectedTheme.color1,
+										arrowColor: selectedTheme.color1,
+										dotColor: selectedTheme.color1,
+										todayTextColor: selectedTheme.color1,
+									}} 
+									onDayPress={(day) => {
+										setSelectedDate(day.dateString)
+								}} />
+							</>
+						)}
 				
 				<NotiContainer>
 					<>
