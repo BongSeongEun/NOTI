@@ -4,8 +4,10 @@ import hello.hellospring.dto.DiaryDTO;
 import hello.hellospring.model.Diary;
 import hello.hellospring.repository.DiaryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,12 +59,31 @@ public class DiaryService {
         return findByUserId(diaryDTO.getUserId());
     }
 
+
 //    public DiaryDTO findByUserIdAndDiaryId(Long userId, Long diaryId) {
 //        Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryId(userId, diaryId)
 //                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found"));
 //        // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
 //        return findByUserId(diary);
 //    }
+
+    public DiaryDTO update(Long userId, Long diaryId, DiaryDTO diaryDTO) {
+        // ID를 이용하여 기존 Diary 조회
+        Diary diary = (Diary) diaryRepository
+                .findByUserIdAndDiaryId(userId, diaryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with id: " + diaryId));
+
+        // Diary 정보 업데이트 (예시)
+        diary.setDiaryTitle(diaryDTO.getDiaryTitle());
+        diary.setDiaryContent(diaryDTO.getDiaryContent());
+        diary.setDiaryImg(diaryDTO.getDiaryImg());
+
+        // 업데이트된 Diary 저장
+        diaryRepository.save(diary);
+
+        // 업데이트된 Diary 정보를 DiaryDTO로 변환하여 반환
+        return DiaryDTO.diaryDTO(diary);
+    }
 
 
 }
