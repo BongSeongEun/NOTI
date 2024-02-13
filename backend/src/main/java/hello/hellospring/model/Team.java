@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.UUID;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -27,5 +31,6 @@ public class Team {
         this.teamTitle = teamTitle;
         this.teamRandNum = teamRandNum;
     }
+
 
 }

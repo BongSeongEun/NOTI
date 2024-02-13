@@ -1,5 +1,6 @@
 package hello.hellospring.service;
 
+import hello.hellospring.model.Team;
 import hello.hellospring.model.TeamMemo;
 import hello.hellospring.model.TeamTogether;
 import hello.hellospring.repository.TeamMemoRepository;
@@ -35,5 +36,17 @@ public class TeamService {
     public List<TeamTogether> getUserList(String teamId){
         return teamTogetherRepository.findByTeamId(Long.valueOf(teamId));
     }
+
+    public List<TeamTogether> createTeam(TeamTogether teamTogether){
+        teamTogetherRepository.save(teamTogether);
+        return teamTogetherRepository.findByUserId(teamTogether.getUserId());
+    }
+
+    public List<Team> createTeamTitle(Team team){
+        teamRepository.save(team);
+        return teamRepository.findByTeamId(team.getTeamId());
+    }
+
+
 
 }

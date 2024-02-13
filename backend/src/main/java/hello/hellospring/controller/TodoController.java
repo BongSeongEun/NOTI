@@ -35,7 +35,7 @@ public class TodoController {
     @PutMapping("/updateTodo/{userId}/{todoId}")
     public ResponseEntity<TodoDTO> updateTodo(@PathVariable Long userId, @PathVariable Long todoId, @RequestBody TodoDTO todoDTO){
         Todo updatedTodo = todoService.update(todoDTO, userId, todoId);
-        TodoDTO dto = TodoDTO.from(updatedTodo); // 해당 변환 로직 구현 필요
+        TodoDTO dto = TodoDTO.from(updatedTodo);
         return ResponseEntity.ok().body(dto);
     }
 
@@ -72,6 +72,5 @@ public class TodoController {
 
         return todoDTOList;
     }
-
 
 }
