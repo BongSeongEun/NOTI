@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Entity
+@Data
 @NoArgsConstructor
 @Table(name = "team_together")
 public class TeamTogether {
