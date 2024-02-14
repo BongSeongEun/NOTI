@@ -17,19 +17,19 @@ import lombok.NoArgsConstructor;
 public class TeamTodoDTO {
     private Long teamTodoId;
     private Long teamId;
-    private Long userId;
     private boolean teamTodoDone;
     private String teamTodoTitle;
     private String teamTodoDate;
+    private String teamTodoColor;
 
     public static TeamTodo toEntity(final TeamTodoDTO dto){
         return TeamTodo.builder()
                 .teamTodoId(dto.getTeamTodoId())
                 .teamId(dto.getTeamId())
-                .userId(dto.getUserId())
                 .teamTodoDone(dto.isTeamTodoDone())
                 .teamTodoTitle(dto.getTeamTodoTitle())
                 .teamTodoDate(dto.getTeamTodoDate())
+                .teamTodoColor(dto.getTeamTodoColor())
                 .build();
     }
 
@@ -37,10 +37,10 @@ public class TeamTodoDTO {
         return TeamTodoDTO.builder()
                 .teamTodoId(teamTodo.getTeamTodoId())
                 .teamId(teamTodo.getTeamId())
-                .userId(teamTodo.getUserId())
                 .teamTodoDone(teamTodo.isTeamTodoDone())
                 .teamTodoTitle(teamTodo.getTeamTodoTitle())
                 .teamTodoDate(teamTodo.getTeamTodoDate())
+                .teamTodoColor(teamTodo.getTeamTodoColor())
                 .build();
     }
 

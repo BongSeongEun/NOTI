@@ -51,10 +51,6 @@ public class TodoService {
         return todoRepository.findByUserId(Long.valueOf(userId));
     }
 
-    public List<Todo> getPresentTodo(String userId, String todoId){
-        Todo todo = (Todo) todoRepository.findByTodoId(Long.valueOf(todoId));
-        return (List<Todo>) todo;
-    }
     @Transactional
     public List<Todo> delete(String userId, String todoId){
             todoRepository.deleteByTodoIdAndUserId(Long.valueOf(todoId), Long.valueOf(userId));

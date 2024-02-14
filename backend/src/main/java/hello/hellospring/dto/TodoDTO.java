@@ -3,12 +3,10 @@ package hello.hellospring.dto;
 import hello.hellospring.Exception.AppException;
 import hello.hellospring.Exception.ErrorCode;
 import hello.hellospring.model.Todo;
-import hello.hellospring.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Builder

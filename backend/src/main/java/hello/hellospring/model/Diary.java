@@ -17,7 +17,7 @@ public class Diary {
     private Long userId;
 
     @Column(name = "diary_date")
-    private Long diaryDate;
+    private String diaryDate;
 
     @Column(name = "diary_content")
     private String diaryContent;
@@ -29,7 +29,7 @@ public class Diary {
     private String diaryTitle;
 
     @Builder
-    public Diary(Long userId, Long diaryDate, String diaryContent, String diaryImg, String diaryTitle){
+    public Diary(Long userId, String diaryDate, String diaryContent, String diaryImg, String diaryTitle){
         this.userId = userId;
         this.diaryDate = diaryDate;
         this.diaryContent = diaryContent;

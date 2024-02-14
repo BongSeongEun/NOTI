@@ -57,31 +57,33 @@ public class TeamController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/createTeamTodo/{userId}/{teamId}")
-    public ResponseEntity<?> createTeamTodo(@PathVariable String userId, @PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
+    @PostMapping("/createTeamTodo/{teamId}")
+    public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
         entity.setTeamId(Long.valueOf(teamId));
-        entity.setUserId(Long.valueOf(userId));
         List<TeamTodo> teamTodoEntity = teamService.createTeamTodo(entity);
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
         return ResponseEntity.ok().build();
     }
 
-    private List<TeamTodoDTO> makeTeamTodoDtoListFromEntityList(List<TeamTodo> teamTodoEntities){
-        List<TeamTodoDTO> teamTodoDTOList = new ArrayList<>();
+    @DeleteMapping("/deleteTeamTodo/{teamId}/{teamTodoId}")
+    public ResponseEntity<?> deleteTeamTodo(@PathVariable String teamId, @PathVariable String teamTodoId){
+        teamService.deleteTeamTodo(teamId, teamTodoId);
+        return ResponseEntity.ok().build();
+    }
 
-        for(TeamTodo teamTodoEntity : teamTodoEntities){
-            TeamTodoDTO teamTodoDTO = TeamTodoDTO.builder()
-                    .teamTodoId(teamTodoEntity.getTeamTodoId())
-                    .teamId(teamTodoEntity.getTeamId())
-                    .userId(teamTodoEntity.getUserId())
-                    .teamTodoDone(teamTodoEntity.isTeamTodoDone())
-                    .teamTodoTitle(teamTodoEntity.getTeamTodoTitle())
-                    .teamTodoDate(teamTodoEntity.getTeamTodoDate())
-                    .build();
-            teamTodoDTOList.add(teamTodoDTO);
-        }
-        return teamTodoDTOList;
+    @GetMapping("/getTeamTodo/{teamId}")
+    public ResponseEntity<?> getTeamTodo(@PathVariable String teamId){
+        List<TeamTodo> todoEntity = teamService.getTeamTodo(teamId);
+        List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(todoEntity);
+        return ResponseEntity.ok().body(dtos);
+    }
+
+    @PutMapping("/updateTeamTodo/{teamId}/{teamTodoId}")
+    public ResponseEntity<?> updateTeamTodo(@PathVariable Long teamId, @PathVariable Long teamTodoId, @RequestBody TeamTodoDTO teamTodoDTO){
+        TeamTodo updatedTeamTodo = teamService.updateTeamTodo(teamTodoDTO, teamId, teamTodoId);
+        TeamTodoDTO dto = TeamTodoDTO.from(updatedTeamTodo);
+        return ResponseEntity.ok().body(dto);
     }
 
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
@@ -97,7 +99,21 @@ public class TeamController {
         }
         return teamDTOList;
     }
+    private List<TeamTodoDTO> makeTeamTodoDtoListFromEntityList(List<TeamTodo> teamTodoEntities){
+        List<TeamTodoDTO> teamTodoDTOList = new ArrayList<>();
 
+        for(TeamTodo teamTodoEntity : teamTodoEntities){
+            TeamTodoDTO teamTodoDTO = TeamTodoDTO.builder()
+                    .teamTodoId(teamTodoEntity.getTeamTodoId())
+                    .teamId(teamTodoEntity.getTeamId())
+                    .teamTodoDone(teamTodoEntity.isTeamTodoDone())
+                    .teamTodoTitle(teamTodoEntity.getTeamTodoTitle())
+                    .teamTodoDate(teamTodoEntity.getTeamTodoDate())
+                    .build();
+            teamTodoDTOList.add(teamTodoDTO);
+        }
+        return teamTodoDTOList;
+    }
     private List<TeamTogetherDTO> makeTeamTogetherDtoListFromEntityList(List<TeamTogether> teamTogetherEntities){
         List<TeamTogetherDTO> teamTogetherDTOList = new ArrayList<>();
 
