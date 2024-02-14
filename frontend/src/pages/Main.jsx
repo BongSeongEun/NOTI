@@ -153,13 +153,12 @@ const StyledCalendar = styled(Calendar)`
   .react-calendar__tile:enabled:focus {
     border-radius: 50%;
     background-color: ${props =>
-      props.theme.color2 || theme.OrangeTheme.color2};
-    border-radius: 50%;
+      props.theme.color1 || theme.OrangeTheme.color1};
   }
 
-  .react-calendar__month-view__days__day--weekend {
-    // 주말 글씨 빨간색 없애기
-    color: var(--festie-gray-800, #000000);
+  /* 일요일에만 빨간 폰트 */
+  .react-calendar__month-view__weekdays__weekday--weekend abbr[title="일요일"] {
+    color: #c70000;
   }
 
   .react-calendar__tile--now {
@@ -167,6 +166,15 @@ const StyledCalendar = styled(Calendar)`
     border-radius: 50%;
     background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
     color: var(--festie-gray-800, #ffffff);
+  }
+
+  .react-calendar__month-view__weekdays abbr {
+    // 요일 밑줄 제거
+    text-decoration: none;
+  }
+
+  .react-calendar__month-view__days__day--weekend {
+    color: inherit; // 주말 색상을 평일과 동일하게 설정
   }
 
   .react-calendar__tile--active {

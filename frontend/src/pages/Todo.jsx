@@ -171,7 +171,6 @@ const DeleteButton = styled.img`
 function Todo({ selectedDate }) {
   // 내 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
-  const [eventCompleted, setEventCompleted] = useState({});
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
 
@@ -192,10 +191,9 @@ function Todo({ selectedDate }) {
   };
   // 모달창 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentTodoId, setCurrentTodoId] = useState(null); // 현재 선택된 todoId를 저장
 
   // 새 일정의 제목, 시간, 색상 상태
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [selectedColor, setSelectedColor] = useState(theme.OrangeTheme.color1);
@@ -276,12 +274,12 @@ function Todo({ selectedDate }) {
   const handleColorSelect = colorKey => {
     setSelectedColor(colorKey); // 색상 키워드를 상태에 저장
   };
-
+  // 수정 모달 여는함수
   const handleDeleteClick = todoId => {
     setDeletingTodoId(todoId);
     setIsDeleteConfirmModalOpen(true);
   };
-
+  // 수정 모달
   const closeDeleteConfirmModal = () => {
     setIsDeleteConfirmModalOpen(false);
     setDeletingTodoId(null);
@@ -294,6 +292,9 @@ function Todo({ selectedDate }) {
   // 모달을 닫는 함수
   const closeModal = () => {
     setIsModalOpen(false);
+    setTitle("");
+    setStartTime("");
+    setEndTime("");
   };
 
   // 수정 버튼 클릭 시 처리 함수
@@ -314,10 +315,7 @@ function Todo({ selectedDate }) {
 
   // 새 일정 만들기 버튼 클릭 시 처리 함수
   const openNewEventModal = () => {
-    // 입력 필드 상태 초기화
-    setTitle("");
-    setStartTime("");
-    setEndTime("");
+    // 입력 필드 상태 초기
     setSelectedColor(currentTheme.color1); // 기본 색상으로 초기화
     setIsEditing(false); // 편집 모드가 아닌 새 추가 모드로 설정
     setEditingTodoId(null); // 편집 중인 이벤트 ID 초기화
@@ -526,7 +524,9 @@ function Todo({ selectedDate }) {
                 <DeleteButton
                   src={deleteIcon}
                   alt="삭제"
-                  onClick={() => handleDeleteClick(event.todoId)}
+                  onClick={() =>
+                    !event.todoDone && handleDeleteClick(event.todoId)
+                  }
                 />
                 <DeleteModal
                   isOpen={isDeleteConfirmModalOpen}
@@ -539,7 +539,7 @@ function Todo({ selectedDate }) {
           <AddEventButton onClick={openNewEventModal}>
             + 새 노티 만들기
             {isModalOpen && (
-              <ModalBackdrop onClick={closeModal}>
+              <ModalBackdrop>
                 <ModalContainer onClick={e => e.stopPropagation()}>
                   <CloseButton
                     onClick={closeModal}
