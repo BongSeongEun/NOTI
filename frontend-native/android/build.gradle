@@ -47,6 +47,9 @@ allprojects {
                 excludeGroup "com.facebook.react"
             }
         }
+        maven{
+            url 'https://devrepo.kakao.com/nexus/content/groups/public/'
+        }
         google()
         maven { url 'https://www.jitpack.io' }
     }
