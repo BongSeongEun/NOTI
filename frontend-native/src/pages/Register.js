@@ -72,9 +72,9 @@ function Register() {
     };
 
     return (
-        <ThemeProvider theme={selectedTheme}>
-            <ScrollView>
-                <FullView>
+		<ThemeProvider theme={selectedTheme}>
+			<FullView>
+            	<ScrollView>
                     <MainView>
                         <MainText>가입을 축하드려요! {'\n'} 프로필을 등록해보세요</MainText>
                         <HorisontalView>
@@ -141,7 +141,7 @@ function Register() {
 
                         <RegularText>일기 생성 시간 *</RegularText>
                         <TextBox onPress={() => showDatePicker('diary')}>
-							<Time>{selectedDiaryTime}</Time>
+							<Time style={{  }}>{selectedDiaryTime}</Time>
 							<DateTimePickerModal
                                 isVisible={isDiaryTimePickerVisible}
                                 mode="time"
@@ -162,12 +162,14 @@ function Register() {
                         </HorisontalView>
 
                         <ResultButton onPress={() => navigation.navigate("Register_Success", { currentTheme: selectedTheme })}>
-                            <RegularText color="white">완료</RegularText>
+							<RegularText color="white"
+							style={{marginTop: 0, fontSize: 15}}>완료</RegularText>
                         </ResultButton>
 
                     </MainView>
-                </FullView>
-            </ScrollView>
+                
+				</ScrollView>
+			</FullView>
         </ThemeProvider>
     );
 }
@@ -182,6 +184,8 @@ const FullView = styled.View`
 const MainView = styled(FullView)`
     align-items: stretch;
     width: 300px;
+	align-self: center;
+	margin-top: 20px;
 `;
 
 const HorisontalView = styled(MainView)`

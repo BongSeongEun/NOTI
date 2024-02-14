@@ -39,20 +39,26 @@ function Todo({ }) {
 
 	const posts = [
 		{
-			id: 1,
-			title: "제목입니다.",
-			contents: "내용입니다.",
-			date: "2024-02-10",
+			todo_id: 1,
+			todo_color: "color1",
+			todo_title: "일정 1",
+			todo_date: "2024-02-10",
+			todo_startTime: "16:30",
+			todo_endTime: "17:00",
+			todo_done: true,
 		},
 		{
-			id: 2,
-			title: "제목입니다.",
-			contents: "내용입니다.",
-			date: "2024-02-12",
+			todo_id: 2,
+			todo_color: "color2",
+			todo_title: "일정 2",
+			todo_date: "2024-02-10",
+			todo_startTime: "17:30",
+			todo_endTime: "18:40",
+			todo_done: true,
 		}
 	];
 	const markedDates = posts.reduce((acc, current) => {
-		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
+		const formattedDate = format(new Date(current.todo_date), 'yyyy-MM-dd');
 		acc[formattedDate] = {marked: true};
 		return acc;
 	}, {});
@@ -70,7 +76,7 @@ function Todo({ }) {
 
 	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
 
-	const [color_num, setColorNum] = useState(0);
+	const [color_numbbb, setColorNum] = useState(0);
 	useEffect(() => { setColorNum(color_num + 1); }, []);
 	const handleAddNoti = () => {
 		setColorNum((prevColorIndex) => (prevColorIndex + 1) % color_sheet.length);

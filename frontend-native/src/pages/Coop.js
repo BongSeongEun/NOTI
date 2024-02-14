@@ -6,14 +6,7 @@
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
 import {
-	View,
-	Text,
-	Button,
-	Image,
-	TextInput,
-	TouchableOpacity,
 	ScrollView,
-	Keyboard,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
@@ -31,7 +24,6 @@ function Coop({ }) {
 	const { selectedTheme } = route.params;
 	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
 	const name = "홍길동";
-
 	const currentDate = new Date();
 	const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토']
 	const dayOfWeek = daysOfWeek[currentDate.getDay()];

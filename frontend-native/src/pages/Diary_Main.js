@@ -237,7 +237,7 @@ const ProfileTextContainer = styled(ProfileContainer)`
 	flex-direction: column;
 	margin-top: 25px;
 	margin-left: 15px;
-	margin-bottom: 25px;
+	margin-bottom: 20px;
 `;
 
 const Profile = styled.Image`
@@ -261,7 +261,6 @@ const DiaryText = styled(MainText)`
 const Bar = styled.View`
     width: 100%;
     height: 1px;
-    margin-top: 10px;
     background-color: #B7BABF;
 `;
 
