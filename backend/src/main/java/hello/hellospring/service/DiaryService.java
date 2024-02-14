@@ -4,6 +4,9 @@ import hello.hellospring.dto.DiaryDTO;
 import hello.hellospring.model.Diary;
 import hello.hellospring.repository.DiaryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,5 +96,19 @@ public class DiaryService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with userId: " + userId + " and date: " + diaryDate));
         // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
         return DiaryDTO.diaryDTO(diary);
+    }
+
+
+    // 페이징
+    public Page<DiaryDTO> getDiariesByUserId(Long userId, int page, int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Diary> diaryPage = (Page<Diary>) diaryRepository.findByUserId(userId, pageable);
+
+        return diaryPage.map(this::convertToDiaryDTO);
+    }
+    // Diary 엔티티를 DiaryDTO로 변환
+    private DiaryDTO convertToDiaryDTO(Diary diary) {
+        // Diary 엔티티를 DiaryDTO로 변환하는 로직 구현
+        return new DiaryDTO();
     }
 }

@@ -5,6 +5,7 @@ import hello.hellospring.model.Diary;
 import hello.hellospring.service.DiaryService;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.connector.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
@@ -61,11 +62,21 @@ public class DiaryController {
 
 
 
-    @PostMapping("/diaryUpdate")
+    @PostMapping("/diaryUpdate") // 안쓸거임
     public String update(@ModelAttribute DiaryDTO diaryDTO, Model model){
         List<DiaryDTO> diaryDTO1 = diaryService.update(diaryDTO); // 메소드 호출
         model.addAttribute("diaryDTO1", diaryDTO1);
         return null;
+    }
+
+    @GetMapping("/diaryPaging/{userId}") //페이징처리
+    public ResponseEntity<Page<DiaryDTO>> getDiariesByUserId(
+            @PathVariable Long userId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        Page<DiaryDTO> diaryPage = diaryService.getDiariesByUserId(userId, page, size);
+        return ResponseEntity.ok(diaryPage);
     }
 }
 
