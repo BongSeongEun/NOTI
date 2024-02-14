@@ -38,6 +38,7 @@ function Diary_Main({ }) {
 
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
+	const [selectedPost, setSelectedPost] = useState(null);
 	//const [clicked_DiaryFrame, setClicked_DiaryFrame] = useState(false);
 
 	const posts = [
@@ -155,24 +156,52 @@ function Diary_Main({ }) {
 
 						{clicked_calendar && (
 							<>
-								<Calendar 
+								<Calendar
 									markedDates={markedSelectedDates}
 									theme={{
 										selectedDayBackgroundColor: selectedTheme.color1,
 										arrowColor: selectedTheme.color1,
 										dotColor: selectedTheme.color1,
 										todayTextColor: selectedTheme.color1,
-									}} 
+									}}
 									onDayPress={(day) => {
-										setSelectedDate(day.dateString)
-								}} />
+										setSelectedDate(day.dateString);
+										const selectedPost = posts.find(
+											(post) => format(new Date(post.date), 'yyyy-MM-dd') === day.dateString
+										);
+										setSelectedPost(selectedPost);
+										if (selectedPost) {
+											navigation.navigate("Diary", {
+												selectedTheme: selectedTheme,
+												diaryData: {
+													date: selectedPost.date,
+													title: selectedPost.title,
+													contents: selectedPost.contents,
+												},
+											});
+										}
+									}}
+								/>
 							</>
 						)}
 
 						{posts.sort((a, b) => b.id - a.id).map(post => (
-							<DiaryFrame key={post.id} diaryId={post.id} colorSheet={color_sheet} />
+							<DiaryFrame
+								key={post.id}
+								diaryId={post.id}
+								colorSheet={color_sheet}
+								onPress={() => {
+									navigation.navigate("Diary", {
+									selectedTheme: selectedTheme,
+									diaryData: {
+									date: post.date,
+									title: post.title,
+									contents: post.contents,
+									},
+								});
+								}}
+							/>
 						))}
-						
 					</MainView>
 				</ScrollView>
 

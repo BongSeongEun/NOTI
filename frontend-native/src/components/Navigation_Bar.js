@@ -35,8 +35,8 @@ const Navigation_Bar = ({ selectedTheme }) => {
             <images.diary
                 width={25}
                 height={25}
-                color={selectedIcon === 'Diary' ? color_sheet[0] : "#B7BABF"}
-                onPress={() => handlePress('Diary')}
+                color={selectedIcon === 'Diary_Main' ? color_sheet[0] : "#B7BABF"}
+                onPress={() => handlePress('Diary_Main')}
             />
 
             <images.stat

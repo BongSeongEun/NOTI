@@ -21,6 +21,9 @@ import todo from "../asset/todo.svg";
 import chatting from "../asset/chatting.svg";
 import setting from "../asset/setting";
 
+import diary_modify from "../asset/diary_modify";
+import diary_delete from "../asset/diary_delete";
+
 export const images = {
 	profile: profile,
 	gallery: gallery,
@@ -42,6 +45,9 @@ export const images = {
 	todo: todo,
 	chatting: chatting,
 	setting: setting,
+
+	diary_modify: diary_modify,
+	diary_delete: diary_delete,
 };
 
 export default images;
