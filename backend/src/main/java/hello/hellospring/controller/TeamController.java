@@ -86,6 +86,8 @@ public class TeamController {
         return ResponseEntity.ok().body(dto);
     }
 
+
+
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
         List<TeamDTO> teamDTOList = new ArrayList<>();
 

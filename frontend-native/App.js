@@ -22,7 +22,7 @@ import Redirection from './src/pages/Redirection';
 const Stack = createStackNavigator();
 
 const linking = {
-  prefixes: ['http://192.168.75.126:4000/authnative'], // 여기에 딥 링크에 사용할 스킴을 추가합니다.
+  prefixes: ['http://192.168.103.245:4000/authnative'], // 여기에 딥 링크에 사용할 스킴을 추가합니다.
   config: {
     screens: {
       Redirection: 'Redirection', // 여기에 리디렉션 URL의 경로와 매칭되는 화면 이름을 설정합니다.
