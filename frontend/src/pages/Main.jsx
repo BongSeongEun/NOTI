@@ -12,6 +12,7 @@ import Diary from "../pages/Diary"; // Diary 컴포넌트 import
 import Coop from "../pages/Coop"; // Coop 컴포넌트 import
 import Setting from "../pages/Setting"; // Setting 컴포넌트 import
 import Stat from "../pages/Stat"; // Stat 컴포넌트 import
+import CoopDetail from "../pages/CoopDetail";
 
 const PageLayout = styled.div`
   display: flex;
@@ -192,11 +193,17 @@ function Main() {
   const [selectedComponent, setSelectedComponent] = useState("Todo");
   const [diaryId, setDiaryId] = useState(null); // 선택된 일기의 ID 상태
   const token = window.localStorage.getItem("token"); // 토큰 추가
+  const [selectedTeam, setSelectedTeam] = useState(null);
   // Base64 이미지 데이터를 저장할 상태
   const [base64Image, setBase64Image] = useState("");
 
   const handleMenuClick = component => {
     setSelectedComponent(component);
+  };
+
+  const handleSelectTeam = team => {
+    setSelectedTeam(team);
+    setSelectedComponent("CoopDetail");
   };
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
@@ -260,7 +267,16 @@ function Main() {
       case "Diary":
         return <Diary onDiarySelect={setDiaryId} />;
       case "Coop":
-        return <Coop />;
+        return (
+          <Coop
+            onSelectTeam={team => {
+              setSelectedTeam(team); // 상태 업데이트 함수
+              setSelectedComponent("CoopDetail");
+            }}
+          />
+        );
+      case "CoopDetail":
+        return <CoopDetail team={selectedTeam} />;
       case "Stat":
         return <Stat />;
       case "Setting":

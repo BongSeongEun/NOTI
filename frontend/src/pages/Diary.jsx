@@ -65,7 +65,6 @@ function Diary() {
         });
         // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
         const userThemeName = response.data.userColor; // 사용자의 테마 이름
-        const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
 
         // 사용자의 테마를 상태에 적용
         if (theme[userThemeName]) {
