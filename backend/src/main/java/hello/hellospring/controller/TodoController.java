@@ -2,10 +2,8 @@ package hello.hellospring.controller;
 
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Todo;
-import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TodoService;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +33,7 @@ public class TodoController {
     @PutMapping("/updateTodo/{userId}/{todoId}")
     public ResponseEntity<TodoDTO> updateTodo(@PathVariable Long userId, @PathVariable Long todoId, @RequestBody TodoDTO todoDTO){
         Todo updatedTodo = todoService.update(todoDTO, userId, todoId);
-        TodoDTO dto = TodoDTO.from(updatedTodo); // 해당 변환 로직 구현 필요
+        TodoDTO dto = TodoDTO.from(updatedTodo);
         return ResponseEntity.ok().body(dto);
     }
 
@@ -72,6 +70,5 @@ public class TodoController {
 
         return todoDTOList;
     }
-
 
 }

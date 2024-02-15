@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
+
+import styled, { ThemeProvider } from 'styled-components/native';
 import React from 'react';
 import { ScrollView } from 'react-native';
-import styled, { ThemeProvider } from 'styled-components/native';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
 import 'react-native-gesture-handler';
 
