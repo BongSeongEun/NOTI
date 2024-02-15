@@ -5,6 +5,7 @@ import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.service.GptService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,10 +25,10 @@ public class GptController {
         this.chatRepository = chatRepository;
     }
 
-    @PostMapping("/ask")
-    public String ask(@RequestBody Map<String, String> request) {
+    @PostMapping("/ask/{userId}")
+    public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
 
-        Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음
+        //Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음
         String userMessage = request.get("chat_content"); // chat_content 입력받음
         boolean chatRole = Boolean.parseBoolean(request.get("chat_role")); // chat_role 입력받음
 
