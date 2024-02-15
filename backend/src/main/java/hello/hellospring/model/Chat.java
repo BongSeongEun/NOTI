@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -23,7 +26,7 @@ public class Chat {
     private Long userId;
 
     @Column(name = "chat_date")
-    private String chatDate;
+    private LocalDateTime chatDate;
 
     @Column(name = "chat_content")
     private String chatContent;
@@ -40,6 +43,11 @@ public class Chat {
     @Column(name = "work_chat_time")
     private String workChatTime;
 
+    @PrePersist
+    public void prePersist() {
+        this.chatDate = LocalDateTime.now(); // 현재 시간으로 설정
+    }
+
     public static Chat toSaveEntity(ChatDTO chatDTO){
         Chat chat = new Chat();
         chat.setChatId(chatDTO.getChatId());
@@ -53,7 +61,7 @@ public class Chat {
         return chat;
     }
 
-    public static Chat toUdateEntity(ChatDTO chatDTO){ 
+    public static Chat toUpdateEntity(ChatDTO chatDTO){
         Chat chat = new Chat();
         chat.setChatId(chatDTO.getChatId());
         chat.setUserId(chatDTO.getUserId());

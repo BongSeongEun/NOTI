@@ -11,7 +11,7 @@ import java.net.http.HttpResponse;
 
 @Service
 public class GptService {
-    private static final String API_KEY = "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"; // 환경변수에서 API 키를 불러옵니다.
+    private static final String API_KEY = "지피티아이피넣어주세용"; // 환경변수에서 API 키를 불러오기
 
     public static String askGpt(String userMessage) throws Exception {
         String responseBody = "";
@@ -22,7 +22,7 @@ public class GptService {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
         jsonBody.put("max_tokens", 50);
-        jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받습니다.
+        jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
 

@@ -4,6 +4,9 @@ import hello.hellospring.model.Chat;
 import hello.hellospring.model.Diary;
 import lombok.*;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @ToString
@@ -13,7 +16,7 @@ import lombok.*;
 public class ChatDTO {
     private Long chatId;
     private Long userId;
-    private String chatDate;
+    private LocalDateTime chatDate;
     private String chatContent;
     private boolean chatWho;
     private boolean chatRole;
