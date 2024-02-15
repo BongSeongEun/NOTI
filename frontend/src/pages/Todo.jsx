@@ -14,7 +14,7 @@ import DeleteModal from "../components/DeleteModal";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import editIcon from "../asset/fi-rr-pencil.png"; // 수정하기
 import deleteIcon from "../asset/fi-rr-trash.png"; // 삭제하기
-import TimeTable from "../pages/TimeTable"; // 타임테이블
+import TimeTable from "../components/TimeTable"; // 타임테이블
 import DiaryContainer from "../components/DiaryContainer";
 import AddEventButton from "../components/AddEventButton";
 

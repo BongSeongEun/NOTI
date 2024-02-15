@@ -11,7 +11,7 @@ import Diary from "./pages/Diary.jsx"; // Diary 컴포넌트 import
 import Coop from "./pages/Coop.jsx"; // Coop 컴포넌트 import
 import Setting from "./pages/Setting.jsx"; // Setting 컴포넌트 import
 import Stat from "./pages/Stat.jsx"; // Stat 컴포넌트 import
-import DiaryPage from "./pages/DiaryPage.jsx";
+// import DiaryPage from "./pages/DiaryPage.jsx";
 
 const MainDiv = styled.div`
   display: flex;
@@ -36,7 +36,7 @@ function App() {
           <Route path="/Todo" element={<Todo />} />
           <Route path="/Coop" element={<Coop />} />
           <Route path="/Diary" element={<Diary />} />
-          <Route path="/Diary/:id" element={<DiaryPage />} />
+          {/* <Route path="/Diary/:id" element={<DiaryPage />} /> */}
           <Route path="/Stat" element={<Stat />} />
           <Route path="/Setting" element={<Setting />} />
           <Route path="/auth" element={<Redirection />} />

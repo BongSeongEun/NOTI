@@ -12,7 +12,6 @@ import Diary from "../pages/Diary"; // Diary 컴포넌트 import
 import Coop from "../pages/Coop"; // Coop 컴포넌트 import
 import Setting from "../pages/Setting"; // Setting 컴포넌트 import
 import Stat from "../pages/Stat"; // Stat 컴포넌트 import
-import DiaryPage from "../pages/DiaryPage"; // DiaryDetailPage 컴포넌트 import
 
 const PageLayout = styled.div`
   display: flex;
@@ -188,7 +187,7 @@ const StyledCalendar = styled(Calendar)`
 function Main() {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
   const formatDay = (locale, date) => <span>{date.getDate()}</span>;
-  const [nickname] = useState("사용자");
+  const [userNickname, setUserNickname] = useState("사용자");
   const [selectedDate, setSelectedDate] = useState(new Date()); // 날짜 상태 추가
   const [selectedComponent, setSelectedComponent] = useState("Todo");
   const [diaryId, setDiaryId] = useState(null); // 선택된 일기의 ID 상태
@@ -228,6 +227,7 @@ function Main() {
         });
         const userThemeName = response.data.userColor; // 사용자가 선택한 테마 이름
         const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
+        setUserNickname(response.data.userNickname); // 사용자 닉네임 설정
 
         if (userThemeName && theme[userThemeName]) {
           setCurrentTheme(theme[userThemeName]); // 가져온 테마로 상태 업데이트
@@ -259,8 +259,6 @@ function Main() {
         return <Todo selectedDate={selectedDate} />;
       case "Diary":
         return <Diary onDiarySelect={setDiaryId} />;
-      case "DiaryDetail":
-        return <DiaryPage diaryId={diaryId} />;
       case "Coop":
         return <Coop />;
       case "Stat":
@@ -317,7 +315,7 @@ function Main() {
             <GreetingSection>
               <UserProfileImage src={base64Image || USER} alt="User Profile" />
               <GreetingText>
-                <div>{nickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
+                <div>{userNickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
                 <div style={{ color: "black" }}>반갑습니다!</div>
               </GreetingText>
             </GreetingSection>
