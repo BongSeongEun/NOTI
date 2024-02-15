@@ -1,13 +1,7 @@
 package hello.hellospring.controller;
 
-import hello.hellospring.dto.TeamDTO;
-import hello.hellospring.dto.TeamScheduleDTO;
-import hello.hellospring.dto.TeamTodoDTO;
-import hello.hellospring.dto.TeamTogetherDTO;
-import hello.hellospring.model.Team;
-import hello.hellospring.model.TeamSchedule;
-import hello.hellospring.model.TeamTodo;
-import hello.hellospring.model.TeamTogether;
+import hello.hellospring.dto.*;
+import hello.hellospring.model.*;
 import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -121,6 +115,19 @@ public class TeamController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/getTeamMemo/{teamId}")
+    public ResponseEntity<?> getTeamMemo(@PathVariable Long teamId){
+        List<TeamMemo> entity = teamService.getTeamMemo(teamId);
+        List<TeamMemoDTO> dtos = makeTeamMemoDtoListFromEntityList(entity);
+        return ResponseEntity.ok().body(dtos);
+    }
+    @PostMapping("/createTeamMemo")
+
+    @PutMapping
+
+    @DeleteMapping
+
+
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
         List<TeamDTO> teamDTOList = new ArrayList<>();
 
@@ -147,6 +154,20 @@ public class TeamController {
             teamTodoDTOList.add(teamTodoDTO);
         }
         return teamTodoDTOList;
+    }
+    private List<TeamMemoDTO> makeTeamMemoDtoListFromEntityList(List<TeamMemo> teamMemoEntities){
+        List<TeamMemoDTO> teamMemoDTOList = new ArrayList<>();
+
+        for(TeamMemo teamMemoEntity : teamMemoEntities){
+            TeamMemoDTO teamMemoDTO = TeamMemoDTO.builder()
+                    .teamMemoId(teamMemoEntity.getTeamMemoId())
+                    .memoTitle(teamMemoEntity.getMemoTitle())
+                    .memoContent(teamMemoEntity.getMemoContent())
+                    .teamId(teamMemoEntity.getTeamId())
+                    .build();
+            teamMemoDTOList.add(teamMemoDTO);
+        }
+        return teamMemoDTOList;
     }
     private List<TeamScheduleDTO> makeTeamScheduleDtoListFromEntiyList(List<TeamSchedule> teamScheduleEntities){
         List<TeamScheduleDTO> teamScheduleDTOList = new ArrayList<>();
