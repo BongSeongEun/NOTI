@@ -85,8 +85,6 @@ public class TeamService {
         return originalTeamTodo;
     }
 
-    public TeamSchedule inputScheduleInTeam(TeamScheduleDTO teamScheduleDTO, Long teamId, Long todoId){
 
-    }
 
 }
