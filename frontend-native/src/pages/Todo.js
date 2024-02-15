@@ -7,13 +7,14 @@ import styled, { ThemeProvider } from 'styled-components/native';
 import React, { useState, useEffect, } from 'react';
 import { ScrollView, TouchableOpacity, Text, Modal, } from 'react-native';
 
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
 
-import DecoesSvg from '../asset/Deco_Svg';
-import { theme } from '../components/theme';
-import images from '../components/images';
+import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
+import { theme } from '../components/theme';
+import { format } from "date-fns";
 
 function Todo({ }) {
 	const navigation = useNavigation();
@@ -77,6 +78,43 @@ function Todo({ }) {
         );
     };
 	*/
+
+	const posts = [
+		{
+		  id: 1,
+		  title: "하루 일기",
+		  contents: "내용입니다.",
+		  date: "2024-02-10",
+		},
+		{
+		  id: 2,
+		  title: "하루 일기",
+		  contents: "내용입니다.",
+		  date: "2024-02-12",
+		},
+		{
+			id: 3,
+			title: "하루 일기",
+			contents: "날씨는 토요일, 이태원에서 고등학교 친구인 나현이와 2시에 만남을 가졌다. \n 우리는 먼저 삼겹살집으로 향했다. 고등학교 시절의 추억을 떠올리며 삼겹살과 함께 한 잔의 소주는 정말 최고였다. 맛있는 음식과 함께 나눈 대화는 시간이 어떻게 흘렀는지 모를 만큼 즐거웠다. \n 1차에서는 끝나지 않고, 우린 2차로 소고기전골집을 향했다. 뜨끈한 소고기전골과 함께 한 잔의 소주는 특별한 순간으로 기억될 것이다. 시간 가는 줄 모르고 먹고 마시다 보니 막차를 놓치고 나현이네 집으로 향하게 되었다. \n 나현이네 집에서는 고등학교 시절의 추억을 떠올리며 웃음 속에 취해서 잠이 들었다. 그리고 다음날, 주말은 술과 함께 흐르고 말았다. \n 그리고 주말의 끝에는 현실이 다가왔다. 새로 시작된 알고리즘 계절학기 수업은 예상치 못한 어려움과 함께 찾아왔다. 수업은 지루하고 힘들게 느껴졌다. 나현이와의 즐거운 주말이 떠올라 더욱 힘든 상황이었다. \n 하지만, 이 모든 어려움도 언젠가는 극복될 것이다. 즐거운 순간들을 떠올리며 앞으로의 도전에 기대를 갖고 살아가야겠다.",
+			date: "2024-02-13",
+		},
+	];
+	const markedDates = posts.reduce((acc, current) => {
+		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
+		acc[formattedDate] = {marked: true};
+		return acc;
+	}, {});
+	
+	const [selectedDate, setSelectedDate] = useState(
+		format(new Date(), "yyyy-MM-dd"),
+	);
+	const markedSelectedDates = {
+		...markedDates,
+		[selectedDate]: {
+			selected: true,
+			marked: markedDates[selectedDate]?.marked,
+		}
+	};
 
 	return (
 		<ThemeProvider theme={selectedTheme}>

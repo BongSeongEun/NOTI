@@ -22,7 +22,7 @@ function Register_Success() {
 
     return (
         <ThemeProvider theme={selectedTheme}>
-            <MainViewStyle>
+            <MainViewStyle style={{ alignItems: 'center' }}>
                 <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 50 }}>
                     <RegularText>
                         프로필 생성 완료!
