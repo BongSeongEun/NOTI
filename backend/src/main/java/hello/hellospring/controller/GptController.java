@@ -5,11 +5,9 @@ import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.service.GptService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -53,6 +51,11 @@ public class GptController {
             return "GPT API 호출 오류가 발생했습니다.";
         }
 
+    }
+
+    @GetMapping("/api/v3/chatlist/{userId}") // 채팅내역 가져오기
+    public List<Chat> getChatListByUserId(@PathVariable Long userId) {
+        return chatRepository.findByUserId(userId);
     }
 
 }
