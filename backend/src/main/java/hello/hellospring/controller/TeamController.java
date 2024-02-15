@@ -45,6 +45,12 @@ public class TeamController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/leaveTeam/{teamId}/{userId}")
+    public ResponseEntity<?> deleteUserFromTeam(@PathVariable String teamId, @PathVariable String userId){
+        teamService.deleteUserFromTeam(teamId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/createTeam")
     public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO){
 

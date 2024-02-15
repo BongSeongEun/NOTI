@@ -1,7 +1,9 @@
 package hello.hellospring.service;
 
+import hello.hellospring.dto.TeamScheduleDTO;
 import hello.hellospring.dto.TeamTodoDTO;
 import hello.hellospring.model.Team;
+import hello.hellospring.model.TeamSchedule;
 import hello.hellospring.model.TeamTodo;
 import hello.hellospring.model.TeamTogether;
 import hello.hellospring.repository.TeamMemoRepository;
@@ -37,6 +39,12 @@ public class TeamService {
 
     public List<TeamTogether> getUserList(String teamId){
         return teamTogetherRepository.findByTeamId(Long.valueOf(teamId));
+    }
+
+    @Transactional
+    public List<TeamTogether> deleteUserFromTeam(String teamId, String userId){
+        teamTogetherRepository.deleteByTeamIdAndUserId(Long.valueOf(teamId), Long.valueOf(userId));
+        return getUserList(teamId);
     }
 
     public List<TeamTogether> createTeam(TeamTogether teamTogether){
@@ -75,6 +83,10 @@ public class TeamService {
         teamTodoRepository.save(originalTeamTodo);
 
         return originalTeamTodo;
+    }
+
+    public TeamSchedule inputScheduleInTeam(TeamScheduleDTO teamScheduleDTO, Long teamId, Long todoId){
+
     }
 
 }
