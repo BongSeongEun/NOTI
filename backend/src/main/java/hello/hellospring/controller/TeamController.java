@@ -1,9 +1,11 @@
 package hello.hellospring.controller;
 
 import hello.hellospring.dto.TeamDTO;
+import hello.hellospring.dto.TeamScheduleDTO;
 import hello.hellospring.dto.TeamTodoDTO;
 import hello.hellospring.dto.TeamTogetherDTO;
 import hello.hellospring.model.Team;
+import hello.hellospring.model.TeamSchedule;
 import hello.hellospring.model.TeamTodo;
 import hello.hellospring.model.TeamTogether;
 import hello.hellospring.service.TeamService;
@@ -92,7 +94,28 @@ public class TeamController {
         return ResponseEntity.ok().body(dto);
     }
 
+    @PostMapping("/inputSchedule/{teamId}/{todoId}")
+    public ResponseEntity<?> inputSchedule(@PathVariable Long teamId, @PathVariable Long todoId, @RequestBody TeamScheduleDTO teamScheduleDTO){
+        TeamSchedule entity = TeamScheduleDTO.toEntity(teamScheduleDTO);
+        entity.setTeamId(teamId);
+        entity.setTodoId(todoId);
+        List<TeamSchedule> teamScheduleEntity = teamService.inputScheduleInTeam(entity);
+        List<TeamScheduleDTO> dtos =makeTeamScheduleDtoListFromEntiyList(teamScheduleEntity);
+        return ResponseEntity.ok().build();
+    }
 
+    @GetMapping("/getSchedule/{teamId}")
+    public ResponseEntity<?> getScheduleFromTeam(@PathVariable Long teamId){
+        List<TeamSchedule> entity = teamService.getSchedule(teamId);
+        List<TeamScheduleDTO> dtos = makeTeamScheduleDtoListFromEntiyList(entity);
+        return ResponseEntity.ok().body(dtos);
+    }
+
+    @DeleteMapping("/deleteSchedule/{teamId}/{todoId}")
+    public ResponseEntity<?> deleteScheduleFromTeam(@PathVariable Long teamId, @PathVariable Long todoId){
+        teamService.deleteSchedule(teamId, todoId);
+        return ResponseEntity.ok().build();
+    }
 
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
         List<TeamDTO> teamDTOList = new ArrayList<>();
@@ -122,6 +145,20 @@ public class TeamController {
         }
         return teamTodoDTOList;
     }
+    private List<TeamScheduleDTO> makeTeamScheduleDtoListFromEntiyList(List<TeamSchedule> teamScheduleEntities){
+        List<TeamScheduleDTO> teamScheduleDTOList = new ArrayList<>();
+
+        for(TeamSchedule teamScheduleEntity : teamScheduleEntities){
+            TeamScheduleDTO teamScheduleDTO = TeamScheduleDTO.builder()
+                    .teamScheduleId(teamScheduleEntity.getTeamScheduleId())
+                    .teamId(teamScheduleEntity.getTeamId())
+                    .todoId(teamScheduleEntity.getTodoId())
+                    .build();
+            teamScheduleDTOList.add(teamScheduleDTO);
+        }
+        return teamScheduleDTOList;
+    }
+
     private List<TeamTogetherDTO> makeTeamTogetherDtoListFromEntityList(List<TeamTogether> teamTogetherEntities){
         List<TeamTogetherDTO> teamTogetherDTOList = new ArrayList<>();
 

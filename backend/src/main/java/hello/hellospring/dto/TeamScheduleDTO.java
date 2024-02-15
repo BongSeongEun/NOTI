@@ -15,8 +15,8 @@ public class TeamScheduleDTO {
     private Long teamId;
     private Long todoId;
 
-    public static TeamScheduleDTO toEntity(final TeamScheduleDTO dto){
-        return TeamScheduleDTO.builder()
+    public static TeamSchedule toEntity(final TeamScheduleDTO dto){
+        return TeamSchedule.builder()
                 .teamScheduleId(dto.getTeamScheduleId())
                 .teamId(dto.getTeamId())
                 .todoId(dto.getTodoId())
