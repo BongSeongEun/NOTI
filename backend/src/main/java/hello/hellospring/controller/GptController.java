@@ -25,7 +25,7 @@ public class GptController {
         this.chatRepository = chatRepository;
     }
 
-    @PostMapping("/ask/{userId}")
+    @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
 
         //Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음

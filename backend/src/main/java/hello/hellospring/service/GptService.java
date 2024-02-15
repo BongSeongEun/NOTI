@@ -11,7 +11,7 @@ import java.net.http.HttpResponse;
 
 @Service
 public class GptService {
-    private static final String API_KEY = "API숨겼어용"; // 환경변수에서 API 키를 불러오기
+    private static final String API_KEY = "API 숨겼지롱"; // 환경변수에서 API 키를 불러오기
 
     public static String askGpt(String userMessage) throws Exception {
         String responseBody = "";
