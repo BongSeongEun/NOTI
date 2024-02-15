@@ -31,25 +31,27 @@ public class GptController {
         String userMessage = request.get("chat_content"); // chat_content 입력받음
         boolean chatRole = Boolean.parseBoolean(request.get("chat_role")); // chat_role 입력받음
 
-        // ChatDTO 생성 및 chatContent 설정
-        ChatDTO chatDTO = new ChatDTO();
-
-        chatDTO.setUserId(userId);
-        chatDTO.setChatContent(userMessage);
-        chatDTO.setChatRole(chatRole);
-
-        // ChatDTO를 Chat 엔티티로 변환
-        Chat chat = Chat.toSaveEntity(chatDTO);
-        // Chat 엔티티를 데이터베이스에 저장
-        chatRepository.save(chat);
-
+        // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
+        ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, chatRole, null, null);
+        Chat initialChat = Chat.toSaveEntity(initialChatDTO);
+        chatRepository.save(initialChat);
 
         try {
-            return gptService.askGpt(userMessage);
+            // GPT 서비스를 호출하여 응답 받기
+            String gptResponse = gptService.askGpt(userMessage);
+
+            // GPT 응답을 새로운 Chat 엔티티의 chat_content로 설정하고 데이터베이스에 저장
+            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptResponse, true, chatRole, null, null);
+            Chat responseChat = Chat.toSaveEntity(responseChatDTO);
+            chatRepository.save(responseChat);
+
+            // GPT 응답을 클라이언트에 반환
+            return gptResponse;
         } catch (Exception e) {
             e.printStackTrace();
-            return "GPT API 호출 오류가 발생했어요 :(";
+            return "GPT API 호출 오류가 발생했습니다.";
         }
+
     }
 
 }
