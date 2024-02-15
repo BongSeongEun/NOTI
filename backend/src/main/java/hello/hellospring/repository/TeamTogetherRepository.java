@@ -9,4 +9,5 @@ import java.util.List;
 public interface TeamTogetherRepository extends JpaRepository<TeamTogether, Long> {
     List<TeamTogether> findByUserId(Long userId);
     List<TeamTogether> findByTeamId(Long teamId);
+    void deleteByTeamIdAndUserId(Long teamId, Long userId);
 }

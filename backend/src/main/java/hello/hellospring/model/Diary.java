@@ -1,9 +1,12 @@
 package hello.hellospring.model;
 
+import hello.hellospring.dto.DiaryDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Getter
+@Setter
 @Data
 @NoArgsConstructor
 @Table(name = "diary")
@@ -17,7 +20,7 @@ public class Diary {
     private Long userId;
 
     @Column(name = "diary_date")
-    private Long diaryDate;
+    private String diaryDate;
 
     @Column(name = "diary_content")
     private String diaryContent;
@@ -28,12 +31,35 @@ public class Diary {
     @Column(name = "diary_title")
     private String diaryTitle;
 
+    //모든 값을 여기로 담아와서 전달해줌
+    public static Diary toSaveEntity(DiaryDTO diaryDTO){
+        Diary diary = new Diary();
+        diary.setDiaryId(diaryDTO.getDiaryId());
+        diary.setUserId(diaryDTO.getUserId());
+        diary.setDiaryDate(diaryDTO.getDiaryDate());
+        diary.setDiaryContent(diaryDTO.getDiaryContent());
+        diary.setDiaryImg(diaryDTO.getDiaryImg());
+        diary.setDiaryTitle(diaryDTO.getDiaryTitle());
+        return diary;
+    }
+
+
+
     @Builder
-    public Diary(Long userId, Long diaryDate, String diaryContent, String diaryImg, String diaryTitle){
+    public Diary(Long userId, String diaryDate, String diaryContent, String diaryImg){
         this.userId = userId;
         this.diaryDate = diaryDate;
         this.diaryContent = diaryContent;
         this.diaryImg = diaryImg;
-        this.diaryTitle = diaryTitle;
+    }
+
+    public static Diary toUpdateEntity(DiaryDTO diaryDTO) {
+        Diary diary = new Diary();
+        diary.setDiaryId(diaryDTO.getDiaryId());
+        diary.setUserId(diaryDTO.getUserId());
+        diary.setDiaryDate(diaryDTO.getDiaryDate());
+        diary.setDiaryContent(diaryDTO.getDiaryContent());
+        diary.setDiaryImg(diaryDTO.getDiaryImg());
+        return diary;
     }
 }

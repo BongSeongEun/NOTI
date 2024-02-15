@@ -11,25 +11,22 @@ npm install @react-navigation/stack --save --legacy-peer-deps
 */
 
 import React from 'react';
-import { View, Text, Button } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-
+import {View, Text, Button} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 function Login({}) {
   const navigation = useNavigation();
   return (
     <View>
       <Text>Login!</Text>
-	    <Button
-    	  title="회원가입"
-          // eslint-disable-next-line quotes
-          onPress={() => navigation.navigate("Register")}>
-        </Button>
-        <Button
-          title="채팅"
-          // eslint-disable-next-line quotes
-          onPress={() => navigation.navigate("Chatting")}>
-        </Button>
+      <Button
+        title="회원가입"
+        // eslint-disable-next-line quotes
+        onPress={() => navigation.navigate('kakaoLogin')}></Button>
+      <Button
+        title="채팅"
+        // eslint-disable-next-line quotes
+        onPress={() => navigation.navigate('Chatting')}></Button>
     </View>
   );
 }

@@ -70,6 +70,40 @@ public class UserService {
 
         return oauthToken;
     }
+    public OauthToken getAccessTokenNative(String code) {
+
+        RestTemplate rt = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", "77cf97c36317f2622a926b9ddb30f96f");
+        params.add("redirect_uri", "http://192.168.103.245:4000/authnative");
+        params.add("code", code);
+
+
+        HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest =
+                new HttpEntity<>(params, headers);
+
+        ResponseEntity<String> accessTokenResponse = rt.exchange(
+                "https://kauth.kakao.com/oauth/token",
+                HttpMethod.POST,
+                kakaoTokenRequest,
+                String.class
+        );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        OauthToken oauthToken = null;
+        try {
+            oauthToken = objectMapper.readValue(accessTokenResponse.getBody(), OauthToken.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return oauthToken;
+    }
     public KakaoProfile findProfile(String token) {
 
         RestTemplate rt = new RestTemplate();
