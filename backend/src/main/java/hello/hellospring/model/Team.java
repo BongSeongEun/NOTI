@@ -19,16 +19,12 @@ public class Team {
     @Column(name = "team_id")
     private Long teamId;
 
-    @Column(name = "team_title")
-    private String teamTitle;
-
     @Column(name = "team_randnum")
     private Long teamRandNum;
 
     @Builder
-    public Team(Long teamId, String teamTitle, Long teamRandNum){
+    public Team(Long teamId, Long teamRandNum){
         this.teamId = teamId;
-        this.teamTitle = teamTitle;
         this.teamRandNum = teamRandNum;
     }
 

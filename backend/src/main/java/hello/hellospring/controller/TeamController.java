@@ -63,8 +63,11 @@ public class TeamController {
         entity.setTeamRandNum((long) random.nextInt(99999999));
         List<Team> teamEntity = teamService.createTeamTitle(entity);
         List<TeamDTO> dtos = makeTeamDtoListFromEntityList(teamEntity);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(dtos);
     }
+
+
+
     // 팀에 새로운 Todo를 추가
     @PostMapping("/createTeamTodo/{teamId}")
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
@@ -124,7 +127,6 @@ public class TeamController {
         for(Team teamEntity : teamEntities){
             TeamDTO teamDTO = TeamDTO.builder()
                     .teamId(teamEntity.getTeamId())
-                    .teamTitle(teamEntity.getTeamTitle())
                     .teamRandNum(teamEntity.getTeamRandNum())
                     .build();
             teamDTOList.add(teamDTO);
@@ -167,6 +169,7 @@ public class TeamController {
                     .teamTogetherId(teamTogetherEntity.getTeamTogetherId())
                     .userId(teamTogetherEntity.getUserId())
                     .teamId(teamTogetherEntity.getTeamId())
+                    .teamTitle(teamTogetherEntity.getTeamTitle())
                     .build();
             teamTogetherDTOList.add(teamTogetherDTO);
         }
