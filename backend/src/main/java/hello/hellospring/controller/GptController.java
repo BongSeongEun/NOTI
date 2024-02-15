@@ -18,7 +18,7 @@ public class GptController {
     private final ChatRepository chatRepository; // repository 참조
 
     @Autowired
-    public GptController(GptService gptService, ChatRepository chatRepository, ChatRepository chatRepository1) {
+    public GptController(GptService gptService, ChatRepository chatRepository) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -27,21 +27,28 @@ public class GptController {
     @PostMapping("/ask")
     public String ask(@RequestBody Map<String, String> request) {
 
-        String userMessage = request.get("prompt");
+        Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음
+        String userMessage = request.get("chat_content"); // chat_content 입력받음
+        boolean chatRole = Boolean.parseBoolean(request.get("chat_role")); // chat_role 입력받음
+
         // ChatDTO 생성 및 chatContent 설정
         ChatDTO chatDTO = new ChatDTO();
+
+        chatDTO.setUserId(userId);
         chatDTO.setChatContent(userMessage);
+        chatDTO.setChatRole(chatRole);
 
         // ChatDTO를 Chat 엔티티로 변환
         Chat chat = Chat.toSaveEntity(chatDTO);
         // Chat 엔티티를 데이터베이스에 저장
         chatRepository.save(chat);
 
+
         try {
             return gptService.askGpt(userMessage);
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error processing your request.";
+            return "GPT API 호출 오류가 발생했어요 :(";
         }
     }
 
