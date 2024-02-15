@@ -24,20 +24,21 @@ public class TeamController {
     @Autowired
     TeamService teamService;
 
+    // 특정 사용자의 팀 목록 조회
     @GetMapping("/getTeam/{userId}")
     public ResponseEntity<?> getTeam(@PathVariable String userId){
         List<TeamTogether> teamTogetherEntity = teamService.getTeamList(userId);
         List<TeamTogetherDTO> dtos = makeTeamTogetherDtoListFromEntityList(teamTogetherEntity);
         return ResponseEntity.ok().body(dtos);
     }
-
+    // 특정 팀에 속한 사용자 목록 조회
     @GetMapping("/getUserTeam/{teamId}")
     public ResponseEntity<?> getUserTeam(@PathVariable String teamId){
         List<TeamTogether> teamTogetherEntity = teamService.getUserList(teamId);
         List<TeamTogetherDTO> dtos = makeTeamTogetherDtoListFromEntityList(teamTogetherEntity);
         return ResponseEntity.ok().body(dtos);
     }
-
+    // 팀에 사용자 추가
     @PostMapping("/enterTeam/{userId}")
     public ResponseEntity<?> enterTeam(@PathVariable String userId, @RequestBody TeamTogetherDTO teamTogetherDTO){
         TeamTogether entity = TeamTogetherDTO.toEntity(teamTogetherDTO);
@@ -46,13 +47,13 @@ public class TeamController {
         List<TeamTogetherDTO> dtos = makeTeamTogetherDtoListFromEntityList(teamTogetherEntity);
         return ResponseEntity.ok().build();
     }
-
+    // 팀에서 사용자 제거
     @DeleteMapping("/leaveTeam/{teamId}/{userId}")
     public ResponseEntity<?> deleteUserFromTeam(@PathVariable String teamId, @PathVariable String userId){
         teamService.deleteUserFromTeam(teamId, userId);
         return ResponseEntity.ok().build();
     }
-
+    // 팀 생성
     @PostMapping("/createTeam")
     public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO){
 
@@ -64,7 +65,7 @@ public class TeamController {
         List<TeamDTO> dtos = makeTeamDtoListFromEntityList(teamEntity);
         return ResponseEntity.ok().build();
     }
-
+    // 팀에 새로운 Todo를 추가
     @PostMapping("/createTeamTodo/{teamId}")
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
@@ -73,27 +74,27 @@ public class TeamController {
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
         return ResponseEntity.ok().build();
     }
-
+    // 팀의 Todo를 삭제
     @DeleteMapping("/deleteTeamTodo/{teamId}/{teamTodoId}")
     public ResponseEntity<?> deleteTeamTodo(@PathVariable String teamId, @PathVariable String teamTodoId){
         teamService.deleteTeamTodo(teamId, teamTodoId);
         return ResponseEntity.ok().build();
     }
-
+    // 팀의 Todo목록을 조회
     @GetMapping("/getTeamTodo/{teamId}")
     public ResponseEntity<?> getTeamTodo(@PathVariable String teamId){
         List<TeamTodo> todoEntity = teamService.getTeamTodo(teamId);
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().body(dtos);
     }
-
+    // 팀의 Todo를 업데이트
     @PutMapping("/updateTeamTodo/{teamId}/{teamTodoId}")
     public ResponseEntity<?> updateTeamTodo(@PathVariable Long teamId, @PathVariable Long teamTodoId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo updatedTeamTodo = teamService.updateTeamTodo(teamTodoDTO, teamId, teamTodoId);
         TeamTodoDTO dto = TeamTodoDTO.from(updatedTeamTodo);
         return ResponseEntity.ok().body(dto);
     }
-
+    //팀에 개인일정을 추가
     @PostMapping("/inputSchedule/{teamId}/{todoId}")
     public ResponseEntity<?> inputSchedule(@PathVariable Long teamId, @PathVariable Long todoId, @RequestBody TeamScheduleDTO teamScheduleDTO){
         TeamSchedule entity = TeamScheduleDTO.toEntity(teamScheduleDTO);
@@ -103,14 +104,14 @@ public class TeamController {
         List<TeamScheduleDTO> dtos =makeTeamScheduleDtoListFromEntiyList(teamScheduleEntity);
         return ResponseEntity.ok().build();
     }
-
+    //팀에 들어가있는 개인 일정을 조회
     @GetMapping("/getSchedule/{teamId}")
     public ResponseEntity<?> getScheduleFromTeam(@PathVariable Long teamId){
         List<TeamSchedule> entity = teamService.getSchedule(teamId);
         List<TeamScheduleDTO> dtos = makeTeamScheduleDtoListFromEntiyList(entity);
         return ResponseEntity.ok().body(dtos);
     }
-
+    //팀에 들어가있는 개인 일정을 삭제
     @DeleteMapping("/deleteSchedule/{teamId}/{todoId}")
     public ResponseEntity<?> deleteScheduleFromTeam(@PathVariable Long teamId, @PathVariable Long todoId){
         teamService.deleteSchedule(teamId, todoId);
@@ -158,7 +159,6 @@ public class TeamController {
         }
         return teamScheduleDTOList;
     }
-
     private List<TeamTogetherDTO> makeTeamTogetherDtoListFromEntityList(List<TeamTogether> teamTogetherEntities){
         List<TeamTogetherDTO> teamTogetherDTOList = new ArrayList<>();
 
