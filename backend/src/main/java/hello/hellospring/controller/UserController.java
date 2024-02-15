@@ -52,7 +52,7 @@ public class UserController {
         return new RedirectView(redirectUrl);
     }
 
-    @PutMapping("/api/v1/user/{userId}")
+    @RequestMapping(value = "/api/v1/user/{userId}", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody UserDTO userDTO) {
         try {
             userService.updateUser(Long.valueOf(userId), userDTO);

@@ -13,6 +13,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import styled, { ThemeProvider } from 'styled-components/native';
 import ImagePicker, { launchImageLibrary } from 'react-native-image-picker';
 import { decode } from 'base-64';
+import axios from 'axios';
 
 import images from '../components/images';
 import theme from '../components/theme';
@@ -67,34 +68,49 @@ const Register = () => {
 
 	const [selectedTheme, setSelectedTheme] = useState(theme.OrangeTheme);
 	const [Buttonclicked, setButtonClicked] = useState(false);
-	const [inputName, setInputName] = useState('');
+	const [inputName, setInputName] = useState("");
 	const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-	const [selectedStartTime, setSelectedStartTime] = useState('');
-	const [selectedEndTime, setSelectedEndTime] = useState('');
-	const [selectedDiaryTime, setSelectedDiaryTime] = useState('');
+	const [selectedStartTime, setSelectedStartTime] = useState("");
+	const [selectedEndTime, setSelectedEndTime] = useState("");
+	const [selectedDiaryTime, setSelectedDiaryTime] = useState("");
 	const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 	const [isDiaryTimePickerVisible, setDiaryTimePickerVisible] = useState(false);
 
 	useEffect(() => {
 		const fetchAndDecodeToken = async () => {
-			const storedToken = await AsyncStorage.getItem('token');
-			console.log('Stored Token:', storedToken);
-			setToken(storedToken);
-			const userId = getUserIdFromToken(storedToken);
-			console.log('Decoded User ID:', userId);
+			try {
+				const storedToken = await AsyncStorage.getItem('token');
+				console.log('Stored Token:', storedToken);
+				setToken(storedToken);
+				const userId = getUserIdFromToken(storedToken);
+				console.log('Decoded User ID:', userId);
+			} catch (error) {
+				console.error('Error fetching token:', error);
+			}
 		};
 		fetchAndDecodeToken();
 	}, []);
+	
 
 	const getUserIdFromToken = (token) => {
-		const payload = token.split('.')[1];
-		const base642 = payload.replace(/-/g, '+').replace(/_/g, '/');
-		const decodedPayload = decode(base642);
-		const decodedJSON = JSON.parse(decodedPayload);
-
-		return decodedJSON.id.toString();
-	};
+		if (!token) {
+			return null;
+		}
+		try {
+			const actualToken = token || '';
+			const payload = actualToken.split('.')[1];
+			const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+			const decodedPayload = decode(base64);
+			const decodedJSON = JSON.parse(decodedPayload);
+		
+			return decodedJSON.id.toString();
+		} catch (error) {
+			console.error('Error decoding token:', error);
+			return null;
+		}
+	  };
+	  
 
 	const showDatePicker = (type) => {
 		switch (type) {
@@ -140,38 +156,68 @@ const Register = () => {
 
 	const postUser = async () => {
 		try {
-			const token = await AsyncStorage.getItem('token');
-			if (!token) {
+			const storedToken = await AsyncStorage.getItem('token');
+			if (!storedToken) {
 				console.log('Token not found');
 				return;
 			}
 	
-			const userId = getUserIdFromToken(token);
-		
-			const response = await fetch(`/api/v1/user/${userId}`, {
-				method: 'PUT',
+			const userId = getUserIdFromToken(storedToken);
+	
+			// AsyncStorage에 값들을 저장
+			await AsyncStorage.multiSet([
+				['inputName', inputName],
+				['selectedTheme', JSON.stringify(selectedTheme)],
+				['selectedDiaryTime', selectedDiaryTime],
+				['selectedStartTime', selectedStartTime],
+				['selectedEndTime', selectedEndTime],
+				['imageFile', imageFile]
+			]);
+	
+			
+			const UserData = {
 				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${token}`,
+					"Content-Type": "multipart/form-data",
 				},
-				body: JSON.stringify({
+				body: {
 					userNickname: inputName,
 					userColor: selectedTheme,
 					diaryTime: selectedDiaryTime,
 					muteStartTime: selectedStartTime,
 					muteEndTime: selectedEndTime,
 					userProfile: imageFile,
-				}),
+				},
+			};
+			
+
+			// 서버로 값들을 전송
+			const response = await axios.put(`http://192.168.30.112:4000/api/v1/user/${userId}`, UserData);
+			//const { response } = await axios({UserData, url:`http://localhost:8000/api/v1/user/${userId}`});
+			/*
+			const response = await axios({
+				method: 'put',
+				url: `http://localhost:4000/api/v1/user/${userId}`,
+				data: {
+					userNickname: inputName,
+					userColor: selectedTheme,
+					diaryTime: selectedDiaryTime,
+					muteStartTime: selectedStartTime,
+					muteEndTime: selectedEndTime,
+					userProfile: imageFile,
+				}
 			});
-		
+			*/
+	
 			if (response.status === 200 || response.status === 201) {
-				await AsyncStorage.setItem('userTheme', selectedTheme);
+				await AsyncStorage.setItem('userTheme', JSON.stringify(selectedTheme));
 				navigation.navigate('Register_Success', { currentTheme: selectedTheme });
 			}
 		} catch (error) {
 			console.error('Error posting user data:', error);
 		}
 	};
+	
+	
 
 	const [response, setResponse] = useState("");
 	const [imageFile, setImageFile] = useState("");
@@ -195,6 +241,15 @@ const Register = () => {
 				setImageFile(response.assets[0].base64);
 			}
 		);
+	};
+
+	const handleSubmit = async () => {
+		try {
+			await postUser();
+			await AsyncStorage.setItem('userColor', selectedTheme.color1);
+		} catch (error) {
+			console.error('사용자 정보 전송 또는 AsyncStorage 저장 중 오류가 발생했습니다:', error);
+		}
 	};
 
 	return (
@@ -291,7 +346,7 @@ const Register = () => {
 							))}
 						</HorisontalView>
 
-						<ResultButton onPress={postUser}>
+						<ResultButton onPress={handleSubmit}>
 							<RegularText color="white" style={{ marginTop: 0, fontSize: 15 }}>
 								완료
 							</RegularText>

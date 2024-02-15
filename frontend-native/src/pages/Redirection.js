@@ -15,8 +15,9 @@ const Redirection = () => {
         axios
           .post(`http://192.168.30.112:4000/authnative?code=${code}`)
           .then(async res => {
-            const token = res.headers.authorization;
-            await AsyncStorage.setItem('token', token);
+			const params = new URLSearchParams(location.search);
+			  const token = params.get("token");
+			  await AsyncStorage.setItem(token);
             navigation.navigate('Register');
           })
           .catch(err => console.log(err));
