@@ -12,8 +12,8 @@ import {
 import { backgrounds, lighten } from "polished";
 import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import theme from "../styles/theme"; // 테마 파일 불러오기
-import DiaryItem from "../pages/DiaryItem"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때
-import DiaryDetailPage from "../pages/DiaryDetailPage";
+import DiaryList from "./DiaryList"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때
+import DiaryPage from "../pages/DiaryPage";
 
 const MainDiv = styled.div`
   height: auto;
@@ -22,7 +22,6 @@ const MainDiv = styled.div`
   align-items: center;
   margin-right: 300px;
   margin-left: 300px;
-
   @media (max-width: 1050px) {
     margin-left: 0;
     padding-left: 20px;
@@ -38,37 +37,23 @@ const dummyDiaries = [
 ];
 
 function Diary() {
-  const [diaries, setDiaries] = useState(dummyDiaries); // 초기값을 dummyDiaries로 설정
-  const [selectedDiaryId, setSelectedDiaryId] = useState(null); // 선택된 일기 ID 상태
-
-  // 일기 항목 클릭 이벤트 핸들러
-  const handleDiaryClick = id => {
-    setSelectedDiaryId(id); // 클릭된 일기 ID로 상태 업데이트
-  };
-
-  // 선택된 일기의 세부 정보를 표시하는 함수
-  const renderDiaryDetail = () => {
-    // selectedDiaryId가 있을 때만 DiaryDetailPage 컴포넌트를 렌더링
-    if (selectedDiaryId) {
-      const selectedDiary = diaries.find(diary => diary.id === selectedDiaryId);
-      return <DiaryDetailPage diary={selectedDiary} />;
-    }
-    // 선택된 일기가 없다면 null 반환
-    return null;
-  };
+  const [diaries, setDiaries] = useState(dummyDiaries);
+  const [selectedDiaryId, setSelectedDiaryId] = useState(null);
 
   return (
     <ThemeProvider theme={theme}>
       <MainDiv>
         <h1>일기 목록</h1>
         {diaries.map(diary => (
-          <DiaryItem
-            key={diary.id}
-            diary={diary}
-            onClick={() => handleDiaryClick(diary.id)} // 클릭 이벤트 핸들러 추가
-          />
+          <React.Fragment key={diary.id}>
+            <DiaryList
+              diary={diary}
+              onClick={() => setSelectedDiaryId(diary.id)} // 클릭 이벤트 핸들러
+            />
+            {/* 선택된 일기의 내용을 바로 아래에 렌더링 */}
+            {selectedDiaryId === diary.id && <DiaryPage diary={diary} />}
+          </React.Fragment>
         ))}
-        {renderDiaryDetail()} {/* 선택된 일기의 세부 정보 렌더링 */}
       </MainDiv>
     </ThemeProvider>
   );

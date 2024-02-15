@@ -12,7 +12,7 @@ import Diary from "../pages/Diary"; // Diary 컴포넌트 import
 import Coop from "../pages/Coop"; // Coop 컴포넌트 import
 import Setting from "../pages/Setting"; // Setting 컴포넌트 import
 import Stat from "../pages/Stat"; // Stat 컴포넌트 import
-import DiaryDetailPage from "../pages/DiaryDetailPage"; // DiaryDetailPage 컴포넌트 import
+import DiaryPage from "../pages/DiaryPage"; // DiaryDetailPage 컴포넌트 import
 
 const PageLayout = styled.div`
   display: flex;
@@ -260,7 +260,7 @@ function Main() {
       case "Diary":
         return <Diary onDiarySelect={setDiaryId} />;
       case "DiaryDetail":
-        return <DiaryDetailPage diaryId={diaryId} />;
+        return <DiaryPage diaryId={diaryId} />;
       case "Coop":
         return <Coop />;
       case "Stat":
