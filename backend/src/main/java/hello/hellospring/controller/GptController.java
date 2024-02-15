@@ -3,6 +3,7 @@ package hello.hellospring.controller;
 import hello.hellospring.dto.ChatDTO;
 import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
+import hello.hellospring.service.GptDiaryService;
 import hello.hellospring.service.GptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +15,16 @@ import java.util.Map;
 public class GptController {
 
     private final GptService gptService; //service 참조
+    private final GptDiaryService gptDiaryService; // service 참조2
     private final ChatRepository chatRepository; // repository 참조
 
+
     @Autowired
-    public GptController(GptService gptService, ChatRepository chatRepository) {
+    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
+        this.gptDiaryService = gptDiaryService;
     }
 
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출
@@ -48,7 +52,7 @@ public class GptController {
             return gptResponse;
         } catch (Exception e) {
             e.printStackTrace();
-            return "GPT API 호출 오류가 발생했습니다.";
+            return "GPT API 호출 오류가 발생했어요... ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";
         }
 
     }
@@ -57,5 +61,21 @@ public class GptController {
     public List<Chat> getChatListByUserId(@PathVariable Long userId) {
         return chatRepository.findByUserId(userId);
     }
+
+    @GetMapping("/api/v3/createDiary/{userId}")
+    public String createDiary(@PathVariable Long userId){
+        try {
+            // userId에 해당하는 chatContent들로 일기 생성
+            return gptDiaryService.createDiary(userId);
+        } catch (Exception e){
+            e.printStackTrace();
+            return "일기 생성 중 오류가 발생했어요... :(";
+        }
+
+    }
+
+
+
+
 
 }

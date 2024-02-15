@@ -2,6 +2,7 @@ package hello.hellospring.service;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -11,9 +12,12 @@ import java.net.http.HttpResponse;
 
 @Service
 public class GptService {
-    private static final String API_KEY = "API 숨겼지롱"; // 환경변수에서 API 키를 불러오기
+    // GPT 대화 관련 API
 
-    public static String askGpt(String userMessage) throws Exception {
+    @Value("${openai.api.key}")
+    private String API_KEY; // 환경변수에서 API 키를 불러오기
+
+    public String askGpt(String userMessage) throws Exception {
         String responseBody = "";
 
         JSONArray messagesArray = new JSONArray();
@@ -50,4 +54,5 @@ public class GptService {
             return "사용가능한 content가 아니에요!! :(";
         }
     }
+
 }
