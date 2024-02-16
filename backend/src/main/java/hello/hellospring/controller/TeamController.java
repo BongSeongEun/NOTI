@@ -1,13 +1,7 @@
 package hello.hellospring.controller;
 
-import hello.hellospring.dto.TeamDTO;
-import hello.hellospring.dto.TeamScheduleDTO;
-import hello.hellospring.dto.TeamTodoDTO;
-import hello.hellospring.dto.TeamTogetherDTO;
-import hello.hellospring.model.Team;
-import hello.hellospring.model.TeamSchedule;
-import hello.hellospring.model.TeamTodo;
-import hello.hellospring.model.TeamTogether;
+import hello.hellospring.dto.*;
+import hello.hellospring.model.*;
 import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -53,9 +47,9 @@ public class TeamController {
         teamService.deleteUserFromTeam(teamId, userId);
         return ResponseEntity.ok().build();
     }
-    // 팀 생성
+    // 팀 생성 및 메모 생성
     @PostMapping("/createTeam")
-    public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO){
+    public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO, TeamMemoDTO teamMemoDTO){
 
         Random random = new Random();
 
@@ -63,8 +57,15 @@ public class TeamController {
         entity.setTeamRandNum((long) random.nextInt(99999999));
         List<Team> teamEntity = teamService.createTeamTitle(entity);
         List<TeamDTO> dtos = makeTeamDtoListFromEntityList(teamEntity);
-        return ResponseEntity.ok().build();
+
+        TeamMemo teamMemoEntity = TeamMemoDTO.toEntity(teamMemoDTO);
+        teamMemoEntity.setTeamId(entity.getTeamRandNum());
+        List<TeamMemo> memoEntity = teamService.createTeamMemo(teamMemoEntity);
+        List<TeamMemoDTO> dtoss = makeTeamMemoDtoListFromEntityList(memoEntity);
+
+        return ResponseEntity.ok().body(dtos);
     }
+
     // 팀에 새로운 Todo를 추가
     @PostMapping("/createTeamTodo/{teamId}")
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
@@ -118,13 +119,26 @@ public class TeamController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/getTeamMemo/{teamId}")
+    public ResponseEntity<?> getTeamMemo(@PathVariable Long teamId){
+        List<TeamMemo> entity = teamService.getTeamMemo(teamId);
+        List<TeamMemoDTO> dtos = makeTeamMemoDtoListFromEntityList(entity);
+        return ResponseEntity.ok().body(dtos);
+    }
+
+    @PutMapping("/updateTeamMemo/{teamId}/{teamMemoId}")
+    public ResponseEntity<TeamMemoDTO> updateTeamMemo(@PathVariable Long teamId, @PathVariable Long teamMemoId, @RequestBody TeamMemoDTO teamMemoDTO){
+        TeamMemo updatedMemo = teamService.updateTeamMemo(teamMemoDTO, teamId, teamMemoId);
+        TeamMemoDTO dto = TeamMemoDTO.from(updatedMemo);
+        return ResponseEntity.ok().body(dto);
+    }
+
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
         List<TeamDTO> teamDTOList = new ArrayList<>();
 
         for(Team teamEntity : teamEntities){
             TeamDTO teamDTO = TeamDTO.builder()
                     .teamId(teamEntity.getTeamId())
-                    .teamTitle(teamEntity.getTeamTitle())
                     .teamRandNum(teamEntity.getTeamRandNum())
                     .build();
             teamDTOList.add(teamDTO);
@@ -145,6 +159,19 @@ public class TeamController {
             teamTodoDTOList.add(teamTodoDTO);
         }
         return teamTodoDTOList;
+    }
+    private List<TeamMemoDTO> makeTeamMemoDtoListFromEntityList(List<TeamMemo> teamMemoEntities){
+        List<TeamMemoDTO> teamMemoDTOList = new ArrayList<>();
+
+        for(TeamMemo teamMemoEntity : teamMemoEntities){
+            TeamMemoDTO teamMemoDTO = TeamMemoDTO.builder()
+                    .teamMemoId(teamMemoEntity.getTeamMemoId())
+                    .memoContent(teamMemoEntity.getMemoContent())
+                    .teamId(teamMemoEntity.getTeamId())
+                    .build();
+            teamMemoDTOList.add(teamMemoDTO);
+        }
+        return teamMemoDTOList;
     }
     private List<TeamScheduleDTO> makeTeamScheduleDtoListFromEntiyList(List<TeamSchedule> teamScheduleEntities){
         List<TeamScheduleDTO> teamScheduleDTOList = new ArrayList<>();
@@ -167,6 +194,7 @@ public class TeamController {
                     .teamTogetherId(teamTogetherEntity.getTeamTogetherId())
                     .userId(teamTogetherEntity.getUserId())
                     .teamId(teamTogetherEntity.getTeamId())
+                    .teamTitle(teamTogetherEntity.getTeamTitle())
                     .build();
             teamTogetherDTOList.add(teamTogetherDTO);
         }
@@ -174,3 +202,4 @@ public class TeamController {
     }
 
 }
+

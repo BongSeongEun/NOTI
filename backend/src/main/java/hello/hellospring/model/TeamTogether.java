@@ -21,10 +21,14 @@ public class TeamTogether {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "team_title")
+    private String teamTitle;
+
     @Builder
-    public TeamTogether(Long teamTogetherId, Long teamId, Long userId){
+    public TeamTogether(Long teamTogetherId, Long teamId, Long userId, String teamTitle){
         this.teamTogetherId = teamTogetherId;
         this.teamId = teamId;
         this.userId = userId;
+        this.teamTitle = teamTitle;
     }
 }

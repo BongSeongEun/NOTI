@@ -1,11 +1,9 @@
 package hello.hellospring.service;
 
+import hello.hellospring.dto.TeamMemoDTO;
 import hello.hellospring.dto.TeamScheduleDTO;
 import hello.hellospring.dto.TeamTodoDTO;
-import hello.hellospring.model.Team;
-import hello.hellospring.model.TeamSchedule;
-import hello.hellospring.model.TeamTodo;
-import hello.hellospring.model.TeamTogether;
+import hello.hellospring.model.*;
 import hello.hellospring.repository.*;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,5 +97,27 @@ public class TeamService {
         teamScheduleRepository.deleteByTeamIdAndTodoId(teamId, todoId);
         return getSchedule(teamId);
     }
+
+    public List<TeamMemo> getTeamMemo(Long teamId){
+        return teamMemoRepository.findByTeamId(teamId);
+    }
+
+    public List<TeamMemo> createTeamMemo(TeamMemo teamMemo){
+        teamMemoRepository.save(teamMemo);
+        return teamMemoRepository.findByTeamId(teamMemo.getTeamId());
+    }
+
+    public TeamMemo updateTeamMemo(TeamMemoDTO teamMemoDTO, Long teamId, Long teamMemoId){
+        TeamMemo originalTeamMemo = teamMemoRepository.findByTeamIdAndTeamMemoId(teamId, teamMemoId);
+        originalTeamMemo.setMemoContent(teamMemoDTO.getMemoContent());
+        teamMemoRepository.save(originalTeamMemo);
+
+        return originalTeamMemo;
+    }
+//    @Transactional
+//    public List<TeamMemo> deleteTeamMemo(Long teamId, Long teamMemoId){
+//        teamMemoRepository.deleteByTeamIdAndTeamMemoId(teamId, teamMemoId);
+//        return getTeamMemo(teamId);
+//    }
 
 }

@@ -15,12 +15,14 @@ public class TeamTogetherDTO {
     private Long teamTogetherId;
     private Long teamId;
     private Long userId;
+    private String teamTitle;
 
     public static TeamTogether toEntity(final TeamTogetherDTO dto){
         return TeamTogether.builder()
                 .teamTogetherId(dto.getTeamTogetherId())
                 .userId(dto.getUserId())
                 .teamId(dto.teamId)
+                .teamTitle(dto.getTeamTitle())
                 .build();
     }
 
