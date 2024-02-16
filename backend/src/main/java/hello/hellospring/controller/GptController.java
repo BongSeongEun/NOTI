@@ -3,8 +3,8 @@ package hello.hellospring.controller;
 import hello.hellospring.dto.ChatDTO;
 import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
-import hello.hellospring.service.GptDiaryService;
-import hello.hellospring.service.GptService;
+import hello.hellospring.service.AI.GptDiaryService;
+import hello.hellospring.service.AI.GptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,10 +58,11 @@ public class GptController {
 
     @GetMapping("/api/v3/chatlist/{userId}") // 채팅내역 가져오기
     public List<Chat> getChatListByUserId(@PathVariable Long userId) {
+
         return chatRepository.findByUserId(userId);
     }
 
-    @GetMapping("/api/v3/createDiary/{userId}")
+    @GetMapping("/api/v3/createDiary/{userId}") // 일기생성하기
     public String createDiary(@PathVariable Long userId){
         try {
             // userId에 해당하는 chatContent들로 일기 생성
@@ -72,5 +73,6 @@ public class GptController {
         }
 
     }
+
 
 }

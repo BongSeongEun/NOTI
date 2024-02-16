@@ -1,4 +1,4 @@
-package hello.hellospring.service;
+package hello.hellospring.service.AI;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

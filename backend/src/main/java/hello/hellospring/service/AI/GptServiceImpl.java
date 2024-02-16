@@ -1,10 +1,9 @@
-package hello.hellospring.service.Impl;
+package hello.hellospring.service.AI;
 
 import hello.hellospring.model.Chat;
 import hello.hellospring.model.Diary;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.DiaryRepository;
-import hello.hellospring.service.GptDiaryService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

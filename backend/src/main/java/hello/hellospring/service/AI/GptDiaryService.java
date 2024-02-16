@@ -1,4 +1,4 @@
-package hello.hellospring.service;
+package hello.hellospring.service.AI;
 
 public interface GptDiaryService {
     String askGpt(String userMessage) throws Exception;
