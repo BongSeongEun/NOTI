@@ -21,14 +21,10 @@ public class TeamMemo {
     @Column(name = "memo_content")
     private String memoContent;
 
-    @Column(name = "memo_title")
-    private String memoTitle;
-
     @Builder
-    public TeamMemo(Long teamMemoId, Long teamId, String memoContent, String memoTitle){
+    public TeamMemo(Long teamMemoId, Long teamId, String memoContent){
         this.teamMemoId = teamMemoId;
         this.teamId = teamId;
         this.memoContent = memoContent;
-        this.memoTitle = memoTitle;
     }
 }
