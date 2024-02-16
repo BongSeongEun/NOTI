@@ -1,17 +1,15 @@
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
-/* eslint-disable react-native/no-inline-styles */
-/* eslint-disable no-undef */
-/* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable prettier/prettier */
-/* eslint-disable quotes */
+
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, TouchableOpacity, Image, Text, Switch } from 'react-native';
+import { ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import styled, { ThemeProvider } from 'styled-components/native';
-import ImagePicker, { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { decode } from 'base-64';
 import axios from 'axios';
 
@@ -91,10 +89,14 @@ const Register = () => {
 	};
 
 	const handleTimePickerConfirm = (type, date) => {
-		const hours = date.getHours();
-		const minutes = date.getMinutes();
+		let hours = date.getHours();
+		let minutes = date.getMinutes();
+	
+		hours = hours < 10 ? `0${hours}` : hours;
+		minutes = minutes < 10 ? `0${minutes}` : minutes;
+	
 		const formattedTime = `${hours}:${minutes}`;
-
+	
 		switch (type) {
 			case 'startTime':
 				setSelectedStartTime(formattedTime);
@@ -108,9 +110,10 @@ const Register = () => {
 			default:
 				break;
 		}
-
+	
 		hideDatePicker();
 	};
+	
 
 	const postUser = async () => {
 		try {
@@ -123,45 +126,28 @@ const Register = () => {
 	  
 		  const userId = getUserIdFromToken(storedToken);
 	  
-		  await AsyncStorage.multiSet([
-			['inputName', inputName],
-			['selectedTheme', JSON.stringify(selectedTheme)],
-			['selectedDiaryTime', selectedDiaryTime],
-			['selectedStartTime', selectedStartTime],
-			['selectedEndTime', selectedEndTime],
-			['imageFile', imageFile],
-		  ]);
-	  
-		  const baseURL = 'http://192.168.30.48:4000';
-	  
-		  const response = await axios.put(`/api/v1/user/${userId}`, {
-			userNickname: inputName,
-			userColor: selectedTheme,
-			diaryTime: selectedDiaryTime,
-			muteStartTime: selectedStartTime,
-			muteEndTime: selectedEndTime,
-			userProfile: imageFile,
+  			const response = await axios.put(`http://192.168.30.48:4000/api/v1/user/${userId}`, {
+				userNickname: String(inputName),
+				userColor: String(selectedTheme), 
+				diaryTime: String(selectedDiaryTime),
+				muteStartTime: String(selectedStartTime),
+				muteEndTime: String(selectedEndTime),
+				userProfile: String(imageFile),
 		  }, {
-			baseURL: baseURL,
 			headers: {
-			  "Content-Type": "application/json",
-			  'Authorization': `Bearer ${token}`,
+			  'Authorization': `Bearer ${storedToken}`,
 			},
 		  });
 	  
 		  if (response.status === 200 || response.status === 201) {
-			await AsyncStorage.setItem('userTheme', JSON.stringify(selectedTheme));
+			await AsyncStorage.setItem('userTheme', String(selectedTheme));
 			navigation.navigate('Register_Success', { currentTheme: selectedTheme });
 		  }
 		} catch (error) {
 		  console.error('Error posting user data:', error);
 		}
-	  };
-	  
+	};
 	
-	
-	
-
 	const [response, setResponse] = useState("");
 	const [imageFile, setImageFile] = useState("");
 
@@ -195,13 +181,26 @@ const Register = () => {
 		}
 	};
 
+
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+
+	const handleThemeChange = selectedThemeName  => {
+		const newTheme = theme[selectedThemeName ];
+		if (newTheme) {
+		  setCurrentTheme(newTheme); // UI 상에서 테마를 적용
+		  setSelectedTheme(selectedThemeName ); // 선택된 테마 이름을 상태에 저장
+		} else {
+		  console.error("Selected theme does not exist:", selectedThemeName );
+		}
+	  };
+
 	return (
-		<ThemeProvider theme={selectedTheme}>
+		<ThemeProvider theme={currentTheme}>
 			<FullView>
 				<ScrollView>
 					<MainView>
 						<MainText>
-						가입을 축하드려요! {'\n'} 프로필을 등록해보세요
+							가입을 축하드려요! {'\n'} 프로필을 등록해보세요
 						</MainText>
 						<HorisontalView>
 							<Images
@@ -280,15 +279,27 @@ const Register = () => {
 
 						<RegularText>테마 선택</RegularText>
 						<HorisontalView>
-							{Object.keys(theme).map((themeKey) => (
-								<ThemedButton
-								key={themeKey}
-								style={{ backgroundColor: theme[themeKey].color1 }}
-								onPress={() => setSelectedTheme(theme[themeKey])}
-								/>
-							))}
+							<ThemedButton
+							style={{ backgroundColor: theme.OrangeTheme.color1 }}
+							onPress={() => handleThemeChange("OrangeTheme")}
+							></ThemedButton>
+							<ThemedButton
+							style={{ backgroundColor: theme.RedTheme.color1 }}
+							onPress={() => handleThemeChange("RedTheme")}
+							></ThemedButton>
+							<ThemedButton
+							style={{ backgroundColor: theme.PinkTheme.color1 }}
+							onPress={() => handleThemeChange("PinkTheme")}
+							></ThemedButton>
+							<ThemedButton
+							style={{ backgroundColor: theme.GreenTheme.color1 }}
+							onPress={() => handleThemeChange("GreenTheme")}
+							></ThemedButton>
+							<ThemedButton
+							style={{ backgroundColor: theme.BlueTheme.color1 }}
+							onPress={() => handleThemeChange("BlueTheme")}
+							></ThemedButton>
 						</HorisontalView>
-
 						<ResultButton onPress={handleSubmit}>
 							<RegularText color="white" style={{ marginTop: 0, fontSize: 15 }}>
 								완료
@@ -394,12 +405,6 @@ const DisturbTimeButton = styled.Switch.attrs((props) => ({
   },
 }))`
   margin-top: 10px;
-`;
-
-const TimeSelectionTextBox = styled(TextBox)`
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
 `;
 
 const ThemedButton = styled.TouchableOpacity`
