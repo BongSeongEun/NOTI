@@ -41,7 +41,7 @@ const DateHeader = styled.div`
 `;
 
 const TeamList = styled.div`
-  width: 70%;
+  width: 80%;
   height: auto;
   padding: 10px;
   border-radius: 10px;
@@ -58,15 +58,32 @@ const TeamItem = styled.div`
     background-color: #f0f0f0;
   }
 `;
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; // 부모 컨테이너의 너비가 정의되어야 합니다.
+`;
 
 const AddTeamButton = styled.button`
-  margin-top: 20px;
-  padding: 10px 20px;
+  margin-right: 15px;
+  margin-top: 10px;
+  padding: 5px 10px;
   background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+`;
+
+const TeamTitle = styled.h4`
+  margin: 0;
+  color: #333;
+`;
+
+const TeamDate = styled.div`
+  margin-top: 5px;
+  font-size: 0.8em;
+  color: #666;
 `;
 
 // 모달 및 입력 필드 스타일 추가
@@ -99,7 +116,7 @@ const InputField = styled.input`
 
 const CreateTeamButton = styled.button`
   padding: 10px 20px;
-  background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  background-color: ${props => props.theme.color2 || theme.OrangeTheme.color2};
   color: white;
   border: none;
   border-radius: 5px;
@@ -193,9 +210,11 @@ function Coop({ onSelectTeam }) {
     <ThemeProvider theme={currentTheme}>
       <MainDiv>
         <DateHeader>협업 목록</DateHeader>
-        <AddTeamButton onClick={() => setShowModal(true)}>
-          새 협업 팀 추가
-        </AddTeamButton>
+        <ButtonContainer>
+          <AddTeamButton onClick={() => setShowModal(true)}>
+            + add Team
+          </AddTeamButton>
+        </ButtonContainer>
         {showModal && (
           <ModalBackdrop>
             <ModalContainer onClick={e => e.stopPropagation()}>
@@ -212,7 +231,8 @@ function Coop({ onSelectTeam }) {
         <TeamList>
           {teams.map(team => (
             <TeamItem key={team.teamId} onClick={() => handleTeamClick(team)}>
-              {team.teamTitle}
+              <TeamTitle>{team.teamTitle}</TeamTitle>
+              <TeamDate>참여 인원 : </TeamDate>
             </TeamItem>
           ))}
         </TeamList>
