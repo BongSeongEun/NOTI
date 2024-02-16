@@ -52,7 +52,7 @@ public class GptController {
             return gptResponse;
         } catch (Exception e) {
             e.printStackTrace();
-            return "GPT API 호출 오류가 발생했어요... ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";
+            return "GPT API 호출 오류가 발생했어요...ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";
         }
 
     }

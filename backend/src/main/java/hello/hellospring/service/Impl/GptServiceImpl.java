@@ -51,7 +51,10 @@ public class GptServiceImpl implements GptDiaryService {
             messagesArray.put(new JSONObject().put("role", "system")
                     .put("content", "이것들은 오늘 나의 대화내용이야. 이 내용들을 조합해서 하루 일기를 작성해줘. " +
                             "모든 내용을 조합할 필요는 없고 많이 언급된 토픽들 위주로 일기를 생성해줘. 마치 내가 쓴것처럼." +
-                            "모든것은 존댓말로 통일해줘"));
+                            "모든것은 존댓말로 통일해줘" +
+                            "했던말은 반복하지마" +
+                            "몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
+                            "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘"));
             messagesArray.put(new JSONObject().put("role", "user").put("content", diaryInputs));
 
             JSONObject jsonBody = new JSONObject();
