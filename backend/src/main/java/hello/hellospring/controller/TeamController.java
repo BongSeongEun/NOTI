@@ -48,8 +48,8 @@ public class TeamController {
         return ResponseEntity.ok().build();
     }
     // 팀 생성 및 메모 생성
-    @PostMapping("/createTeam")
-    public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO, TeamMemoDTO teamMemoDTO){
+    @PostMapping("/createTeam/{userId}")
+    public ResponseEntity<?> createTeam(@PathVariable Long userId, TeamDTO teamDTO, @RequestBody TeamTogetherDTO teamTogetherDTO, TeamMemoDTO teamMemoDTO){
 
         Random random = new Random();
 
@@ -62,6 +62,12 @@ public class TeamController {
         teamMemoEntity.setTeamId(entity.getTeamRandNum());
         List<TeamMemo> memoEntity = teamService.createTeamMemo(teamMemoEntity);
         List<TeamMemoDTO> dtoss = makeTeamMemoDtoListFromEntityList(memoEntity);
+
+        TeamTogether togetherEntity = TeamTogetherDTO.toEntity(teamTogetherDTO);
+        togetherEntity.setUserId(userId);
+        togetherEntity.setTeamId(entity.getTeamRandNum());
+        List<TeamTogether> teamTogetherEntity = teamService.createTeam(togetherEntity);
+        List<TeamTogetherDTO> dtosss = makeTeamTogetherDtoListFromEntityList(teamTogetherEntity);
 
         return ResponseEntity.ok().body(dtos);
     }
