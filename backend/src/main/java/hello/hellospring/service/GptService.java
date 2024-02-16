@@ -21,7 +21,9 @@ public class GptService {
         String responseBody = "";
 
         JSONArray messagesArray = new JSONArray();
-        messagesArray.put(new JSONObject().put("role", "system").put("content", "내가 하는 말에 대화가 안끊기도록 해줘"));
+        messagesArray.put(new JSONObject().put("role", "system").put("content", "내가 하는 말에 대화가 안끊기도록 해줘" +
+                "모든 대답은 존댓말로 해줘." +
+                "대답해줄땐 상냥하게 공감식 말투로 대답해줘"));
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
         JSONObject jsonBody = new JSONObject();

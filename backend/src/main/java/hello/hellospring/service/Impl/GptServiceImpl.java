@@ -46,46 +46,63 @@ public class GptServiceImpl implements GptDiaryService {
                 .map(Chat::getChatContent)
                 .collect(Collectors.joining(" "));
 
+        String diaryContent = ""; // 생성된 일기 내용을 저장할 변수
+        String diaryTitle = "";   // 생성된 일기 제목을 저장할 변수
+
         try {
-            JSONArray messagesArray = new JSONArray();
-            messagesArray.put(new JSONObject().put("role", "system")
-                    .put("content", "이것들은 오늘 나의 대화내용이야. 이 내용들을 조합해서 하루 일기를 작성해줘. " +
-                            "모든 내용을 조합할 필요는 없고 많이 언급된 토픽들 위주로 일기를 생성해줘. 마치 내가 쓴것처럼." +
-                            "모든것은 존댓말로 통일해줘" +
-                            "했던말은 반복하지마" +
-                            "몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
-                            "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘"));
-            messagesArray.put(new JSONObject().put("role", "user").put("content", diaryInputs));
+            diaryContent = callGptApi(diaryInputs, "이것들은 오늘 나의 대화내용이야. 이 내용들을 조합해서 하루 일기를 작성해줘. " +
+                    "모든 내용을 조합할 필요는 없고 많이 언급된 토픽들 위주로 일기를 생성해줘. 마치 내가 쓴것처럼." +
+                    "모든것은 존댓말로 통일해줘" +
+                    "했던말은 반복하지마" +
+                    "몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
+                    "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘");
 
-            JSONObject jsonBody = new JSONObject();
-            jsonBody.put("messages", messagesArray);
-            jsonBody.put("max_tokens", 1000);
-            jsonBody.put("n", 1);
-            jsonBody.put("temperature", 0.7);
-            jsonBody.put("model", "gpt-3.5-turbo");
+            // 생성된 일기 내용을 기반으로 제목 생성
+            diaryTitle = callGptApi(diaryContent, "이 일기 내용을 기반으로 일기 제목을 생성해줘." +
+                    "여기 내용중에 가장 많이 나온 내용을 토픽으로 제목을 써주면돼");
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.openai.com/v1/chat/completions"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + API_KEY)
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString()))
-                    .build();
+            return "제목: " + diaryTitle + "\n내용: " + diaryContent;
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String responseBody = response.body();
-
-            JSONObject jsonResponse = new JSONObject(responseBody);
-            JSONArray choices = jsonResponse.getJSONArray("choices");
-            if (choices.length() > 0) {
-                JSONObject firstChoice = choices.getJSONObject(0);
-                JSONObject message = firstChoice.getJSONObject("message");
-                String content = message.getString("content");
-                return content; // GPT로부터 생성된 일기 내용 반환
-            }
         } catch (Exception e) {
             e.printStackTrace();
+            return "일기 생성에 실패했어요....:(";
         }
-        return "일기 생성에 실패했습니다.";
+
     }
+    private String callGptApi(String inputs, String prompt) throws Exception {
+        JSONArray messagesArray = new JSONArray();
+        messagesArray.put(new JSONObject().put("role", "system").put("content", prompt));
+        messagesArray.put(new JSONObject().put("role", "user").put("content", inputs));
+
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("messages", messagesArray);
+        jsonBody.put("max_tokens", 1000);
+        jsonBody.put("n", 1);
+        jsonBody.put("temperature", 0.7);
+        jsonBody.put("model", "gpt-3.5-turbo");
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.openai.com/v1/chat/completions"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + API_KEY)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString()))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseBody = response.body();
+
+        JSONObject jsonResponse = new JSONObject(responseBody);
+        JSONArray choices = jsonResponse.getJSONArray("choices");
+        if (choices.length() > 0) {
+            JSONObject firstChoice = choices.getJSONObject(0);
+            JSONObject message = firstChoice.getJSONObject("message");
+            return message.getString("content"); // GPT로부터 생성된 일기 내용 반환
+        } else {
+            return "GPT생성 API 호출에 실패했어요... :(";
+        }
+
+    }
+
+
 }
