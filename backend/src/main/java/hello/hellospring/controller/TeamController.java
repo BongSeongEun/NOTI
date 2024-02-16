@@ -103,7 +103,7 @@ public class TeamController {
     }
     //팀에 개인일정을 추가
     @PostMapping("/inputSchedule/{teamId}/{todoId}")
-    public ResponseEntity<?> inputSchedule(@PathVariable Long teamId, @PathVariable Long todoId, @RequestBody TeamScheduleDTO teamScheduleDTO){
+    public ResponseEntity<?> inputSchedule(@PathVariable Long teamId, @PathVariable Long todoId, TeamScheduleDTO teamScheduleDTO){
         TeamSchedule entity = TeamScheduleDTO.toEntity(teamScheduleDTO);
         entity.setTeamId(teamId);
         entity.setTodoId(todoId);
@@ -161,6 +161,7 @@ public class TeamController {
                     .teamTodoDone(teamTodoEntity.isTeamTodoDone())
                     .teamTodoTitle(teamTodoEntity.getTeamTodoTitle())
                     .teamTodoDate(teamTodoEntity.getTeamTodoDate())
+                    .teamTodoColor((teamTodoEntity.getTeamTodoColor()))
                     .build();
             teamTodoDTOList.add(teamTodoDTO);
         }
