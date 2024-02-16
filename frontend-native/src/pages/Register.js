@@ -18,48 +18,6 @@ import axios from 'axios';
 import images from '../components/images';
 import theme from '../components/theme';
 
-/*
-const ImageUpload = ({ onFileChange }) => {
-  const [uploadedImage, setUploadedImage] = useState(null);
-
-  const handleImageUpload = () => {
-    ImagePicker.showImagePicker({ mediaType: 'photo' }, (response) => {
-      if (!response.didCancel && !response.error) {
-        setUploadedImage(response.uri);
-        onFileChange(response.uri);
-      }
-    });
-  };
-
-  return (
-    <View>
-      <TouchableOpacity onPress={handleImageUpload}>
-        <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 15 }}>
-          {uploadedImage && (
-            <Image
-              source={{ uri: uploadedImage }}
-              style={{
-                borderWidth: 3,
-                borderColor: 'red',
-                width: 80,
-                height: 80,
-                borderRadius: 40,
-                marginRight: 10,
-              }}
-            />
-          )}
-          {!uploadedImage && (
-            <Text style={{ borderWidth: 3, borderColor: 'red', width: 80, height: 80, borderRadius: 40 }}>
-              Upload
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-};
-*/
-
 const Register = () => {
 	const navigation = useNavigation();
 	const email = 'streethong@naver.com';
@@ -156,66 +114,51 @@ const Register = () => {
 
 	const postUser = async () => {
 		try {
-			const storedToken = await AsyncStorage.getItem('token');
-			if (!storedToken) {
-				console.log('Token not found');
-				return;
-			}
-	
-			const userId = getUserIdFromToken(storedToken);
-	
-			// AsyncStorage에 값들을 저장
-			await AsyncStorage.multiSet([
-				['inputName', inputName],
-				['selectedTheme', JSON.stringify(selectedTheme)],
-				['selectedDiaryTime', selectedDiaryTime],
-				['selectedStartTime', selectedStartTime],
-				['selectedEndTime', selectedEndTime],
-				['imageFile', imageFile]
-			]);
-	
-			
-			const UserData = {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-				body: {
-					userNickname: inputName,
-					userColor: selectedTheme,
-					diaryTime: selectedDiaryTime,
-					muteStartTime: selectedStartTime,
-					muteEndTime: selectedEndTime,
-					userProfile: imageFile,
-				},
-			};
-			
-
-			// 서버로 값들을 전송
-			const response = await axios.put(`http://192.168.30.112:4000/api/v1/user/${userId}`, UserData);
-			//const { response } = await axios({UserData, url:`http://localhost:8000/api/v1/user/${userId}`});
-			/*
-			const response = await axios({
-				method: 'put',
-				url: `http://localhost:4000/api/v1/user/${userId}`,
-				data: {
-					userNickname: inputName,
-					userColor: selectedTheme,
-					diaryTime: selectedDiaryTime,
-					muteStartTime: selectedStartTime,
-					muteEndTime: selectedEndTime,
-					userProfile: imageFile,
-				}
-			});
-			*/
-	
-			if (response.status === 200 || response.status === 201) {
-				await AsyncStorage.setItem('userTheme', JSON.stringify(selectedTheme));
-				navigation.navigate('Register_Success', { currentTheme: selectedTheme });
-			}
+		  const storedToken = await AsyncStorage.getItem('token');
+	  
+		  if (!storedToken) {
+			console.log('Token not found');
+			return;
+		  }
+	  
+		  const userId = getUserIdFromToken(storedToken);
+	  
+		  await AsyncStorage.multiSet([
+			['inputName', inputName],
+			['selectedTheme', JSON.stringify(selectedTheme)],
+			['selectedDiaryTime', selectedDiaryTime],
+			['selectedStartTime', selectedStartTime],
+			['selectedEndTime', selectedEndTime],
+			['imageFile', imageFile],
+		  ]);
+	  
+		  const baseURL = 'http://192.168.30.48:4000';
+	  
+		  const response = await axios.put(`/api/v1/user/${userId}`, {
+			userNickname: inputName,
+			userColor: selectedTheme,
+			diaryTime: selectedDiaryTime,
+			muteStartTime: selectedStartTime,
+			muteEndTime: selectedEndTime,
+			userProfile: imageFile,
+		  }, {
+			baseURL: baseURL,
+			headers: {
+			  "Content-Type": "application/json",
+			  'Authorization': `Bearer ${token}`,
+			},
+		  });
+	  
+		  if (response.status === 200 || response.status === 201) {
+			await AsyncStorage.setItem('userTheme', JSON.stringify(selectedTheme));
+			navigation.navigate('Register_Success', { currentTheme: selectedTheme });
+		  }
 		} catch (error) {
-			console.error('Error posting user data:', error);
+		  console.error('Error posting user data:', error);
 		}
-	};
+	  };
+	  
+	
 	
 	
 
