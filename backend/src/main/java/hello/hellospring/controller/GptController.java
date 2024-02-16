@@ -54,7 +54,6 @@ public class GptController {
             e.printStackTrace();
             return "GPT API 호출 오류가 발생했어요...ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";
         }
-
     }
 
     @GetMapping("/api/v3/chatlist/{userId}") // 채팅내역 가져오기
@@ -73,9 +72,5 @@ public class GptController {
         }
 
     }
-
-
-
-
 
 }

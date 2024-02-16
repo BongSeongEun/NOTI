@@ -15,6 +15,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,9 +72,12 @@ public class GptServiceImpl implements GptDiaryService {
             diary.setUserId(userId); //user_id에 저장
             diary.setDiaryTitle(diaryTitle); //diary_title에 저장
             diary.setDiaryContent(diaryContent); //diary_content에 저장
+
+            String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
+            diary.setDiaryDate(formattedDate); //diary_date에 저장
             diaryRepository.save(diary);
 
-            return "제목: " + diaryTitle + "\n내용: " + diaryContent;
+            return "제목: " + diaryTitle + "\n내용: " + diaryContent + "\n날짜: " + formattedDate;
 
         } catch (Exception e) {
             e.printStackTrace();
