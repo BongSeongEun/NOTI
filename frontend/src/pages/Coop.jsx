@@ -32,7 +32,7 @@ const MainDiv = styled.div`
 const DateHeader = styled.div`
   font-size: 24px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 3px;
   height: 40px;
   width: 100%;
   color: black;
@@ -40,18 +40,19 @@ const DateHeader = styled.div`
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
-const TeamList = styled.ul`
-  list-style: none;
-  padding: 0;
+const TeamList = styled.div`
+  width: 70%;
+  height: auto;
+  padding: 10px;
+  border-radius: 10px;
 `;
 
-const TeamItem = styled.li`
+const TeamItem = styled.div`
   margin: 10px 0;
   padding: 10px;
   border: 1px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
   border-radius: 8px;
-  width: 300px;
-  height: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   &:hover {
     background-color: #f0f0f0;
@@ -148,19 +149,12 @@ function Coop({ onSelectTeam }) {
   const fetchTeams = async () => {
     const userId = getUserIdFromToken();
     try {
-      const response = await axios.get(`/api/v1/getTeam/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(`/api/v1/getTeam/${userId}`);
       setTeams(response.data);
     } catch (error) {
       console.error("팀 목록을 불러오는데 실패했습니다:", error);
     }
   };
-
-  useEffect(() => {
-    fetchUserData(token);
-    fetchTeams();
-  }, [token]);
 
   const addTeam = async () => {
     try {
@@ -189,6 +183,11 @@ function Coop({ onSelectTeam }) {
       console.error("onSelectTeam is not a function");
     }
   };
+
+  useEffect(() => {
+    fetchUserData(token);
+    fetchTeams();
+  }, [token]);
 
   return (
     <ThemeProvider theme={currentTheme}>
