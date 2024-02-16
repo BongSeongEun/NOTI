@@ -100,7 +100,6 @@ public class TeamController {
         for(Team teamEntity : teamEntities){
             TeamDTO teamDTO = TeamDTO.builder()
                     .teamId(teamEntity.getTeamId())
-                    .teamTitle(teamEntity.getTeamTitle())
                     .teamRandNum(teamEntity.getTeamRandNum())
                     .build();
             teamDTOList.add(teamDTO);

@@ -1,7 +1,9 @@
 package hello.hellospring.service.Impl;
 
 import hello.hellospring.model.Chat;
+import hello.hellospring.model.Diary;
 import hello.hellospring.repository.ChatRepository;
+import hello.hellospring.repository.DiaryRepository;
 import hello.hellospring.service.GptDiaryService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,6 +33,9 @@ public class GptServiceImpl implements GptDiaryService {
         this.chatRepository = chatRepository;
     }
 
+    @Autowired
+    private DiaryRepository diaryRepository;
+
     @Override
     public String askGpt(String userMessage){
 
@@ -49,17 +54,23 @@ public class GptServiceImpl implements GptDiaryService {
         String diaryContent = ""; // 생성된 일기 내용을 저장할 변수
         String diaryTitle = "";   // 생성된 일기 제목을 저장할 변수
 
-        try {
+        try { // 대화한 내용 기반으로 일기내용 생성
             diaryContent = callGptApi(diaryInputs, "이것들은 오늘 나의 대화내용이야. 이 내용들을 조합해서 하루 일기를 작성해줘. " +
                     "모든 내용을 조합할 필요는 없고 많이 언급된 토픽들 위주로 일기를 생성해줘. 마치 내가 쓴것처럼." +
-                    "모든것은 존댓말로 통일해줘" +
+                    "답변은 존댓말로 통일해줘" +
                     "했던말은 반복하지마" +
-                    "몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
+                    "꼭 몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
                     "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘");
 
             // 생성된 일기 내용을 기반으로 제목 생성
             diaryTitle = callGptApi(diaryContent, "이 일기 내용을 기반으로 일기 제목을 생성해줘." +
                     "여기 내용중에 가장 많이 나온 내용을 토픽으로 제목을 써주면돼");
+
+            Diary diary = new Diary();
+            diary.setUserId(userId); //user_id에 저장
+            diary.setDiaryTitle(diaryTitle); //diary_title에 저장
+            diary.setDiaryContent(diaryContent); //diary_content에 저장
+            diaryRepository.save(diary);
 
             return "제목: " + diaryTitle + "\n내용: " + diaryContent;
 
@@ -101,7 +112,6 @@ public class GptServiceImpl implements GptDiaryService {
         } else {
             return "GPT생성 API 호출에 실패했어요... :(";
         }
-
     }
 
 

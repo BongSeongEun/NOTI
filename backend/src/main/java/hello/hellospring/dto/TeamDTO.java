@@ -18,7 +18,7 @@ public class TeamDTO {
     public static Team toEntity(final TeamDTO dto){
         return Team.builder()
                 .teamId(dto.getTeamId())
-                .teamTitle(dto.getTeamTitle())
+                //.teamTitle(dto.getTeamTitle())
                 .teamRandNum(dto.getTeamRandNum())
                 .build();
     }
@@ -26,7 +26,7 @@ public class TeamDTO {
     public static TeamDTO from(Team team){
         return TeamDTO.builder()
                 .teamId(team.getTeamId())
-                .teamTitle(team.getTeamTitle())
+                //.teamTitle(team.getTeamTitle())
                 .teamRandNum(team.getTeamRandNum())
                 .build();
     }
