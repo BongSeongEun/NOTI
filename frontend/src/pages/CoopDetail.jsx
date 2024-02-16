@@ -13,6 +13,7 @@ import { backgrounds, lighten } from "polished";
 import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
+import CoopTodo from "../components/CoopTodo.jsx";
 
 const MainDiv = styled.div`
   height: auto;
@@ -75,30 +76,33 @@ function CoopDetail({ team }) {
     }
   };
 
-  // 특정 팀의 상세 정보를 가져오는 함수
-  const fetchTeamDetails = async () => {
+  const fetchTeamDetails = async teamId => {
     try {
-      const response = await axios.get(`/api/v1/getUserTeam/${team}`, {
+      const response = await axios.get(`/api/v1/getUserTeam/${teamId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTeamDetails(response.data);
+      if (response.status === 200) {
+        setTeamDetails(response.data); // 여기서 response.data에 teamId가 포함될 것입니다.
+      }
     } catch (error) {
-      console.error("팀 상세 정보를 불러오는데 실패했습니다:", error);
+      console.error("Failed to fetch team details:", error);
     }
   };
 
   useEffect(() => {
-    if (team) {
-      fetchTeamDetails();
+    if (team && team.teamId) {
+      // team 객체와 teamId 속성의 존재 여부를 확인합니다.
+      fetchTeamDetails(team.teamId); // 올바른 teamId를 사용하여 팀 상세 정보를 불러옵니다.
       fetchUserData();
     }
-  }, [team, token]);
+  }, [team, token]); // team이 변경될 때마다 useEffect를 실행합니다.
 
   return (
     <ThemeProvider theme={currentTheme}>
       <MainDiv>
-        <DateHeader>{team.teamTitle}</DateHeader>
+        <DateHeader>{team && team.teamTitle}</DateHeader>
         {/* 팀 상세 정보가 있으면 팀 이름을 표시하고, 없으면 로딩 텍스트를 표시한다. */}
+        <CoopTodo teamId={team.teamId} onTodoChange={fetchTeamDetails} />
       </MainDiv>
     </ThemeProvider>
     // Use 'team' prop to display team details

@@ -123,12 +123,17 @@ const CreateTeamButton = styled.button`
   cursor: pointer;
 `;
 
+const CloseButton = styled.button`
+  align-self: flex-end;
+`;
+
 function Coop({ onSelectTeam }) {
   const [teams, setTeams] = useState([]);
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [teamName, setTeamName] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [teamMembersCount, setTeamMembersCount] = useState({});
   const navigate = useNavigate();
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
@@ -174,9 +179,10 @@ function Coop({ onSelectTeam }) {
   };
 
   const addTeam = async () => {
+    const userId = getUserIdFromToken();
     try {
       await axios.post(
-        `/api/v1/createTeam`,
+        `/api/v1/createTeam/${userId}`,
         {
           teamTitle: teamName,
         },
@@ -201,10 +207,37 @@ function Coop({ onSelectTeam }) {
     }
   };
 
+  // 특정 팀에 속한 사용자 수를 불러오는 함수
+  const fetchTeamMembers = async teamId => {
+    try {
+      const response = await axios.get(`/api/v1/getUserTeam/${teamId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTeamMembersCount(prevState => ({
+        ...prevState,
+        [teamId]: response.data.length,
+      }));
+    } catch (error) {
+      console.error("팀 참여 인원 수를 불러오는데 실패했습니다:", error);
+    }
+  };
+  // 모달을 닫는 함수
+  const closeModal = () => {
+    setShowModal(false);
+    setTeamName("");
+  };
+
   useEffect(() => {
-    fetchUserData(token);
+    fetchUserData();
     fetchTeams();
   }, [token]);
+
+  useEffect(() => {
+    // 각 팀에 대한 사용자 수를 불러옵니다.
+    teams.forEach(team => {
+      fetchTeamMembers(team.teamId);
+    });
+  }, [teams]);
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -218,6 +251,12 @@ function Coop({ onSelectTeam }) {
         {showModal && (
           <ModalBackdrop>
             <ModalContainer onClick={e => e.stopPropagation()}>
+              <CloseButton
+                onClick={closeModal}
+                style={{ border: "none", backgroundColor: "white" }}
+              >
+                x
+              </CloseButton>
               <InputField
                 type="text"
                 placeholder="팀 이름 입력..."
@@ -232,7 +271,9 @@ function Coop({ onSelectTeam }) {
           {teams.map(team => (
             <TeamItem key={team.teamId} onClick={() => handleTeamClick(team)}>
               <TeamTitle>{team.teamTitle}</TeamTitle>
-              <TeamDate>참여 인원 : </TeamDate>
+              <TeamDate>
+                참여 인원 : {teamMembersCount[team.teamId] || "로딩 중..."} 명
+              </TeamDate>
             </TeamItem>
           ))}
         </TeamList>

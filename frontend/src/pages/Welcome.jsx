@@ -2,7 +2,7 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { Navigate, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import axios from "axios"; // axios import 확인
 import theme from "../styles/theme";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
@@ -63,6 +63,7 @@ const GestImgBox = styled.img`
 `;
 
 function Welcome() {
+  const location = useLocation();
   const navigate = useNavigate();
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
@@ -113,6 +114,14 @@ function Welcome() {
   const handleCompleteClick = () => {
     navigate("/main"); // 메인 페이지로 이동
   };
+
+  useEffect(() => {
+    // 사용자가 URL을 직접 입력해서 이 페이지에 왔는지 확인합니다.
+    // state가 없거나 'from' 키가 'login'이 아니면, 메인 페이지로 리다이렉트합니다.
+    if (!location.state || location.state.from !== "login") {
+      navigate("/main");
+    }
+  }, [location, navigate]);
 
   return (
     <ThemeProvider theme={currentTheme}>
