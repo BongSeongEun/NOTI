@@ -83,6 +83,7 @@ public class TeamService {
         return originalTeamTodo;
     }
 
+
     public List<TeamSchedule> inputScheduleInTeam(TeamSchedule teamSchedule){
         teamScheduleRepository.save(teamSchedule);
         return teamScheduleRepository.findByTeamId(teamSchedule.getTeamId());
@@ -114,10 +115,4 @@ public class TeamService {
 
         return originalTeamMemo;
     }
-//    @Transactional
-//    public List<TeamMemo> deleteTeamMemo(Long teamId, Long teamMemoId){
-//        teamMemoRepository.deleteByTeamIdAndTeamMemoId(teamId, teamMemoId);
-//        return getTeamMemo(teamId);
-//    }
-
 }
