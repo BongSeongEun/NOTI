@@ -15,14 +15,19 @@ public class TeamMemoDTO {
     private Long teamMemoId;
     private Long teamId;
     private String memoContent;
-    private String memoTitle;
 
     public static TeamMemo toEntity(final TeamMemoDTO dto){
         return TeamMemo.builder()
                 .teamMemoId(dto.getTeamMemoId())
                 .teamId(dto.getTeamId())
                 .memoContent(dto.getMemoContent())
-                .memoTitle(dto.getMemoTitle())
+                .build();
+    }
+    public static TeamMemoDTO from(TeamMemo teamMemo){
+        return TeamMemoDTO.builder()
+                .teamMemoId(teamMemo.getTeamMemoId())
+                .teamId(teamMemo.getTeamId())
+                .memoContent(teamMemo.getMemoContent())
                 .build();
     }
 

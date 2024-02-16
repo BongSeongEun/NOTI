@@ -109,16 +109,15 @@ public class TeamService {
 
     public TeamMemo updateTeamMemo(TeamMemoDTO teamMemoDTO, Long teamId, Long teamMemoId){
         TeamMemo originalTeamMemo = teamMemoRepository.findByTeamIdAndTeamMemoId(teamId, teamMemoId);
-        originalTeamMemo.setMemoTitle(teamMemoDTO.getMemoTitle());
         originalTeamMemo.setMemoContent(teamMemoDTO.getMemoContent());
         teamMemoRepository.save(originalTeamMemo);
 
         return originalTeamMemo;
     }
-    @Transactional
-    public List<TeamMemo> deleteTeamMemo(Long teamId, Long teamMemoId){
-        teamMemoRepository.deleteByTeamIdAndTeamMemoId(teamId, teamMemoId);
-        return getTeamMemo(teamId);
-    }
+//    @Transactional
+//    public List<TeamMemo> deleteTeamMemo(Long teamId, Long teamMemoId){
+//        teamMemoRepository.deleteByTeamIdAndTeamMemoId(teamId, teamMemoId);
+//        return getTeamMemo(teamId);
+//    }
 
 }

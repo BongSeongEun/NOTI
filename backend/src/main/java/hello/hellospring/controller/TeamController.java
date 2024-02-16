@@ -47,9 +47,9 @@ public class TeamController {
         teamService.deleteUserFromTeam(teamId, userId);
         return ResponseEntity.ok().build();
     }
-    // 팀 생성
+    // 팀 생성 및 메모 생성
     @PostMapping("/createTeam")
-    public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO){
+    public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO, TeamMemoDTO teamMemoDTO){
 
         Random random = new Random();
 
@@ -57,10 +57,14 @@ public class TeamController {
         entity.setTeamRandNum((long) random.nextInt(99999999));
         List<Team> teamEntity = teamService.createTeamTitle(entity);
         List<TeamDTO> dtos = makeTeamDtoListFromEntityList(teamEntity);
+
+        TeamMemo teamMemoEntity = TeamMemoDTO.toEntity(teamMemoDTO);
+        teamMemoEntity.setTeamId(entity.getTeamRandNum());
+        List<TeamMemo> memoEntity = teamService.createTeamMemo(teamMemoEntity);
+        List<TeamMemoDTO> dtoss = makeTeamMemoDtoListFromEntityList(memoEntity);
+
         return ResponseEntity.ok().body(dtos);
     }
-
-
 
     // 팀에 새로운 Todo를 추가
     @PostMapping("/createTeamTodo/{teamId}")
@@ -121,12 +125,13 @@ public class TeamController {
         List<TeamMemoDTO> dtos = makeTeamMemoDtoListFromEntityList(entity);
         return ResponseEntity.ok().body(dtos);
     }
-    @PostMapping("/createTeamMemo")
 
-    @PutMapping
-
-    @DeleteMapping
-
+    @PutMapping("/updateTeamMemo/{teamId}/{teamMemoId}")
+    public ResponseEntity<TeamMemoDTO> updateTeamMemo(@PathVariable Long teamId, @PathVariable Long teamMemoId, @RequestBody TeamMemoDTO teamMemoDTO){
+        TeamMemo updatedMemo = teamService.updateTeamMemo(teamMemoDTO, teamId, teamMemoId);
+        TeamMemoDTO dto = TeamMemoDTO.from(updatedMemo);
+        return ResponseEntity.ok().body(dto);
+    }
 
     private List<TeamDTO> makeTeamDtoListFromEntityList(List<Team> teamEntities){
         List<TeamDTO> teamDTOList = new ArrayList<>();
@@ -161,7 +166,6 @@ public class TeamController {
         for(TeamMemo teamMemoEntity : teamMemoEntities){
             TeamMemoDTO teamMemoDTO = TeamMemoDTO.builder()
                     .teamMemoId(teamMemoEntity.getTeamMemoId())
-                    .memoTitle(teamMemoEntity.getMemoTitle())
                     .memoContent(teamMemoEntity.getMemoContent())
                     .teamId(teamMemoEntity.getTeamId())
                     .build();
