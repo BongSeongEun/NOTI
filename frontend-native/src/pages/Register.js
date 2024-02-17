@@ -65,7 +65,7 @@ const Register = () => {
 			console.error('Error decoding token:', error);
 			return null;
 		}
-	  };
+	};
 	  
 
 	const showDatePicker = (type) => {
@@ -126,7 +126,7 @@ const Register = () => {
 	  
 		  const userId = getUserIdFromToken(storedToken);
 	  
-  			const response = await axios.put(`http://192.168.30.48:4000/api/v1/user/${userId}`, {
+  			const response = await axios.put(`http://172.20.10.5:4000/api/v1/user/${userId}`, {
 				userNickname: String(inputName),
 				userColor: String(selectedTheme), 
 				diaryTime: String(selectedDiaryTime),
@@ -175,7 +175,7 @@ const Register = () => {
 	const handleSubmit = async () => {
 		try {
 			await postUser();
-			await AsyncStorage.setItem('userColor', selectedTheme.color1);
+			await AsyncStorage.setItem('userColor', selectedTheme);
 		} catch (error) {
 			console.error('사용자 정보 전송 또는 AsyncStorage 저장 중 오류가 발생했습니다:', error);
 		}
@@ -313,117 +313,117 @@ const Register = () => {
 };
 
 const FullView = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
+	flex: 1;
+	justify-content: center;
+	align-items: center;
+	background-color: white;
 `;
 
 const MainView = styled(FullView)`
-  align-items: stretch;
-  width: 300px;
-  align-self: center;
-  margin-top: 20px;
+	align-items: stretch;
+	width: 300px;
+	align-self: center;
+	margin-top: 20px;
 `;
 
 const HorisontalView = styled(MainView)`
-  flex-direction: row;
+  	flex-direction: row;
 `;
 
 const HorisontalViewEnd = styled(HorisontalView)`
-  justify-content: flex-end;
+  	justify-content: flex-end;
 `;
 
 const MainText = styled.Text`
-  color: ${(props) => props.color || 'black'};
-  font-size: 15px;
-  font-weight: bold;
-  text-align: center;
-  margin: 20px;
+	color: ${(props) => props.color || 'black'};
+	font-size: 15px;
+	font-weight: bold;
+	text-align: center;
+	margin: 20px;
 `;
 
 const RegularText = styled(MainText)`
-  font-size: 8px;
-  text-align: left;
-  margin: 0px;
-  margin-top: 20px;
+	font-size: 8px;
+	text-align: left;
+	margin: 0px;
+	margin-top: 20px;
 `;
 
 const TextBoxText = styled(MainText)`
-  font-size: 8px;
-  text-align: left;
-  font-weight: normal;
-  margin: 0px;
-  margin-left: 10px;
+	font-size: 8px;
+	text-align: left;
+	font-weight: normal;
+	margin: 0px;
+	margin-left: 10px;
 `;
 
 const Time = styled(TextBoxText)`
-  text-align: right;
-  margin-right: 10px;
+	text-align: right;
+	margin-right: 10px;
 `;
 
 const Images = styled.Image`
-  width: ${(props) => props.size || '100px'};
-  height: ${(props) => props.size || '100px'};
+	width: ${(props) => props.size || '100px'};
+	height: ${(props) => props.size || '100px'};
 `;
 
 const GalleryButton = styled.TouchableOpacity`
-  width: 40px;
-  height: 40px;
-  background-color: ${(props) => props.theme.color1};
-  border-radius: 100px;
-  justify-content: center;
-  align-items: center;
-  margin-left: -30px;
-  margin-top: 55px;
+	width: 40px;
+	height: 40px;
+	background-color: ${(props) => props.theme.color1};
+	border-radius: 100px;
+	justify-content: center;
+	align-items: center;
+	margin-left: -30px;
+	margin-top: 55px;
 `;
 
 const TextBox = styled.TouchableOpacity`
-  background-color: ${(props) => props.color || '#F2F3F5'};
-  width: 300px;
-  height: 40px;
-  border-radius: 15px;
-  margin-top: 10px;
-  justify-content: space-between;
-  flex-direction: row;
-  align-items: center;
+	background-color: ${(props) => props.color || '#F2F3F5'};
+	width: 300px;
+	height: 40px;
+	border-radius: 15px;
+	margin-top: 10px;
+	justify-content: space-between;
+	flex-direction: row;
+	align-items: center;
 `;
 
 const InputName = styled.TextInput.attrs({ maxLength: 6 })`
-  color: black;
-  font-size: 8px;
-  font-weight: normal;
-  width: 100%;
-  height: 100%;
-  margin-left: 10px;
+	color: black;
+	font-size: 8px;
+	font-weight: normal;
+	width: 100%;
+	height: 100%;
+	margin-left: 10px;
 `;
 
 const DisturbTimeButton = styled.Switch.attrs((props) => ({
-  trackColor: {
-    false: '#F2F3F5',
-    true: props.theme.color1,
-  },
+	trackColor: {
+		false: '#F2F3F5',
+		true: props.theme.color1,
+	},
 }))`
-  margin-top: 10px;
+  	margin-top: 10px;
 `;
 
 const ThemedButton = styled.TouchableOpacity`
-  height: 30px;
-  width: 30px;
-  padding: 15px;
-  margin: 10px;
-  border-radius: 100px;
-  justify-content: center;
-  align-items: center;
-  background-color: ${(props) => props.theme.color1};
+	height: 30px;
+	width: 30px;
+	padding: 15px;
+	margin: 10px;
+	border-radius: 100px;
+	justify-content: center;
+	align-items: center;
+	background-color: ${(props) => props.theme.color1};
 `;
 
 const ResultButton = styled(TextBox)`
-  background-color: ${(props) => props.theme.color1};
-  margin-top: 30px;
-  margin-bottom: 0px;
-  justify-content: center;
-  align-items: center;
+	background-color: ${(props) => props.theme.color1};
+	margin-top: 30px;
+	margin-bottom: 0px;
+	justify-content: center;
+	align-items: center;
 `;
 
 export default Register;

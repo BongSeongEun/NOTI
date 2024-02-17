@@ -2,14 +2,18 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
-import styled, { ThemeProvider } from 'styled-components/native';
 
-import React, { useState, useEffect, } from 'react';
-import { ScrollView, TouchableOpacity, Text, Modal, } from 'react-native';
-
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { Calendar } from "react-native-calendars";
-import 'react-native-gesture-handler';
+import 'react-native-gesture-handler'
+import React, { useState, useEffect } from 'react';
+import { ScrollView, TouchableOpacity, Text, Modal, } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import styled, { ThemeProvider } from 'styled-components/native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { decode } from 'base-64';
+import axios from 'axios';
 
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
@@ -20,12 +24,61 @@ function Todo({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
 	const { selectedTheme } = route.params || { selectedTheme: theme.DefaultTheme };
+
+    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [base64Image, setBase64Image] = useState('');
+	const [userNickname, setUserNickname] = useState('');
+	
 	const name = "홍길동";
 
 	const currentDate = new Date();
 	const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
 	const dayOfWeek = daysOfWeek[currentDate.getDay()];
 	const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
+
+	useEffect(() => {
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
+
+			if (token) {
+				const userId = getUserIdFromToken(token);
+				console.log(`userId: ${userId}, token: ${token}`);
+				try {
+					const response = await axios.get(`http://172.20.10.5:4000/api/v1/userInfo/${userId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+					});
+					const userThemeName = response.data.userColor || 'OrangeTheme';
+					const userProfileImage = response.data.userProfile;
+					const nickname = response.data.userNickname;
+
+					if (theme[userThemeName]) {
+						setCurrentTheme(theme[userThemeName]);
+					}
+					setBase64Image(userProfileImage || ""); 
+					setUserNickname(nickname || ""); 
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, []);
+
+    const getUserIdFromToken = (token) => {
+        try {
+            const payload = token.split('.')[1];
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const decodedPayload = decode(base64);
+            const decodedJSON = JSON.parse(decodedPayload);
+
+            return decodedJSON.id.toString();
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    };
 
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
@@ -117,7 +170,7 @@ function Todo({ }) {
 	};
 
 	return (
-		<ThemeProvider theme={selectedTheme}>
+		<ThemeProvider theme={currentTheme}>
 			<FullView>
 				<MainView>
 					<HorisontalView style={{marginTop: 30, marginBottom: 10}}>

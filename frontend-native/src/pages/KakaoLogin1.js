@@ -33,7 +33,7 @@ const KakaoLogin = () => {
       <WebView
         style={{flex: 1}}
         source={{
-          uri: 'https://kauth.kakao.com/oauth/authorize?client_id=77cf97c36317f2622a926b9ddb30f96f&redirect_uri=http://192.168.30.48:4000/authnative&response_type=code',
+          uri: 'https://kauth.kakao.com/oauth/authorize?client_id=77cf97c36317f2622a926b9ddb30f96f&redirect_uri=http://172.20.10.5:4000/authnative&response_type=code',
         }}
         onNavigationStateChange={handleNavigationStateChange}
       />
