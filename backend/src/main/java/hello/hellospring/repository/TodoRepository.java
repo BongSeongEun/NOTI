@@ -2,8 +2,11 @@ package hello.hellospring.repository;
 
 import hello.hellospring.model.Todo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,5 +16,11 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     List<Todo> findByTodoId(Long TodoId);
     Todo findByTodoIdAndUserId(Long todoId, Long userId);
     void deleteByTodoIdAndUserId(Long todoId, Long userId);
+
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate = :todoDateStr")
+    List<Todo> findByUserIdAndTodoDate(
+            @Param("userId") Long userId,
+            @Param("todoDateStr") String todoDateStr);
+
 
 }

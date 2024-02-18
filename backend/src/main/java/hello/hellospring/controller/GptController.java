@@ -41,7 +41,7 @@ public class GptController {
 
         try {
             // GPT 서비스를 호출하여 응답 받기
-            String gptResponse = gptService.askGpt(userMessage);
+            String gptResponse = gptService.askGpt(userMessage, userId);
 
             // GPT 응답을 새로운 Chat 엔티티의 chat_content로 설정하고 데이터베이스에 저장
             ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptResponse, true, chatRole, null, null);
@@ -50,6 +50,7 @@ public class GptController {
 
             // GPT 응답을 클라이언트에 반환
             return gptResponse;
+
         } catch (Exception e) {
             e.printStackTrace();
             return "GPT API 호출 오류가 발생했어요...ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";

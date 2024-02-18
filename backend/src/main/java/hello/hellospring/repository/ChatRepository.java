@@ -16,7 +16,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     // chat에서 userId가 지정한 chatDate (startTime~endTime) 사이의 chat만 가져오기
     List<Chat> findChatsByUserIdAndTimeRange(
             @Param("userId") Long userId,
-            @Param("startTime") LocalDateTime startOfPreviousDay,
-            @Param("endTime") LocalDateTime now);
+            @Param("startTime") LocalDateTime startOfPreviousDay, //현재시간으로부터 24시간 전 시간
+            @Param("endTime") LocalDateTime now); //현재시간
 
 }
