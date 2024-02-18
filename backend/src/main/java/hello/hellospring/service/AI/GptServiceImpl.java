@@ -15,6 +15,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,8 +46,12 @@ public class GptServiceImpl implements GptDiaryService {
 
     @Override
     public String createDiary(Long userId) {
-        // userId에 해당하는 Chat 목록 조회
-        List<Chat> chats = chatRepository.findByUserId(userId);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfPreviousDay = now.minusDays(1);
+
+        // 지정된 사용자 ID와 시간 범위에 해당하는 chatContent 조회
+        List<Chat> chats = chatRepository.findChatsByUserIdAndTimeRange(userId, startOfPreviousDay, now);
+
         // Chat 목록에서 chatContent만 추출하여 결합
         String diaryInputs = chats.stream()
                 .map(Chat::getChatContent)
