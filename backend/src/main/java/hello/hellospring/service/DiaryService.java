@@ -69,7 +69,7 @@ public class DiaryService {
         // ID를 이용하여 기존 Diary 조회
         Diary diary = (Diary) diaryRepository
                 .findByUserIdAndDiaryId(userId, diaryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with id: " + diaryId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "diary_id를 찾을수 없어요...ㅠㅠ: " + diaryId));
 
         // Diary 정보 업데이트
         diary.setDiaryTitle(diaryDTO.getDiaryTitle());
@@ -86,14 +86,14 @@ public class DiaryService {
 
     public DiaryDTO findByUserIdAndDiaryId(Long userId, Long diaryId) {
         Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryId(userId, diaryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with userId: " + userId + " and diaryId: " + diaryId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_id를 찾을 수 없어요..." + userId + " 앗.. diray_id도요... :( " + diaryId));
         // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
         return DiaryDTO.diaryDTO(diary);
     }
 
     public DiaryDTO findByUserIdAndDiaryDate(Long userId, String diaryDate) {
         Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryDate(userId, diaryDate)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with userId: " + userId + " and date: " + diaryDate));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_id를 찾을 수 없어요..." + userId + " 앗.. diray_date도요... :( " + diaryDate));
         // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
         return DiaryDTO.diaryDTO(diary);
     }
