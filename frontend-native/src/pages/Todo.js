@@ -15,6 +15,7 @@ import theme from '../components/theme';
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format, parseISO } from "date-fns";
 import { Calendar } from "react-native-calendars";
+//import TimeTable from "../components/TimeTable";
 
 function Todo() {
 	const navigation = useNavigation();
@@ -26,6 +27,8 @@ function Todo() {
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
+	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
+	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 
     useEffect(() => {
         fetchUserData();
@@ -51,11 +54,14 @@ function Todo() {
 		  });
 	
 		  if (userResponse.status === 200) {
-			const userThemeName = userResponse.data.userColor;
+			  const userThemeName = userResponse.data.userColor;
+			  const userProfileImage = userResponse.data.userProfile;
+					const nickname = userResponse.data.userNickname;
 	
 			if (theme[userThemeName]) {
 			  setCurrentTheme(theme[userThemeName]);
-	
+			  setBase64Image(userProfileImage || ""); 
+			  setUserNickname(nickname || ""); 
 			  const eventsResponse = await axios.get(`http://192.168.30.21:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
 				headers: {
 				  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
@@ -107,9 +113,44 @@ function Todo() {
 		const newMarkedDates = {};
 		events.forEach(event => {
 			const eventDateFormatted = event.todoDate.replace(/\./g, '-');
-			newMarkedDates[eventDateFormatted] = { marked: true, dotColor: `${currentTheme.color1}` };
+			newMarkedDates[eventDateFormatted] = { marked: true, dotColor: currentTheme.color1 };
 		});
 		setMarkedDates(newMarkedDates);
+	};
+
+	/*
+	const timeToIndex = time => {
+		const [hours, minutes] = time.split(":").map(Number);
+		return hours * 6 + Math.floor(minutes / 10);
+	};
+	*/
+
+	const toggleComplete = async (todoId, index) => {
+		const userId = await getUserIdFromToken();
+		const newCompletedStatus = !events[index].todoDone;
+	
+		try {
+			await axios.put(
+				`http://192.168.30.21:4000/api/v1/updateTodo/${userId}/${todoId}`,
+				{
+					...events[index],
+					todoDone: newCompletedStatus,
+				},
+				{
+					headers: {
+						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+					},
+				}
+			);
+			setEvents(prevEvents =>
+				prevEvents.map((event, evtIndex) =>
+					evtIndex === index ? { ...event, todoDone: newCompletedStatus } : event
+				)
+			);
+			setClicked_check(clicked_check);
+		} catch (error) {
+			console.error("Error updating todo status:", error);
+		}
 	};
 	
 	return (
@@ -160,13 +201,20 @@ function Todo() {
 						)}
 						
 						{events.map((event, index) => (
-							<Noti key={index}
+							<Noti key={event.todoId}
 							style={{
 								backgroundColor: event.selectedColor,
 								opacity: event.todoDone ? 0.5 : 1,
-							}}>
-								<NotiText>{event.todoTitle}</NotiText>
-								<NotiText>{`${event.todoStartTime} ~ ${event.todoEndTime}`}</NotiText>
+								}}>
+								<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
+									{event.todoDone && <images.noticheck width={15} height={15}
+										color={event.selectedColor} /> }
+								</Noti_Check>
+								<NotiTextContainer>
+									<NotiText>{event.todoTitle}</NotiText>
+									<NotiText>{`${event.todoStartTime} ~ ${event.todoEndTime}`}</NotiText>
+								</NotiTextContainer>
+								
 							</Noti>
 						))}
 						</MainView>
@@ -239,11 +287,12 @@ const Bar_Mini = styled(Bar)`
     margin-top: 0px;
 `;
 
-const NotiContainer = styled.View`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 15px;
+const NotiTextContainer = styled.View`
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 20px;
 `;
 
 const Noti = styled.TouchableOpacity`
