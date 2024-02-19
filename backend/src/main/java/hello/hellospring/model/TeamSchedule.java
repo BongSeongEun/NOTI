@@ -16,13 +16,13 @@ public class TeamSchedule {
     private Long teamScheduleId;
 
     @Column(name = "team_id")
-    private Long teamId;
+    private String teamId;
 
     @Column(name = "todo_id")
     private Long todoId;
 
     @Builder
-    public TeamSchedule(Long teamScheduleId, Long teamId, Long todoId){
+    public TeamSchedule(Long teamScheduleId, String teamId, Long todoId){
         this.teamScheduleId = teamScheduleId;
         this.teamId = teamId;
         this.todoId = todoId;
