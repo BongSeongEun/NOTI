@@ -36,12 +36,12 @@ public class TeamService {
     }
 
     public List<TeamTogether> getUserList(String teamId){
-        return teamTogetherRepository.findByTeamId(Long.valueOf(teamId));
+        return teamTogetherRepository.findByTeamId(teamId);
     }
 
     @Transactional
     public List<TeamTogether> deleteUserFromTeam(String teamId, String userId){
-        teamTogetherRepository.deleteByTeamIdAndUserId(Long.valueOf(teamId), Long.valueOf(userId));
+        teamTogetherRepository.deleteByTeamIdAndUserId(teamId, Long.valueOf(userId));
         return getUserList(teamId);
     }
 
@@ -61,16 +61,16 @@ public class TeamService {
     }
 
     public List<TeamTodo> getTeamTodo(String teamId){
-        return teamTodoRepository.findByteamId(Long.valueOf(teamId));
+        return teamTodoRepository.findByteamId(teamId);
     }
 
     @Transactional
     public List<TeamTodo> deleteTeamTodo(String teamId, String teamTodoId){
-        teamTodoRepository.deleteByTeamIdAndTeamTodoId(Long.valueOf(teamId), Long.valueOf(teamTodoId));
+        teamTodoRepository.deleteByTeamIdAndTeamTodoId(teamId, Long.valueOf(teamTodoId));
         return getTeamTodo(teamTodoId);
     }
 
-    public TeamTodo updateTeamTodo(TeamTodoDTO teamTodoDTO, Long teamId, Long teamTodoId){
+    public TeamTodo updateTeamTodo(TeamTodoDTO teamTodoDTO, String teamId, Long teamTodoId){
 
         TeamTodo originalTeamTodo = teamTodoRepository.findByTeamIdAndTeamTodoId(teamId, teamTodoId);
         originalTeamTodo.setTeamTodoTitle(teamTodoDTO.getTeamTodoTitle());
@@ -89,17 +89,17 @@ public class TeamService {
         return teamScheduleRepository.findByTeamId(teamSchedule.getTeamId());
     }
 
-    public List<TeamSchedule> getSchedule(Long teamId){
+    public List<TeamSchedule> getSchedule(String teamId){
         return teamScheduleRepository.findByTeamId(teamId);
     }
 
     @Transactional
-    public List<TeamSchedule> deleteSchedule(Long teamId, Long todoId){
+    public List<TeamSchedule> deleteSchedule(String teamId, Long todoId){
         teamScheduleRepository.deleteByTeamIdAndTodoId(teamId, todoId);
         return getSchedule(teamId);
     }
 
-    public List<TeamMemo> getTeamMemo(Long teamId){
+    public List<TeamMemo> getTeamMemo(String teamId){
         return teamMemoRepository.findByTeamId(teamId);
     }
 
@@ -108,7 +108,7 @@ public class TeamService {
         return teamMemoRepository.findByTeamId(teamMemo.getTeamId());
     }
 
-    public TeamMemo updateTeamMemo(TeamMemoDTO teamMemoDTO, Long teamId, Long teamMemoId){
+    public TeamMemo updateTeamMemo(TeamMemoDTO teamMemoDTO, String teamId, Long teamMemoId){
         TeamMemo originalTeamMemo = teamMemoRepository.findByTeamIdAndTeamMemoId(teamId, teamMemoId);
         originalTeamMemo.setMemoContent(teamMemoDTO.getMemoContent());
         teamMemoRepository.save(originalTeamMemo);

@@ -14,14 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/")
 public class TodoController {
-
     private final TodoService todoService;
-
     @Autowired
     public TodoController(TodoService todoService) {
         this.todoService = todoService;
     }
-
     @PostMapping("/createTodo/{userId}")
     public ResponseEntity<?> createTodo(@PathVariable String userId, @RequestBody TodoDTO todoDTO){
         Todo entity = TodoDTO.toEntity(todoDTO);
@@ -36,20 +33,17 @@ public class TodoController {
         TodoDTO dto = TodoDTO.from(updatedTodo);
         return ResponseEntity.ok().body(dto);
     }
-
     @GetMapping("/getTodo/{userId}")
     public ResponseEntity<?> getTodo(@PathVariable String userId){
         List<Todo> todoEntity = todoService.getTodo(userId);
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().body(dtos);
     }
-
     @DeleteMapping("/deleteTodo/{userId}/{todoId}")
     public ResponseEntity<?> deleteTodo(@PathVariable String userId, @PathVariable String todoId) {
         todoService.delete(userId, todoId);
         return ResponseEntity.ok().build(); // 200 OK와 내용 없이 응답
     }
-
     private List<TodoDTO> makeDtoListFromEntityList( List<Todo> todoEntities ){
         List<TodoDTO> todoDTOList = new ArrayList<>();
 
@@ -67,7 +61,6 @@ public class TodoController {
 
             todoDTOList.add(todoDTO);
         }
-
         return todoDTOList;
     }
 

@@ -16,7 +16,7 @@ public class TeamTogether {
     private Long teamTogetherId;
 
     @Column(name = "team_id")
-    private Long teamId;
+    private String teamId;
 
     @Column(name = "user_id")
     private Long userId;
@@ -25,7 +25,7 @@ public class TeamTogether {
     private String teamTitle;
 
     @Builder
-    public TeamTogether(Long teamTogetherId, Long teamId, Long userId, String teamTitle){
+    public TeamTogether(Long teamTogetherId, String teamId, Long userId, String teamTitle){
         this.teamTogetherId = teamTogetherId;
         this.teamId = teamId;
         this.userId = userId;

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class TeamTogetherDTO {
 
     private Long teamTogetherId;
-    private Long teamId;
+    private String teamId;
     private Long userId;
     private String teamTitle;
 

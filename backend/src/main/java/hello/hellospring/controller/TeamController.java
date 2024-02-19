@@ -54,7 +54,7 @@ public class TeamController {
         Random random = new Random();
 
         Team entity = TeamDTO.toEntity(teamDTO);
-        entity.setTeamRandNum((long) random.nextInt(99999999));
+        entity.setTeamRandNum(getAuthcode());
         List<Team> teamEntity = teamService.createTeamTitle(entity);
         List<TeamDTO> dtos = makeTeamDtoListFromEntityList(teamEntity);
 
@@ -76,7 +76,7 @@ public class TeamController {
     @PostMapping("/createTeamTodo/{teamId}")
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
-        entity.setTeamId(Long.valueOf(teamId));
+        entity.setTeamId(teamId);
         List<TeamTodo> teamTodoEntity = teamService.createTeamTodo(entity);
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
         return ResponseEntity.ok().build();
@@ -96,14 +96,14 @@ public class TeamController {
     }
     // 팀의 Todo를 업데이트
     @PutMapping("/updateTeamTodo/{teamId}/{teamTodoId}")
-    public ResponseEntity<?> updateTeamTodo(@PathVariable Long teamId, @PathVariable Long teamTodoId, @RequestBody TeamTodoDTO teamTodoDTO){
+    public ResponseEntity<?> updateTeamTodo(@PathVariable String teamId, @PathVariable Long teamTodoId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo updatedTeamTodo = teamService.updateTeamTodo(teamTodoDTO, teamId, teamTodoId);
         TeamTodoDTO dto = TeamTodoDTO.from(updatedTeamTodo);
         return ResponseEntity.ok().body(dto);
     }
     //팀에 개인일정을 추가
     @PostMapping("/inputSchedule/{teamId}/{todoId}")
-    public ResponseEntity<?> inputSchedule(@PathVariable Long teamId, @PathVariable Long todoId, TeamScheduleDTO teamScheduleDTO){
+    public ResponseEntity<?> inputSchedule(@PathVariable String teamId, @PathVariable Long todoId, TeamScheduleDTO teamScheduleDTO){
         TeamSchedule entity = TeamScheduleDTO.toEntity(teamScheduleDTO);
         entity.setTeamId(teamId);
         entity.setTodoId(todoId);
@@ -113,27 +113,27 @@ public class TeamController {
     }
     //팀에 들어가있는 개인 일정을 조회
     @GetMapping("/getSchedule/{teamId}")
-    public ResponseEntity<?> getScheduleFromTeam(@PathVariable Long teamId){
+    public ResponseEntity<?> getScheduleFromTeam(@PathVariable String teamId){
         List<TeamSchedule> entity = teamService.getSchedule(teamId);
         List<TeamScheduleDTO> dtos = makeTeamScheduleDtoListFromEntiyList(entity);
         return ResponseEntity.ok().body(dtos);
     }
     //팀에 들어가있는 개인 일정을 삭제
     @DeleteMapping("/deleteSchedule/{teamId}/{todoId}")
-    public ResponseEntity<?> deleteScheduleFromTeam(@PathVariable Long teamId, @PathVariable Long todoId){
+    public ResponseEntity<?> deleteScheduleFromTeam(@PathVariable String teamId, @PathVariable Long todoId){
         teamService.deleteSchedule(teamId, todoId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/getTeamMemo/{teamId}")
-    public ResponseEntity<?> getTeamMemo(@PathVariable Long teamId){
+    public ResponseEntity<?> getTeamMemo(@PathVariable String teamId){
         List<TeamMemo> entity = teamService.getTeamMemo(teamId);
         List<TeamMemoDTO> dtos = makeTeamMemoDtoListFromEntityList(entity);
         return ResponseEntity.ok().body(dtos);
     }
 
     @PutMapping("/updateTeamMemo/{teamId}/{teamMemoId}")
-    public ResponseEntity<TeamMemoDTO> updateTeamMemo(@PathVariable Long teamId, @PathVariable Long teamMemoId, @RequestBody TeamMemoDTO teamMemoDTO){
+    public ResponseEntity<TeamMemoDTO> updateTeamMemo(@PathVariable String teamId, @PathVariable Long teamMemoId, @RequestBody TeamMemoDTO teamMemoDTO){
         TeamMemo updatedMemo = teamService.updateTeamMemo(teamMemoDTO, teamId, teamMemoId);
         TeamMemoDTO dto = TeamMemoDTO.from(updatedMemo);
         return ResponseEntity.ok().body(dto);
@@ -206,6 +206,20 @@ public class TeamController {
             teamTogetherDTOList.add(teamTogetherDTO);
         }
         return teamTogetherDTOList;
+    }
+    private String getAuthcode(){
+        Random random = new Random();
+        StringBuffer authCode = new StringBuffer();
+
+        while(authCode.length()<13){
+            if(random.nextBoolean()){
+                authCode.append((char)((int)(random.nextInt(26))+65));
+            }
+            else{
+                authCode.append(random.nextInt(10));
+            }
+        }
+        return authCode.toString();
     }
 
 }

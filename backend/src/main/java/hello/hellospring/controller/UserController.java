@@ -22,9 +22,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private final UserRepository userRepository;
-
     // 프론트에서 인가코드 받아오는 url
     @RequestMapping(value = "/auth", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity getLogin(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
@@ -46,13 +43,13 @@ public class UserController {
         String jwtToken = userService.SaveUserAndGetToken(oauthToken.getAccess_token());
 
         // 클라이언트에게 전달할 커스텀 URL 생성
-        String redirectUrl = "http://192.168.103.245:4000/success&token=" + jwtToken;
+        String redirectUrl = "http://192.168.30.48:4000/success&token=" + jwtToken;
 
         // 클라이언트를 리디렉트 URL로 리디렉션
         return new RedirectView(redirectUrl);
     }
 
-    @PutMapping("/api/v1/user/{userId}")
+    @RequestMapping(value = "/api/v1/user/{userId}", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<?> updateUser(@PathVariable String userId, @RequestBody UserDTO userDTO) {
         try {
             userService.updateUser(Long.valueOf(userId), userDTO);
