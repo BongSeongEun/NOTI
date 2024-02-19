@@ -18,26 +18,14 @@ public class TeamSchedule {
     @Column(name = "team_id")
     private Long teamId;
 
-    @Column(name = "user_id")
-    private Long userId;
-
-    @Column(name = "team_schedule_title")
-    private String teamScheduleTitle;
-
-    @Column(name = "team_schedule_date")
-    private String teamScheduleDate;
-
-    @Column(name = "team_schedule_color")
-    private String teamScheduleColor;
+    @Column(name = "todo_id")
+    private Long todoId;
 
     @Builder
-    public TeamSchedule(Long teamScheduleId, Long teamId, Long userId, String teamScheduleTitle, String teamScheduleDate, String teamScheduleColor){
+    public TeamSchedule(Long teamScheduleId, Long teamId, Long todoId){
         this.teamScheduleId = teamScheduleId;
         this.teamId = teamId;
-        this.userId = userId;
-        this.teamScheduleTitle = teamScheduleTitle;
-        this.teamScheduleDate = teamScheduleDate;
-        this.teamScheduleColor = teamScheduleColor;
+        this.todoId = todoId;
     }
 
 }

@@ -22,9 +22,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private final UserRepository userRepository;
-
     // 프론트에서 인가코드 받아오는 url
     @RequestMapping(value = "/auth", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity getLogin(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
