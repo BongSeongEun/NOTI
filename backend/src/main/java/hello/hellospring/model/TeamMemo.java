@@ -16,13 +16,13 @@ public class TeamMemo {
     private Long teamMemoId;
 
     @Column(name = "team_id")
-    private Long teamId;
+    private String teamId;
 
     @Column(name = "memo_content")
     private String memoContent;
 
     @Builder
-    public TeamMemo(Long teamMemoId, Long teamId, String memoContent){
+    public TeamMemo(Long teamMemoId, String teamId, String memoContent){
         this.teamMemoId = teamMemoId;
         this.teamId = teamId;
         this.memoContent = memoContent;

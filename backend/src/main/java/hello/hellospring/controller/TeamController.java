@@ -54,7 +54,7 @@ public class TeamController {
         Random random = new Random();
 
         Team entity = TeamDTO.toEntity(teamDTO);
-        entity.setTeamRandNum((long) random.nextInt(99999999));
+        entity.setTeamRandNum(getAuthcode());
         List<Team> teamEntity = teamService.createTeamTitle(entity);
         List<TeamDTO> dtos = makeTeamDtoListFromEntityList(teamEntity);
 
@@ -126,14 +126,14 @@ public class TeamController {
     }
 
     @GetMapping("/getTeamMemo/{teamId}")
-    public ResponseEntity<?> getTeamMemo(@PathVariable Long teamId){
+    public ResponseEntity<?> getTeamMemo(@PathVariable String teamId){
         List<TeamMemo> entity = teamService.getTeamMemo(teamId);
         List<TeamMemoDTO> dtos = makeTeamMemoDtoListFromEntityList(entity);
         return ResponseEntity.ok().body(dtos);
     }
 
     @PutMapping("/updateTeamMemo/{teamId}/{teamMemoId}")
-    public ResponseEntity<TeamMemoDTO> updateTeamMemo(@PathVariable Long teamId, @PathVariable Long teamMemoId, @RequestBody TeamMemoDTO teamMemoDTO){
+    public ResponseEntity<TeamMemoDTO> updateTeamMemo(@PathVariable String teamId, @PathVariable Long teamMemoId, @RequestBody TeamMemoDTO teamMemoDTO){
         TeamMemo updatedMemo = teamService.updateTeamMemo(teamMemoDTO, teamId, teamMemoId);
         TeamMemoDTO dto = TeamMemoDTO.from(updatedMemo);
         return ResponseEntity.ok().body(dto);
@@ -206,6 +206,21 @@ public class TeamController {
             teamTogetherDTOList.add(teamTogetherDTO);
         }
         return teamTogetherDTOList;
+    }
+
+    private String getAuthcode(){
+        Random random = new Random();
+        StringBuffer authCode = new StringBuffer();
+
+        while(authCode.length()<13){
+            if(random.nextBoolean()){
+                authCode.append((char)((int)(random.nextInt(26))+65));
+            }
+            else{
+                authCode.append(random.nextInt(10));
+            }
+        }
+        return authCode.toString();
     }
 
 }

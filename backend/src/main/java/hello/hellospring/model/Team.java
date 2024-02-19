@@ -20,10 +20,10 @@ public class Team {
     private Long teamId;
 
     @Column(name = "team_randnum")
-    private Long teamRandNum;
+    private String teamRandNum;
 
     @Builder
-    public Team(Long teamId, Long teamRandNum){
+    public Team(Long teamId, String teamRandNum){
         this.teamId = teamId;
         this.teamRandNum = teamRandNum;
     }

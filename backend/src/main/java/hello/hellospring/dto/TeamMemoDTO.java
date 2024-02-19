@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class TeamMemoDTO {
 
     private Long teamMemoId;
-    private Long teamId;
+    private String teamId;
     private String memoContent;
 
     public static TeamMemo toEntity(final TeamMemoDTO dto){
