@@ -15,7 +15,7 @@ import theme from '../components/theme';
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format, parseISO } from "date-fns";
 import { Calendar } from "react-native-calendars";
-//import TimeTable from "../components/TimeTable";
+import TimeTable from "../components/TimeTable";
 
 function Todo() {
 	const navigation = useNavigation();
@@ -118,41 +118,52 @@ function Todo() {
 		setMarkedDates(newMarkedDates);
 	};
 
-	/*
 	const timeToIndex = time => {
 		const [hours, minutes] = time.split(":").map(Number);
 		return hours * 6 + Math.floor(minutes / 10);
 	};
-	*/
 
 	const toggleComplete = async (todoId, index) => {
 		const userId = await getUserIdFromToken();
 		const newCompletedStatus = !events[index].todoDone;
-	
 		try {
-			await axios.put(
+			const response = await axios.put(
 				`http://192.168.30.21:4000/api/v1/updateTodo/${userId}/${todoId}`,
 				{
-					...events[index],
-					todoDone: newCompletedStatus,
+				...events[index],
+				todoDone: newCompletedStatus,
 				},
 				{
-					headers: {
-						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
-					},
+				headers: {
+					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+				},
 				}
 			);
-			setEvents(prevEvents =>
-				prevEvents.map((event, evtIndex) =>
+
+			if (response.status === 200) {
+				const updatedEvents = events.map((event, evtIndex) =>
 					evtIndex === index ? { ...event, todoDone: newCompletedStatus } : event
-				)
-			);
-			setClicked_check(clicked_check);
+				);
+				setEvents(updatedEvents);
+
+				const startTimeIndex = timeToIndex(events[index].todoStartTime);
+				const endTimeIndex = timeToIndex(events[index].todoEndTime);
+				const newSchedule = schedule.map((slot, idx) => {
+					if (idx >= startTimeIndex && idx < endTimeIndex) {
+						return newCompletedStatus ? events[index].selectedColor : false;
+					}
+					return slot;
+				});
+				setSchedule(newSchedule);
+			} else {
+				console.error("Failed to update todo status:", response);
+			}
 		} catch (error) {
-			console.error("Error updating todo status:", error);
+		  // Error during the request
+		  console.error("Error updating todo status:", error);
 		}
 	};
-	
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
@@ -204,7 +215,6 @@ function Todo() {
 							<Noti key={event.todoId}
 							style={{
 								backgroundColor: event.selectedColor,
-								opacity: event.todoDone ? 0.5 : 1,
 								}}>
 								<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
 									{event.todoDone && <images.noticheck width={15} height={15}
@@ -217,6 +227,8 @@ function Todo() {
 								
 							</Noti>
 						))}
+
+						<TimeTable schedule={schedule} />
 						</MainView>
 					</ScrollView>
 			</FullView>
