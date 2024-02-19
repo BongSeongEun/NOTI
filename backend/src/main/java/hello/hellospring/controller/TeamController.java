@@ -207,7 +207,6 @@ public class TeamController {
         }
         return teamTogetherDTOList;
     }
-
     private String getAuthcode(){
         Random random = new Random();
         StringBuffer authCode = new StringBuffer();
