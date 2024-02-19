@@ -5,6 +5,7 @@ import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.service.AI.GptDiaryService;
 import hello.hellospring.service.AI.GptService;
+import hello.hellospring.service.AI.GptTodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +18,16 @@ public class GptController {
     private final GptService gptService; //service 참조
     private final GptDiaryService gptDiaryService; // service 참조2
     private final ChatRepository chatRepository; // repository 참조
+    private final GptTodoService gptTodoService;
 
 
     @Autowired
-    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService) {
+    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService, GptTodoService gptTodoService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
         this.gptDiaryService = gptDiaryService;
+        this.gptTodoService = gptTodoService;
     }
 
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출
@@ -32,19 +35,28 @@ public class GptController {
 
         //Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음
         String userMessage = request.get("chat_content"); // chat_content 입력받음
-        boolean chatRole = Boolean.parseBoolean(request.get("chat_role")); // chat_role 입력받음
+        //boolean chatRole = Boolean.parseBoolean(request.get("chat_role")); // chat_role 입력받음
 
-        // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
-        ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, chatRole, null, null);
-        Chat initialChat = Chat.toSaveEntity(initialChatDTO);
-        chatRepository.save(initialChat);
+        try {
+            boolean gptTodo = Boolean.parseBoolean(gptTodoService.askGpt(userMessage, userId));
+
+            // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
+            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, null, null);
+            Chat initialChat = Chat.toSaveEntity(initialChatDTO);
+            chatRepository.save(initialChat);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return "GPT API 호출 오류가 발생했어요...ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";
+
+        }
 
         try {
             // GPT 서비스를 호출하여 응답 받기
             String gptResponse = gptService.askGpt(userMessage, userId);
 
             // GPT 응답을 새로운 Chat 엔티티의 chat_content로 설정하고 데이터베이스에 저장
-            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptResponse, true, chatRole, null, null);
+            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptResponse, true, false, null, null);
             Chat responseChat = Chat.toSaveEntity(responseChatDTO);
             chatRepository.save(responseChat);
 
