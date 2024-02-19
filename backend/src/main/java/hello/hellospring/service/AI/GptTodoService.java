@@ -30,8 +30,10 @@ public class GptTodoService {
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
         messagesArray.put(new JSONObject().put("role", "system")
-                .put("content", "이 메시지가 일정이면 ture를, 아니면 false를 출력해줘" +
-                        "7시에 학교를 간다 처럼 time과 event가 있으면 true로 반환해줘"));
+                .put("content", "다음 메시지가 일정 관련 메시지인지 분류해주세요" +
+                        "1시에 운동하러왔어, 5시에 밥먹었어. 처럼 시간과 이벤트가 존재하면 일정 관련 메시지(true)로 분류해줘" +
+                                "답은 오직 true 아니면 false로 해줘" +
+                                "일정 관련 메시지면 true를, 일정관련 메시지가 아니면 false를 출력해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
@@ -60,12 +62,15 @@ public class GptTodoService {
             JSONObject firstChoice = choices.getJSONObject(0);
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
+
             System.out.println("Content: " + content);
 
-            return content; // content만 반환
-
-
-
+            if ("true".equalsIgnoreCase(content) || "false".equalsIgnoreCase(content)) {
+                return content;
+            } else {
+                // content가 "true" 또는 "false"가 아닌 경우 null 반환
+                return null;
+            }
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
