@@ -126,7 +126,7 @@ const Register = () => {
 	  
 		  const userId = getUserIdFromToken(storedToken);
 	  
-  			const response = await axios.put(`http://172.20.10.5:4000/api/v1/user/${userId}`, {
+  			const response = await axios.put(`http://192.168.30.21:4000/api/v1/user/${userId}`, {
 				userNickname: String(inputName),
 				userColor: String(selectedTheme), 
 				diaryTime: String(selectedDiaryTime),

@@ -80,7 +80,7 @@ public class UserService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", "77cf97c36317f2622a926b9ddb30f96f");
-        params.add("redirect_uri", "http://172.20.10.5:4000/authnative");
+        params.add("redirect_uri", "http://192.168.30.21:4000/authnative");
         params.add("code", code);
 
 

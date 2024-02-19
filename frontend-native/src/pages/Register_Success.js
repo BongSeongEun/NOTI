@@ -22,9 +22,8 @@ function Register_Success() {
 
 			if (token) {
 				const userId = getUserIdFromToken(token);
-				console.log(`userId: ${userId}, token: ${token}`);
 				try {
-					const response = await axios.get(`http://172.20.10.5:4000/api/v1/userInfo/${userId}`, {
+					const response = await axios.get(`http://192.168.30.21:4000/api/v1/userInfo/${userId}`, {
 						headers: {
 							'Authorization': `Bearer ${token}`,
 						},

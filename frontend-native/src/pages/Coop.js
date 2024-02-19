@@ -5,9 +5,7 @@
 
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import {
-	ScrollView,
-} from "react-native";
+import { ScrollView,  } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 
