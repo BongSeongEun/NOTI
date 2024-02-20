@@ -1,14 +1,18 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-shadow */
+/* eslint-disable quotes */
+/* eslint-disable no-trailing-spaces */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-mixed-spaces-and-tabs */
-/* eslint-disable prettier/prettier */
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { ScrollView, TouchableOpacity, Text, Modal } from "react-native";
 import styled, { ThemeProvider } from 'styled-components/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode } from 'base-64';
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 import images from "../components/images";
 import theme from '../components/theme';
@@ -27,17 +31,23 @@ function Todo() {
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
-	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+	const [modalVisible, setModalVisible] = useState(false);
+	const [selectedEvent, setSelectedEvent] = useState(null);
 
     useEffect(() => {
         fetchUserData();
     }, [selectedDate]);
 
+	useFocusEffect(
+        useCallback(() => {
+            fetchUserData();
+        }, [selectedDate])
+    );
 	const formatDate = date => {
 		const d = new Date(date);
 		const year = d.getFullYear();
-		const month = `0${d.getMonth() + 1}`.slice(-2); // 월은 0부터 시작하므로 1을 더함
+		const month = `0${d.getMonth() + 1}`.slice(-2);
 		const day = `0${d.getDate()}`.slice(-2);
 		return `${year}.${month}.${day}`;
 	};
@@ -47,7 +57,7 @@ function Todo() {
 		const formattedDate = formatDate(selectedDate);
 	
 		try {
-		  const userResponse = await axios.get(`http://192.168.30.21:4000/api/v1/userInfo/${userId}`, {
+		  const userResponse = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
 			headers: {
 			  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 			},
@@ -60,9 +70,9 @@ function Todo() {
 	
 			if (theme[userThemeName]) {
 			  setCurrentTheme(theme[userThemeName]);
-			  setBase64Image(userProfileImage || ""); 
-			  setUserNickname(nickname || ""); 
-			  const eventsResponse = await axios.get(`http://192.168.30.21:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
+			  setBase64Image(userProfileImage || ''); 
+			  setUserNickname(nickname || ''); 
+			  const eventsResponse = await axios.get(`http://192.168.30.122:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
 				headers: {
 				  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 				},
@@ -86,13 +96,11 @@ function Todo() {
 		} catch (error) {
 		  console.error('Error fetching user data and events:', error);
 		}
-	  };
+	};
 	
-	  const getUserIdFromToken = async () => {
+	const getUserIdFromToken = async () => {
 		try {
 		  const token = await AsyncStorage.getItem('token');
-		  if (!token) return null;
-	
 		  const payload = token.split('.')[1];
 		  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
 		  const decodedPayload = decode(base64);
@@ -112,8 +120,10 @@ function Todo() {
 	const updateMarkedDates = (events) => {
 		const newMarkedDates = {};
 		events.forEach(event => {
-			const eventDateFormatted = event.todoDate.replace(/\./g, '-');
-			newMarkedDates[eventDateFormatted] = { marked: true, dotColor: currentTheme.color1 };
+			if (event.todoDate) {
+				const eventDateFormatted = event.todoDate.replace(/\./g, '-');
+				newMarkedDates[eventDateFormatted] = { marked: true, dotColor: currentTheme.color1 };
+			}
 		});
 		setMarkedDates(newMarkedDates);
 	};
@@ -128,17 +138,14 @@ function Todo() {
 		const newCompletedStatus = !events[index].todoDone;
 		try {
 			const response = await axios.put(
-				`http://192.168.30.21:4000/api/v1/updateTodo/${userId}/${todoId}`,
-				{
-				...events[index],
-				todoDone: newCompletedStatus,
-				},
-				{
+				`http://192.168.30.122:4000/api/v1/updateTodo/${userId}/${todoId}`, {
+					...events[index],
+					todoDone: newCompletedStatus,
+				}, {
 				headers: {
 					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 				},
-				}
-			);
+			});
 
 			if (response.status === 200) {
 				const updatedEvents = events.map((event, evtIndex) =>
@@ -159,10 +166,14 @@ function Todo() {
 				console.error("Failed to update todo status:", response);
 			}
 		} catch (error) {
-		  // Error during the request
 		  console.error("Error updating todo status:", error);
 		}
 	};
+
+	const handleEditEvent = (event) => {
+        setSelectedEvent(event);
+        setModalVisible(true);
+    };
 
 	return (
 		<ThemeProvider theme={currentTheme}>
@@ -213,8 +224,12 @@ function Todo() {
 						
 						{events.map((event, index) => (
 							<Noti key={event.todoId}
-							style={{
-								backgroundColor: event.selectedColor,
+								style={{
+									backgroundColor: event.selectedColor,
+								}}
+								onPress={() => {
+									setModalVisible(true);
+									handleEditEvent(event);
 								}}>
 								<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
 									{event.todoDone && <images.noticheck width={15} height={15}
@@ -224,9 +239,51 @@ function Todo() {
 									<NotiText>{event.todoTitle}</NotiText>
 									<NotiText>{`${event.todoStartTime} ~ ${event.todoEndTime}`}</NotiText>
 								</NotiTextContainer>
-								
+
+
 							</Noti>
 						))}
+
+						<Noti onPress={() => navigation.navigate("Todo_Add", { selectedDate: selectedDate })}
+							style={{ width: 150, backgroundColor: "#B7BABF", alignSelf: 'center' }}>
+							<NotiText style={{ justifyContent: 'center', alignItems: 'center' }}>+ 새 노티 추가하기</NotiText>
+						</Noti>
+
+						<Modal
+							animationType="slide"
+							transparent={true}
+							visible={modalVisible}
+							onRequestClose={() => setModalVisible(false)}
+						>
+							<ModalContainer>
+								<ModalView>
+									<ModalContent>
+										<TouchableOpacity onPress={() => {
+											navigation.navigate("Todo_Add", {
+												todoId: selectedEvent.todoId,
+												inputTitle: selectedEvent.todoTitle,
+												selectedStartTime: selectedEvent.todoStartTime,
+												selectedEndTime: selectedEvent.todoEndTime,
+												selectedColor: selectedEvent.todoColor,
+												isEditing: true,
+												selectedDate: selectedDate
+											});
+											setModalVisible(false);
+										}}>
+											<Text>수정하기</Text>
+										</TouchableOpacity>
+										<TouchableOpacity onPress={() => {
+											setModalVisible(!modalVisible);
+										}}>
+											<Text>삭제하기</Text>
+										</TouchableOpacity>
+										<TouchableOpacity onPress={() => setModalVisible(false)}>
+											<Text>닫기</Text>
+										</TouchableOpacity>
+									</ModalContent>
+								</ModalView>
+							</ModalContainer>
+						</Modal>
 
 						<TimeTable schedule={schedule} />
 						</MainView>
@@ -333,6 +390,26 @@ const NotiText = styled.Text`
 	color: ${props => props.color || "white"};
 	text-align: left;
 	margin-left: 10px;
+`;
+
+const ModalContainer = styled.View`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalView = styled.View`
+  margin: 20px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 35px;
+  align-items: center;
+`;
+
+const ModalContent = styled.View`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default Todo;
