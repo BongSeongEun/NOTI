@@ -43,7 +43,7 @@ public class GptController {
         this.todoRepository = todoRepository;
     }
 
-    @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출
+    @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         //Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음
         String userMessage = request.get("chatContent"); // chat_content 입력받음
@@ -53,10 +53,11 @@ public class GptController {
             boolean gptTodo = Boolean.parseBoolean(gptTodoService.askGpt(userMessage, userId));
             String chatEvent = null;
 
-            // gptTodo가 true일 경우, nlpService 호출
+
             String nlpEvent = null;
             String nlpTime = null;
 
+            // gptTodo가 true일 경우, nlpService 호출
             if (gptTodo) { // 합쳐져 있는 event와 time을 각각 분리
                 chatEvent = nlpService.askNlp(userMessage, userId);
 
@@ -75,7 +76,6 @@ public class GptController {
                     nlpTime = matcher.group(2); // 다음 두 번째 괄호에 일치하는 부분
                 }
             }
-
 
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
             ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, nlpEvent, nlpTime);
@@ -108,7 +108,7 @@ public class GptController {
                     todoRepository.save(newTodo); // Todo 저장
                 } else {
                     // nlpTime 형식이 예상과 다를 경우의 처리
-                    System.out.println("nlpTime 형식이 유효하지 않습니다: " + nlpTime);
+                    System.out.println("nlpTime 형식이 이상해요...ㅡ3ㅡ : " + nlpTime);
                 }
             }
 
@@ -119,6 +119,7 @@ public class GptController {
         }
 
         try {
+
             // GPT 서비스를 호출하여 응답 받기
             String gptResponse = gptService.askGpt(userMessage, userId);
 
@@ -131,8 +132,15 @@ public class GptController {
             return gptResponse;
 
         } catch (Exception e) {
+            String gptError = "gpt채팅 오류가 났어요.. 다시 시도해주시겠어요?";
+
+            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptError, true, false, null, null);
+            Chat responseChat = Chat.toSaveEntity(responseChatDTO);
+            chatRepository.save(responseChat);
+
             e.printStackTrace();
-            return "GPT API 호출 오류가 발생했어요...ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!!";
+            return "GPT API 호출 오류가 발생했어요...ㅠ3ㅠ 아마.. API KEY가 잘못입력된 것 같아요..!! " +
+                    "\n 우선 보내주신 채팅내용은 저장해놨어요 >_<";
         }
     }
 
