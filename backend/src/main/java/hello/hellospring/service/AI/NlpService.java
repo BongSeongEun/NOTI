@@ -32,7 +32,7 @@ public class NlpService {
                         "배열 형식으로 결과값을 리턴해줘.7시에 커피집을 갔다하면 [커피집을 갔다],[07:00] 이런식으로" +
                         "첫번째 배열에는 event를 넣어주고, 두번째 배열에는 time을 넣어줘" +
                         "time의 경우에는 xx:yy 형식으로 값을 넣어줘" +
-                        "event랑 time이 여러개이면 [운전을했다, 집에 왔다],[02:00,06:00] 이런식으로 분리해줘"));
+                        "event랑 time이 여러개이면 : [[운전을했다, 집에 왔다],[02:00,06:00]] 이런식으로 분리해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 

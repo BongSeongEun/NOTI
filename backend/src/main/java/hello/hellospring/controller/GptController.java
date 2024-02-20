@@ -2,16 +2,19 @@ package hello.hellospring.controller;
 
 import hello.hellospring.dto.ChatDTO;
 import hello.hellospring.model.Chat;
+import hello.hellospring.model.Todo;
 import hello.hellospring.repository.ChatRepository;
+import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.GptDiaryService;
 import hello.hellospring.service.AI.GptService;
 import hello.hellospring.service.AI.GptTodoService;
 import hello.hellospring.service.AI.NlpService;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -23,18 +26,21 @@ public class GptController {
     private final GptService gptService; //service 참조
     private final GptDiaryService gptDiaryService; // service 참조2
     private final ChatRepository chatRepository; // repository 참조
-    private final GptTodoService gptTodoService;
-    private final NlpService nlpService;
+    private final GptTodoService gptTodoService; // todo인지 아닌지 분류
+    private final NlpService nlpService; // nlp기능 사용
+    private final TodoRepository todoRepository; // todo 저장용
+
 
 
     @Autowired
-    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService, GptTodoService gptTodoService, NlpService nlpService) {
+    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService, GptTodoService gptTodoService, NlpService nlpService, TodoRepository todoRepository) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
         this.gptDiaryService = gptDiaryService;
         this.gptTodoService = gptTodoService;
         this.nlpService = nlpService;
+        this.todoRepository = todoRepository;
     }
 
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출
@@ -48,35 +54,53 @@ public class GptController {
             String chatEvent = null;
 
             // gptTodo가 true일 경우, nlpService 호출
-            String event1 = null;
-            String event2 = null;
+            String nlpEvent = null;
+            String nlpTime = null;
 
-            if (gptTodo) {
+            if (gptTodo) { // 합쳐져 있는 event와 time을 각각 분리
                 chatEvent = nlpService.askNlp(userMessage, userId);
 
                 // 정규 표현식 패턴: 대괄호 안의 쌍따옴표로 둘러싸인 문자열을 찾음
                 Pattern pattern = Pattern.compile("\\[\"(.*?)\"\\]");
                 Matcher matcher = pattern.matcher(chatEvent);
-
-                event1 = null;
-                event2 = null;
+                nlpEvent = null;
+                nlpTime = null;
 
                 // event값 분류하기 (첫 번째 일치하는 부분 찾기)
                 if (matcher.find()) {
-                    event1 = matcher.group(1); // 첫 번째 괄호에 일치하는 부분
+                    nlpEvent = matcher.group(1); // 첫 번째 괄호에 일치하는 부분
                 }
                 // time값 분류하기  (두 번째 일치하는 부분 찾기)
                 if (matcher.find()) {
-                    event2 = matcher.group(1); // 두 번째 괄호에 일치하는 부분
+                    nlpTime = matcher.group(1); // 두 번째 괄호에 일치하는 부분
                 }
-
-
             }
 
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
-            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, event1, event2);
+            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, nlpEvent, nlpTime);
             Chat initialChat = Chat.toSaveEntity(initialChatDTO);
             chatRepository.save(initialChat);
+
+            if (nlpTime != null && nlpEvent != null) {
+                // nlpEvent과 nlpTime을 Todo 테이블에 저장
+                Todo newTodo = new Todo();
+                newTodo.setUserId(userId); // userId 값 저장
+                newTodo.setTodoTitle(nlpEvent); // nlpEvent 값 저장
+
+                newTodo.setTodoStartTime(nlpTime); // nlpTime 값 저장
+                newTodo.setTodoEndTime(nlpTime); // nlpTime 값 저장
+
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
+                newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
+
+                newTodo.setTodoDone(false);
+                newTodo.setTodoColor("color1");
+
+
+                todoRepository.save(newTodo); // Todo 저장
+            }
+
 
         } catch (Exception e){
             e.printStackTrace();
