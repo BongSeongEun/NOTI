@@ -40,7 +40,7 @@ const DateHeader = styled.div`
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
-function CoopDetail({ team }) {
+function CoopDetail({ team, selectedDate }) {
   const [teamDetails, setTeamDetails] = useState(null); // 팀 상세 정보 상태
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
@@ -102,7 +102,11 @@ function CoopDetail({ team }) {
       <MainDiv>
         <DateHeader>{team && team.teamTitle}</DateHeader>
         {/* 팀 상세 정보가 있으면 팀 이름을 표시하고, 없으면 로딩 텍스트를 표시한다. */}
-        <CoopTodo teamId={team.teamId} onTodoChange={fetchTeamDetails} />
+        <CoopTodo
+          teamId={team.teamId}
+          onTodoChange={fetchTeamDetails}
+          selectedDate={selectedDate}
+        />
       </MainDiv>
     </ThemeProvider>
     // Use 'team' prop to display team details

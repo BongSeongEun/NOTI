@@ -7,6 +7,7 @@ const DiaryContainer = styled.div`
   align-items: center;
   margin-right: 300px;
   margin-left: 300px;
+  height: 100%;
 
   @media (max-width: 1050px) {
     margin-left: 0;

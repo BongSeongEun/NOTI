@@ -9,6 +9,7 @@ import DeleteModal from "../components/DeleteModal";
 import TimeTable from "../components/TimeTable";
 
 const HorizontalBox = styled.div`
+  min-width: 600px;
   // 아이템을 가로정렬하는 상자
   display: flex; // 정렬하려면 이거 먼저 써야함
   flex-direction: row; // 가로나열
@@ -75,6 +76,7 @@ const EditButton = styled.img`
 `;
 
 const CompleteButton = styled.div`
+  min-width: 30px;
   margin-right: 10px;
   height: 30px;
   width: 30px;
@@ -145,6 +147,7 @@ const DateHeader = styled.div`
 `;
 
 const DeleteButton = styled.img`
+  min-width: 15px;
   //삭제 버튼
   cursor: pointer;
   margin-left: 10px; // 시간과 아이콘 사이의 간격 조정
@@ -166,6 +169,7 @@ const DateSpan = styled.span`
 `;
 
 const RegDiv = styled.div`
+  min-width: 300px;
   //회원가입 제일큰 박스
   height: auto;
   width: 85%; // 가로 50%
@@ -175,7 +179,19 @@ const RegDiv = styled.div`
   flex-direction: column; // 내용 세로나열
 `;
 
-function CoopTodo({ teamId, onTodoChange }) {
+const VerticalBox = styled.div`
+  // 아이템을 세로정렬하는 상자
+  display: flex; // 정렬하려면 이거 먼저 써야함
+  align-items: center; // 수직 가운데 정렬
+  flex-direction: column; // 세로나열
+  width: 100%;
+  height: auto;
+`;
+const TextBox = styled.div`
+  font-size: 17px;
+`;
+
+function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token");
   const [eventDate, setEventDate] = useState("");
@@ -463,7 +479,7 @@ function CoopTodo({ teamId, onTodoChange }) {
   useEffect(() => {
     fetchUserData();
     fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
-  }, [onTodoChange]);
+  }, [onTodoChange, selectedDate]);
 
   const handleTitleChange = e => {
     console.log("Before setTitle:", title);
@@ -581,10 +597,13 @@ function CoopTodo({ teamId, onTodoChange }) {
             </ModalBackdrop>
           )}
         </RegDiv>
-        <TimeTable
-          style={{ width: "300px", height: "450px", marginBottom: "5px" }}
-          schedule={schedule}
-        />
+        <VerticalBox>
+          <TextBox>{formatDate(selectedDate)}</TextBox>
+          <TimeTable
+            style={{ width: "300px", height: "450px", marginBottom: "5px" }}
+            schedule={schedule}
+          />
+        </VerticalBox>
       </HorizontalBox>
     </ThemeProvider>
   );

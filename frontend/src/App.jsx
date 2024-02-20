@@ -36,7 +36,7 @@ function App() {
           <Route path="/Welcome" element={<Welcome />} />
           <Route path="/Todo" element={<Todo2 />} />
           <Route path="/Coop" element={<Coop />} />
-          <Route path="/coop/:teamId" element={<CoopDetail />} />
+          <Route path="/Coop/:teamId" element={<CoopDetail />} />
           <Route path="/Diary" element={<Diary />} />
           {/* <Route path="/Diary/:id" element={<DiaryPage />} /> */}
           <Route path="/Stat" element={<Stat />} />

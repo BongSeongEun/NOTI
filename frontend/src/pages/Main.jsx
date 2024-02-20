@@ -295,7 +295,7 @@ function Main() {
           />
         );
       case "CoopDetail":
-        return <CoopDetail team={selectedTeam} />;
+        return <CoopDetail team={selectedTeam} selectedDate={selectedDate} />;
       case "Stat":
         return <Stat />;
       case "Setting":
@@ -309,8 +309,7 @@ function Main() {
     <ThemeProvider theme={currentTheme}>
       <PageLayout>
         <Header>
-          <Logo src={NOTI} alt="NOTI Logo" /> {/* 로고 이미지를 삽입합니다. */}
-          <NavBar />
+          {/* <NavBar /> */}
           <li
             onClick={() => handleMenuClick("Coop")}
             style={{ cursor: "pointer" }}

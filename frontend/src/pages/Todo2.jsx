@@ -512,7 +512,6 @@ function Todo2({ selectedDate }) {
     <ThemeProvider theme={currentTheme}>
       <div>
         <Header>
-          <Logo src={NOTI} alt="NOTI Logo" /> {/* 로고 이미지를 삽입합니다. */}
           <NavBar />
         </Header>
         <DiaryContainer>
