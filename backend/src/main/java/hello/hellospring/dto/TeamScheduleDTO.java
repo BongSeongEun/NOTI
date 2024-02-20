@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TeamScheduleDTO {
     private Long teamScheduleId;
-    private Long teamId;
+    private String teamId;
     private Long todoId;
 
     public static TeamSchedule toEntity(final TeamScheduleDTO dto){

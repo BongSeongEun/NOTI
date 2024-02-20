@@ -13,10 +13,11 @@ const Redirection = () => {
       const code = new URL(event.url).searchParams.get('code');
       if (code) {
         axios
-          .post(`http://192.168.75.126:4000/authnative?code=${code}`)
+          .post(`http://172.20.10.5:4000/authnative?code=${code}`)
           .then(async res => {
-            const token = res.headers.authorization;
-            await AsyncStorage.setItem('token', token);
+			const params = new URLSearchParams(location.search);
+			  const token = params.get("token");
+			  await AsyncStorage.setItem(token);
             navigation.navigate('Register');
           })
           .catch(err => console.log(err));
