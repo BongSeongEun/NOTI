@@ -60,21 +60,22 @@ public class GptController {
             if (gptTodo) { // 합쳐져 있는 event와 time을 각각 분리
                 chatEvent = nlpService.askNlp(userMessage, userId);
 
-                // 정규 표현식 패턴: 대괄호 안의 쌍따옴표로 둘러싸인 문자열을 찾음
-                Pattern pattern = Pattern.compile("\\[\"(.*?)\"\\]");
+                // 정규 표현식 패턴: 대괄호 안의 쌍따옴표 또는 작은따옴표로 둘러싸인 문자열을 찾음
+                Pattern pattern = Pattern.compile("\\[((?:\"|')(.*?)(?:\"|'))\\]");
                 Matcher matcher = pattern.matcher(chatEvent);
                 nlpEvent = null;
                 nlpTime = null;
 
                 // event값 분류하기 (첫 번째 일치하는 부분 찾기)
                 if (matcher.find()) {
-                    nlpEvent = matcher.group(1); // 첫 번째 괄호에 일치하는 부분
+                    nlpEvent = matcher.group(2); // 두 번째 괄호에 일치하는 부분 (쌍따옴표 또는 작은따옴표 내의 문자열)
                 }
                 // time값 분류하기  (두 번째 일치하는 부분 찾기)
                 if (matcher.find()) {
-                    nlpTime = matcher.group(1); // 두 번째 괄호에 일치하는 부분
+                    nlpTime = matcher.group(2); // 다음 두 번째 괄호에 일치하는 부분
                 }
             }
+
 
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
             ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, nlpEvent, nlpTime);
@@ -82,23 +83,33 @@ public class GptController {
             chatRepository.save(initialChat);
 
             if (nlpTime != null && nlpEvent != null) {
-                // nlpEvent과 nlpTime을 Todo 테이블에 저장
-                Todo newTodo = new Todo();
-                newTodo.setUserId(userId); // userId 값 저장
-                newTodo.setTodoTitle(nlpEvent); // nlpEvent 값 저장
+                // nlpTime 문자열 분리
+                String[] times = nlpTime.split("~");
+                if (times.length == 2) { // 정상적으로 두 부분으로 분리되었는지 확인
+                    String startTimeStr = times[0];
+                    String endTimeStr = times[1];
 
-                newTodo.setTodoStartTime(nlpTime); // nlpTime 값 저장
-                newTodo.setTodoEndTime(nlpTime); // nlpTime 값 저장
+                    // nlpEvent과 nlpTime을 Todo 테이블에 저장
+                    Todo newTodo = new Todo();
+                    newTodo.setUserId(userId); // userId 값 저장
+                    newTodo.setTodoTitle(nlpEvent); // nlpEvent 값 저장
 
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-                String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
-                newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
+                    // 여기서는 시간 정보를 String으로 다루고 있으므로, LocalTime을 다시 문자열로 변환
+                    newTodo.setTodoStartTime(startTimeStr.toString()); // 시작 시간 저장
+                    newTodo.setTodoEndTime(endTimeStr.toString()); // 종료 시간 저장
 
-                newTodo.setTodoDone(false);
-                newTodo.setTodoColor("color1");
+                    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                    String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
+                    newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
 
+                    newTodo.setTodoDone(false);
+                    newTodo.setTodoColor("color1");
 
-                todoRepository.save(newTodo); // Todo 저장
+                    todoRepository.save(newTodo); // Todo 저장
+                } else {
+                    // nlpTime 형식이 예상과 다를 경우의 처리
+                    System.out.println("nlpTime 형식이 유효하지 않습니다: " + nlpTime);
+                }
             }
 
 
