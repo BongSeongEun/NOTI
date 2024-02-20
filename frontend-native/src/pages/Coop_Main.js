@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable quotes */
 /* eslint-disable no-trailing-spaces */
@@ -5,7 +6,7 @@
 
 import styled, { ThemeProvider } from 'styled-components/native';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Modal, Text, TouchableOpacity, } from "react-native";
+import { ScrollView, Modal, Text, TouchableOpacity, View } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
@@ -18,54 +19,64 @@ import { TextInput } from 'react-native-gesture-handler';
 import Navigation_Bar from "../components/Navigation_Bar";
 
 
-function Coop_Main() {
+function Coop_Main({ onSelectTeam }) {
 	const navigation = useNavigation();
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
+	const [token, setToken] = useState('');
+
+	useEffect(() => {
+		fetchUserData();
+		fetchTeams();
+	}, [token]);
+
+	useEffect(() => {
+		teams.forEach(team => {
+			fetchTeamMembers(team.teamId);
+		});
+	}, [teams]);
 
 	const getUserIdFromToken = (token) => {
-        try {
-            const payload = token.split('.')[1];
-            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-            const decodedPayload = decode(base64);
-            const decodedJSON = JSON.parse(decodedPayload);
+		try {
+		const payload = token.split('.')[1];
+		const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+		const decodedPayload = decode(base64);
+		const decodedJSON = JSON.parse(decodedPayload);
 
-            return decodedJSON.id.toString();
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return null;
-        }
-    };
-	
-    useEffect(() => {
-		const fetchUserData = async () => {
-			const token = await AsyncStorage.getItem('token');
+		return decodedJSON.id.toString();
+		} catch (error) {
+		console.error('Error decoding token:', error);
+		return null;
+		}
+	};
 
-			if (token) {
-				const userId = getUserIdFromToken(token);
-				try {
-					const response = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
-						headers: {
-							'Authorization': `Bearer ${token}`,
-						},
-					});
-					const userThemeName = response.data.userColor || 'OrangeTheme';
-					const userProfileImage = response.data.userProfile;
-					const nickname = response.data.userNickname;
+	const fetchUserData = async () => {
+		const storedToken = await AsyncStorage.getItem('token');
+		setToken(storedToken);
 
-					if (theme[userThemeName]) {
-						setCurrentTheme(theme[userThemeName]);
-					}
-					setBase64Image(userProfileImage || ""); 
-					setUserNickname(nickname || ""); 
-				} catch (error) {
-					console.error("Error fetching user data:", error);
-				}
+		if (storedToken) {
+		const userId = getUserIdFromToken(storedToken);
+		try {
+			const response = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
+			headers: {
+				'Authorization': `Bearer ${storedToken}`,
+			},
+			});
+			const userThemeName = response.data.userColor || 'OrangeTheme';
+			const userProfileImage = response.data.userProfile;
+			const nickname = response.data.userNickname;
+
+			if (theme[userThemeName]) {
+			setCurrentTheme(theme[userThemeName]);
 			}
-		};
-		fetchUserData();
-	}, []);
+			setBase64Image(userProfileImage || "");
+			setUserNickname(nickname || "");
+		} catch (error) {
+			console.error("Error fetching user data:", error);
+		}
+		}
+	};
 
 	const [clicked_add, setClicked_add] = useState(false);
 	const [clicked_out, setClicked_out] = useState(false);
@@ -74,6 +85,9 @@ function Coop_Main() {
 	const [modal_TeamOutVisible, set_TeamOutModalVisible] = useState(false);
 	const [inputTeamLink, setInputTeamLink] = useState('');
 	const [clicked_pin, setClicked_pin] = useState(false);
+	const [teams, setTeams] = useState([]);
+	const [teamName, setTeamName] = useState("");
+	const [teamMembersCount, setTeamMembersCount] = useState({});
 
 	const formatDate = date => {
 		const d = new Date(date);
@@ -136,6 +150,44 @@ function Coop_Main() {
     };
 
 	*/
+
+	const fetchTeams = async () => {
+		const storedToken = await AsyncStorage.getItem('token');
+		const userId = getUserIdFromToken(storedToken);
+	
+		try {
+			const response = await axios.get(`http://192.168.30.122:4000/api/v1/getTeam/${userId}`);
+			response.data.forEach(team => {
+				fetchTeamMembers(team.teamId);
+			});
+		} catch (error) {
+			console.error("팀 목록을 불러오는데 실패했습니다:", error);
+		}
+	};
+	
+	const fetchTeamMembers = async (teamId) => {
+		try {
+			const token = await AsyncStorage.getItem('token');
+			const response = await axios.get(`http://192.168.30.122:4000/api/v1/getUserTeam/${teamId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			setTeamMembersCount((prevState) => ({
+				...prevState,
+				[teamId]: response.data.length,
+			}));
+		} catch (error) {
+			console.error("팀 참여 인원 수를 불러오는데 실패했습니다:", error);
+		}
+	};
+
+	const handleTeamClick = (team) => {
+		if (onSelectTeam && typeof onSelectTeam === 'function') {
+			onSelectTeam(team);
+		} else {
+			console.error('onSelectTeam is not a function');
+		}
+	};
+	
 
     return (
 		<ThemeProvider theme={currentTheme}>
@@ -212,6 +264,15 @@ function Coop_Main() {
 								</ModalView>
 							</ModalContainer>
 						</Modal>
+
+						<View>
+						{teams.map((team) => (
+							<TouchableOpacity key={team.teamId} onPress={() => handleTeamClick(team)}>
+							<Text>{team.teamTitle}</Text>
+							<Text>참여 인원: {teamMembersCount[team.teamId] || '로딩 중...'}</Text>
+							</TouchableOpacity>
+						))}
+						</View>
 
 						<Modal
 							animationType="slide"
