@@ -253,7 +253,11 @@ function Coop({ onSelectTeam }) {
             <ModalContainer onClick={e => e.stopPropagation()}>
               <CloseButton
                 onClick={closeModal}
-                style={{ border: "none", backgroundColor: "white" }}
+                style={{
+                  border: "none",
+                  backgroundColor: "white",
+                  marginBottom: "5px",
+                }}
               >
                 x
               </CloseButton>

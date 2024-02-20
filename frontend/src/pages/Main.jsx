@@ -13,6 +13,7 @@ import Coop from "../pages/Coop"; // Coop 컴포넌트 import
 import Setting from "../pages/Setting"; // Setting 컴포넌트 import
 import Stat from "../pages/Stat"; // Stat 컴포넌트 import
 import CoopDetail from "../pages/CoopDetail";
+import NavBar from "../components/Navigation";
 
 const PageLayout = styled.div`
   display: flex;
@@ -309,40 +310,13 @@ function Main() {
       <PageLayout>
         <Header>
           <Logo src={NOTI} alt="NOTI Logo" /> {/* 로고 이미지를 삽입합니다. */}
-          <Navigation>
-            <ul>
-              <li
-                onClick={() => handleMenuClick("Todo")}
-                style={{ cursor: "pointer" }}
-              >
-                일정
-              </li>
-              <li
-                onClick={() => handleMenuClick("Coop")}
-                style={{ cursor: "pointer" }}
-              >
-                협업
-              </li>
-              <li
-                onClick={() => handleMenuClick("Diary")}
-                style={{ cursor: "pointer" }}
-              >
-                일기
-              </li>
-              <li
-                onClick={() => handleMenuClick("Stat")}
-                style={{ cursor: "pointer" }}
-              >
-                통계
-              </li>
-              <li
-                onClick={() => handleMenuClick("Setting")}
-                style={{ cursor: "pointer" }}
-              >
-                설정
-              </li>
-            </ul>
-          </Navigation>
+          <NavBar />
+          <li
+            onClick={() => handleMenuClick("Coop")}
+            style={{ cursor: "pointer" }}
+          >
+            협업
+          </li>
         </Header>
         <Content>
           <LeftSidebar>

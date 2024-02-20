@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import styled, { ThemeProvider } from "styled-components";
+import { useDropzone, open } from "react-dropzone";
+import {
+  Navigate,
+  useNavigate,
+  Link,
+  Toggle,
+  redirect,
+} from "react-router-dom";
+import { backgrounds, lighten } from "polished";
+import axios from "axios"; // axios import 확인
+import DeleteModal from "../components/DeleteModal";
 import theme from "../styles/theme"; // 테마 파일 불러오기
-import AddEventButton from "../components/AddEventButton";
 import editIcon from "../asset/fi-rr-pencil.png"; // 수정하기
 import deleteIcon from "../asset/fi-rr-trash.png"; // 삭제하기
-import DeleteModal from "../components/DeleteModal";
-import TimeTable from "../components/TimeTable";
-
-const HorizontalBox = styled.div`
-  // 아이템을 가로정렬하는 상자
-  display: flex; // 정렬하려면 이거 먼저 써야함
-  flex-direction: row; // 가로나열
-  /* justify-content: center; // 가운데 정렬 */
-  width: 100%;
-`;
+import TimeTable from "../components/TimeTable"; // 타임테이블
+import DiaryContainer from "../components/DiaryContainer";
+import AddEventButton from "../components/AddEventButton";
 
 const ModalBackdrop = styled.div`
   position: fixed;
@@ -48,8 +50,12 @@ const CloseButton = styled.button`
   align-self: flex-end;
 `;
 
-const EventItem = styled.div`
+const EventList = styled.div`
   white-space: nowrap;
+  width: 100%;
+`;
+
+const EventItem = styled.div`
   background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
   color: white;
   padding: 10px;
@@ -69,9 +75,13 @@ const EventTitle = styled.div`
 
 const EditButton = styled.img`
   cursor: pointer;
-  margin-left: 5px; // 시간과 아이콘 사이의 간격
+  margin-left: 10px; // 시간과 아이콘 사이의 간격
   width: 15px;
   height: 15px;
+`;
+
+const EventTime = styled.div`
+  white-space: nowrap; // 시작 시간과 종료 시간을 같은 줄에 표시
 `;
 
 const CompleteButton = styled.div`
@@ -98,6 +108,8 @@ const InputField = styled.input`
   border: none;
   background-color: #f2f3f5;
 `;
+
+const TimeInput = styled(InputField).attrs({ type: "time" })``;
 
 const ColorSelector = styled.div`
   display: flex;
@@ -144,6 +156,12 @@ const DateHeader = styled.div`
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
+const Edit = styled.img`
+  //토끼로고
+  width: 20px;
+  height: 20px;
+`;
+
 const DeleteButton = styled.img`
   //삭제 버튼
   cursor: pointer;
@@ -152,38 +170,14 @@ const DeleteButton = styled.img`
   height: 15px;
 `;
 
-const EventList = styled.div`
-  margin-top: 20px;
-  width: 100%;
-`;
-
-const Event = styled.div`
-  white-space: nowrap; // 시작 시간과 종료 시간을 같은 줄에 표시
-`;
-
-const DateSpan = styled.span`
-  margin-right: 15px; // 오른쪽 마진으로 간격 추가
-`;
-
-const RegDiv = styled.div`
-  //회원가입 제일큰 박스
-  height: auto;
-  width: 85%; // 가로 50%
-  display: flex;
-  /* justify-content: center; */
-  align-items: center;
-  flex-direction: column; // 내용 세로나열
-`;
-
-function CoopTodo({ teamId, onTodoChange }) {
+function Todo({ selectedDate }) {
+  // 내 일정 목록을 관리하기 위한 상태
+  const [events, setEvents] = useState([]);
+  const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
-  const token = window.localStorage.getItem("token");
-  const [eventDate, setEventDate] = useState("");
+
   // 일정에 따라 색칠할 시간 블록들의 상태를 관리
   const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
-
-  // 일정 목록을 관리하기 위한 상태
-  const [events, setEvents] = useState([]);
 
   // 수정 모드 상태와 현재 수정 중인 이벤트의 ID를 저장하는 상태 추가
   const [isEditing, setIsEditing] = useState(false);
@@ -197,25 +191,16 @@ function CoopTodo({ teamId, onTodoChange }) {
     const day = `0${d.getDate()}`.slice(-2);
     return `${year}.${month}.${day}`;
   };
-  // 수정하기에서 달력날짜 불러오는 함수
-  const formatDateForInput = date => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = `0${d.getMonth() + 1}`.slice(-2); // 월은 0부터 시작하므로 1을 더함
-    const day = `0${d.getDate()}`.slice(-2);
-    return `${year}-${month}-${day}`; // YYYY-MM-DD 형식으로 반환
-  };
   // 모달창 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 새 일정의 제목, 시간, 색상 상태
   const [title, setTitle] = useState([]);
+  const [startTime, setStartTime] = useState([]);
+  const [endTime, setEndTime] = useState([]);
   const [selectedColor, setSelectedColor] = useState(theme.OrangeTheme.color1);
 
-  // 날짜 입력 필드 변경 핸들러
-  const handleDateChange = e => {
-    setEventDate(e.target.value);
-  };
+  const token = window.localStorage.getItem("token");
 
   // isDeleteConfirmModalOpen은 삭제 확인 모달의 열림/닫힘 상태
   // deletingTodoId는 삭제할 일정의 ID를 저장
@@ -234,24 +219,56 @@ function CoopTodo({ teamId, onTodoChange }) {
     return decodedJSON.id.toString();
   };
 
-  // 테마 정보 가져오는 함수
-  const fetchUserData = async userToken => {
-    const userId = getUserIdFromToken(userToken); // 사용자 ID 가져오기
+  // 사용자 데이터 및 일정 데이터를 가져오는 함수
+  const fetchUserData = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    const formattedDate = formatDate(selectedDate); // 선택된 날짜를 YYYY-MM-DD 형식으로 변환
+
     try {
-      const response = await axios.get(`/api/v1/userInfo/${userId}`, {
+      // 사용자 정보 불러오기
+      const userResponse = await axios.get(`/api/v1/userInfo/${userId}`, {
         headers: {
-          Authorization: `Bearer ${userToken}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
-      const userThemeName = response.data.userColor; // 사용자의 테마 이름
 
-      // 사용자의 테마를 상태에 적용
-      if (theme[userThemeName]) {
-        setCurrentTheme(theme[userThemeName]);
+      // 사용자의 테마 정보를 서버로부터 받아옴
+      if (userResponse.status === 200) {
+        const userThemeName = userResponse.data.userColor; // 사용자의 테마 이름
+
+        // 사용자의 테마를 상태에 적용
+        if (theme[userThemeName]) {
+          setCurrentTheme(theme[userThemeName]);
+
+          // 날짜에 맞는 일정 데이터 불러오기
+          const eventsResponse = await axios.get(
+            `/api/v1/getTodo/${userId}?date=${formattedDate}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            },
+          );
+
+          if (eventsResponse.status === 200) {
+            const filteredEvents = eventsResponse.data.filter(
+              event => event.todoDate === formattedDate,
+            );
+            const updatedEvents = filteredEvents.map(event => ({
+              ...event,
+              selectedColor:
+                theme[userThemeName][event.todoColor] || event.todoColor,
+            }));
+            setEvents(updatedEvents);
+          } else {
+            console.error("Unexpected response:", eventsResponse);
+          }
+        }
+      } else {
+        console.error("Unexpected response:", userResponse);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching user data and events:", error);
     }
   };
 
@@ -259,15 +276,15 @@ function CoopTodo({ teamId, onTodoChange }) {
   const handleColorSelect = colorKey => {
     setSelectedColor(colorKey); // 색상 키워드를 상태에 저장
   };
-  // 삭제
-  const handleDeleteClick = teamTodoId => {
-    setDeletingTodoId(teamTodoId);
+  // 수정 모달 여는함수
+  const handleDeleteClick = todoId => {
+    setDeletingTodoId(todoId);
     setIsDeleteConfirmModalOpen(true);
   };
-  // 삭제
-  const closeDeleteConfirmModal = teamTodoId => {
+  // 수정 모달
+  const closeDeleteConfirmModal = () => {
     setIsDeleteConfirmModalOpen(false);
-    setDeletingTodoId(teamTodoId);
+    setDeletingTodoId(null);
   };
   // 모달을 여는 함수
   const openModal = () => {
@@ -278,13 +295,24 @@ function CoopTodo({ teamId, onTodoChange }) {
   const closeModal = () => {
     setIsModalOpen(false);
     setTitle("");
-    setEventDate([]);
+    setStartTime("");
+    setEndTime("");
   };
 
-  // 시간을 schedule 배열의 인덱스로 변환하는 함수
-  const timeToIndex = time => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 6 + Math.floor(minutes / 10);
+  // 수정 버튼 클릭 시 처리 함수
+  const handleEditClick = todoId => {
+    // 일정 목록에서 특정 ID를 가진 일정을 찾습니다.
+    const eventToEdit = events.find(event => event.todoId === todoId);
+    if (eventToEdit) {
+      // 상태 변수를 업데이트하여 모달에 현재 값을 표시합니다.
+      setTitle(eventToEdit.todoTitle);
+      setStartTime(eventToEdit.todoStartTime);
+      setEndTime(eventToEdit.todoEndTime);
+      setSelectedColor(eventToEdit.selectedColor); // 여기서 색상은 이미 변환된 상태여야 합니다.
+      setEditingTodoId(eventToEdit.todoId); // 수정 중인 이벤트의 ID를 상태에 저장합니다.
+      setIsEditing(true); // 수정 모드로 전환합니다.
+      openModal(); // 모달 창을 엽니다.
+    }
   };
 
   // 새 일정 만들기 버튼 클릭 시 처리 함수
@@ -296,17 +324,25 @@ function CoopTodo({ teamId, onTodoChange }) {
     openModal(); // 모달 창 열기
   };
 
+  // 시간을 schedule 배열의 인덱스로 변환하는 함수
+  const timeToIndex = time => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 6 + Math.floor(minutes / 10);
+  };
+
   // 일정 완료 상태를 토글하는 함수
-  const toggleComplete = async (teamTodoId, index) => {
+  const toggleComplete = async (todoId, index) => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
     // 새로운 완료 상태 값을 정의합니다.
-    const newCompletedStatus = !events[index].teamTodoDone;
+    const newCompletedStatus = !events[index].todoDone;
+
     // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
     try {
       const response = await axios.put(
-        `/api/v1/updateTeamTodo/${teamId}/${teamTodoId}`,
+        `/api/v1/updateTodo/${userId}/${todoId}`,
         {
           ...events[index], // 기존 일정 데이터를 펼침
-          teamTodoDone: newCompletedStatus, // 완료 상태만 변경
+          todoDone: newCompletedStatus, // 완료 상태만 변경
         },
         {
           headers: {
@@ -319,10 +355,29 @@ function CoopTodo({ teamId, onTodoChange }) {
         // 서버 응답이 성공적으로 왔을 때 events 상태 업데이트
         const updatedEvents = events.map((event, evtIndex) =>
           evtIndex === index
-            ? { ...event, teamTodoDone: newCompletedStatus }
+            ? { ...event, todoDone: newCompletedStatus }
             : event,
         );
         setEvents(updatedEvents);
+        /** toggleComplete 함수는 todoId와 index를 인자로 받아,
+         * 해당 일정의 todoDone 상태를 서버에 업데이트합니다.
+         * 서버로부터 성공적인 응답을 받으면,
+         * events 배열과 schedule 배열을 새로운 상태로 업데이트합니다.
+         * schedule 배열은 시작 시간과 종료 시간에 해당하는 인덱스를 색칠하여
+         * 시간표에 반영합니다. */
+        // 일정 시간에 해당하는 schedule 배열의 칸을 색칠합니다.
+        const startTimeIndex = timeToIndex(updatedEvents[index].todoStartTime);
+        const endTimeIndex = timeToIndex(updatedEvents[index].todoEndTime);
+        const newSchedule = schedule.map((slot, idx) => {
+          if (idx >= startTimeIndex && idx < endTimeIndex) {
+            return newCompletedStatus
+              ? updatedEvents[index].selectedColor
+              : false;
+          }
+          return slot;
+        });
+
+        setSchedule(newSchedule);
       } else {
         // 서버 응답이 실패한 경우, 오류를 출력합니다.
         console.error("Failed to update todo status:", response);
@@ -333,12 +388,12 @@ function CoopTodo({ teamId, onTodoChange }) {
     }
   };
 
-  // 삭제
   const handleDelete = async () => {
     if (!deletingTodoId) return;
+    const userId = getUserIdFromToken();
     try {
       const response = await axios.delete(
-        `/api/v1/deleteTeamTodo/${teamId}/${deletingTodoId}`,
+        `/api/v1/deleteTodo/${userId}/${deletingTodoId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -347,7 +402,7 @@ function CoopTodo({ teamId, onTodoChange }) {
       );
       if (response.status === 200) {
         const updatedEvents = events.filter(
-          event => event.teamTodoId !== deletingTodoId,
+          event => event.todoId !== deletingTodoId,
         );
         setEvents(updatedEvents);
         closeDeleteConfirmModal(); // 삭제 후 모달 닫기
@@ -360,161 +415,120 @@ function CoopTodo({ teamId, onTodoChange }) {
       console.error("Error deleting the event:", error);
     }
   };
-
-  // 팀의 Todo를 가져오는 함수
-  const fetchTodos = async () => {
-    try {
-      const response = await axios.get(`/api/v1/getTeamTodo/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.data && Array.isArray(response.data)) {
-        // 서버로부터 받은 일정 데이터에 대해 각 항목의 색상을 현재 테마에 맞는 색상으로 변환
-        const updatedEvents = response.data.map(event => ({
-          ...event,
-          // 현재 테마에서 해당 색상 코드에 매핑된 색상을 찾거나, 매핑된 색상이 없으면 기본 색상을 사용
-          teamSelectedColor:
-            currentTheme[event.teamTodoColor] || event.teamTodoColor,
-        }));
-        setEvents(updatedEvents);
-      }
-    } catch (error) {
-      console.error("Failed to fetch todos:", error);
-    }
-  };
-  // 수정하기 버튼 클릭 시 호출될 함수
-  const handleEditSubmit = async e => {
-    setIsEditing(true);
+  // 모달에서 '추가하기' 또는 '수정하기' 버튼 클릭 시 처리 함수
+  const handleSubmit = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
     const eventData = {
-      teamTodoTitle: title,
-      teamTodoColor: selectedColor,
-      teamTodoDone: false,
-      teamTodoDate: formatDate(eventDate), // 날짜 데이터 포함
+      todoTitle: title,
+      todoStartTime: startTime,
+      todoEndTime: endTime,
+      todoColor: selectedColor,
+      todoDone: false, // 완료 여부는 기본적으로 false로 설정
+      todoDate: formatDate(selectedDate), // formatDate 함수를 사용하여 날짜 포맷 변경
     };
 
     try {
-      const url = `/api/v1/updateTeamTodo/${teamId}/${editingTodoId}`;
-      const response = await axios.put(url, eventData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        await fetchTodos(); // 일정 목록 새로고침
-        closeModal(); // 모달 창 닫기
+      let response;
+      if (isEditing) {
+        // 수정하는 경우
+        const url = `/api/v1/updateTodo/${userId}/${editingTodoId}`; // 수정 API 엔드포인트, todoId 포함
+        response = await axios.put(url, eventData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
       } else {
+        // 새로 추가하는 경우
+        const url = `/api/v1/createTodo/${userId}`; // 생성 API 엔드포인트
+        response = await axios.post(url, eventData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      }
+      if (response.status === 200 || response.status === 201) {
+        closeModal(); // 모달 창 닫기
+        // 요청 성공 후 로직 (예: 사용자 정보와 일정 데이터 새로고침)
+        await fetchUserData(); // 서버로부터 최신 데이터를 다시 받아옵니다.
+      } else {
+        // 서버로부터 예상치 못한 응답을 받은 경우
         console.error("Unexpected response:", response);
       }
     } catch (error) {
-      console.error("Error updating event:", error);
+      console.error("Error updating/adding event:", error);
+      // 에러 처리
     }
   };
 
-  // 추가하기 버튼 클릭 시 호출될 함수
-  const handleAddSubmit = async e => {
-    e.preventDefault(); // 폼 제출 기본 동작 방지
-    const eventData = {
-      teamTodoTitle: title,
-      teamTodoColor: selectedColor,
-      teamTodoDone: false,
-      teamTodoDate: formatDate(eventDate),
-    };
-
-    try {
-      const url = `/api/v1/createTeamTodo/${teamId}`;
-      const response = await axios.post(url, eventData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.status === 200 || response.status === 201) {
-        closeModal(); // 모달 창 닫기
-        await fetchTodos(); // 일정 목록 새로고침
-      } else {
-        console.error("Unexpected response:", response);
-      }
-    } catch (error) {
-      console.error("Error adding new event:", error);
-    }
-  };
-
-  const handleEditClick = teamTodoId => {
-    // 일정 목록에서 수정하려는 일정의 ID와 일치하는 일정을 찾습니다.
-    const eventToEdit = events.find(event => event.teamTodoId === teamTodoId);
-    if (eventToEdit) {
-      // 상태를 업데이트하여 모달에 현재 값을 표시합니다.
-      // 제목, 선택된 색상을 상태에 설정합니다.
-      setTitle(eventToEdit.teamTodoTitle);
-      setSelectedColor(eventToEdit.teamTodoColor); // 이전에는 eventToEdit.SelectedColor 였으나, 실제 프로퍼티 명과 일치해야 합니다.
-      // 수정 중인 일정의 ID를 상태에 저장합니다.
-      setEditingTodoId(eventToEdit.teamTodoId);
-      setEventDate(formatDateForInput(eventToEdit.teamTodoDate));
-      // 수정 모드로 전환합니다.
-      setIsEditing(true);
-
-      // 모달 창을 엽니다.
-      openModal();
-    } else {
-      console.error("Could not find the event to edit.");
-    }
-  };
-
+  // useEffect 내부에서 사용자 정보와 일정 데이터를 불러오는 로직
   useEffect(() => {
     fetchUserData();
-    fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
-  }, [onTodoChange]);
+  }, [selectedDate]); // token이 변경될 때마다 정보를 새로 불러옴
+
+  // events 상태가 변경될 때마다 TimeTable 컴포넌트를 업데이트하는 useEffect
+  useEffect(() => {
+    const newSchedule = Array(24 * 6).fill(null); // 새로운 시간표 배열을 초기화합니다.
+
+    // 완료된 일정에 대해 시간표 배열을 업데이트합니다.
+    events.forEach(event => {
+      if (event.todoDone) {
+        const startIdx = timeToIndex(event.todoStartTime);
+        const endIdx = timeToIndex(event.todoEndTime);
+        for (let i = startIdx; i < endIdx; i += 1) {
+          newSchedule[i] = event.todoDone
+            ? event.selectedColor
+            : `${event.selectedColor}80`; // 80은 투명도를 의미
+        }
+      }
+    });
+
+    setSchedule(newSchedule); // schedule 상태를 업데이트합니다.
+  }, [events]); // events 상태가 변경될 때마다 실행됩니다.
 
   const handleTitleChange = e => {
-    console.log("Before setTitle:", title);
+    console.log("Before setTitle:", e.target.value);
     setTitle(e.target.value);
-    console.log("After setTitle, title is now:", e.target.value);
-  };
-
-  // D-Day 계산 함수
-  const calculateDDay = date => {
-    const today = new Date();
-    const targetDate = new Date(date);
-    const difference = targetDate - today;
-    const dDay = Math.ceil(difference / (1000 * 60 * 60 * 24));
-    return dDay;
+    console.log("After setTitle, title is now:", title);
   };
 
   return (
     <ThemeProvider theme={currentTheme}>
-      <HorizontalBox>
-        <RegDiv>
+      <div>
+        <DiaryContainer>
+          <DateHeader>{formatDate(selectedDate)}</DateHeader>
           <EventList>
+            {/* 이 부분에서 날짜에 해당하는 일정들을 렌더링합니다.
+            EventList 컴포넌트 내에서 events 상태를 기반으로 일정 항목을 동적으로 렌더링 */}
             {events.map((event, index) => (
               <EventItem
-                key={event.teamTodoId}
+                key={event.todoId}
                 style={{
-                  backgroundColor: event.teamSelectedColor, // 일정의 선택된 색상을 항상 사용
-                  opacity: event.teamTodoDone ? "0.5" : "1", // 완료 상태에 따라 투명도 조정
+                  backgroundColor: event.selectedColor, // 일정의 선택된 색상을 항상 사용
+                  opacity: event.todoDone ? "0.5" : "1", // 완료 상태에 따라 투명도 조정
                 }}
               >
                 <CompleteButton
-                  onClick={() => toggleComplete(event.teamTodoId, index)}
+                  onClick={() => toggleComplete(event.todoId, index)}
                 >
-                  {event.teamTodoDone && <CheckMark>✔</CheckMark>}
+                  {event.todoDone && <CheckMark>✔</CheckMark>}
                 </CompleteButton>
-                <EventTitle>{event.teamTodoTitle}</EventTitle>
-                <Event>
-                  <DateSpan>{formatDate(event.teamTodoDate)}</DateSpan>
-                  <DateSpan>D - {calculateDDay(event.teamTodoDate)}</DateSpan>
-                </Event>
+                <EventTitle>{event.todoTitle}</EventTitle>
+                <EventTime>
+                  {event.todoStartTime}{" "}
+                  {event.todoEndTime && `~ ${event.todoEndTime}`}
+                </EventTime>
                 <EditButton
                   src={editIcon}
                   alt="수정"
                   onClick={() =>
-                    !event.teamTodoDone && handleEditClick(event.teamTodoId)
+                    !event.todoDone && handleEditClick(event.todoId)
                   }
                 />
                 <DeleteButton
                   src={deleteIcon}
                   alt="삭제"
                   onClick={() =>
-                    !event.teamTodoDone && handleDeleteClick(event.teamTodoId)
+                    !event.todoDone && handleDeleteClick(event.todoId)
                   }
                 />
                 <DeleteModal
@@ -541,10 +555,13 @@ function CoopTodo({ teamId, onTodoChange }) {
                   style={{
                     borderBottom: `2px solid ${currentTheme[selectedColor]}`,
                     fontSize: "20px",
-                    height: "10px",
+                    height: "30px",
                   }}
-                ></DateHeader>
+                >
+                  {formatDate(selectedDate)}
+                </DateHeader>
                 <SubTextBox>노티 제목</SubTextBox>
+
                 <InputField
                   placeholder="노티이름을 작성해주세요!"
                   value={title}
@@ -552,11 +569,15 @@ function CoopTodo({ teamId, onTodoChange }) {
                   maxLength={15}
                   style={{ marginBottom: "30px" }}
                 />
-                <SubTextBox>노티 날짜</SubTextBox>
-                <InputField
-                  type="date"
-                  value={eventDate}
-                  onChange={handleDateChange}
+                <SubTextBox>노티 시작</SubTextBox>
+                <TimeInput
+                  value={startTime}
+                  onChange={e => setStartTime(e.target.value)}
+                />
+                <SubTextBox>노티 종료</SubTextBox>
+                <TimeInput
+                  value={endTime}
+                  onChange={e => setEndTime(e.target.value)}
                   style={{ marginBottom: "30px" }}
                 />
                 <SubTextBox>노티 색상</SubTextBox>
@@ -573,21 +594,18 @@ function CoopTodo({ teamId, onTodoChange }) {
                 </ColorSelector>
                 <SubmitButton
                   color={currentTheme[selectedColor]}
-                  onClick={isEditing ? handleEditSubmit : handleAddSubmit}
+                  onClick={handleSubmit}
                 >
-                  {isEditing ? "수정하기" : "일정 추가"}
+                  {isEditing ? "수정하기" : "일정 추가"}{" "}
                 </SubmitButton>
               </ModalContainer>
             </ModalBackdrop>
           )}
-        </RegDiv>
-        <TimeTable
-          style={{ width: "300px", height: "450px", marginBottom: "5px" }}
-          schedule={schedule}
-        />
-      </HorizontalBox>
+
+          <TimeTable schedule={schedule} />
+        </DiaryContainer>
+      </div>
     </ThemeProvider>
   );
 }
-
-export default CoopTodo;
+export default Todo;

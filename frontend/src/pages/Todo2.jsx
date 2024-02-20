@@ -17,6 +17,25 @@ import deleteIcon from "../asset/fi-rr-trash.png"; // 삭제하기
 import TimeTable from "../components/TimeTable"; // 타임테이블
 import DiaryContainer from "../components/DiaryContainer";
 import AddEventButton from "../components/AddEventButton";
+import NavBar from "../components/Navigation";
+import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
+
+const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  padding: 0 20px;
+  height: 80px;
+  position: fixed;
+  width: 100%;
+  z-index: 1;
+`;
+
+const Logo = styled.img`
+  height: 50px; // 로고 이미지의 높이 설정
+  width: auto;
+`;
 
 const ModalBackdrop = styled.div`
   position: fixed;
@@ -168,7 +187,7 @@ const DeleteButton = styled.img`
   height: 15px;
 `;
 
-function Todo({ selectedDate }) {
+function Todo2({ selectedDate }) {
   // 내 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
@@ -492,6 +511,10 @@ function Todo({ selectedDate }) {
   return (
     <ThemeProvider theme={currentTheme}>
       <div>
+        <Header>
+          <Logo src={NOTI} alt="NOTI Logo" /> {/* 로고 이미지를 삽입합니다. */}
+          <NavBar />
+        </Header>
         <DiaryContainer>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
           <EventList>
@@ -606,4 +629,4 @@ function Todo({ selectedDate }) {
     </ThemeProvider>
   );
 }
-export default Todo;
+export default Todo2;
