@@ -9,12 +9,14 @@ import hello.hellospring.service.AI.GptDiaryService;
 import hello.hellospring.service.AI.GptService;
 import hello.hellospring.service.AI.GptTodoService;
 import hello.hellospring.service.AI.NlpService;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -58,27 +60,33 @@ public class GptController {
             String nlpTime = null;
 
             // gptTodo가 true일 경우, nlpService 호출
+            String eventsString = null;
+            String timesString = null;
             if (gptTodo) { // 합쳐져 있는 event와 time을 각각 분리
                 chatEvent = nlpService.askNlp(userMessage, userId);
 
-                // 정규 표현식 패턴: 대괄호 안의 쌍따옴표 또는 작은따옴표로 둘러싸인 문자열을 찾음
-                Pattern pattern = Pattern.compile("\\[((?:\"|')(.*?)(?:\"|'))\\]");
-                Matcher matcher = pattern.matcher(chatEvent);
-                nlpEvent = null;
-                nlpTime = null;
+                JSONArray mainArray = new JSONArray(chatEvent);
 
-                // event값 분류하기 (첫 번째 일치하는 부분 찾기)
-                if (matcher.find()) {
-                    nlpEvent = matcher.group(2); // 두 번째 괄호에 일치하는 부분 (쌍따옴표 또는 작은따옴표 내의 문자열)
+                // 첫 번째 배열에서 이벤트 추출
+                JSONArray eventsArray = mainArray.getJSONArray(0);
+                List<String> nlpEvents = new ArrayList<>();
+                for (int i = 0; i < eventsArray.length(); i++) {
+                    nlpEvents.add(eventsArray.getString(i));
                 }
-                // time값 분류하기  (두 번째 일치하는 부분 찾기)
-                if (matcher.find()) {
-                    nlpTime = matcher.group(2); // 다음 두 번째 괄호에 일치하는 부분
+                // 두 번째 배열에서 시간 추출
+                JSONArray timesArray = mainArray.getJSONArray(1);
+                List<String> nlpTimes = new ArrayList<>();
+                for (int i = 0; i < timesArray.length(); i++) {
+                    nlpTimes.add(timesArray.getString(i));
                 }
+
+                //대괄호 없이 출력되도록
+                eventsString = String.join(", ", nlpEvents);
+                timesString = String.join(", ", nlpTimes);
             }
 
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
-            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, nlpEvent, nlpTime);
+            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, eventsString, timesString);
             Chat initialChat = Chat.toSaveEntity(initialChatDTO);
             chatRepository.save(initialChat);
 
