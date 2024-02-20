@@ -14,7 +14,7 @@ public class TeamTodo {
     private Long teamTodoId;
 
     @Column(name = "team_id")
-    private Long teamId;
+    private String teamId;
 
     @Column(name = "team_todo_done")
     private boolean teamTodoDone;
@@ -29,7 +29,7 @@ public class TeamTodo {
     private String teamTodoColor;
 
     @Builder
-    public TeamTodo(Long teamTodoId, Long teamId, String teamTodoColor, boolean teamTodoDone, String teamTodoTitle, String teamTodoDate){
+    public TeamTodo(Long teamTodoId, String teamId, String teamTodoColor, boolean teamTodoDone, String teamTodoTitle, String teamTodoDate){
         this.teamTodoId = teamTodoId;
         this.teamId = teamId;
         this.teamTodoDone = teamTodoDone;

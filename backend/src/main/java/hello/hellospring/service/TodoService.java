@@ -34,7 +34,6 @@ public class TodoService {
     public Todo update(TodoDTO todoDTO, Long userId, Long todoId) {
         Todo originalTodo = todoRepository.findByTodoIdAndUserId(todoId, userId);
 
-        // DTO의 값을 사용하여 Todo 업데이트
         originalTodo.setTodoTitle(todoDTO.getTodoTitle());
         originalTodo.setTodoStartTime(todoDTO.getTodoStartTime());
         originalTodo.setTodoEndTime(todoDTO.getTodoEndTime());
