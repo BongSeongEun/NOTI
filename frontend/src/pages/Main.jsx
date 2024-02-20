@@ -5,7 +5,7 @@ import Calendar from "react-calendar";
 import axios from "axios"; // axios import
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
 import theme from "../styles/theme";
-import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
+import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
 import "react-calendar/dist/Calendar.css"; // 로고 이미지를 가져옵니다.
 import Todo from "../pages/Todo"; // Todo 컴포넌트 import
 import Diary from "../pages/Diary"; // Diary 컴포넌트 import
@@ -18,6 +18,14 @@ const PageLayout = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: #ccc;
+  }
 `;
 
 const Header = styled.header`
@@ -27,6 +35,9 @@ const Header = styled.header`
   background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
   padding: 0 20px;
   height: 80px;
+  position: fixed;
+  width: 100%;
+  z-index: 1;
 `;
 
 const Logo = styled.img`
@@ -38,6 +49,9 @@ const Navigation = styled.nav`
   display: flex;
   align-items: center;
   height: 80px;
+  width: 100%;
+  justify-content: right;
+  padding-right: 40px;
 
   & > ul {
     display: flex;
@@ -81,12 +95,16 @@ const LeftSidebar = styled.aside`
 const MainContent = styled.section`
   flex-grow: 1;
   padding: 20px;
+  margin-top: 80px;
   // margin-left: 300px; // 기본적으로 LeftSidebar의 너비만큼 여백을 둡니다.
 
   // 미디어 쿼리 추가
   @media (max-width: 1050px) {
     // LeftSidebar가 사라지는 화면 너비
     margin-left: 0; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
+  }
+  &::-webkit-scrollbar {
+    display: none;
   }
 `;
 

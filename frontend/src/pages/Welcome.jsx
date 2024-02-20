@@ -115,14 +115,6 @@ function Welcome() {
     navigate("/main"); // 메인 페이지로 이동
   };
 
-  useEffect(() => {
-    // 사용자가 URL을 직접 입력해서 이 페이지에 왔는지 확인합니다.
-    // state가 없거나 'from' 키가 'login'이 아니면, 메인 페이지로 리다이렉트합니다.
-    if (!location.state || location.state.from !== "login") {
-      navigate("/main");
-    }
-  }, [location, navigate]);
-
   return (
     <ThemeProvider theme={currentTheme}>
       <div>

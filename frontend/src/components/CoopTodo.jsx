@@ -301,7 +301,7 @@ function CoopTodo({ teamId, onTodoChange }) {
   // 일정 완료 상태를 토글하는 함수
   const toggleComplete = async (teamTodoId, index) => {
     // 새로운 완료 상태 값을 정의합니다.
-    const newCompletedStatus = !events[index].temaTodoDone;
+    const newCompletedStatus = !events[index].teamTodoDone;
     // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
     try {
       const response = await axios.put(
