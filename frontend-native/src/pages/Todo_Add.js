@@ -162,7 +162,7 @@ function Todo_Add({ }) {
 		} catch (error) {
 			console.error("Error saving todo:", error);
 		}
-	};	
+	};
 
     return (
         <ThemeProvider theme={currentTheme}>

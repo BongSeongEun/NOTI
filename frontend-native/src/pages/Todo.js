@@ -34,6 +34,7 @@ function Todo() {
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState(null);
+	const [clicked_delete, setClicked_delete] = useState(false);
 
     useEffect(() => {
         fetchUserData();
@@ -173,7 +174,49 @@ function Todo() {
 	const handleEditEvent = (event) => {
         setSelectedEvent(event);
         setModalVisible(true);
-    };
+	};
+	
+	useEffect(() => {
+		const newSchedule = Array(24 * 6).fill(null);
+	
+		events.forEach(event => {
+			if (event.todoDone) {
+				const startIdx = timeToIndex(event.todoStartTime);
+				const endIdx = timeToIndex(event.todoEndTime);
+				for (let i = startIdx; i < endIdx; i += 1) {
+					newSchedule[i] = event.todoDone
+						? event.selectedColor
+						: `${event.selectedColor}80`;
+				}
+			}
+		});
+	
+		setSchedule(newSchedule);
+	}, [events]);
+
+	const handleDelete = async () => {
+		if (!selectedEvent || !selectedEvent.todoId) return;
+		const userId = await getUserIdFromToken();
+		try {
+			const response = await axios.delete(
+				`http://192.168.30.122:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
+				{
+					headers: {
+						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+					},
+				}
+			);
+	
+			if (response.status === 200) {
+				setModalVisible(false); // 모달을 닫습니다.
+				fetchUserData(); // Todo 목록을 새로고침합니다.
+			} else {
+				console.error("Failed to delete the event:", response);
+			}
+		} catch (error) {
+			console.error("Error deleting the event:", error);
+		}
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>
@@ -194,7 +237,7 @@ function Todo() {
 			<FullView style={{flex: 1}}>
 				<BarContainer>
 					<MainText style={{ marginRight: 20 }}>나의 일정</MainText>
-                    <MainText onPress={() => navigation.navigate('Coop_M')}style={{ marginLeft: 20 }}>협업 일정</MainText>
+                    <MainText onPress={() => navigation.navigate('Coop_Main')}style={{ marginLeft: 20, color: "#B7BABF" }}>협업 일정</MainText>
                 </BarContainer>
 				<Bar />
 				<Bar_Mini />
@@ -245,8 +288,8 @@ function Todo() {
 						))}
 
 						<Noti onPress={() => navigation.navigate("Todo_Add", { selectedDate: selectedDate })}
-							style={{ width: 150, backgroundColor: "#B7BABF", alignSelf: 'center' }}>
-							<NotiText style={{ justifyContent: 'center', alignItems: 'center' }}>+ 새 노티 추가하기</NotiText>
+							style={{ width: 150, backgroundColor: "#B7BABF", alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
+							<NotiText style={{ marginRight: 10 }}>+ 새 노티 추가하기</NotiText>
 						</Noti>
 
 						<Modal
@@ -258,6 +301,7 @@ function Todo() {
 							<ModalContainer>
 								<ModalView>
 									<ModalContent>
+
 										<TouchableOpacity onPress={() => {
 											navigation.navigate("Todo_Add", {
 												todoId: selectedEvent.todoId,
@@ -269,17 +313,46 @@ function Todo() {
 												selectedDate: selectedDate
 											});
 											setModalVisible(false);
-										}}>
-											<Text>수정하기</Text>
+										}}
+										style={{ padding: 20, marginTop: 20 }}>
+											<MainText style={{ fontSize: 15 }}>수정하기</MainText>
 										</TouchableOpacity>
-										<TouchableOpacity onPress={() => {
-											setModalVisible(!modalVisible);
-										}}>
-											<Text>삭제하기</Text>
+
+										
+										<TouchableOpacity onPress={() => setClicked_delete(true)}
+										style={{ padding: 20 }}>
+											<MainText style={{ fontSize: 15 }}>삭제하기</MainText>
 										</TouchableOpacity>
-										<TouchableOpacity onPress={() => setModalVisible(false)}>
-											<Text>닫기</Text>
-										</TouchableOpacity>
+										<Modal
+											animationType="slide"
+											transparent={true}
+											visible={clicked_delete}
+											onRequestClose={() => setClicked_delete(false)}>
+											<ModalContainer>
+												<ModalView>
+													<MainText style={{ margin: 20, fontSize: 15 }}>정말 삭제하시겠습니까?</MainText>
+													<HorisontalView style={{ alignItems: 'center', justifyContent: 'center' }}>
+														<TeamOut onPress={() => {
+															handleDelete();
+															setClicked_delete(false);
+														}}
+														style={{ backgroundColor: "#F2F3F5" }}>
+															<Text>예</Text>
+														</TeamOut>
+
+														<TeamOut onPress={() => setClicked_delete(false)}
+														style={{ backgroundColor: currentTheme.color1 }}>
+															<Text style={{ color: "white" }}>아니요</Text>
+														</TeamOut>
+													</HorisontalView>
+												</ModalView>
+											</ModalContainer>
+										</Modal>
+
+										<TeamOut onPress={() => setModalVisible(false)}
+										style={{ backgroundColor: currentTheme.color1, width: 250 }}>
+											<Text style={{ color: 'white' }}>닫기</Text>
+										</TeamOut>
 									</ModalContent>
 								</ModalView>
 							</ModalContainer>
@@ -393,23 +466,38 @@ const NotiText = styled.Text`
 `;
 
 const ModalContainer = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: flex-end;
+    align-items: center;
 `;
 
 const ModalView = styled.View`
-  margin: 20px;
-  background-color: white;
-  border-radius: 20px;
-  padding: 35px;
-  align-items: center;
+    background-color: white;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px
+	width: 100%;
+	height: 250px;
+    align-items: center;
 `;
 
 const ModalContent = styled.View`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+`;
+
+const TeamOut = styled.TouchableOpacity`
+	width: 120px;
+	height: 40px;
+	border-radius: 15px;
+	justify-content: center;
+	align-items: center;
+	margin: 20px;
 `;
 
 export default Todo;
