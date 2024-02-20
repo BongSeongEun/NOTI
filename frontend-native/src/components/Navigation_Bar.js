@@ -1,8 +1,13 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import styled from "styled-components/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import styled, { ThemeProvider } from 'styled-components/native';
+import { ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { decode } from 'base-64';
+import axios from 'axios';
+
 import 'react-native-gesture-handler';
 
 import images from "../components/images";
@@ -10,20 +15,47 @@ import theme from "../components/theme";
 
 const Navigation_Bar = ({ selectedTheme }) => {
     const navigation = useNavigation();
-    const route = useRoute();
+    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+	const [selectedIcon, setSelectedIcon] = useState(null);
+	
+	useEffect(() => {
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (token) {
+				const userId = getUserIdFromToken(token);
+				try {
+					const response = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+					});
+					const userThemeName = response.data.userColor || 'OrangeTheme';
+					if (theme[userThemeName]) {
+						setCurrentTheme(theme[userThemeName]);
+					} 
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, []);
 
-    const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
+	const getUserIdFromToken = (token) => {
+        try {
+            const payload = token.split('.')[1];
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const decodedPayload = decode(base64);
+            const decodedJSON = JSON.parse(decodedPayload);
 
-    const [selectedIcon, setSelectedIcon] = useState(null);
-
-    useEffect(() => {
-        // Set the selected icon based on the current route name
-        const routeName = route.name;
-        setSelectedIcon(routeName);
-    }, [route]);
+            return decodedJSON.id.toString();
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    };
 
     const handlePress = (type) => {
-        // Update the selected icon state only if it's different from the current route name
         if (selectedIcon !== type) {
             setSelectedIcon(type);
         }
@@ -35,35 +67,31 @@ const Navigation_Bar = ({ selectedTheme }) => {
             <images.diary
                 width={25}
                 height={25}
-                color={selectedIcon === 'Diary_Main' ? color_sheet[0] : "#B7BABF"}
+                color={selectedIcon === 'Diary_Main' ? currentTheme.color1 : "#B7BABF"}
                 onPress={() => handlePress('Diary_Main')}
             />
-
             <images.stat
                 width={25}
                 height={25}
-                color={selectedIcon === 'Stat' ? color_sheet[0] : "#B7BABF"}
+                color={selectedIcon === 'Stat' ? currentTheme.color1 : "#B7BABF"}
                 onPress={() => handlePress('Stat')}
             />
-
             <images.todo
 				width={25}
 				height={25}
-				color={selectedIcon === 'Todo' ? color_sheet[0] : "#B7BABF"}
+				color={selectedIcon === 'Todo' ? currentTheme.color1 : "#B7BABF"}
 				onPress={() => handlePress('Todo')}
             />
-
             <images.chatting
                 width={25}
                 height={25}
-                color={selectedIcon === 'Chatting' ? color_sheet[0] : "#B7BABF"}
+                color={selectedIcon === 'Chatting' ? currentTheme.color1 : "#B7BABF"}
                 onPress={() => handlePress('Chatting')}
             />
-
             <images.setting
                 width={25}
                 height={25}
-                color={selectedIcon === 'Setting' ? color_sheet[0] : "#B7BABF"}
+                color={selectedIcon === 'Setting' ? currentTheme.color1 : "#B7BABF"}
                 onPress={() => handlePress('Setting')}
             />
         </NavigationView>

@@ -6,7 +6,7 @@
 
 import styled, { ThemeProvider } from "styled-components/native"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -14,8 +14,11 @@ import {
 	StyleSheet
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
+import { decode } from 'base-64';
+import axios from 'axios';
 
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
@@ -25,10 +28,52 @@ import { format } from "date-fns";
 
 function Diary_Main({ }) {
 	const navigation = useNavigation();
-	const route = useRoute();
-	const { selectedTheme } = route.params;
-	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
+    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [base64Image, setBase64Image] = useState('');
+    const [userNickname, setUserNickname] = useState('');
 
+    useEffect(() => {
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
+
+			if (token) {
+				const userId = getUserIdFromToken(token);
+				try {
+					const response = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+					});
+					const userThemeName = response.data.userColor || 'OrangeTheme';
+					const userProfileImage = response.data.userProfile;
+					const nickname = response.data.userNickname;
+
+					if (theme[userThemeName]) {
+						setCurrentTheme(theme[userThemeName]);
+					}
+					setBase64Image(userProfileImage || ""); 
+					setUserNickname(nickname || ""); 
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, []);
+
+    const getUserIdFromToken = (token) => {
+        try {
+            const payload = token.split('.')[1];
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const decodedPayload = decode(base64);
+            const decodedJSON = JSON.parse(decodedPayload);
+
+            return decodedJSON.id.toString();
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    };
 	const name = "홍길동";
 
 	const currentDate = new Date();
@@ -78,13 +123,13 @@ function Diary_Main({ }) {
 		}
 	};
 
-	const DiaryFrame = ({ diaryId, colorSheet }) => {
+	const DiaryFrame = ({ diaryId }) => {
 		const post = posts.find(p => p.id === diaryId);
 	
 		return (
 			<DiaryContainer>
 				<Diary_Frame>
-					<MainText style={{top: 10, color: colorSheet[0], alignSelf: 'center' }}>
+					<MainText style={{top: 10, color: currentTheme.color1, alignSelf: 'center' }}>
 						{post.date}
 					</MainText>
 					<MainText style={{top: 10, alignSelf: 'center' }}>
@@ -123,34 +168,32 @@ function Diary_Main({ }) {
 	  
 
 	return (
-		<ThemeProvider theme={selectedTheme}>
+		<ThemeProvider theme={currentTheme}>
 			<FullView>
-					<MainView>
-						<HorisontalView style={{marginTop: 30 }}>
-							<Profile source={images.profile} style={{ marginTop: 20 }} />
-							<ProfileTextContainer>
-								<MainText>
-									{name} 님,
-								</MainText>
-								<MainText color={color_sheet[0]}>
-									{formattedDate} 노티입니다!
-								</MainText>
-							</ProfileTextContainer>
-						</HorisontalView>
+				<MainView>
+				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
+						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
+						<ProfileTextContainer>
+							<MainText>{userNickname} 님,</MainText>
+							<MainText style={{ color: currentTheme.color1 }}>
+								{format(new Date(selectedDate), "yyyy.MM.dd")} 노티입니다!
+							</MainText>
+						</ProfileTextContainer>
+					</HorisontalView>
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1}}>
+			<FullView style={{flex: 1, marginBottom: 80}}>
 				<Bar />
 
 				<ScrollView>
 					<MainView>
 						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
 							<images.calendar width={20} height={20}
-							color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
+							color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
 							onPress={() => setClicked_calendar(!clicked_calendar)} />
 							<images.share width={20} height={20}
-							color={clicked_share ? color_sheet[0] : "#B7BABF"}
+							color={clicked_share ? currentTheme.color1 : "#B7BABF"}
 									onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
 
@@ -159,10 +202,10 @@ function Diary_Main({ }) {
 								<Calendar
 									markedDates={markedSelectedDates}
 									theme={{
-										selectedDayBackgroundColor: selectedTheme.color1,
-										arrowColor: selectedTheme.color1,
-										dotColor: selectedTheme.color1,
-										todayTextColor: selectedTheme.color1,
+										selectedDayBackgroundColor: currentTheme.color1,
+										arrowColor: currentTheme.color1,
+										dotColor: currentTheme.color1,
+										todayTextColor: currentTheme.color1,
 									}}
 									onDayPress={(day) => {
 										setSelectedDate(day.dateString);
@@ -172,7 +215,7 @@ function Diary_Main({ }) {
 										setSelectedPost(selectedPost);
 										if (selectedPost) {
 											navigation.navigate("Diary", {
-												selectedTheme: selectedTheme,
+												selectedTheme: currentTheme,
 												diaryData: {
 													date: selectedPost.date,
 													title: selectedPost.title,
@@ -189,10 +232,9 @@ function Diary_Main({ }) {
 							<DiaryFrame
 								key={post.id}
 								diaryId={post.id}
-								colorSheet={color_sheet}
 								onPress={() => {
 									navigation.navigate("Diary", {
-									selectedTheme: selectedTheme,
+									selectedTheme: currentTheme,
 									diaryData: {
 									date: post.date,
 									title: post.title,
@@ -204,9 +246,8 @@ function Diary_Main({ }) {
 						))}
 					</MainView>
 				</ScrollView>
-
-				<Navigation_Bar selectedTheme={selectedTheme} />
 			</FullView>
+			<Navigation_Bar />
 		</ThemeProvider>	
 	);
 }
@@ -232,18 +273,18 @@ const ProfileContainer = styled.View`
     flex-direction: row;
 `;
 
-
 const ProfileTextContainer = styled(ProfileContainer)`
 	flex-direction: column;
 	margin-top: 25px;
 	margin-left: 15px;
-	margin-bottom: 20px;
+	margin-bottom: 25px;
 `;
 
 const Profile = styled.Image`
     width: 40px;
     height: 40px;
     margin-left: 20px;
+	border-radius: 100px;
 `;
 
 const MainText = styled.Text`

@@ -234,7 +234,7 @@ function Todo() {
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1}}>
+			<FullView style={{flex: 1, marginBottom: 80}}>
 				<BarContainer>
 					<MainText style={{ marginRight: 20 }}>나의 일정</MainText>
                     <MainText onPress={() => navigation.navigate('Coop_Main')}style={{ marginLeft: 20, color: "#B7BABF" }}>협업 일정</MainText>
@@ -313,8 +313,7 @@ function Todo() {
 												selectedDate: selectedDate
 											});
 											setModalVisible(false);
-										}}
-										style={{ padding: 20, marginTop: 20 }}>
+										}} style={{ padding: 20, marginTop: 20 }}>
 											<MainText style={{ fontSize: 15 }}>수정하기</MainText>
 										</TouchableOpacity>
 
@@ -360,8 +359,10 @@ function Todo() {
 
 						<TimeTable schedule={schedule} />
 						</MainView>
-					</ScrollView>
-			</FullView>
+				</ScrollView>
+				</FullView>
+				<Navigation_Bar />
+			
 		</ThemeProvider>
 	);	
 }
@@ -479,7 +480,7 @@ const ModalContainer = styled.View`
 const ModalView = styled.View`
     background-color: white;
 	border-top-left-radius: 20px;
-	border-top-right-radius: 20px
+	border-top-right-radius: 20px;
 	width: 100%;
 	height: 250px;
     align-items: center;

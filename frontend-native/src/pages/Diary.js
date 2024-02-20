@@ -189,7 +189,7 @@ const ModalContainer = styled.View`
 const ModalView = styled.View`
     background-color: white;
 	border-top-left-radius: 20px;
-	border-top-right-radius: 20px
+	border-top-right-radius: 20px;
 	width: 100%;
 	height: 250px;
     align-items: center;
