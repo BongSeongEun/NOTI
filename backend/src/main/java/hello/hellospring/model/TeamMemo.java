@@ -16,19 +16,15 @@ public class TeamMemo {
     private Long teamMemoId;
 
     @Column(name = "team_id")
-    private Long teamId;
+    private String teamId;
 
     @Column(name = "memo_content")
     private String memoContent;
 
-    @Column(name = "memo_title")
-    private String memoTitle;
-
     @Builder
-    public TeamMemo(Long teamMemoId, Long teamId, String memoContent, String memoTitle){
+    public TeamMemo(Long teamMemoId, String teamId, String memoContent){
         this.teamMemoId = teamMemoId;
         this.teamId = teamId;
         this.memoContent = memoContent;
-        this.memoTitle = memoTitle;
     }
 }

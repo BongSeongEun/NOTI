@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TeamTodoDTO {
     private Long teamTodoId;
-    private Long teamId;
+    private String teamId;
     private boolean teamTodoDone;
     private String teamTodoTitle;
     private String teamTodoDate;

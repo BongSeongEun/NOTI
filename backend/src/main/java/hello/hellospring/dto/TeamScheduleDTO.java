@@ -12,20 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TeamScheduleDTO {
     private Long teamScheduleId;
-    private Long teamId;
-    private Long userId;
-    private String teamScheduleTitle;
-    private String teamScheduleDate;
-    private String teamScheduleColor;
+    private String teamId;
+    private Long todoId;
 
-    public static TeamScheduleDTO toEntity(final TeamScheduleDTO dto){
-        return TeamScheduleDTO.builder()
+    public static TeamSchedule toEntity(final TeamScheduleDTO dto){
+        return TeamSchedule.builder()
                 .teamScheduleId(dto.getTeamScheduleId())
                 .teamId(dto.getTeamId())
-                .userId(dto.getUserId())
-                .teamScheduleTitle(dto.getTeamScheduleTitle())
-                .teamScheduleDate(dto.getTeamScheduleDate())
-                .teamScheduleColor(dto.getTeamScheduleColor())
+                .todoId(dto.getTodoId())
                 .build();
     }
 
@@ -33,10 +27,7 @@ public class TeamScheduleDTO {
         return TeamScheduleDTO.builder()
                 .teamScheduleId(teamSchedule.getTeamScheduleId())
                 .teamId(teamSchedule.getTeamId())
-                .userId(teamSchedule.getUserId())
-                .teamScheduleTitle(teamSchedule.getTeamScheduleTitle())
-                .teamScheduleDate(teamSchedule.getTeamScheduleDate())
-                .teamScheduleColor(teamSchedule.getTeamScheduleColor())
+                .todoId(teamSchedule.getTodoId())
                 .build();
     }
 
