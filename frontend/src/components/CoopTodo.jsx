@@ -49,6 +49,16 @@ const CloseButton = styled.button`
   align-self: flex-end;
 `;
 
+const ScheduleItem = styled.div`
+  /* 일정 항목 스타일 */
+  padding: 10px;
+  margin: 5px 0;
+  cursor: pointer;
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
 const EventItem = styled.div`
   white-space: nowrap;
   background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
@@ -169,7 +179,6 @@ const DateSpan = styled.span`
 `;
 
 const RegDiv = styled.div`
-  min-width: 300px;
   //회원가입 제일큰 박스
   height: auto;
   width: 85%; // 가로 50%
@@ -195,6 +204,9 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token");
   const [eventDate, setEventDate] = useState("");
+  const [mySchedulesModalIsOpen, setMySchedulesModalIsOpen] = useState(false); // 내 일정 모달 상태
+  const [mySchedules, setMySchedules] = useState([]); // 사용자의 일정 목록
+
   // 일정에 따라 색칠할 시간 블록들의 상태를 관리
   const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 
@@ -487,13 +499,58 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     console.log("After setTitle, title is now:", e.target.value);
   };
 
-  // D-Day 계산 함수
+  // D-Day 계산 함수 수정
   const calculateDDay = date => {
     const today = new Date();
     const targetDate = new Date(date);
     const difference = targetDate - today;
     const dDay = Math.ceil(difference / (1000 * 60 * 60 * 24));
-    return dDay;
+
+    // D-Day가 음수일 경우 빈 문자열 반환
+    if (dDay < 0) {
+      return ""; // D-Day가 이미 지났을 경우, 표시하지 않음
+    }
+    return `D - ${dDay}`; // D-Day가 양수일 경우에만 표시
+  };
+
+  // 사용자의 일정을 불러오는 함수
+  const fetchMySchedules = async () => {
+    const userId = getUserIdFromToken(); // 토큰에서 사용자 ID 추출
+    try {
+      const response = await axios.get(`/api/v1/getTodo/${userId}`);
+      setMySchedules(response.data); // 사용자 일정 데이터를 상태에 저장
+    } catch (error) {
+      console.error("Failed to fetch my schedules:", error);
+    }
+  };
+
+  // 내 일정 추가 모달을 여는 함수
+  const openMySchedulesModal = () => {
+    fetchMySchedules(); // 모달을 열 때 사용자의 일정을 불러온다
+    setMySchedulesModalIsOpen(true);
+  };
+
+  // 내 일정 추가 모달을 닫는 함수
+  const closeMySchedulesModal = () => {
+    setMySchedulesModalIsOpen(false);
+  };
+
+  // 일정을 선택하고 TimeTable에 추가하는 함수
+  const handleSelectSchedule = async scheduleId => {
+    // 선택된 일정으로 TimeTable 업데이트 로직
+    try {
+      await axios.post(
+        `/api/v1/inputSchedule/${teamId}/${scheduleId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      closeMySchedulesModal(); // 요청 성공 시 모달 닫기
+      onTodoChange(); // 부모 컴포넌트에서 데이터를 새로고침
+    } catch (error) {
+      console.error("Failed to input schedule:", error);
+    }
   };
 
   return (
@@ -517,7 +574,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                 <EventTitle>{event.teamTodoTitle}</EventTitle>
                 <Event>
                   <DateSpan>{formatDate(event.teamTodoDate)}</DateSpan>
-                  <DateSpan>D - {calculateDDay(event.teamTodoDate)}</DateSpan>
+                  <DateSpan>{calculateDDay(event.teamTodoDate)}</DateSpan>
                 </Event>
                 <EditButton
                   src={editIcon}
@@ -599,6 +656,32 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
         </RegDiv>
         <VerticalBox>
           <TextBox>{formatDate(selectedDate)}</TextBox>
+          <div>
+            <AddEventButton onClick={openMySchedulesModal}>
+              내 일정 시간 추가하기
+            </AddEventButton>
+            {mySchedulesModalIsOpen && (
+              <ModalBackdrop onClick={closeMySchedulesModal}>
+                <ModalContainer onClick={e => e.stopPropagation()}>
+                  <CloseButton onClick={closeMySchedulesModal}>
+                    닫기
+                  </CloseButton>
+                  <h2>내 일정 선택하기</h2>
+                  {mySchedules.map(scheduleItem => (
+                    <ScheduleItem
+                      key={scheduleItem.todoId}
+                      onClick={() => handleSelectSchedule(scheduleItem.todoId)}
+                    >
+                      {scheduleItem.todoTitle} {scheduleItem.todoStartTime}{" "}
+                      {scheduleItem.todoEndTime &&
+                        `~ ${scheduleItem.todoEndTime}`}
+                    </ScheduleItem>
+                  ))}
+                </ModalContainer>
+              </ModalBackdrop>
+            )}
+            {/* 기존 TimeTable 및 기타 컴포넌트 렌더링 */}
+          </div>
           <TimeTable
             style={{ width: "300px", height: "450px", marginBottom: "5px" }}
             schedule={schedule}

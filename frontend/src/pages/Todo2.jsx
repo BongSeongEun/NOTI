@@ -24,12 +24,12 @@ const Header = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
   padding: 0 20px;
   height: 80px;
   position: fixed;
   width: 100%;
   z-index: 1;
+  position: fixed;
 `;
 
 const Logo = styled.img`
@@ -171,6 +171,7 @@ const DateHeader = styled.div`
   color: black;
   border-bottom: 2px solid
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  margin-top: 30px;
 `;
 
 const Edit = styled.img`
@@ -187,7 +188,7 @@ const DeleteButton = styled.img`
   height: 15px;
 `;
 
-function Todo2({ selectedDate }) {
+function Todo2() {
   // 내 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
@@ -218,6 +219,7 @@ function Todo2({ selectedDate }) {
   const [selectedColor, setSelectedColor] = useState(theme.OrangeTheme.color1);
 
   const token = window.localStorage.getItem("token");
+  const [selectedDate, setSelectedDate] = useState("");
 
   // isDeleteConfirmModalOpen은 삭제 확인 모달의 열림/닫힘 상태
   // deletingTodoId는 삭제할 일정의 ID를 저장
@@ -477,6 +479,10 @@ function Todo2({ selectedDate }) {
     }
   };
 
+  const setDate = date => {
+    setSelectedDate(date);
+  };
+
   // useEffect 내부에서 사용자 정보와 일정 데이터를 불러오는 로직
   useEffect(() => {
     fetchUserData();
@@ -511,12 +517,10 @@ function Todo2({ selectedDate }) {
   return (
     <ThemeProvider theme={currentTheme}>
       <div>
-        <Header>
-          <NavBar />
-        </Header>
+        <NavBar setDate={setDate} />
         <DiaryContainer>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
-          <EventList>
+          <EventList style={{ marginTop: "80px" }}>
             {/* 이 부분에서 날짜에 해당하는 일정들을 렌더링합니다.
             EventList 컴포넌트 내에서 events 상태를 기반으로 일정 항목을 동적으로 렌더링 */}
             {events.map((event, index) => (

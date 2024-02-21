@@ -145,7 +145,7 @@ const StyledCalendar = styled(Calendar)`
   }
 `;
 
-function Navigation() {
+function Navigation({ setDate }) {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
   const token = window.localStorage.getItem("token");
   const [base64Image, setBase64Image] = useState("");
@@ -188,6 +188,7 @@ function Navigation() {
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
   };
+  setDate(selectedDate);
 
   return (
     <>
