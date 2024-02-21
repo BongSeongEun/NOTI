@@ -53,7 +53,7 @@ const DiaryList = () => {
     const fetchDiaries = async () => {
       const userId = await getUserIdFromToken();
       try {
-        const response = await axios.get(`http://172.20.10.5:4000/api/v2/diarylist/${userId}`);
+        const response = await axios.get(`http://192.168.30.220:4000/api/v2/diarylist/${userId}`);
         const sortedDiaries = response.data.sort(
           (a, b) => new Date(b.diaryDate) - new Date(a.diaryDate),
         );

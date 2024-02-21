@@ -8,7 +8,11 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView,  } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decode } from 'base-64';
 
+import { theme } from "../components/theme";
 import images from "../components/images";
 import NotiCheck from "../asset/noticheck.svg";
 import Navigation_Bar from "../components/Navigation_Bar";
@@ -18,23 +22,109 @@ import { Calendar } from "react-native-calendars";
 function Coop({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
-	
-	const { selectedTheme } = route.params;
-	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
-	const name = "홍길동";
-	const currentDate = new Date();
-	const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토']
-	const dayOfWeek = daysOfWeek[currentDate.getDay()];
-	const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
-
-	const Team_Title = "졸업작품 팀 프로젝트";
-	const team_todo = ['유산소 운동', '강아지 산책', '스터디'];
-
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [base64Image, setBase64Image] = useState('');
+	const [userNickname, setUserNickname] = useState('');
+	const [markedDates, setMarkedDates] = useState({});
+	const [token, setToken] = useState('');
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
-	const [color_num, setColorNum] = useState(0);
-	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
+	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+	const [events, setEvents] = useState([]);
+	const [selectedEvent, setSelectedEvent] = useState(null);
+	const [teamId, setTeamId] = useState(route.params.teamId);
+    const [teamTodos, setTeamTodos] = useState([]);
 
+	useEffect(() => {
+		fetchUserData();
+    }, []);
+
+    const fetchTeamTodos = async () => {
+        try {
+            const response = await axios.get(`http://192.168.30.220:4000/api/v1/getTeamTodo/${teamId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (response.status === 200) {
+                setTeamTodos(response.data);
+            }
+        } catch (error) {
+            console.error("팀 일정을 불러오는데 실패했습니다:", error);
+        }
+    };
+
+	const formatDate = date => {
+		const d = new Date(date);
+		const year = d.getFullYear();
+		const month = `0${d.getMonth() + 1}`.slice(-2);
+		const day = `0${d.getDate()}`.slice(-2);
+		return `${year}.${month}.${day}`;
+	};
+	
+	const fetchUserData = async () => {
+		const userId = await getUserIdFromToken();
+		const formattedDate = formatDate(selectedDate);
+	
+		try {
+			const userResponse = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
+				headers: {
+					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+				},
+			});
+	
+			if (userResponse.status === 200) {
+				const userThemeName = userResponse.data.userColor;
+				const userProfileImage = userResponse.data.userProfile;
+				const nickname = userResponse.data.userNickname;
+	
+				if (theme[userThemeName]) {
+					setCurrentTheme(theme[userThemeName]);
+					setBase64Image(userProfileImage || '');
+					setUserNickname(nickname || '');
+				}
+			} else {
+				console.error('Unexpected response:', userResponse);
+			}
+		} catch (error) {
+			console.error('Error fetching user data and events:', error);
+		}
+	};
+	
+	const getUserIdFromToken = async () => {
+		try {
+			const token = await AsyncStorage.getItem('token');
+			const payload = token.split('.')[1];
+			const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+			const decodedPayload = decode(base64);
+			const decodedJSON = JSON.parse(decodedPayload);
+
+			return decodedJSON.id.toString();
+		} catch (error) {
+			console.error('Error decoding token:', error);
+			return null;
+		}
+	};
+
+    const onDayPress = (day) => {
+        setSelectedDate(day.dateString);
+    };
+
+	const updateMarkedDates = (events) => {
+		const newMarkedDates = {};
+		events.forEach(event => {
+			if (event.todoDate) {
+				const eventDateFormatted = event.todoDate.replace(/\./g, '-');
+				newMarkedDates[eventDateFormatted] = { marked: true, dotColor: currentTheme.color1 };
+			}
+		});
+		setMarkedDates(newMarkedDates);
+	};
+
+	const timeToIndex = time => {
+		const [hours, minutes] = time.split(":").map(Number);
+		return hours * 6 + Math.floor(minutes / 10);
+	};
+
+	/*
 	useEffect(() => { setColorNum(color_num + 1); }, []);
 	const handleAddNoti = () => {
 		setColorNum((prevColorIndex) => (prevColorIndex + 1) % color_sheet.length);
@@ -57,7 +147,7 @@ function Coop({ }) {
 				<images.noticheck width={15} height={15}
 					color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : "#B7BABF"} />
 		  	</Noti_Check>
-		  	<NotiText> {team_todo[color_num]} </NotiText>
+		  	<NotiText> </NotiText>
 		</Noti>
 	);
 
@@ -91,31 +181,29 @@ function Coop({ }) {
 			marked: markedDates[selectedDate]?.marked,
 		}
 	};
+	*/
 
 	return (
-		<ThemeProvider theme={selectedTheme}>
+		<ThemeProvider theme={currentTheme}>
 			<FullView>
-					<MainView>
-						<HorisontalView style={{marginTop: 30, marginBottom: 10}}>
-							<Profile source={images.profile} style={{ marginTop: 20 }} />
-							<ProfileTextContainer>
-								<MainText>
-									{name} 님,
-								</MainText>
-								<MainText color={color_sheet[0]}>
-									{formattedDate} 노티입니다!
-								</MainText>
-							</ProfileTextContainer>
-						</HorisontalView>
+				<MainView>
+				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
+						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
+						<ProfileTextContainer>
+							<MainText>{userNickname} 님,</MainText>
+							<MainText style={{ color: currentTheme.color1 }}>
+								{formatDate(new Date(), "yyyy.MM.dd")} 노티입니다!
+							</MainText>
+						</ProfileTextContainer>
+					</HorisontalView>
 				</MainView>
 			</FullView>
 			
 			<FullView style={{flex: 1}}>
 				<BarContainer>
-					<MainText onPress={() => navigation.navigate('Todo', { selectedTheme: selectedTheme })}
-						style={{ marginRight: 20 }}>나의 일정</MainText>
-                    <MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
-                </BarContainer>
+					<MainText onPress={() => navigation.navigate('Todo')} style={{ marginRight: 20, color: "#B7BABF" }}>나의 일정</MainText>
+					<MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
+				</BarContainer>
 				<Bar />
 				<Bar_Mini />
 
@@ -123,43 +211,31 @@ function Coop({ }) {
 					<MainView>
 						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
 						<images.calendar width={20} height={20}
-						color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
+						color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
 						onPress={() => setClicked_calendar(!clicked_calendar)} />
 						<images.share width={20} height={20}
-						color={clicked_share ? color_sheet[0] : "#B7BABF"}
+						color={clicked_share ? currentTheme.color1 : "#B7BABF"}
 								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
-						
+
 						{clicked_calendar && (
 							<>
-								<Calendar 
-									markedDates={markedSelectedDates}
-									theme={{
-										selectedDayBackgroundColor: selectedTheme.color1,
-										arrowColor: selectedTheme.color1,
-										dotColor: selectedTheme.color1,
-										todayTextColor: selectedTheme.color1,
-									}} 
-									onDayPress={(day) => {
-										setSelectedDate(day.dateString)
-								}} />
+								<Calendar
+									onDayPress={onDayPress}
+									markedDates={{
+										...markedDates,
+										[selectedDate]: { ...markedDates[selectedDate], selected: true, selectedColor: currentTheme.color1 },
+									}}
+								/>
 							</>
 						)}
 
-						<MainText style={{ fontSize: 15, textAlign: 'center' }}>{Team_Title}</MainText>
+						<MainText style={{ fontSize: 15, textAlign: 'center' }}> </MainText>
 						
-						<NotiContainer>
-							<>
-								{Noties(0)}
-								{Noties(1)}
-								{Noties(2)}
-							
-							</>
-						</NotiContainer>
 						
 					</MainView>
 				</ScrollView>
-				<Navigation_Bar selectedTheme={selectedTheme} />
+				<Navigation_Bar />
 			</FullView>
 		</ThemeProvider>
 	);
@@ -204,6 +280,7 @@ const Profile = styled.Image`
     width: 40px;
     height: 40px;
     margin-left: 20px;
+	border-radius: 100px;
 `;
 
 const MainText = styled.Text`

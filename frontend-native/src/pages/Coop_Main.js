@@ -25,6 +25,15 @@ function Coop_Main({ onSelectTeam }) {
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
 	const [token, setToken] = useState('');
+	const [clicked_add, setClicked_add] = useState(false);
+	const [modal_TeamAddVisible, set_TeamAddModalVisible] = useState(false);
+	const [modal_TeamOutVisible, set_TeamOutModalVisible] = useState(false);
+	const [inputTeamLink, setInputTeamLink] = useState('');
+	const [teams, setTeams] = useState([]);
+	const [teamMembersCount, setTeamMembersCount] = useState({});
+	const [pinClicked, setPinClicked] = useState({});
+	const [outClicked, setOutClicked] = useState({});
+	const [selectedTeamId, setSelectedTeamId] = useState(null);
 
 	useEffect(() => {
 		fetchUserData();
@@ -58,7 +67,7 @@ function Coop_Main({ onSelectTeam }) {
 		if (storedToken) {
 		const userId = getUserIdFromToken(storedToken);
 		try {
-			const response = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
+			const response = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
 			headers: {
 				'Authorization': `Bearer ${storedToken}`,
 			},
@@ -78,17 +87,6 @@ function Coop_Main({ onSelectTeam }) {
 		}
 	};
 
-	const [clicked_add, setClicked_add] = useState(false);
-	const [clicked_out, setClicked_out] = useState(false);
-	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
-	const [modal_TeamAddVisible, set_TeamAddModalVisible] = useState(false);
-	const [modal_TeamOutVisible, set_TeamOutModalVisible] = useState(false);
-	const [inputTeamLink, setInputTeamLink] = useState('');
-	const [clicked_pin, setClicked_pin] = useState(false);
-	const [teams, setTeams] = useState([]);
-	const [teamName, setTeamName] = useState("");
-	const [teamMembersCount, setTeamMembersCount] = useState({});
-
 	const formatDate = date => {
 		const d = new Date(date);
 		const year = d.getFullYear();
@@ -97,78 +95,25 @@ function Coop_Main({ onSelectTeam }) {
 		return `${year}.${month}.${day}`;
 	};
 
-	/*
-    const TeamFrame = ({ teamName, clickedPin, setClickedPin, clickedOut, setClickedOut, colorSheet }) => (
-		<TeamFrameContainer>
-			<images.team_frame
-				color={clickedPin ? currentTheme.color1 : "#B7BABF"}
-				style={{ position: 'absolute' }}
-				onPress={handleTeamFramePress} />
-			<images.team_pin
-				width={15}
-				height={15}
-				color={clickedPin ? currentTheme.color1 : "#B7BABF"}
-				onPress={() => setClickedPin(!clickedPin)}
-				style={{ position: 'absolute', margin: 15, left: 10 }}
-			/>
-			
-			<MainText style={{ position: 'absolute', margin: 15, alignSelf: 'center' }}>{teamName}</MainText>
-			
-			{events.map((event, index) => (
-				<Noti key={event.todoId}
-					style={{ backgroundColor: event.selectedColor, }}
-						onPress={() => {
-							setModalVisible(true);
-							handleEditEvent(event);
-						}}>
-						<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
-							{event.todoDone && <images.noticheck width={10} height={10}
-								color={event.selectedColor} /> }
-						</Noti_Check>
-						<NotiTextContainer>
-							<NotiText>{event.todoTitle}</NotiText>
-							<NotiText>{`${event.todoStartTime} ~ ${event.todoEndTime}`}</NotiText>
-					</NotiTextContainer>
-				</Noti>
-			))}
-			
-			<images.team_out
-				width={15}
-				height={15}
-				color={clickedOut ? currentTheme.color1 : "#B7BABF"}
-				onPress={() => {
-					setClickedOut(!clickedOut);
-					set_TeamOutModalVisible(true);
-				}}
-				style={{ position: 'absolute', margin: 15, right: 10 }}
-			/>
-		</TeamFrameContainer>
-	);
-
-	const handleTeamFramePress = () => {
-        navigation.navigate('Coop', { selectedTheme: currentTheme });
-    };
-
-	*/
-
 	const fetchTeams = async () => {
 		const storedToken = await AsyncStorage.getItem('token');
-		const userId = getUserIdFromToken(storedToken);
+		if (!storedToken) return;
 	
 		try {
-			const response = await axios.get(`http://192.168.30.122:4000/api/v1/getTeam/${userId}`);
-			response.data.forEach(team => {
-				fetchTeamMembers(team.teamId);
+			const userId = getUserIdFromToken(storedToken);
+			const response = await axios.get(`http://192.168.30.220:4000/api/v1/getTeam/${userId}`, {
+				headers: { Authorization: `Bearer ${storedToken}` },
 			});
+			setTeams(response.data);
 		} catch (error) {
 			console.error("팀 목록을 불러오는데 실패했습니다:", error);
 		}
-	};
+	};	
 	
 	const fetchTeamMembers = async (teamId) => {
 		try {
 			const token = await AsyncStorage.getItem('token');
-			const response = await axios.get(`http://192.168.30.122:4000/api/v1/getUserTeam/${teamId}`, {
+			const response = await axios.get(`http://192.168.30.220:4000/api/v1/getUserTeam/${teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			setTeamMembersCount((prevState) => ({
@@ -180,11 +125,27 @@ function Coop_Main({ onSelectTeam }) {
 		}
 	};
 
-	const handleTeamClick = (team) => {
-		if (onSelectTeam && typeof onSelectTeam === 'function') {
-			onSelectTeam(team);
-		} else {
-			console.error('onSelectTeam is not a function');
+	const handlePinClick = (teamId) => {
+		setPinClicked(prevState => ({
+			...prevState,
+			[teamId]: !prevState[teamId],
+		}));
+	};
+
+	const handleTeamClick = (teamId) => {
+        navigation.navigate('Coop', { teamId: teamId });
+    };
+
+	const leaveTeam = async (teamId, userId) => {
+		try {
+			const response = await axios.delete(`http://192.168.30.220:4000/api/v1/leaveTeam/${teamId}/${userId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			if (response.status === 200) {
+				setTeams(teams.filter(team => team.teamId !== teamId));
+			}
+		} catch (error) {
+			console.error("팀을 나가는데 실패했습니다:", error);
 		}
 	};
 	
@@ -266,12 +227,40 @@ function Coop_Main({ onSelectTeam }) {
 						</Modal>
 
 						<View>
-						{teams.map((team) => (
-							<TouchableOpacity key={team.teamId} onPress={() => handleTeamClick(team)}>
-							<Text>{team.teamTitle}</Text>
-							<Text>참여 인원: {teamMembersCount[team.teamId] || '로딩 중...'}</Text>
-							</TouchableOpacity>
-						))}
+							{teams.map((team) => (
+								<TeamFrameContainer key={team.teamId}>
+									<images.team_frame
+										color={pinClicked[team.teamId] || outClicked[team.teamId] ? currentTheme.color1 : "#B7BABF"}
+										style={{ position: 'absolute' }}
+										onPress={() => handleTeamClick(team)}
+									/>
+									<images.team_pin
+										width={15}
+										height={15}
+										color={pinClicked[team.teamId] ? currentTheme.color1 : "#B7BABF"}
+										style={{ position: 'absolute', margin: 15, left: 10 }}
+										onPress={() => handlePinClick(team.teamId)}
+									/>
+
+									<MainText style={{ position: 'absolute', top: 30, alignSelf: 'center' }}>
+										{team.teamTitle}
+									</MainText>
+									<MainText style={{ position: 'absolute', top: 80, alignSelf: 'center' }}>
+										{teamMembersCount[team.teamId] || 0}명
+									</MainText>
+
+									<images.team_out
+										width={15}
+										height={15}
+										color={outClicked[team.teamId] ? currentTheme.color1 : "#B7BABF"}
+										onPress={() => {
+											setSelectedTeamId(team.teamId);
+											set_TeamOutModalVisible(true);
+										}}
+										style={{ position: 'absolute', margin: 15, right: 10 }}
+									/>
+								</TeamFrameContainer>
+							))}
 						</View>
 
 						<Modal
@@ -285,22 +274,25 @@ function Coop_Main({ onSelectTeam }) {
 									<HorisontalView style={{alignItems: 'center', justifyContent: 'center'}}>
 									<TeamOut
 										onPress={() => {
-											set_TeamOutModalVisible(!modal_TeamOutVisible);
-											setClicked_out(false);
-											}}
+											const userId = getUserIdFromToken(token);
+											if (selectedTeamId && userId) {
+												leaveTeam(selectedTeamId, userId);
+											}
+											set_TeamOutModalVisible(false);
+											setOutClicked(false);
+										}}
 										style={{backgroundColor: "#F2F3F5"}}
-										>
+									>
 										<Text>예</Text>
 									</TeamOut>
 
 									<TeamOut
 										onPress={() => {
 											set_TeamOutModalVisible(!modal_TeamOutVisible);
-											setClicked_out(false);
+											setOutClicked(false);
 											}}
-										style={{backgroundColor: currentTheme.color1.color1}}
+										style={{backgroundColor: currentTheme.color1}}
 										>
-											
 										<Text style={{color: "white"}}>아니요</Text>
 									</TeamOut>
 									</HorisontalView>
@@ -391,7 +383,7 @@ const Team_Noti = styled.TouchableOpacity`
 	width: 230px;
 	height: 30px;
 	border-radius: 15px;
-	background-color: ${props => props.color || "#FF7154"};
+	background-color: ${props => props.theme.color1};
 	flex-direction: row;
 	align-items: center;
 	margin: 5px;
@@ -438,7 +430,7 @@ const ModalContainer = styled.View`
 const ModalView = styled.View`
     background-color: white;
 	border-top-left-radius: 20px;
-	border-top-right-radius: 20px
+	border-top-right-radius: 20px;
 	width: 100%;
 	height: 250px;
     align-items: center;

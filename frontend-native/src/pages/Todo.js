@@ -44,7 +44,8 @@ function Todo() {
         useCallback(() => {
             fetchUserData();
         }, [selectedDate])
-    );
+	);
+	
 	const formatDate = date => {
 		const d = new Date(date);
 		const year = d.getFullYear();
@@ -58,7 +59,7 @@ function Todo() {
 		const formattedDate = formatDate(selectedDate);
 	
 		try {
-		  const userResponse = await axios.get(`http://192.168.30.122:4000/api/v1/userInfo/${userId}`, {
+		  const userResponse = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
 			headers: {
 			  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 			},
@@ -73,7 +74,7 @@ function Todo() {
 			  setCurrentTheme(theme[userThemeName]);
 			  setBase64Image(userProfileImage || ''); 
 			  setUserNickname(nickname || ''); 
-			  const eventsResponse = await axios.get(`http://192.168.30.122:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
+			  const eventsResponse = await axios.get(`http://192.168.30.220:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
 				headers: {
 				  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 				},
@@ -139,7 +140,7 @@ function Todo() {
 		const newCompletedStatus = !events[index].todoDone;
 		try {
 			const response = await axios.put(
-				`http://192.168.30.122:4000/api/v1/updateTodo/${userId}/${todoId}`, {
+				`http://192.168.30.220:4000/api/v1/updateTodo/${userId}/${todoId}`, {
 					...events[index],
 					todoDone: newCompletedStatus,
 				}, {
@@ -199,7 +200,7 @@ function Todo() {
 		const userId = await getUserIdFromToken();
 		try {
 			const response = await axios.delete(
-				`http://192.168.30.122:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
+				`http://192.168.30.220:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
 				{
 					headers: {
 						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
