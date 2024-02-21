@@ -179,6 +179,7 @@ const DateSpan = styled.span`
 `;
 
 const RegDiv = styled.div`
+  margin-left: 15px;
   //회원가입 제일큰 박스
   height: auto;
   width: 85%; // 가로 50%
@@ -198,6 +199,25 @@ const VerticalBox = styled.div`
 `;
 const TextBox = styled.div`
   font-size: 17px;
+`;
+
+const AddSchedulesButton = styled.button`
+  margin-right: 15px;
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const ButtonContainer = styled.div`
+  margin-top: -15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; // 부모 컨테이너의 너비가 정의되어야 합니다.
 `;
 
 function CoopTodo({ teamId, onTodoChange, selectedDate }) {
@@ -488,11 +508,6 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     }
   };
 
-  useEffect(() => {
-    fetchUserData();
-    fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
-  }, [onTodoChange, selectedDate]);
-
   const handleTitleChange = e => {
     console.log("Before setTitle:", title);
     setTitle(e.target.value);
@@ -516,13 +531,19 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   // 사용자의 일정을 불러오는 함수
   const fetchMySchedules = async () => {
     const userId = getUserIdFromToken(); // 토큰에서 사용자 ID 추출
+    const formattedDate = formatDate(selectedDate); // 선택된 날짜를 YYYY-MM-DD 형식으로 변환
+
     try {
-      const response = await axios.get(`/api/v1/getTodo/${userId}`);
-      // todoStartTime이 있는 할 일만 필터링하여 상태에 저장
-      const filteredSchedules = response.data.filter(
-        scheduleItem => scheduleItem.todoStartTime,
+      // 서버 요청 시, 선택한 날짜(`selectedDate`)를 포함하여 요청
+      const response = await axios.get(
+        `/api/v1/getTodo/${userId}?date=${formattedDate}`,
       );
-      setMySchedules(filteredSchedules);
+      // `todoStartTime`이 존재하며, 선택한 날짜에 해당하는 일정만 필터링
+      const filteredSchedules = response.data.filter(
+        scheduleItem =>
+          scheduleItem.todoStartTime && scheduleItem.todoDate === formattedDate,
+      );
+      setMySchedules(filteredSchedules); // 필터링된 일정 데이터를 상태에 저장
     } catch (error) {
       console.error("Failed to fetch my schedules:", error);
     }
@@ -555,6 +576,14 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       console.error("Failed to input schedule:", error);
     }
   };
+
+  useEffect(() => {
+    fetchUserData();
+    fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
+    if (mySchedulesModalIsOpen) {
+      fetchMySchedules();
+    }
+  }, [onTodoChange, selectedDate, mySchedulesModalIsOpen]);
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -658,18 +687,23 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
           )}
         </RegDiv>
         <VerticalBox>
+          <ButtonContainer>
+            <AddSchedulesButton onClick={openMySchedulesModal}>
+              + add Schedules
+            </AddSchedulesButton>
+          </ButtonContainer>
           <TextBox>{formatDate(selectedDate)}</TextBox>
           <div>
-            <AddEventButton onClick={openMySchedulesModal}>
-              내 일정 시간 추가하기
-            </AddEventButton>
             {mySchedulesModalIsOpen && (
               <ModalBackdrop onClick={closeMySchedulesModal}>
                 <ModalContainer onClick={e => e.stopPropagation()}>
-                  <CloseButton onClick={closeMySchedulesModal}>
-                    닫기
+                  <CloseButton
+                    onClick={closeMySchedulesModal}
+                    style={{ border: "none", backgroundColor: "white" }}
+                  >
+                    x
                   </CloseButton>
-                  <h2>내 일정 선택하기</h2>
+                  <h2>{formatDate(selectedDate)} 노티</h2>
                   {mySchedules.map(scheduleItem => (
                     <ScheduleItem
                       key={scheduleItem.todoId}
