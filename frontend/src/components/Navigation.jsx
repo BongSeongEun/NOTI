@@ -6,6 +6,7 @@ import Calendar from "react-calendar";
 import theme from "../styles/theme";
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
 import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
+import ChatComponent from "./Chatting";
 
 const Nav = styled.nav`
   display: flex;
@@ -152,6 +153,8 @@ function Navigation({ setDate }) {
   const [userNickname, setUserNickname] = useState("사용자");
   const [selectedDate, setSelectedDate] = useState(new Date()); // 날짜 상태 추가
   const formatDay = (locale, date) => <span>{date.getDate()}</span>;
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
 
   const getUserIdFromToken = () => {
     const payload = token.split(".")[1];
@@ -162,10 +165,19 @@ function Navigation({ setDate }) {
     console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
+  const userId = getUserIdFromToken();
+
+  const fetchChatList = async () => {
+    try {
+      const response = await axios.get(`/api/v3/chatlist/${userId}`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error("채팅 내역을 불러오는 중 오류가 발생했습니다.", error);
+    }
+  };
 
   useEffect(() => {
     async function themeSelec() {
-      const userId = getUserIdFromToken();
       const response = await axios.get(`/api/v1/userInfo/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -183,7 +195,26 @@ function Navigation({ setDate }) {
       setBase64Image(userProfileImage);
     }
     themeSelec();
+    fetchChatList();
   }, [token]);
+
+  const sendMessage = async event => {
+    event.preventDefault();
+    try {
+      const response = await axios.post(`/api/v3/ask/${userId}`, {
+        chat_content: newMessage,
+        chat_role: false, // 예시로, 사용자 메시지로 설정
+      });
+      setMessages([
+        ...messages,
+        { chat_content: newMessage, isBot: false },
+        { chat_content: response.data, isBot: true },
+      ]);
+      setNewMessage("");
+    } catch (error) {
+      console.error("메시지 전송 중 오류가 발생했습니다.", error);
+    }
+  };
 
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
@@ -216,6 +247,7 @@ function Navigation({ setDate }) {
           value={selectedDate}
           formatDay={formatDay}
         />
+        <ChatComponent userId={userId} />
       </RightSidebar>
     </>
   );
