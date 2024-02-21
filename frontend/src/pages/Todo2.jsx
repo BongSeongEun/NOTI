@@ -70,7 +70,7 @@ const CloseButton = styled.button`
 `;
 
 const EventList = styled.div`
-  width: 100%;
+  width: 95%;
 `;
 
 const EventItem = styled.div`
@@ -167,7 +167,7 @@ const DateHeader = styled.div`
   text-align: center;
   margin-bottom: 20px;
   height: 40px;
-  width: 100%;
+  width: 95%;
   color: black;
   border-bottom: 2px solid
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
@@ -520,7 +520,7 @@ function Todo2() {
         <NavBar setDate={setDate} />
         <DiaryContainer>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
-          <EventList style={{ marginTop: "80px" }}>
+          <EventList>
             {/* 이 부분에서 날짜에 해당하는 일정들을 렌더링합니다.
             EventList 컴포넌트 내에서 events 상태를 기반으로 일정 항목을 동적으로 렌더링 */}
             {events.map((event, index) => (

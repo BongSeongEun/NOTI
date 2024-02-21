@@ -518,12 +518,15 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     const userId = getUserIdFromToken(); // 토큰에서 사용자 ID 추출
     try {
       const response = await axios.get(`/api/v1/getTodo/${userId}`);
-      setMySchedules(response.data); // 사용자 일정 데이터를 상태에 저장
+      // todoStartTime이 있는 할 일만 필터링하여 상태에 저장
+      const filteredSchedules = response.data.filter(
+        scheduleItem => scheduleItem.todoStartTime,
+      );
+      setMySchedules(filteredSchedules);
     } catch (error) {
       console.error("Failed to fetch my schedules:", error);
     }
   };
-
   // 내 일정 추가 모달을 여는 함수
   const openMySchedulesModal = () => {
     fetchMySchedules(); // 모달을 열 때 사용자의 일정을 불러온다
