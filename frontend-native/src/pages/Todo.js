@@ -3,20 +3,32 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { useState, useEffect, } from 'react';
+import { Calendar } from "react-native-calendars";
+import 'react-native-gesture-handler'
+import React, { useState, useEffect } from 'react';
 import { ScrollView, TouchableOpacity, Text, Modal, } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation, useRoute } from "@react-navigation/native";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import styled, { ThemeProvider } from 'styled-components/native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import 'react-native-gesture-handler';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { decode } from 'base-64';
+import axios from 'axios';
 
-import DecoesSvg from '../asset/Deco_Svg';
+import images from "../components/images";
+import Navigation_Bar from "../components/Navigation_Bar";
 import { theme } from '../components/theme';
-import images from '../components/images';
+import { format } from "date-fns";
 
 function Todo({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
-	const { selectedTheme } = route.params;
+	const { selectedTheme } = route.params || { selectedTheme: theme.DefaultTheme };
+
+    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [base64Image, setBase64Image] = useState('');
+	const [userNickname, setUserNickname] = useState('');
+	
 	const name = "홍길동";
 
 	const currentDate = new Date();
@@ -24,12 +36,56 @@ function Todo({ }) {
 	const dayOfWeek = daysOfWeek[currentDate.getDay()];
 	const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
 
+	useEffect(() => {
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
+
+			if (token) {
+				const userId = getUserIdFromToken(token);
+				console.log(`userId: ${userId}, token: ${token}`);
+				try {
+					const response = await axios.get(`http://172.20.10.5:4000/api/v1/userInfo/${userId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+					});
+					const userThemeName = response.data.userColor || 'OrangeTheme';
+					const userProfileImage = response.data.userProfile;
+					const nickname = response.data.userNickname;
+
+					if (theme[userThemeName]) {
+						setCurrentTheme(theme[userThemeName]);
+					}
+					setBase64Image(userProfileImage || ""); 
+					setUserNickname(nickname || ""); 
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, []);
+
+    const getUserIdFromToken = (token) => {
+        try {
+            const payload = token.split('.')[1];
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const decodedPayload = decode(base64);
+            const decodedJSON = JSON.parse(decodedPayload);
+
+            return decodedJSON.id.toString();
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+    };
+
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
 	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
 	const [modalVisible, setModalVisible] = useState(false);
 
-	// json 형식
+	// json 형식으로 받아옴,,,? 어케하는데
 	const NotiTitle = ["일정 1", "일정 2", "일정 3"];
 	const Noti_Time = ["16:30 ~ 17:00", "17:30 ~ 18:40", "19:00~20:00"];
 
@@ -63,38 +119,110 @@ function Todo({ }) {
 		</Noti>
 	);
 
+	/*
+	const CreateNoties = () => {
+        return (
+            <>
+                <Text>Title: {inputTitle}</Text>
+                <Text>Start Time: {selectedStartTime}</Text>
+                <Text>End Time: {selectedEndTime}</Text>
+                <Text>Color: {selectedColor}</Text>
+            </>
+        );
+    };
+	*/
+
+	const posts = [
+		{
+		  id: 1,
+		  title: "하루 일기",
+		  contents: "내용입니다.",
+		  date: "2024-02-10",
+		},
+		{
+		  id: 2,
+		  title: "하루 일기",
+		  contents: "내용입니다.",
+		  date: "2024-02-12",
+		},
+		{
+			id: 3,
+			title: "하루 일기",
+			contents: "날씨는 토요일, 이태원에서 고등학교 친구인 나현이와 2시에 만남을 가졌다. \n 우리는 먼저 삼겹살집으로 향했다. 고등학교 시절의 추억을 떠올리며 삼겹살과 함께 한 잔의 소주는 정말 최고였다. 맛있는 음식과 함께 나눈 대화는 시간이 어떻게 흘렀는지 모를 만큼 즐거웠다. \n 1차에서는 끝나지 않고, 우린 2차로 소고기전골집을 향했다. 뜨끈한 소고기전골과 함께 한 잔의 소주는 특별한 순간으로 기억될 것이다. 시간 가는 줄 모르고 먹고 마시다 보니 막차를 놓치고 나현이네 집으로 향하게 되었다. \n 나현이네 집에서는 고등학교 시절의 추억을 떠올리며 웃음 속에 취해서 잠이 들었다. 그리고 다음날, 주말은 술과 함께 흐르고 말았다. \n 그리고 주말의 끝에는 현실이 다가왔다. 새로 시작된 알고리즘 계절학기 수업은 예상치 못한 어려움과 함께 찾아왔다. 수업은 지루하고 힘들게 느껴졌다. 나현이와의 즐거운 주말이 떠올라 더욱 힘든 상황이었다. \n 하지만, 이 모든 어려움도 언젠가는 극복될 것이다. 즐거운 순간들을 떠올리며 앞으로의 도전에 기대를 갖고 살아가야겠다.",
+			date: "2024-02-13",
+		},
+	];
+	const markedDates = posts.reduce((acc, current) => {
+		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
+		acc[formattedDate] = {marked: true};
+		return acc;
+	}, {});
+	
+	const [selectedDate, setSelectedDate] = useState(
+		format(new Date(), "yyyy-MM-dd"),
+	);
+	const markedSelectedDates = {
+		...markedDates,
+		[selectedDate]: {
+			selected: true,
+			marked: markedDates[selectedDate]?.marked,
+		}
+	};
+
 	return (
-		<ThemeProvider theme={selectedTheme}>
-			<MainViewStyle>
-				<ProfileContainer>
-					<Profile source={images.profile}></Profile>
-					<ProfileTextContainer>
-						<MainText>
-							{name} 님,
-						</MainText>
-						<MainText color={color_sheet[0]}>
-							{formattedDate} 노티입니다!
-						</MainText>
-					</ProfileTextContainer>
-				</ProfileContainer>
-
+		<ThemeProvider theme={currentTheme}>
+			<FullView>
+				<MainView>
+					<HorisontalView style={{marginTop: 30, marginBottom: 10}}>
+						<Profile source={images.profile} style={{ marginTop: 20 }} />
+						<ProfileTextContainer>
+							<MainText>
+								{name} 님,
+							</MainText>
+							<MainText color={color_sheet[0]}>
+								{formattedDate} 노티입니다!
+							</MainText>
+						</ProfileTextContainer>
+					</HorisontalView>
+				</MainView>
+			</FullView>
+			
+			<FullView style={{flex: 1}}>
 				<BarContainer>
-					<MainText> 나의 일정      </MainText>
-					<MainText onPress={() => navigation.navigate("Coop_Main", { selectedTheme: selectedTheme })} color="#B7BABF">      협업 일정</MainText>
-				</BarContainer>
-
-				<Bar>
-					<Bar_Mini></Bar_Mini>
-				</Bar>
-
-				<Icons>
-					<Icon_calendar width={20} height={20}
+					<MainText style={{ marginRight: 20 }} >나의 일정</MainText>
+                    <MainText onPress={() => navigation.navigate('Coop_Main', { selectedTheme: selectedTheme })}
+						style={{ marginLeft: 20, color: "#B7BABF" }}>협업 일정</MainText>
+                </BarContainer>
+				<Bar />
+				<Bar_Mini />
+				
+				
+				<ScrollView>
+					<MainView>
+						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
+						<images.calendar width={20} height={20}
 						color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
 						onPress={() => setClicked_calendar(!clicked_calendar)} />
-					<images.share width={20} height={20}
+						<images.share width={20} height={20}
 						color={clicked_share ? color_sheet[0] : "#B7BABF"}
-						onPress={() => setClicked_share(!clicked_share)} />
-				</Icons>
+								onPress={() => setClicked_share(!clicked_share)} />
+						</HorisontalView>
+
+						{clicked_calendar && (
+							<>
+								<Calendar 
+									markedDates={markedSelectedDates}
+									theme={{
+										selectedDayBackgroundColor: selectedTheme.color1,
+										arrowColor: selectedTheme.color1,
+										dotColor: selectedTheme.color1,
+										todayTextColor: selectedTheme.color1,
+									}} 
+									onDayPress={(day) => {
+										setSelectedDate(day.dateString)
+								}} />
+							</>
+						)}
 				
 				<NotiContainer>
 					<>
@@ -102,8 +230,9 @@ function Todo({ }) {
 						{Noties(1)}
 						{Noties(2)}
 						{Noties(3)}
+					
 					</>
-					<AddNoti onPress={() => navigation.navigate("Todo_Add")} color="#E3E4E6">
+					<AddNoti onPress={() => navigation.navigate("Todo_Add", { selectedTheme: selectedTheme })} color="#E3E4E6">
 						<NotiText color="black">+ 새 노티 추가하기  </NotiText>
 					</AddNoti>
 				</NotiContainer>
@@ -138,68 +267,82 @@ function Todo({ }) {
 						</ModalView>
 					</ModalContainer>
 				</Modal>
-			</MainViewStyle>
+					</MainView>
+				</ScrollView>
+
+				<Navigation_Bar selectedTheme={selectedTheme} />
+			</FullView>
 		</ThemeProvider>
 	);
 
 }
 
-const ProfileContainer = styled.View`
-	display: flex;
-	flex-direction: row;
-`;
-
-const MainViewStyle = styled.View`
-	flex: 1;
-	display: flex;
+const FullView = styled.View`
+	width: 100%;
 	background-color: white;
 `;
 
-const BarContainer = styled(ProfileContainer)`
-	justify-content: center;
+const MainView = styled(FullView)`
+	height: auto;
+	align-items: stretch;
+	align-self: center;
+	width: 300px;
+`;
+
+const HorisontalView = styled(MainView)`
+	flex-direction: row;
+`;
+
+
+const ProfileContainer = styled.View`
+    display: flex;
+    flex-direction: row;
+`;
+
+const BarContainer = styled.View`
+	flex-direction: row;
 	align-items: center;
-	margin-top: 20px;
+	justify-content: center;
 `;
 
 const ProfileTextContainer = styled(ProfileContainer)`
 	flex-direction: column;
 	margin-top: 25px;
-	margin-left: 10px;
+	margin-left: 15px;
+	margin-bottom: 25px;
 `;
 
 const Profile = styled.Image`
-	width: 40px;
-	height: 40px;
-	margin-top: 20px;
-	margin-left: 50px;
+    width: 40px;
+    height: 40px;
 `;
 
 const MainText = styled.Text`
-	font-size: 12px;
-	font-weight: bold;
-	color: ${props => props.color || "black"};
-	text-align: left;
+    font-size: ${props => props.fontSize || "12px"};
+    font-weight: bold;
+    color: ${props => props.color || "black"};
+    text-align: left;
 `;
 
-const Bar = styled.TouchableOpacity`
-	width: 100%;
-	height: 1px;
-	margin-top: 10px;
-	background-color: #B7BABF;
+const Bar = styled.View`
+    width: 100%;
+    height: 1px;
+    margin-top: 10px;
+    background-color: #B7BABF;
 `;
 
 const Bar_Mini = styled(Bar)`
-	width: 50%;
-	height: 2px;
-	background-color: ${props => props.theme.color1};
-	margin-top: -1px;
+    align-self: flex-start;
+    width: 50%;
+    height: 2px;
+    background-color: ${props => props.theme.color1};
+    margin-top: 0px;
 `;
 
 const NotiContainer = styled.View`
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-top: 15px;
 `;
 
 const Noti = styled.TouchableOpacity`
@@ -244,7 +387,7 @@ const AddNoti = styled(Noti)`
 const Icons = styled.View`
 	display: flex;
 	flex-direction: row;
-	margin-left: 70px;
+	margin-left: 10px;
 	margin-top: 15px;
 `;
 
