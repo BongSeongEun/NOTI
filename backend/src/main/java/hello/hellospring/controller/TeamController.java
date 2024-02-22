@@ -33,10 +33,12 @@ public class TeamController {
         return ResponseEntity.ok().body(dtos);
     }
     // 팀에 사용자 추가
-    @PostMapping("/enterTeam/{userId}")
-    public ResponseEntity<?> enterTeam(@PathVariable String userId, @RequestBody TeamTogetherDTO teamTogetherDTO){
+    @PostMapping("/enterTeam/{userId}/{teamId}")
+    public ResponseEntity<?> enterTeam(@PathVariable String userId, @PathVariable String teamId, TeamTogetherDTO teamTogetherDTO){
+        List<TeamTogether> existTeam = teamService.findAllTeamsByTeamId(teamId);
         TeamTogether entity = TeamTogetherDTO.toEntity(teamTogetherDTO);
         entity.setUserId(Long.valueOf(userId));
+        entity.setTeamTitle(existTeam.get(0).getTeamTitle());
         List<TeamTogether> teamTogetherEntity = teamService.createTeam(entity);
         List<TeamTogetherDTO> dtos = makeTeamTogetherDtoListFromEntityList(teamTogetherEntity);
         return ResponseEntity.ok().build();
