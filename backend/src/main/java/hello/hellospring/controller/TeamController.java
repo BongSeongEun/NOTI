@@ -135,6 +135,7 @@ public class TeamController {
                 // Todo의 시작 시간과 종료 시간 추가
                 scheduleInfo.put("todoStartTime", todo.getTodoStartTime());
                 scheduleInfo.put("todoEndTime", todo.getTodoEndTime());
+                scheduleInfo.put("todoDate", todo.getTodoDate());
 
                 scheduleWithTodoTimes.add(scheduleInfo);
             }
