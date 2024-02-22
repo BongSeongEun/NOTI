@@ -601,38 +601,33 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       const [hours, minutes] = time.split(":").map(Number);
       return hours * 6 + Math.floor(minutes / 10);
     };
-    const fetchTeamSchedulesAndMembers = async () => {
-      try {
-        const scheduleResponse = await axios.get(
-          `/api/v1/getSchedule/${teamId}`,
-        );
-        const schedules = scheduleResponse.data;
 
-        const membersResponse = await axios.get(
-          `/api/v1/getUserTeam/${teamId}`,
-        );
-        const membersCount = membersResponse.data.length;
+    const updateScheduleBlocks = () => {
+      const formattedSelectedDate = formatDateForInput(selectedDate);
+      const schedulesForSelectedDate = teamSchedules.filter(
+        scheduleItem =>
+          formatDateForInput(scheduleItem.todoDate) === formattedSelectedDate,
+      );
 
-        const newScheduleBlocks = Array(24 * 6).fill(0); // 24시간 * 6(10분 단위)
+      const newScheduleBlocks = Array(24 * 6).fill(0);
 
-        schedules.forEach(scheduleItem => {
-          if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
-            const startIndex = timeToIndex(scheduleItem.todoStartTime);
-            const endIndex = timeToIndex(scheduleItem.todoEndTime);
-            for (let i = startIndex; i <= endIndex; i += 1) {
-              newScheduleBlocks[i] += 1; // 중복된 일정이 있을 경우 값을 증가
-            }
+      schedulesForSelectedDate.forEach(scheduleItem => {
+        if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
+          const startIndex = timeToIndex(scheduleItem.todoStartTime);
+          const endIndex = timeToIndex(scheduleItem.todoEndTime);
+          for (let i = startIndex; i <= endIndex; i += 1) {
+            newScheduleBlocks[i] += 1;
           }
-        });
-        // 팀원 수로 나누어 각 블록의 투명도 결정
-        setScheduleBlocks(newScheduleBlocks.map(block => block / membersCount));
-      } catch (error) {
-        console.error("Failed to fetch team schedules and members:", error);
-      }
+        }
+      });
+
+      // 팀원 수로 나누어 각 블록의 투명도 결정
+      const membersCount = teamMembersCount || 1; // 팀원 수가 0인 경우를 대비해 기본값 1 설정
+      setScheduleBlocks(newScheduleBlocks.map(block => block / membersCount));
     };
 
-    fetchTeamSchedulesAndMembers();
-  }, [teamId]);
+    updateScheduleBlocks();
+  }, [teamSchedules, teamMembersCount, selectedDate]);
 
   useEffect(() => {
     fetchUserData();
