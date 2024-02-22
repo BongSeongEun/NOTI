@@ -8,6 +8,7 @@ const TimeTableContainer = styled.div`
   margin-right: 35px;
   width: 60%;
   margin-top: 20px;
+  min-width: 200px;
 `;
 
 const HourRow = styled.div`

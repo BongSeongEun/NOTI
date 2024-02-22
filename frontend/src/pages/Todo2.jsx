@@ -17,6 +17,25 @@ import deleteIcon from "../asset/fi-rr-trash.png"; // 삭제하기
 import TimeTable from "../components/TimeTable"; // 타임테이블
 import DiaryContainer from "../components/DiaryContainer";
 import AddEventButton from "../components/AddEventButton";
+import NavBar from "../components/Navigation";
+import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
+
+const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 80px;
+  position: fixed;
+  width: 100%;
+  z-index: 1;
+  position: fixed;
+`;
+
+const Logo = styled.img`
+  height: 50px; // 로고 이미지의 높이 설정
+  width: auto;
+`;
 
 const ModalBackdrop = styled.div`
   position: fixed;
@@ -51,7 +70,7 @@ const CloseButton = styled.button`
 `;
 
 const EventList = styled.div`
-  width: 100%;
+  width: 95%;
 `;
 
 const EventItem = styled.div`
@@ -148,10 +167,11 @@ const DateHeader = styled.div`
   text-align: center;
   margin-bottom: 20px;
   height: 40px;
-  width: 100%;
+  width: 95%;
   color: black;
   border-bottom: 2px solid
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  margin-top: 130px;
 `;
 
 const Edit = styled.img`
@@ -168,7 +188,7 @@ const DeleteButton = styled.img`
   height: 15px;
 `;
 
-function Todo({ selectedDate }) {
+function Todo2() {
   // 내 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();
@@ -199,6 +219,7 @@ function Todo({ selectedDate }) {
   const [selectedColor, setSelectedColor] = useState(theme.OrangeTheme.color1);
 
   const token = window.localStorage.getItem("token");
+  const [selectedDate, setSelectedDate] = useState("");
 
   // isDeleteConfirmModalOpen은 삭제 확인 모달의 열림/닫힘 상태
   // deletingTodoId는 삭제할 일정의 ID를 저장
@@ -458,6 +479,10 @@ function Todo({ selectedDate }) {
     }
   };
 
+  const setDate = date => {
+    setSelectedDate(date);
+  };
+
   // useEffect 내부에서 사용자 정보와 일정 데이터를 불러오는 로직
   useEffect(() => {
     fetchUserData();
@@ -491,6 +516,8 @@ function Todo({ selectedDate }) {
 
   return (
     <ThemeProvider theme={currentTheme}>
+      <NavBar setDate={setDate} />
+
       <div>
         <DiaryContainer>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
@@ -606,4 +633,4 @@ function Todo({ selectedDate }) {
     </ThemeProvider>
   );
 }
-export default Todo;
+export default Todo2;

@@ -16,14 +16,12 @@ import {
 import { backgrounds, lighten } from "polished";
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
-
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import USER from "../asset/userimage.png";
 import COM from "../asset/cam.png";
 
 // 이미지 업로드
 const ImageUpload = ({ onFileChange }) => {
-  // onFileChange prop 추가
   const [uploadedImage, setUploadedImage] = useState(USER);
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -31,9 +29,12 @@ const ImageUpload = ({ onFileChange }) => {
       const file = acceptedFiles[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result); // 이미지 미리보기를 위한 상태 업데이트
-        onFileChange(file); // 선택된 파일을 상위 컴포넌트로 전달
+        // 이미지 미리보기를 위한 상태 업데이트
+        setUploadedImage(reader.result);
+        // Base64 인코딩된 이미지 데이터를 상위 컴포넌트로 전달
+        onFileChange(reader.result);
       };
+      // 파일을 읽어 Base64로 변환
       reader.readAsDataURL(file);
     },
   });
@@ -211,10 +212,6 @@ const RegBtn = styled.button`
   text-align: center; // 텍스트 가운데 정렬
 `;
 
-function myLighten(amount, color) {
-  return lighten(amount, color);
-}
-
 const ThemedButton = styled.button`
   border: 4px solid #ffffff;
   height: 30px;
@@ -252,17 +249,12 @@ function Register() {
     if (newTheme) {
       setCurrentTheme(newTheme); // UI 상에서 테마를 적용
       setThemeName(selectedThemeName); // 선택된 테마 이름을 상태에 저장
-      localStorage.setItem("userTheme", selectedThemeName); // 선택된 테마 이름을 localStorage에 저장
     } else {
       console.error("Selected theme does not exist:", selectedThemeName);
     }
   };
 
-  // 이미지 파일 변경 처리
-  const handleFileChange = file => {
-    setSelectedFile(file);
-  };
-
+  // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
     const payload = token.split(".")[1];
     const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
@@ -272,11 +264,19 @@ function Register() {
     console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
+  // Base64 이미지 데이터를 저장할 상태
+  const [base64Image, setBase64Image] = useState("");
+
+  // ImageUpload 컴포넌트로부터 Base64 인코딩된 이미지 데이터를 받음
+  const handleFileChange = base64 => {
+    setBase64Image(base64);
+  };
+
   // 사용자 정보 전송 함수
   async function postUser() {
     const userId = getUserIdFromToken();
     try {
-      await axios.put(
+      const response = await axios.put(
         `/api/v1/user/${userId}`,
         {
           userNickname,
@@ -284,6 +284,7 @@ function Register() {
           diaryTime, // 일기 생성 시간
           muteStartTime, // 방해 금지 시작 시간
           muteEndTime, // 방해 금지 종료 시간
+          userProfile: base64Image, // Base64 인코딩된 이미지 데이터
         },
         {
           headers: {
@@ -291,13 +292,21 @@ function Register() {
           },
         },
       );
+      if (response.status === 200 || response.status === 201) {
+        // 회원 정보 업데이트 성공 시
+        // 로컬 스토리지에 사용자가 선택한 테마 정보 저장
+        localStorage.setItem("userTheme", themeName);
+        // 회원 정보 업데이트가 성공했을 때, Welcome 페이지로 이동
+        navigate("/Welcome");
+      }
     } catch (error) {
       console.error("Error posting user data:", error);
       // 에러 처리
     }
   }
   // 가입하기 버튼 클릭 핸들러
-  const handleSubmit = async () => {
+  const handleSubmit = async e => {
+    e.preventDefault(); // 폼 제출에 의한 페이지 새로고침 방지
     await postUser(); // 사용자 정보 전송
     localStorage.setItem("userColor", currentTheme.color1); // 색상을 로컬 스토리지에 저장
   };
@@ -321,7 +330,7 @@ function Register() {
                 프로필을 등록해보세요
               </MainTextBox>
               <HorizontalBox>
-                <ImageUpload onFileChange={file => setSelectedFile(file)} />
+                <ImageUpload onFileChange={handleFileChange} />
                 <VerticalBox>
                   <SubTextBox style={{ marginTop: "15px" }}>
                     사용자명*
@@ -401,14 +410,13 @@ function Register() {
                   onClick={() => handleThemeChange("BlueTheme")}
                 ></ThemedButton>
               </HorizontalBox>
-              <Link to="/Welcome">
-                <RegBtn
-                  style={{ marginTop: "30px" }}
-                  onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
-                >
-                  가입하기
-                </RegBtn>
-              </Link>
+
+              <RegBtn
+                style={{ marginTop: "30px" }}
+                onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
+              >
+                가입하기
+              </RegBtn>
             </RegBox>
           </RegDiv>
         </MainDiv>

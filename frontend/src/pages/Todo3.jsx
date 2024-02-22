@@ -51,6 +51,7 @@ const CloseButton = styled.button`
 `;
 
 const EventList = styled.div`
+  white-space: nowrap;
   width: 100%;
 `;
 
@@ -67,6 +68,7 @@ const EventItem = styled.div`
 `;
 
 const EventTitle = styled.div`
+  white-space: nowrap;
   flex: 1; // 사용 가능한 공간 모두 사용
   padding-right: 10px; // 시간과 간격을 주기 위해
 `;
