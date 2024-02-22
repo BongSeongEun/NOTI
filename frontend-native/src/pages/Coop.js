@@ -19,6 +19,8 @@ import NotiCheck from "../asset/noticheck.svg";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
+import TimeTable from "../components/TimeTable";
+
 
 function Coop({ }) {
 	const navigation = useNavigation();
@@ -35,6 +37,7 @@ function Coop({ }) {
 	const [eventDate, setEventDate] = useState("");
 	const [mySchedules, setMySchedules] = useState([]);
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+	const [todos, setTodos] = useState([]);
 
 	const host = "192.168.30.83";
 
@@ -42,6 +45,7 @@ function Coop({ }) {
 		fetchUserData();
 		fetchTeamInfo();
 		fetchTeamMembers();
+		fetchTodosForTeam();
 	}, [selectedDate]);
 
 	const fetchUserData = async () => {
@@ -172,7 +176,10 @@ function Coop({ }) {
 		}
 	};
 
-	const timeToIndex = time => {
+	const timeToIndex = (time) => {
+		if (!time || !time.includes(":")) {
+			return -1; // 유효하지 않은 시간 형식
+		}
 		const [hours, minutes] = time.split(':').map(Number);
 		return hours * 6 + Math.floor(minutes / 10);
 	};
@@ -195,6 +202,40 @@ function Coop({ }) {
 			return 'D - Day';
 		} else {
 			return `D - ${dDay}`;
+		}
+	};
+
+	const fetchTodosForTeam = async () => {
+		const token = await AsyncStorage.getItem('token');
+		try {
+			const scheduleResponse = await axios.get(`http://${host}:4000/api/v1/getSchedule/${teamId.teamId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+
+			let todosDetails = await Promise.all(scheduleResponse.data.map(async (todoId) => {
+				const todoResponse = await axios.get(`http://${host}:4000/api/v1/getTodoByTodoId/${todoId.todoId}`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				return todoResponse.data;
+			}));
+			todosDetails = todosDetails.flat();
+
+			const newSchedule = Array(24 * 6).fill(null);
+			todosDetails.forEach(todo => {
+				const startTimeIndex = timeToIndex(todo.todoStartTime); // 시작 시간 인덱스 계산
+				const endTimeIndex = timeToIndex(todo.todoEndTime); // 종료 시간 인덱스 계산
+	
+				if (startTimeIndex >= 0 && endTimeIndex > startTimeIndex) {
+					// 유효한 시간 인덱스에 대해 newSchedule 배열 업데이트
+					for (let i = startTimeIndex; i < endTimeIndex; i++) {
+						newSchedule[i] = "rgba(255, 165, 0, 0.2)"; // color1 색상과 20% 투명도 적용
+					}
+				}
+			});
+			setSchedule(newSchedule);
+			
+		} catch (error) {
+			console.error("할 일 정보를 가져오는 중 오류가 발생했습니다.", error);
 		}
 	};
 	
@@ -272,7 +313,8 @@ function Coop({ }) {
 								</NotiTextContainer>
 							</Noti>
 						))}
-	
+
+						<TimeTable schedule={schedule} />
 					</MainView>
 				</ScrollView>
 			</FullView>
