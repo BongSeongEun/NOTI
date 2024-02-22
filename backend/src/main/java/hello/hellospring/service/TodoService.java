@@ -56,6 +56,7 @@ public class TodoService {
         return getTodo(userId);
     }
 
+
     private void validateEmptyTodoTile(Todo todo) {
         if (todo.getTodoTitle().equals("") || todo.getTodoTitle() == null) {
             throw new AppException(NO_TITLE_ENTERED);

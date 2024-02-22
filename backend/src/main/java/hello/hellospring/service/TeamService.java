@@ -115,4 +115,8 @@ public class TeamService {
 
         return originalTeamMemo;
     }
+
+    public List<TeamTogether> findAllTeamsByTeamId(String teamId) {
+        return teamTogetherRepository.findByTeamId(teamId);
+    }
 }
