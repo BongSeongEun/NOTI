@@ -1,11 +1,12 @@
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/self-closing-comp */
-/* eslint-disable prettier/prettier */
 
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import { ScrollView,  } from "react-native";
+import { ScrollView, Text, View, Image,  } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
@@ -22,36 +23,93 @@ import { Calendar } from "react-native-calendars";
 function Coop({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
+	const { teamId } = route.params;
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
-	const [markedDates, setMarkedDates] = useState({});
-	const [token, setToken] = useState('');
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [events, setEvents] = useState([]);
-	const [selectedEvent, setSelectedEvent] = useState(null);
-	const [teamId, setTeamId] = useState(route.params.teamId);
-    const [teamTodos, setTeamTodos] = useState([]);
+	const [teamMembers, setTeamMembers] = useState([]);
+	const [eventDate, setEventDate] = useState("");
+	const [mySchedules, setMySchedules] = useState([]);
+	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+
+	const host = "192.168.30.83";
 
 	useEffect(() => {
 		fetchUserData();
-    }, []);
+		fetchTeamInfo();
+		fetchTeamMembers();
+	}, []);
 
-    const fetchTeamTodos = async () => {
+	const fetchUserData = async () => {
+		const token = await AsyncStorage.getItem('token');
+
+		if (token) {
+			const userId = getUserIdFromToken(token);
+			try {
+				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+				const userThemeName = response.data.userColor || 'OrangeTheme';
+				const userProfileImage = response.data.userProfile;
+				const nickname = response.data.userNickname;
+
+				if (theme[userThemeName]) {
+					setCurrentTheme(theme[userThemeName]);
+				}
+				setBase64Image(userProfileImage || ""); 
+				setUserNickname(nickname || ""); 
+			} catch (error) {
+				console.error("Error fetching user data:", error);
+			}
+		}
+	};
+
+	const fetchTeamInfo = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			try {
+				const todoresponse = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId.teamId}`, {
+					headers: {
+						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+					},
+				});
+				if (todoresponse.data && Array.isArray(todoresponse.data)) {
+					const updatedEvents = todoresponse.data.map(event => ({
+						...event,
+						teamSelectedColor: currentTheme[event.teamTodoColor] || event.teamTodoColor,
+					}));
+					setEvents(updatedEvents);
+					
+				}
+			} catch (error) {
+				console.error("Failed to fetch team info:", error);
+			}
+		}
+	};
+	
+	const getUserIdFromToken = (token) => {
         try {
-            const response = await axios.get(`http://192.168.30.220:4000/api/v1/getTeamTodo/${teamId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.status === 200) {
-                setTeamTodos(response.data);
-            }
+            const payload = token.split('.')[1];
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const decodedPayload = decode(base64);
+            const decodedJSON = JSON.parse(decodedPayload);
+            return decodedJSON.id.toString();
         } catch (error) {
-            console.error("팀 일정을 불러오는데 실패했습니다:", error);
+            console.error('Error decoding token:', error);
+            return null;
         }
-    };
-
+	};
+	
+    const onDayPress = (day) => {
+        setSelectedDate(day.dateString);
+	};
+	
 	const formatDate = date => {
 		const d = new Date(date);
 		const year = d.getFullYear();
@@ -60,129 +118,77 @@ function Coop({ }) {
 		return `${year}.${month}.${day}`;
 	};
 	
-	const fetchUserData = async () => {
-		const userId = await getUserIdFromToken();
-		const formattedDate = formatDate(selectedDate);
-	
+	const toggleComplete = async (teamTodoId, index) => {
 		try {
-			const userResponse = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
-				headers: {
-					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
-				},
-			});
-	
-			if (userResponse.status === 200) {
-				const userThemeName = userResponse.data.userColor;
-				const userProfileImage = userResponse.data.userProfile;
-				const nickname = userResponse.data.userNickname;
-	
-				if (theme[userThemeName]) {
-					setCurrentTheme(theme[userThemeName]);
-					setBase64Image(userProfileImage || '');
-					setUserNickname(nickname || '');
-				}
-			} else {
-				console.error('Unexpected response:', userResponse);
-			}
-		} catch (error) {
-			console.error('Error fetching user data and events:', error);
-		}
-	};
-	
-	const getUserIdFromToken = async () => {
-		try {
+			const newCompletedStatus = !events[index].teamTodoDone;
 			const token = await AsyncStorage.getItem('token');
-			const payload = token.split('.')[1];
-			const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-			const decodedPayload = decode(base64);
-			const decodedJSON = JSON.parse(decodedPayload);
+            const response = await axios.put(
+                `http://${host}:4000/api/v1/updateTeamTodo/${teamId.teamId}/${teamTodoId}`,
+                {
+                    ...events[index],
+                    teamTodoDone: newCompletedStatus, 
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
 
-			return decodedJSON.id.toString();
-		} catch (error) {
-			console.error('Error decoding token:', error);
-			return null;
-		}
+            if (response.status === 200) {
+                const updatedEvents = events.map((event, evtIndex) =>
+                    evtIndex === index
+                        ? { ...event, teamTodoDone: newCompletedStatus }
+                        : event,
+                );
+                setEvents(updatedEvents);
+            } else {
+                console.error("Failed to update todo status:", response);
+            }
+        } catch (error) {
+            console.error("Error updating todo status:", error);
+        }
 	};
 
-    const onDayPress = (day) => {
-        setSelectedDate(day.dateString);
-    };
-
-	const updateMarkedDates = (events) => {
-		const newMarkedDates = {};
-		events.forEach(event => {
-			if (event.todoDate) {
-				const eventDateFormatted = event.todoDate.replace(/\./g, '-');
-				newMarkedDates[eventDateFormatted] = { marked: true, dotColor: currentTheme.color1 };
-			}
-		});
-		setMarkedDates(newMarkedDates);
+	const fetchTeamMembers = async () => {
+		const token = await AsyncStorage.getItem('token');
+		try {
+			const response = await axios.get(`http://${host}:4000/api/v1/getUserTeam/${teamId.teamId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const memberInfos = await Promise.all(response.data.map(async (member) => {
+				const profileResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${member.userId}`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				return {
+					profile: profileResponse.data.userProfile,
+					name: profileResponse.data.userNickname,
+				};
+			}));
+	
+			setTeamMembers(memberInfos);
+		} catch (error) {
+			console.error("Failed to fetch team members:", error);
+		}
 	};
 
 	const timeToIndex = time => {
-		const [hours, minutes] = time.split(":").map(Number);
+		const [hours, minutes] = time.split(':').map(Number);
 		return hours * 6 + Math.floor(minutes / 10);
 	};
 
-	/*
-	useEffect(() => { setColorNum(color_num + 1); }, []);
-	const handleAddNoti = () => {
-		setColorNum((prevColorIndex) => (prevColorIndex + 1) % color_sheet.length);
-	};
+	const calculateDDay = date => {
+		const today = new Date();
+		const targetDate = new Date(date);
+		const difference = targetDate - today;
+		const dDay = Math.ceil(difference / (1000 * 60 * 60 * 24));
 
-	const handleCheckToggle = (color_num) => {
-		setClicked_check((prevClickedChecks) => {
-			const newClickedChecks = [...prevClickedChecks];
-			newClickedChecks[color_num] = !prevClickedChecks[color_num];
-			return newClickedChecks;
-		});
-	}
-
-	const Noties = (color_num) => (
-		<Noti color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : color_sheet[color_num]}>
-			<Noti_Check onPress={() => {
-				handleCheckToggle(color_num);
-				handleAddNoti();
-			}}>
-				<images.noticheck width={15} height={15}
-					color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : "#B7BABF"} />
-		  	</Noti_Check>
-		  	<NotiText> </NotiText>
-		</Noti>
-	);
-
-	const posts = [
-		{
-			id: 1,
-			title: "제목입니다.",
-			contents: "내용입니다.",
-			date: "2024-02-10",
-		},
-		{
-			id: 2,
-			title: "제목입니다.",
-			contents: "내용입니다.",
-			date: "2024-02-12",
+		if (dDay < 0) {
+			return '';
 		}
-	];
-	const markedDates = posts.reduce((acc, current) => {
-		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
-		acc[formattedDate] = {marked: true};
-		return acc;
-	}, {});
+		return `D - ${dDay}`;
+	};
 	
-	const [selectedDate, setSelectedDate] = useState(
-		format(new Date(), "yyyy-MM-dd"),
-	);
-	const markedSelectedDates = {
-		...markedDates,
-		[selectedDate]: {
-			selected: true,
-			marked: markedDates[selectedDate]?.marked,
-		}
-	};
-	*/
-
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
@@ -207,7 +213,7 @@ function Coop({ }) {
 				<Bar />
 				<Bar_Mini />
 
-				<ScrollView>
+				<ScrollView >
 					<MainView>
 						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
 						<images.calendar width={20} height={20}
@@ -222,17 +228,41 @@ function Coop({ }) {
 							<>
 								<Calendar
 									onDayPress={onDayPress}
-									markedDates={{
-										...markedDates,
-										[selectedDate]: { ...markedDates[selectedDate], selected: true, selectedColor: currentTheme.color1 },
-									}}
 								/>
 							</>
 						)}
+						
+						<MainText style={{ fontSize: 15, textAlign: 'center', paddingBottom: 10 }}>{teamId.teamTitle}</MainText>
 
-						<MainText style={{ fontSize: 15, textAlign: 'center' }}> </MainText>
+						<View style={{flexDirection: 'row', alignSelf: 'center', alignItems: 'center'}}>
+							{teamMembers.map((member, index) => (
+								<View key={index} style={{ alignItems: 'center', marginRight: 10 }}>
+									<Image
+										source={{ uri: member.profile || '' }}
+										style={{ width: 30, height: 30, borderRadius: 15, marginBottom: 5 }}
+									/>
+									<Text style={{ fontSize: 12, color: '#B7BABF', marginBottom: 10 }}>{member.name}</Text>
+								</View>
+							))}
+						</View>
 						
-						
+						{events.map((event, index) => (
+							<Noti
+								key={event.teamTodoId}
+								style={{
+									backgroundColor: event.teamSelectedColor,
+								}}
+							>
+								<Noti_Check onPress={() => toggleComplete(event.teamTodoId, index)}>
+									{event.teamTodoDone && <images.noticheck width={15} height={15}
+										color={event.teamSelectedColor} />}
+								</Noti_Check>
+								<NotiTextContainer>
+									<NotiText>{event.teamTodoTitle}</NotiText>
+								</NotiTextContainer>
+							</Noti>
+						))}
+	
 					</MainView>
 				</ScrollView>
 				<Navigation_Bar />
@@ -305,11 +335,12 @@ const Bar_Mini = styled(Bar)`
     margin-top: 0px;
 `;
 
-const NotiContainer = styled.View`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 15px;
+const NotiTextContainer = styled.View`
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 20px;
 `;
 
 const Noti = styled.TouchableOpacity`
@@ -338,12 +369,6 @@ const NotiText = styled.Text`
 	color: ${props => props.color || "white"};
 	text-align: left;
 	margin-left: 10px;
-`;
-
-const Icons = styled.Image`
-	width: 15px;
-	height: 15px;
-	margin: 20px;
 `;
 
 export default Coop;

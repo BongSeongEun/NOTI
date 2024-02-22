@@ -35,6 +35,8 @@ function Coop_Main({ onSelectTeam }) {
 	const [outClicked, setOutClicked] = useState({});
 	const [selectedTeamId, setSelectedTeamId] = useState(null);
 
+	const host = "192.168.30.83";
+
 	useEffect(() => {
 		fetchUserData();
 		fetchTeams();
@@ -65,25 +67,25 @@ function Coop_Main({ onSelectTeam }) {
 		setToken(storedToken);
 
 		if (storedToken) {
-		const userId = getUserIdFromToken(storedToken);
-		try {
-			const response = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
-			headers: {
-				'Authorization': `Bearer ${storedToken}`,
-			},
-			});
-			const userThemeName = response.data.userColor || 'OrangeTheme';
-			const userProfileImage = response.data.userProfile;
-			const nickname = response.data.userNickname;
+			const userId = getUserIdFromToken(storedToken);
+			try {
+				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+					headers: {
+						'Authorization': `Bearer ${storedToken}`,
+					},
+				});
+				const userThemeName = response.data.userColor || 'OrangeTheme';
+				const userProfileImage = response.data.userProfile;
+				const nickname = response.data.userNickname;
 
-			if (theme[userThemeName]) {
-			setCurrentTheme(theme[userThemeName]);
+				if (theme[userThemeName]) {
+					setCurrentTheme(theme[userThemeName]);
+				}
+				setBase64Image(userProfileImage || "");
+				setUserNickname(nickname || "");
+			} catch (error) {
+				console.error("Error fetching user data:", error);
 			}
-			setBase64Image(userProfileImage || "");
-			setUserNickname(nickname || "");
-		} catch (error) {
-			console.error("Error fetching user data:", error);
-		}
 		}
 	};
 
@@ -101,7 +103,7 @@ function Coop_Main({ onSelectTeam }) {
 	
 		try {
 			const userId = getUserIdFromToken(storedToken);
-			const response = await axios.get(`http://192.168.30.220:4000/api/v1/getTeam/${userId}`, {
+			const response = await axios.get(`http://${host}:4000/api/v1/getTeam/${userId}`, {
 				headers: { Authorization: `Bearer ${storedToken}` },
 			});
 			setTeams(response.data);
@@ -113,7 +115,7 @@ function Coop_Main({ onSelectTeam }) {
 	const fetchTeamMembers = async (teamId) => {
 		try {
 			const token = await AsyncStorage.getItem('token');
-			const response = await axios.get(`http://192.168.30.220:4000/api/v1/getUserTeam/${teamId}`, {
+			const response = await axios.get(`http://${host}:4000/api/v1/getUserTeam/${teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			setTeamMembersCount((prevState) => ({
@@ -133,12 +135,12 @@ function Coop_Main({ onSelectTeam }) {
 	};
 
 	const handleTeamClick = (teamId) => {
-        navigation.navigate('Coop', { teamId: teamId });
-    };
+		navigation.navigate('Coop', { teamId: teamId });
+	};
 
 	const leaveTeam = async (teamId, userId) => {
 		try {
-			const response = await axios.delete(`http://192.168.30.220:4000/api/v1/leaveTeam/${teamId}/${userId}`, {
+			const response = await axios.delete(`http://${host}:4000/api/v1/leaveTeam/${teamId}/${userId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (response.status === 200) {

@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable react-native/no-inline-styles */
+
 import styled, { ThemeProvider } from 'styled-components/native';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,8 +24,9 @@ function Register_Success() {
 
 			if (token) {
 				const userId = getUserIdFromToken(token);
+				const host = "192.168.30.83";
 				try {
-					const response = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
+					const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
 						headers: {
 							'Authorization': `Bearer ${token}`,
 						},
@@ -67,7 +70,7 @@ function Register_Success() {
                     <MainText>{userNickname} 님! 노티에 {'\n'} 오신 것을 환영해요</MainText>
                     <ProfileContainer>
                         <Profile  source={{ uri: `data:image/png;base64,${base64Image}` }}
-        						style={{ width: 130, height: 130, position: 'absolute', marginTop: 30 }} />
+						style={{ width: 130, height: 130, position: 'absolute', marginTop: 30 }} />
 						<DecoesSvg currentTheme={currentTheme}
 							style={{ position: 'absolute', marginRight: 10 }} />
                     </ProfileContainer>
@@ -92,10 +95,6 @@ const MainView = styled(FullView)`
 	width: 300px;
 	align-self: center;
 	margin-top: 20px;
-`;
-
-const HorisontalView = styled(MainView)`
-  	flex-direction: row;
 `;
 
 const ProfileContainer = styled.View`

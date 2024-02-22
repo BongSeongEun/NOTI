@@ -19,6 +19,7 @@ import theme from '../components/theme';
 const Register = () => {
 	const navigation = useNavigation();
 	const email = 'streethong@naver.com';
+	const host = "192.168.30.83";
 
 	const [token, setToken] = useState(null);
 
@@ -126,7 +127,7 @@ const Register = () => {
 	  
 		  const userId = getUserIdFromToken(storedToken);
 	  
-  			const response = await axios.put(`http://192.168.30.220:4000/api/v1/user/${userId}`, {
+  			const response = await axios.put(`http://${host}:4000/api/v1/user/${userId}`, {
 				userNickname: String(inputName),
 				userColor: String(selectedTheme), 
 				diaryTime: String(selectedDiaryTime),

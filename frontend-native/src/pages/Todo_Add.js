@@ -38,7 +38,8 @@ function Todo_Add({ }) {
     const [selectedColor, setSelectedColor] = useState(initialSelectedColor || '');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
-    const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+	const host = "192.168.30.83";
 
 	useEffect(() => {
 		if (isEditing) {
@@ -112,7 +113,7 @@ function Todo_Add({ }) {
 	const fetchUserData = async () => { 
 		const userId = await getUserIdFromToken();
 		try {
-			const userResponse = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
+			const userResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
 			  headers: {
 				'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 			  },
@@ -136,8 +137,8 @@ function Todo_Add({ }) {
 		const formattedSelectedDate = selectedDate.replace(/-/g, '.');
 		
 		const url = isEditing
-			? `http://192.168.30.220:4000/api/v1/updateTodo/${userId}/${todoId}`
-			: `http://192.168.30.220:4000/api/v1/createTodo/${userId}`;
+			? `http://${host}:4000/api/v1/updateTodo/${userId}/${todoId}`
+			: `http://${host}:4000/api/v1/createTodo/${userId}`;
 		
 		const method = isEditing ? 'put' : 'post';
 		
