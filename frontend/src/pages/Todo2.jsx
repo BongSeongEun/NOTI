@@ -171,7 +171,7 @@ const DateHeader = styled.div`
   color: black;
   border-bottom: 2px solid
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
-  margin-top: 30px;
+  margin-top: 130px;
 `;
 
 const Edit = styled.img`
@@ -516,8 +516,9 @@ function Todo2() {
 
   return (
     <ThemeProvider theme={currentTheme}>
+      <NavBar setDate={setDate} />
+
       <div>
-        <NavBar setDate={setDate} />
         <DiaryContainer>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
           <EventList>

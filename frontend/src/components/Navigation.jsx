@@ -15,7 +15,9 @@ const Nav = styled.nav`
   width: 100%;
   justify-content: right;
   padding-right: 40px;
+  position: fixed;
   background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  z-index: 1;
 `;
 
 const NavLink = styled(Link)`
@@ -231,24 +233,24 @@ function Navigation({ setDate }) {
           <NavLink to={"/Todo"}>일기</NavLink>
           <NavLink to={"/Todo"}>설정</NavLink>
         </NavLink>
+        <LeftSidebar>
+          <GreetingSection>
+            <UserProfileImage src={base64Image || USER} alt="User Profile" />
+            <GreetingText>
+              <div>{userNickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
+              <div style={{ color: "black" }}>반갑습니다!</div>
+            </GreetingText>
+          </GreetingSection>
+        </LeftSidebar>
+        <RightSidebar>
+          <StyledCalendar
+            onChange={handleDateChange}
+            value={selectedDate}
+            formatDay={formatDay}
+          />
+          <ChatComponent userId={userId} />
+        </RightSidebar>
       </Nav>
-      <LeftSidebar>
-        <GreetingSection>
-          <UserProfileImage src={base64Image || USER} alt="User Profile" />
-          <GreetingText>
-            <div>{userNickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
-            <div style={{ color: "black" }}>반갑습니다!</div>
-          </GreetingText>
-        </GreetingSection>
-      </LeftSidebar>
-      <RightSidebar>
-        <StyledCalendar
-          onChange={handleDateChange}
-          value={selectedDate}
-          formatDay={formatDay}
-        />
-        <ChatComponent userId={userId} />
-      </RightSidebar>
     </>
   );
 }

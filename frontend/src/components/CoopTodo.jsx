@@ -6,7 +6,7 @@ import AddEventButton from "../components/AddEventButton";
 import editIcon from "../asset/fi-rr-pencil.png"; // 수정하기
 import deleteIcon from "../asset/fi-rr-trash.png"; // 삭제하기
 import DeleteModal from "../components/DeleteModal";
-import TimeTable from "../components/TimeTable";
+import ScheduleTimeTable from "../components/ScheduleTimeTable"; // 변경된 부분
 
 const HorizontalBox = styled.div`
   min-width: 600px;
@@ -52,6 +52,9 @@ const CloseButton = styled.button`
 const ScheduleItem = styled.div`
   /* 일정 항목 스타일 */
   padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 세로 중앙 정렬을 위해 */
   margin: 5px 0;
   cursor: pointer;
   &:hover {
@@ -226,6 +229,9 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [eventDate, setEventDate] = useState("");
   const [mySchedulesModalIsOpen, setMySchedulesModalIsOpen] = useState(false); // 내 일정 모달 상태
   const [mySchedules, setMySchedules] = useState([]); // 사용자의 일정 목록
+  const [teamSchedules, setTeamSchedules] = useState([]);
+  const [teamMembersCount, setTeamMembersCount] = useState(0);
+  const [scheduleBlocks, setScheduleBlocks] = useState(Array(24 * 6).fill(0));
 
   // 일정에 따라 색칠할 시간 블록들의 상태를 관리
   const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
@@ -282,6 +288,25 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     return decodedJSON.id.toString();
   };
 
+  // 팀 일정과 팀원 수를 불러오는 함수
+  const fetchTeamData = async () => {
+    try {
+      const teamSchedulesResponse = await axios.get(
+        `/api/v1/getSchedule/${teamId}`,
+      );
+      const userTeamResponse = await axios.get(`/api/v1/getUserTeam/${teamId}`);
+
+      setTeamSchedules(teamSchedulesResponse.data);
+      setTeamMembersCount(userTeamResponse.data.length);
+    } catch (error) {
+      console.error("Failed to fetch team data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeamData();
+  }, [teamId, onTodoChange]);
+
   // 테마 정보 가져오는 함수
   const fetchUserData = async userToken => {
     const userId = getUserIdFromToken(userToken); // 사용자 ID 가져오기
@@ -327,12 +352,6 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     setIsModalOpen(false);
     setTitle("");
     setEventDate([]);
-  };
-
-  // 시간을 schedule 배열의 인덱스로 변환하는 함수
-  const timeToIndex = time => {
-    const [hours, minutes] = time.split(":").map(Number);
-    return hours * 6 + Math.floor(minutes / 10);
   };
 
   // 새 일정 만들기 버튼 클릭 시 처리 함수
@@ -578,6 +597,44 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   };
 
   useEffect(() => {
+    const timeToIndex = time => {
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours * 6 + Math.floor(minutes / 10);
+    };
+    const fetchTeamSchedulesAndMembers = async () => {
+      try {
+        const scheduleResponse = await axios.get(
+          `/api/v1/getSchedule/${teamId}`,
+        );
+        const schedules = scheduleResponse.data;
+
+        const membersResponse = await axios.get(
+          `/api/v1/getUserTeam/${teamId}`,
+        );
+        const membersCount = membersResponse.data.length;
+
+        const newScheduleBlocks = Array(24 * 6).fill(0); // 24시간 * 6(10분 단위)
+
+        schedules.forEach(scheduleItem => {
+          if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
+            const startIndex = timeToIndex(scheduleItem.todoStartTime);
+            const endIndex = timeToIndex(scheduleItem.todoEndTime);
+            for (let i = startIndex; i <= endIndex; i += 1) {
+              newScheduleBlocks[i] += 1; // 중복된 일정이 있을 경우 값을 증가
+            }
+          }
+        });
+        // 팀원 수로 나누어 각 블록의 투명도 결정
+        setScheduleBlocks(newScheduleBlocks.map(block => block / membersCount));
+      } catch (error) {
+        console.error("Failed to fetch team schedules and members:", error);
+      }
+    };
+
+    fetchTeamSchedulesAndMembers();
+  }, [teamId]);
+
+  useEffect(() => {
     fetchUserData();
     fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
     if (mySchedulesModalIsOpen) {
@@ -709,9 +766,13 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                       key={scheduleItem.todoId}
                       onClick={() => handleSelectSchedule(scheduleItem.todoId)}
                     >
-                      {scheduleItem.todoTitle} {scheduleItem.todoStartTime}{" "}
-                      {scheduleItem.todoEndTime &&
-                        `~ ${scheduleItem.todoEndTime}`}
+                      <div>{scheduleItem.todoTitle}</div> {/* Title */}
+                      <div>
+                        {scheduleItem.todoStartTime} {/* Start Time */}
+                        {scheduleItem.todoEndTime &&
+                          `~ ${scheduleItem.todoEndTime}`}{" "}
+                        {/* End Time, if available */}
+                      </div>
                     </ScheduleItem>
                   ))}
                 </ModalContainer>
@@ -719,9 +780,9 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
             )}
             {/* 기존 TimeTable 및 기타 컴포넌트 렌더링 */}
           </div>
-          <TimeTable
+          <ScheduleTimeTable
             style={{ width: "300px", height: "450px", marginBottom: "5px" }}
-            schedule={schedule}
+            scheduleBlocks={scheduleBlocks} // schedule 상태를 scheduleBlocks prop으로 전달
           />
         </VerticalBox>
       </HorizontalBox>

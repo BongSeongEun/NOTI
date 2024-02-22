@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const DiaryContainer = styled.div`
-  height: auto;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,6 +14,7 @@ const DiaryContainer = styled.div`
     padding-left: 20px;
     padding-right: 20px;
   }
+  margin-bottom: 40px;
 `;
 
 export default DiaryContainer;
