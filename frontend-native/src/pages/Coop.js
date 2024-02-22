@@ -42,7 +42,7 @@ function Coop({ }) {
 		fetchUserData();
 		fetchTeamInfo();
 		fetchTeamMembers();
-	}, []);
+	}, [selectedDate]);
 
 	const fetchUserData = async () => {
 		const token = await AsyncStorage.getItem('token');
@@ -107,7 +107,7 @@ function Coop({ }) {
 	};
 	
     const onDayPress = (day) => {
-        setSelectedDate(day.dateString);
+		setSelectedDate(day.dateString);
 	};
 	
 	const formatDate = date => {
@@ -178,15 +178,24 @@ function Coop({ }) {
 	};
 
 	const calculateDDay = date => {
-		const today = new Date();
-		const targetDate = new Date(date);
+		const formattedDate = date.replace(/\./g, '-');
+
+		const today = new Date(selectedDate);
+		today.setHours(0, 0, 0, 0);
+
+		const targetDate = new Date(formattedDate);
+		targetDate.setHours(0, 0, 0, 0);
+
 		const difference = targetDate - today;
 		const dDay = Math.ceil(difference / (1000 * 60 * 60 * 24));
-
+	
 		if (dDay < 0) {
 			return '';
+		} else if (dDay === 0) {
+			return 'D - Day';
+		} else {
+			return `D - ${dDay}`;
 		}
-		return `D - ${dDay}`;
 	};
 	
 	return (
@@ -198,14 +207,14 @@ function Coop({ }) {
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
-								{formatDate(new Date(), "yyyy.MM.dd")} 노티입니다!
+								{formatDate(new Date(selectedDate), "yyyy.MM.dd")} 노티입니다!
 							</MainText>
 						</ProfileTextContainer>
 					</HorisontalView>
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1}}>
+			<FullView style={{flex: 1, marginBottom: 80}}>
 				<BarContainer>
 					<MainText onPress={() => navigation.navigate('Todo')} style={{ marginRight: 20, color: "#B7BABF" }}>나의 일정</MainText>
 					<MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
@@ -259,14 +268,15 @@ function Coop({ }) {
 								</Noti_Check>
 								<NotiTextContainer>
 									<NotiText>{event.teamTodoTitle}</NotiText>
+									<NotiText>{calculateDDay(event.teamTodoDate)}</NotiText>
 								</NotiTextContainer>
 							</Noti>
 						))}
 	
 					</MainView>
 				</ScrollView>
-				<Navigation_Bar />
 			</FullView>
+			<Navigation_Bar />
 		</ThemeProvider>
 	);
 
