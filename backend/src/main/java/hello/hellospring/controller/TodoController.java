@@ -37,6 +37,14 @@ public class TodoController {
         List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/getTodoByTodoId/{todoId}")
+    public ResponseEntity<?> getTodoByTodoId(@PathVariable String todoId){
+        List<Todo> todoEntity = todoRepository.findByTodoId(Long.valueOf(todoId));
+        List<TodoDTO> dtos = makeDtoListFromEntityList(todoEntity);
+        return ResponseEntity.ok().body(dtos);
+    }
+
     @PutMapping("/updateTodo/{userId}/{todoId}")
     public ResponseEntity<TodoDTO> updateTodo(@PathVariable Long userId, @PathVariable Long todoId, @RequestBody TodoDTO todoDTO){
         Todo updatedTodo = todoService.update(todoDTO, userId, todoId);
