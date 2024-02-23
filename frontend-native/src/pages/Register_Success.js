@@ -24,7 +24,7 @@ function Register_Success() {
 
 			if (token) {
 				const userId = getUserIdFromToken(token);
-				const host = "192.168.30.197";
+				const host = "192.168.240.252";
 				try {
 					const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
 						headers: {

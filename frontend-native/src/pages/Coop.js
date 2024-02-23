@@ -19,7 +19,7 @@ import NotiCheck from "../asset/noticheck.svg";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
-import TimeTable from "../components/TimeTable";
+import ScheduleTimeTable from "../components/ScheduleTimeTable";
 
 
 function Coop({ }) {
@@ -39,7 +39,7 @@ function Coop({ }) {
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 	const [todos, setTodos] = useState([]);
 
-	const host = "192.168.30.197";
+	const host = "192.168.240.252";
 
 	useEffect(() => {
 		fetchUserData();
@@ -221,9 +221,8 @@ function Coop({ }) {
 				return todoResponse.data;
 			}));
 			todosDetails = todosDetails.flat();
-    		const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
+			const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
 
-	
 			const newSchedule = Array(24 * 6).fill(0);
 			filteredTodos.forEach(({ todoStartTime, todoEndTime }) => {
 				const startIndex = timeToIndex(todoStartTime);
@@ -231,7 +230,7 @@ function Coop({ }) {
 	
 				if (startIndex >= 0 && endIndex > startIndex) {
 					for (let i = startIndex; i < endIndex; i++) {
-						newSchedule[i] += 0.2;
+						newSchedule[i] += 0.4;
 					}
 				}
 			});
@@ -318,7 +317,7 @@ function Coop({ }) {
 							</Noti>
 						))}
 
-						<TimeTable schedule={schedule} />
+						<ScheduleTimeTable schedule={schedule} currentTheme={currentTheme} />
 					</MainView>
 				</ScrollView>
 			</FullView>

@@ -19,7 +19,7 @@ import theme from '../components/theme';
 const Register = () => {
 	const navigation = useNavigation();
 	const email = 'streethong@naver.com';
-	const host = "192.168.30.197";
+	const host = "192.168.240.252";
 
 	const [token, setToken] = useState(null);
 
@@ -38,10 +38,8 @@ const Register = () => {
 		const fetchAndDecodeToken = async () => {
 			try {
 				const storedToken = await AsyncStorage.getItem('token');
-				console.log('Stored Token:', storedToken);
 				setToken(storedToken);
 				const userId = getUserIdFromToken(storedToken);
-				console.log('Decoded User ID:', userId);
 			} catch (error) {
 				console.error('Error fetching token:', error);
 			}
@@ -161,7 +159,6 @@ const Register = () => {
 				includeBase64: true
 			},
 			(response) => {
-				console.log(response)
 				if (response.didCancel) {
 					return;
 				} else if (response.errorCode) {

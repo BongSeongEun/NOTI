@@ -35,7 +35,7 @@ function Todo() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState(null);
 	const [clicked_delete, setClicked_delete] = useState(false);
-	const host = "192.168.30.197";
+	const host = "192.168.240.252";
 
     useEffect(() => {
         fetchUserData();
@@ -75,7 +75,7 @@ function Todo() {
 			  setCurrentTheme(theme[userThemeName]);
 			  setBase64Image(userProfileImage || ''); 
 			  setUserNickname(nickname || ''); 
-			  const eventsResponse = await axios.get(`http://0${host}:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
+			  const eventsResponse = await axios.get(`http://${host}:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
 				headers: {
 				  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 				},

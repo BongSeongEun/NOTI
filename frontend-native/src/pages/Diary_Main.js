@@ -31,7 +31,7 @@ function Diary_Main({ }) {
     const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
-	const host = "192.168.30.197";
+	const host = "192.168.240.252";
 
     useEffect(() => {
 		const fetchUserData = async () => {
