@@ -39,7 +39,7 @@ function Coop({ }) {
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 	const [todos, setTodos] = useState([]);
 
-	const host = "192.168.30.83";
+	const host = "192.168.30.197";
 
 	useEffect(() => {
 		fetchUserData();
@@ -178,7 +178,7 @@ function Coop({ }) {
 
 	const timeToIndex = (time) => {
 		if (!time || !time.includes(":")) {
-			return -1; // 유효하지 않은 시간 형식
+			return -1;
 		}
 		const [hours, minutes] = time.split(':').map(Number);
 		return hours * 6 + Math.floor(minutes / 10);
@@ -207,33 +207,37 @@ function Coop({ }) {
 
 	const fetchTodosForTeam = async () => {
 		const token = await AsyncStorage.getItem('token');
+		if (!token) return;
+	
 		try {
 			const scheduleResponse = await axios.get(`http://${host}:4000/api/v1/getSchedule/${teamId.teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
-
-			let todosDetails = await Promise.all(scheduleResponse.data.map(async (todoId) => {
-				const todoResponse = await axios.get(`http://${host}:4000/api/v1/getTodoByTodoId/${todoId.todoId}`, {
+	
+			let todosDetails = await Promise.all(scheduleResponse.data.map(async ({ todoId }) => {
+				const todoResponse = await axios.get(`http://${host}:4000/api/v1/getTodoByTodoId/${todoId}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				return todoResponse.data;
 			}));
 			todosDetails = todosDetails.flat();
+    		const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
 
-			const newSchedule = Array(24 * 6).fill(null);
-			todosDetails.forEach(todo => {
-				const startTimeIndex = timeToIndex(todo.todoStartTime); // 시작 시간 인덱스 계산
-				const endTimeIndex = timeToIndex(todo.todoEndTime); // 종료 시간 인덱스 계산
 	
-				if (startTimeIndex >= 0 && endTimeIndex > startTimeIndex) {
-					// 유효한 시간 인덱스에 대해 newSchedule 배열 업데이트
-					for (let i = startTimeIndex; i < endTimeIndex; i++) {
-						newSchedule[i] = "rgba(255, 165, 0, 0.2)"; // color1 색상과 20% 투명도 적용
+			const newSchedule = Array(24 * 6).fill(0);
+			filteredTodos.forEach(({ todoStartTime, todoEndTime }) => {
+				const startIndex = timeToIndex(todoStartTime);
+				const endIndex = timeToIndex(todoEndTime);
+	
+				if (startIndex >= 0 && endIndex > startIndex) {
+					for (let i = startIndex; i < endIndex; i++) {
+						newSchedule[i] += 0.2;
 					}
 				}
 			});
-			setSchedule(newSchedule);
-			
+			const adjustedSchedule = newSchedule.map(opacity => Math.min(opacity, 1));
+	
+			setSchedule(adjustedSchedule);
 		} catch (error) {
 			console.error("할 일 정보를 가져오는 중 오류가 발생했습니다.", error);
 		}

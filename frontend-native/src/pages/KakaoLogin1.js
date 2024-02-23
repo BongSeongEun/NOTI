@@ -12,7 +12,6 @@ const KakaoLogin = () => {
   const navigation = useNavigation();
 
 	const handleNavigationStateChange = navState => {
-		// 성공 URL 패턴 확인 예시: http://192.168.75.126:4000/authnative?success
 		if (navState.url.includes('success')) {
 			const { url } = navState;
 			// URL에서 토큰 추출
@@ -30,7 +29,7 @@ const KakaoLogin = () => {
 			<WebView
 				style={{ flex: 1 }}
 				source={{
-					uri: 'https://kauth.kakao.com/oauth/authorize?client_id=77cf97c36317f2622a926b9ddb30f96f&redirect_uri=http://192.168.30.83:4000/authnative&response_type=code',
+					uri: 'https://kauth.kakao.com/oauth/authorize?client_id=77cf97c36317f2622a926b9ddb30f96f&redirect_uri=http://192.168.30.197:4000/authnative&response_type=code',
 				}}
 				onNavigationStateChange={handleNavigationStateChange}
 			/>
