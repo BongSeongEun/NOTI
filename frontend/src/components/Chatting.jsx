@@ -4,7 +4,7 @@ import styled, { ThemeProvider } from "styled-components";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const ChatDiv = styled.div`
-  border: 3px solid black;
+  /* border: 3px solid black; */
   margin-top: 10px;
   height: 500px;
   justify-content: bottom;
@@ -12,6 +12,11 @@ const ChatDiv = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  -ms-overflow-style: none;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const ChatInput = styled.input`
@@ -23,9 +28,21 @@ const ChatInput = styled.input`
 const ChatRole = styled.div`
   &.bot-message {
     background-color: skyblue;
+    width: 200px;
+    border-radius: 15px;
+    padding: 10px;
+    font-size: 12px;
   }
   &.user-message {
     background-color: yellow;
+    border-radius: 15px;
+    padding: 10px;
+    font-size: 12px;
+    align-items: right;
+    justify-content: right;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    display: inline-block;
   }
 `;
 
@@ -56,7 +73,7 @@ function ChatComponent() {
   // 채팅 내역 불러오기
   useEffect(() => {
     fetchChatList();
-  }, []);
+  }, [userId]);
 
   // 새 채팅 메시지 전송
   const sendMessage = async event => {
@@ -64,12 +81,12 @@ function ChatComponent() {
     try {
       const response = await axios.post(`/api/v3/ask/${userId}`, {
         chat_content: newMessage,
-        chat_role: false, // 예시로, 사용자 메시지로 설정
+        chatWho: false, // 예시로, 사용자 메시지로 설정
       });
       setMessages([
         ...messages,
-        { chat_content: newMessage, isBot: false },
-        { chat_content: response.data, isBot: true },
+        { chat_content: newMessage, chatWho: false },
+        { chat_content: response.data, chatWho: true },
       ]);
       setNewMessage("");
     } catch (error) {
@@ -77,16 +94,15 @@ function ChatComponent() {
     }
   };
 
-  // 메롱 메롱 메롱 메에에에엘오롱
   return (
     <ChatDiv>
       <ChatDiv>
         {messages.map((msg, index) => (
           <ChatRole
             key={index}
-            className={msg.isBot ? "bot-message" : "user-message"}
+            className={msg.chatWho ? "bot-message" : "user-message"}
           >
-            {msg.chat_content}
+            {msg.chatContent}
           </ChatRole>
         ))}
       </ChatDiv>

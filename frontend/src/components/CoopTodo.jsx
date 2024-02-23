@@ -233,8 +233,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [scheduleBlocks, setScheduleBlocks] = useState(Array(24 * 6).fill(0));
 
-  // 일정에 따라 색칠할 시간 블록들의 상태를 관리
-  const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+  const [todoStates, setTodoStates] = useState([]);
 
   // 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
@@ -428,6 +427,19 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     }
   };
 
+  // 사용자의 일정 상태를 불러오는 함수
+  const fetchTodoStates = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    try {
+      const response = await axios.get(
+        `/api/v1/getTodoState/${userId}/${teamId}`,
+      );
+      setTodoStates(response.data); // API 응답으로 받은 일정 상태를 상태 변수에 저장
+    } catch (error) {
+      console.error("Failed to fetch todo states:", error);
+    }
+  };
+
   // 팀의 Todo를 가져오는 함수
   const fetchTodos = async () => {
     try {
@@ -569,7 +581,8 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   };
   // 내 일정 추가 모달을 여는 함수
   const openMySchedulesModal = () => {
-    fetchMySchedules(); // 모달을 열 때 사용자의 일정을 불러온다
+    fetchMySchedules(); // 사용자의 일정을 불러옵니다.
+    fetchTodoStates(); // 사용자의 일정 상태를 불러옵니다.
     setMySchedulesModalIsOpen(true);
   };
 
@@ -634,6 +647,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
     if (mySchedulesModalIsOpen) {
       fetchMySchedules();
+      fetchTodoStates();
     }
   }, [onTodoChange, selectedDate, mySchedulesModalIsOpen]);
 
@@ -756,20 +770,39 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                     x
                   </CloseButton>
                   <h2>{formatDate(selectedDate)} 노티</h2>
-                  {mySchedules.map(scheduleItem => (
-                    <ScheduleItem
-                      key={scheduleItem.todoId}
-                      onClick={() => handleSelectSchedule(scheduleItem.todoId)}
-                    >
-                      <div>{scheduleItem.todoTitle}</div> {/* Title */}
-                      <div>
-                        {scheduleItem.todoStartTime} {/* Start Time */}
-                        {scheduleItem.todoEndTime &&
-                          `~ ${scheduleItem.todoEndTime}`}{" "}
-                        {/* End Time, if available */}
-                      </div>
-                    </ScheduleItem>
-                  ))}
+                  {mySchedules.map(scheduleItem => {
+                    // 해당 일정이 이미 추가된 상태인지 확인
+                    const isAdded = todoStates.some(
+                      todoState =>
+                        todoState.todoId === scheduleItem.todoId &&
+                        todoState.state,
+                    );
+
+                    // 이미 추가된 일정에는 특정 스타일을 적용
+                    const itemStyle = isAdded
+                      ? {
+                          opacity: "0.5",
+                          textDecoration: "line-through",
+                          pointerEvents: "none",
+                          cursor: "default",
+                        }
+                      : {};
+
+                    return (
+                      <ScheduleItem
+                        key={scheduleItem.todoId}
+                        style={itemStyle}
+                        // 이미 추가된 일정은 클릭 이벤트를 비활성화합니다.
+                      >
+                        <div>{scheduleItem.todoTitle}</div>
+                        <div>
+                          {scheduleItem.todoStartTime}
+                          {scheduleItem.todoEndTime &&
+                            `~ ${scheduleItem.todoEndTime}`}
+                        </div>
+                      </ScheduleItem>
+                    );
+                  })}
                 </ModalContainer>
               </ModalBackdrop>
             )}
