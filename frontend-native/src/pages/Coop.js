@@ -6,7 +6,7 @@
 
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, Image,  } from "react-native";
+import { ScrollView, Text, View, Image, TouchableOpacity,  } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
@@ -38,6 +38,7 @@ function Coop({ }) {
 	const [mySchedules, setMySchedules] = useState([]);
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 	const [todos, setTodos] = useState([]);
+	const [isModalVisible, setIsModalVisible] = useState(false);
 
 	const host = "192.168.240.252";
 
@@ -222,6 +223,7 @@ function Coop({ }) {
 			}));
 			todosDetails = todosDetails.flat();
 			const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
+			setTodos(filteredTodos);
 
 			const newSchedule = Array(24 * 6).fill(0);
 			filteredTodos.forEach(({ todoStartTime, todoEndTime }) => {
@@ -241,7 +243,19 @@ function Coop({ }) {
 			console.error("할 일 정보를 가져오는 중 오류가 발생했습니다.", error);
 		}
 	};
-	
+
+	const ScheduleInfoList = ({ todos }) => {
+		return (
+			<ScheduleInfoContainer>
+				{todos.map((todo, index) => (
+					<ScheduleInfoText key={index}>
+						{todo.todoTitle}, {todo.todoStartTime} ~ {todo.todoEndTime}
+					</ScheduleInfoText>
+				))}
+			</ScheduleInfoContainer>
+		);
+	};
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
@@ -261,7 +275,7 @@ function Coop({ }) {
 			<FullView style={{flex: 1, marginBottom: 80}}>
 				<BarContainer>
 					<MainText onPress={() => navigation.navigate('Todo')} style={{ marginRight: 20, color: "#B7BABF" }}>나의 일정</MainText>
-					<MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
+					<MainText onPress={() => navigation.navigate('Coop_Main')}style={{ marginLeft: 20 }}>협업 일정</MainText>
 				</BarContainer>
 				<Bar />
 				<Bar_Mini />
@@ -318,6 +332,31 @@ function Coop({ }) {
 						))}
 
 						<ScheduleTimeTable schedule={schedule} currentTheme={currentTheme} />
+
+						<TouchableOpacity onPress={() => setIsModalVisible(true)} style={{margin: 10}}>
+          <Text style={{color: currentTheme.color1}}>일정 보기</Text>
+        </TouchableOpacity>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={() => {
+            setIsModalVisible(!isModalVisible);
+          }}
+        >
+          <ModalView>
+            <ScrollView>
+              <ScheduleInfoList todos={todos} />
+            </ScrollView>
+            <TouchableOpacity
+              onPress={() => setIsModalVisible(!isModalVisible)}
+              style={{marginTop: 20, alignSelf: 'center'}}
+            >
+              <Text>닫기</Text>
+            </TouchableOpacity>
+          </ModalView>
+        </Modal>
 					</MainView>
 				</ScrollView>
 			</FullView>
@@ -424,6 +463,16 @@ const NotiText = styled.Text`
 	color: ${props => props.color || "white"};
 	text-align: left;
 	margin-left: 10px;
+`;
+
+const ScheduleInfoContainer = styled.View`
+  margin-top: 20px;
+`;
+
+const ScheduleInfoText = styled.Text`
+  color: #808080;
+  font-size: 12px;
+  line-height: 18px;
 `;
 
 export default Coop;

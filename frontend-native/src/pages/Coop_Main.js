@@ -168,7 +168,7 @@ function Coop_Main({ onSelectTeam }) {
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1}}>
+			<FullView style={{flex: 1, marginBottom: 80}}>
 				<BarContainer>
 					<MainText onPress={() => navigation.navigate('Todo')} style={{ marginRight: 20, color: "#B7BABF" }}>나의 일정</MainText>
 					<MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
@@ -305,9 +305,11 @@ function Coop_Main({ onSelectTeam }) {
 					</MainView>
 				</ScrollView>
 			</FullView>
+			<Navigation_Bar />
 		</ThemeProvider>
     );
 }
+
 
 const FullView = styled.View`
 	width: 100%;

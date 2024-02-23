@@ -17,6 +17,7 @@ const Navigation_Bar = ({ selectedTheme }) => {
     const navigation = useNavigation();
     const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
 	const [selectedIcon, setSelectedIcon] = useState(null);
+	const host = "192.168.240.252";
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -24,7 +25,7 @@ const Navigation_Bar = ({ selectedTheme }) => {
 			if (token) {
 				const userId = getUserIdFromToken(token);
 				try {
-					const response = await axios.get(`http://192.168.30.220:4000/api/v1/userInfo/${userId}`, {
+					const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
 						headers: {
 							'Authorization': `Bearer ${token}`,
 						},
