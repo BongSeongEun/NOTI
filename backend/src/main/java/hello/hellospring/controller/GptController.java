@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -155,6 +152,9 @@ public class GptController {
 
     }
 
+
+
+    //todo 자동저장 함수
     private void saveTodo (String processedEvent, String processedTime, Long userId){
         String[] times = processedTime.split("~"); // ~ 기준으로 분리
         if (times.length == 2){
@@ -175,7 +175,11 @@ public class GptController {
             newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
 
             newTodo.setTodoDone(false);
-            newTodo.setTodoColor("color1");
+
+            Random random = new Random();
+            int colorIndex = random.nextInt(5) + 1; // 1~5 사이의 랜덤한 수 생성
+            newTodo.setTodoColor("color" + colorIndex); // todoColor 저장
+//            newTodo.setTodoColor("color1");
 
             todoRepository.save(newTodo); // Todo 저장
 
