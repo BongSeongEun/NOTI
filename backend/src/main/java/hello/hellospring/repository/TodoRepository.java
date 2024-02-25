@@ -23,4 +23,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
             @Param("todoDateStr") String todoDateStr);
 
 
+    List<Todo> findByTodoDateAndTodoEndTime(String format, String format1);
+    // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
 }

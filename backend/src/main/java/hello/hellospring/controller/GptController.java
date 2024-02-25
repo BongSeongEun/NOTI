@@ -179,7 +179,6 @@ public class GptController {
             Random random = new Random();
             int colorIndex = random.nextInt(5) + 1; // 1~5 사이의 랜덤한 수 생성
             newTodo.setTodoColor("color" + colorIndex); // todoColor 저장
-//            newTodo.setTodoColor("color1");
 
             todoRepository.save(newTodo); // Todo 저장
 
