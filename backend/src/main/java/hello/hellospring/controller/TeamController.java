@@ -2,12 +2,16 @@ package hello.hellospring.controller;
 
 import hello.hellospring.dto.*;
 import hello.hellospring.model.*;
+import hello.hellospring.repository.TeamTogetherRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -18,6 +22,8 @@ public class TeamController {
     TeamService teamService;
     @Autowired
     TodoRepository todoRepository;
+    @Autowired
+    TeamTogetherRepository teamTogetherRepository;
 
     // 특정 사용자의 팀 목록 조회
     @GetMapping("/getTeam/{userId}")
@@ -75,11 +81,23 @@ public class TeamController {
         return ResponseEntity.ok().body(dtos);
     }
 
+    @GetMapping("/getTeamInfo/{teamId}")
+    public ResponseEntity<?> getTeamInfo(@PathVariable String teamId){
+        List<TeamTogether> entity = teamTogetherRepository.findByTeamId(teamId);
+        return ResponseEntity.ok().body(entity.get(0).getTeamTitle());
+    }
+
     // 팀에 새로운 Todo를 추가
     @PostMapping("/createTeamTodo/{teamId}")
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
         entity.setTeamId(teamId);
+        if (entity.getTeamTodoDate() == null){
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String formatedNow = now.format(formatter);
+            entity.setTeamTodoDate(String.valueOf(formatedNow));
+        }
         List<TeamTodo> teamTodoEntity = teamService.createTeamTodo(entity);
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
         return ResponseEntity.ok().build();
