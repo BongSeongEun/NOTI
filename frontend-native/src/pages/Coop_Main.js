@@ -34,7 +34,7 @@ function Coop_Main({ onSelectTeam }) {
 	const [pinClicked, setPinClicked] = useState({});
 	const [outClicked, setOutClicked] = useState({});
 	const [selectedTeamId, setSelectedTeamId] = useState(null);
-	const [teamTodo, setTeamTodos] = useState('');
+	const [teamTodos, setTeamTodos] = useState([]);
 
 	const host = "192.168.30.197";
 
@@ -108,9 +108,18 @@ function Coop_Main({ onSelectTeam }) {
 				headers: { Authorization: `Bearer ${storedToken}` },
 			});
 			setTeams(response.data);
+
+			if (response.status === 200) {
+				setTeams(response.data);
+				response.data.forEach(team => {
+					fetchTeamTodos(team.teamId);
+				});
+			}
 		} catch (error) {
 			console.error("팀 목록을 불러오는데 실패했습니다:", error);
 		}
+
+		
 	};	
 	
 	const fetchTeamMembers = async (teamId) => {
@@ -152,40 +161,32 @@ function Coop_Main({ onSelectTeam }) {
 		}
 	};
 	
-	const Noti = ({ todo, index, themeColor }) => {
+	const Noti = ({ todo, index, currentTheme  }) => {
+		const themeColor = currentTheme[todo.teamTodoColor];
 		const opacity = index === 0 ? 1 : 0.5;
+		const width = index === 1 ? 200 : 230;
+		const marginTop = index === 1 ? -15 : 10;
+		const zIndex = index === 1 ? 1 : 2;
 		return (
-			<Team_Noti style={{ backgroundColor: themeColor, opacity }}>
-				<Text style={{ color: 'white' }}>{todo.teamTodoTitle}</Text>
+			<Team_Noti style={{ backgroundColor: themeColor, opacity, width, marginTop, zIndex }}>
+				<NotiCheck>
+					{todo.teamTodoDone && <images.noticheck width={12} height={12}
+						color={themeColor} />}
+				</NotiCheck>
+				<NotiText>{todo.teamTodoTitle}</NotiText>
 			</Team_Noti>
-		);
-	};
-
-	const UserProfileImage = ({ userId }) => {
-		const [profileImage, setProfileImage] = useState('');
-	  
-		useEffect(() => {
-			const fetchUserProfile = async () => {
-				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`);
-				setProfileImage(response.data.userProfile);
-			};
-	  
-			fetchUserProfile();
-		}, [userId]);
-	  
-		return (
-			<Image
-				source={{ uri: profileImage }}
-				style={{ width: 30, height: 30, borderRadius: 15 }}
-			/>
 		);
 	};
 
 	const fetchTeamTodos = async (teamId) => {
 		try {
 			const response = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId}`);
-			const todosToShow = response.data.slice(0, 2);
-			setTeamTodos(todosToShow);
+			if (response.status === 200) {
+				setTeamTodos(prevTodos => ({
+					...prevTodos,
+					[teamId]: response.data.slice(0, 2)
+				}));
+			}
 		} catch (error) {
 			console.error("팀 일정을 불러오는데 실패했습니다:", error);
 		}
@@ -283,14 +284,21 @@ function Coop_Main({ onSelectTeam }) {
 										onPress={() => handlePinClick(team.teamId)}
 									/>
 
-									<MainText style={{ position: 'absolute', top: 30, alignSelf: 'center' }}>
+									<MainText style={{ position: 'absolute', top: 20, alignSelf: 'center' }}>
 										{team.teamTitle}
 									</MainText>
 
-									
-									<MainText style={{ position: 'absolute', top: 80, alignSelf: 'center' }}>
-										{teamMembersCount[team.teamId] || 0}명
-									</MainText>
+									<NotiContainer>
+										{teamTodos[team.teamId] && teamTodos[team.teamId].map((todo, index) => (
+											<View key={todo.teamTodoId} style={{ flexDirection: 'row', alignItems: 'center' }}>
+											<Noti todo={todo} index={index} currentTheme={currentTheme} />
+											</View>
+										))}
+									</NotiContainer>
+
+									<Text style={{ position: 'absolute', top: 120, alignSelf: 'flex-start', marginLeft: 40, fontSize: 10 }}>
+										참여자: {teamMembersCount[team.teamId] || 0}명
+									</Text>
 
 									<images.team_out
 										width={15}
@@ -305,6 +313,7 @@ function Coop_Main({ onSelectTeam }) {
 								</TeamFrameContainer>
 							))}
 						</View>
+
 
 						<Modal
 							animationType="slide"
