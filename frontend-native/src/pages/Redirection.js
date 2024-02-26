@@ -14,7 +14,7 @@ const Redirection = () => {
 	  const handleDeepLink = event => {
 		  const code = new URL(event.url).searchParams.get('code');
 		  if (code) {
-			  const host = "192.168.240.252";
+			  const host = "192.168.30.197";
 			  axios
 				  .post(`http://${host}/authnative?code=${code}`)
 				  .then(async res => {

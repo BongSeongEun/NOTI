@@ -35,7 +35,7 @@ function Todo() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState(null);
 	const [clicked_delete, setClicked_delete] = useState(false);
-	const host = "192.168.240.252";
+	const host = "192.168.30.197";
 
     useEffect(() => {
         fetchUserData();

@@ -6,7 +6,7 @@
 
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, Image, TouchableOpacity,  } from "react-native";
+import { ScrollView, Text, View, Image, TouchableOpacity, Modal } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
@@ -40,7 +40,7 @@ function Coop({ }) {
 	const [todos, setTodos] = useState([]);
 	const [isModalVisible, setIsModalVisible] = useState(false);
 
-	const host = "192.168.240.252";
+	const host = "192.168.30.197";
 
 	useEffect(() => {
 		fetchUserData();
@@ -365,6 +365,23 @@ function Coop({ }) {
 	);
 
 }
+
+
+const ModalView = styled.View`
+	margin: 20px;
+	background-color: white;
+	border-radius: 20px;
+	padding: 35px;
+	align-items: center;
+	shadow-color: #000;
+	shadow-offset: {
+		width: 0;
+		height: 2;
+	};
+	shadow-opacity: 0.25;
+	shadow-radius: 3.84px;
+	elevation: 5;
+`;
 
 const FullView = styled.View`
 	width: 100%;
