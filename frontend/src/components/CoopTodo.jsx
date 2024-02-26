@@ -355,7 +355,13 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
 
   // 새 일정 만들기 버튼 클릭 시 처리 함수
   const openNewEventModal = () => {
-    // 입력 필드 상태 초기
+    // 현재 날짜를 YYYY-MM-DD 형식으로 설정
+    const today = new Date();
+    const formattedDate = today.toISOString().substring(0, 10);
+
+    // 입력 필드 상태 초기화
+    setTitle(""); // 제목 초기화
+    setEventDate(formattedDate); // 오늘 날짜로 초기화
     setSelectedColor(currentTheme.color1); // 기본 색상으로 초기화
     setIsEditing(false); // 편집 모드가 아닌 새 추가 모드로 설정
     setEditingTodoId(null); // 편집 중인 이벤트 ID 초기화
@@ -556,7 +562,10 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     if (dDay < 0) {
       return ""; // D-Day가 이미 지났을 경우, 표시하지 않음
     }
-    return `D - ${dDay}`; // D-Day가 양수일 경우에만 표시
+    if (dDay === 0) {
+      return "D-Day"; // D-Day가 오늘일 경우 "Day" 표시
+    }
+    return `D-${dDay}`; // D-Day가 양수일 경우 "D-숫자" 표시
   };
 
   // 사용자의 일정을 불러오는 함수
@@ -581,8 +590,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   };
   // 내 일정 추가 모달을 여는 함수
   const openMySchedulesModal = () => {
-    fetchMySchedules(); // 사용자의 일정을 불러옵니다.
-    fetchTodoStates(); // 사용자의 일정 상태를 불러옵니다.
+    fetchMySchedules(); // 모달을 열 때 사용자의 일정을 불러온다
     setMySchedulesModalIsOpen(true);
   };
 
@@ -627,8 +635,10 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       schedulesForSelectedDate.forEach(scheduleItem => {
         if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
           const startIndex = timeToIndex(scheduleItem.todoStartTime);
-          const endIndex = timeToIndex(scheduleItem.todoEndTime);
-          for (let i = startIndex; i <= endIndex; i += 1) {
+          // 수정: 종료 시간을 포함하지 않도록 endIndex 계산 변경
+          const endIndex = timeToIndex(scheduleItem.todoEndTime); // 여기에서 변경
+          for (let i = startIndex; i < endIndex; i += 1) {
+            // '<=' 에서 '<'로 변경
             newScheduleBlocks[i] += 1;
           }
         }
@@ -641,6 +651,20 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
 
     updateScheduleBlocks();
   }, [teamSchedules, teamMembersCount, selectedDate]);
+
+  // 개인 일정을 TimeTable에서 삭제하는 함수 추가
+  const handleDeleteSchedule = async todoId => {
+    try {
+      await axios.delete(`/api/v1/deleteSchedule/${teamId}/${todoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // 성공적으로 삭제 후, TimeTable 및 개인 일정 목록 새로고침
+      fetchMySchedules(); // 개인 일정 목록 다시 불러오기
+      onTodoChange(); // TimeTable 업데이트를 위해 부모 컴포넌트의 변경사항 반영 함수 호출
+    } catch (error) {
+      console.error("Failed to delete the schedule:", error);
+    }
+  };
 
   useEffect(() => {
     fetchUserData();
@@ -789,16 +813,26 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                       : {};
 
                     return (
-                      <ScheduleItem
-                        key={scheduleItem.todoId}
-                        style={itemStyle}
-                        // 이미 추가된 일정은 클릭 이벤트를 비활성화합니다.
-                      >
-                        <div>{scheduleItem.todoTitle}</div>
+                      <ScheduleItem key={scheduleItem.todoId} style={itemStyle}>
                         <div>
-                          {scheduleItem.todoStartTime}
+                          {isAdded && (
+                            <button
+                              onClick={() =>
+                                handleDeleteSchedule(scheduleItem.todoId)
+                              }
+                            >
+                              {" "}
+                              -{" "}
+                            </button>
+                          )}
+                          {scheduleItem.todoTitle}
+                        </div>{" "}
+                        {/* Title */}
+                        <div>
+                          {scheduleItem.todoStartTime} {/* Start Time */}
                           {scheduleItem.todoEndTime &&
-                            `~ ${scheduleItem.todoEndTime}`}
+                            `~ ${scheduleItem.todoEndTime}`}{" "}
+                          {/* End Time, if available */}
                         </div>
                       </ScheduleItem>
                     );

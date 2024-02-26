@@ -14,6 +14,7 @@ import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import CoopTodo from "../components/CoopTodo.jsx";
+import Memo from "../components/Memo.jsx";
 
 const MainDiv = styled.div`
   height: auto;
@@ -107,6 +108,7 @@ function CoopDetail({ team, selectedDate }) {
           onTodoChange={fetchTeamDetails}
           selectedDate={selectedDate}
         />
+        <Memo teamId={team.teamId} />
       </MainDiv>
     </ThemeProvider>
     // Use 'team' prop to display team details

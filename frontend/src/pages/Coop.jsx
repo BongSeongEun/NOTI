@@ -14,6 +14,7 @@ import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import CoopDetail from "../pages/CoopDetail"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때;
+import Confirm from "../asset/fi-rr-sign-out.png"; //
 
 const MainDiv = styled.div`
   height: auto;
@@ -48,6 +49,9 @@ const TeamList = styled.div`
 `;
 
 const TeamItem = styled.div`
+  display: flex;
+  justify-content: space-between; // 내용을 양 끝으로 정렬
+  align-items: center; // 세로 중앙 정렬
   margin: 10px 0;
   padding: 10px;
   border: 1px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
@@ -76,11 +80,14 @@ const AddTeamButton = styled.button`
 `;
 
 const TeamTitle = styled.h4`
-  margin: 0;
+  margin-left: 10px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   color: #333;
 `;
 
 const TeamDate = styled.div`
+  margin-left: 10px;
   margin-top: 5px;
   font-size: 0.8em;
   color: #666;
@@ -127,6 +134,56 @@ const CloseButton = styled.button`
   align-self: flex-end;
 `;
 
+const LeaveTeamButton = styled.img`
+  margin-right: 10px;
+  cursor: pointer;
+  width: 17px;
+  height: 17px;
+`;
+
+const ConfirmModalBackdrop = styled(ModalBackdrop)``; // 이미 정의된 ModalBackdrop 사용
+
+const ConfirmModalContainer = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center; // 가운데 놓기
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const ConfirmButtonContainer = styled.div`
+  display: flex;
+  justify-content: center; // 버튼을 가운데 정렬
+  gap: 10px; // 버튼 사이의 간격
+`;
+
+const ConfirmMessage = styled.p`
+  margin-bottom: 20px;
+`;
+
+const ConfirmButton = styled.button`
+  color: white;
+  padding: 10px 20px;
+  background-color: ${props => props.theme.color2 || theme.OrangeTheme.color2};
+  width: 100px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+`;
+
+const CancelButton = styled(ConfirmButton)`
+  background-color: #ccc; // 회색 계열
+`;
+
+const TeamInfo = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
 function Coop({ onSelectTeam }) {
   const [teams, setTeams] = useState([]);
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
@@ -135,6 +192,8 @@ function Coop({ onSelectTeam }) {
   const [showModal, setShowModal] = useState(false);
   const [teamMembersCount, setTeamMembersCount] = useState({});
   const navigate = useNavigate();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
@@ -145,6 +204,11 @@ function Coop({ onSelectTeam }) {
 
     console.log(decodedJSON);
     return decodedJSON.id.toString();
+  };
+
+  const handleLeaveTeamClick = teamId => {
+    setShowConfirmModal(true);
+    setSelectedTeamId(teamId);
   };
 
   const fetchUserData = async userToken => {
@@ -239,6 +303,24 @@ function Coop({ onSelectTeam }) {
     });
   }, [teams]);
 
+  const leaveTeam = async teamId => {
+    const userId = getUserIdFromToken();
+    try {
+      await axios.delete(`/api/v1/leaveTeam/${teamId}/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setShowConfirmModal(false);
+      fetchTeams(); // 팀 목록 다시 불러오기
+    } catch (error) {
+      console.error("팀 나가기 실패:", error);
+    }
+  };
+
+  const closeModalAndReset = () => {
+    setShowConfirmModal(false);
+    setSelectedTeamId(null);
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
       <MainDiv>
@@ -273,13 +355,33 @@ function Coop({ onSelectTeam }) {
         )}
         <TeamList>
           {teams.map(team => (
-            <TeamItem key={team.teamId} onClick={() => handleTeamClick(team)}>
-              <TeamTitle>{team.teamTitle}</TeamTitle>
-              <TeamDate>
-                참여 인원 : {teamMembersCount[team.teamId] || "로딩 중..."} 명
-              </TeamDate>
+            <TeamItem key={team.teamId}>
+              <TeamInfo onClick={() => handleTeamClick(team)}>
+                <TeamTitle>{team.teamTitle}</TeamTitle>
+                <TeamDate>
+                  참여 인원 : {teamMembersCount[team.teamId] || "로딩 중..."} 명
+                </TeamDate>
+              </TeamInfo>
+              <LeaveTeamButton
+                src={Confirm}
+                alt="팀 나가기"
+                onClick={() => handleLeaveTeamClick(team.teamId)}
+              />
             </TeamItem>
           ))}
+          {showConfirmModal && (
+            <ConfirmModalBackdrop>
+              <ConfirmModalContainer onClick={e => e.stopPropagation()}>
+                <ConfirmMessage>Team을 나가시겠습니까?</ConfirmMessage>
+                <ConfirmButtonContainer>
+                  <ConfirmButton onClick={() => leaveTeam(selectedTeamId)}>
+                    나가기
+                  </ConfirmButton>
+                  <CancelButton onClick={closeModalAndReset}>취소</CancelButton>
+                </ConfirmButtonContainer>
+              </ConfirmModalContainer>
+            </ConfirmModalBackdrop>
+          )}
         </TeamList>
       </MainDiv>
     </ThemeProvider>
