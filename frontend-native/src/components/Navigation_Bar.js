@@ -17,7 +17,7 @@ const Navigation_Bar = ({ selectedTheme }) => {
     const navigation = useNavigation();
     const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
 	const [selectedIcon, setSelectedIcon] = useState(null);
-	const host = "192.168.240.252";
+	const host = "192.168.30.197";
 	
 	useEffect(() => {
 		const fetchUserData = async () => {

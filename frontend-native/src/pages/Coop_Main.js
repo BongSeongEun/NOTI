@@ -6,7 +6,7 @@
 
 import styled, { ThemeProvider } from 'styled-components/native';
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Modal, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Modal, Text, TouchableOpacity, View, Image} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
@@ -34,6 +34,7 @@ function Coop_Main({ onSelectTeam }) {
 	const [pinClicked, setPinClicked] = useState({});
 	const [outClicked, setOutClicked] = useState({});
 	const [selectedTeamId, setSelectedTeamId] = useState(null);
+	const [teamTodo, setTeamTodos] = useState('');
 
 	const host = "192.168.30.197";
 
@@ -151,6 +152,44 @@ function Coop_Main({ onSelectTeam }) {
 		}
 	};
 	
+	const Noti = ({ todo, index, themeColor }) => {
+		const opacity = index === 0 ? 1 : 0.5;
+		return (
+			<Team_Noti style={{ backgroundColor: themeColor, opacity }}>
+				<Text style={{ color: 'white' }}>{todo.teamTodoTitle}</Text>
+			</Team_Noti>
+		);
+	};
+
+	const UserProfileImage = ({ userId }) => {
+		const [profileImage, setProfileImage] = useState('');
+	  
+		useEffect(() => {
+			const fetchUserProfile = async () => {
+				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`);
+				setProfileImage(response.data.userProfile);
+			};
+	  
+			fetchUserProfile();
+		}, [userId]);
+	  
+		return (
+			<Image
+				source={{ uri: profileImage }}
+				style={{ width: 30, height: 30, borderRadius: 15 }}
+			/>
+		);
+	};
+
+	const fetchTeamTodos = async (teamId) => {
+		try {
+			const response = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId}`);
+			const todosToShow = response.data.slice(0, 2);
+			setTeamTodos(todosToShow);
+		} catch (error) {
+			console.error("팀 일정을 불러오는데 실패했습니다:", error);
+		}
+	};
 
     return (
 		<ThemeProvider theme={currentTheme}>
@@ -247,6 +286,8 @@ function Coop_Main({ onSelectTeam }) {
 									<MainText style={{ position: 'absolute', top: 30, alignSelf: 'center' }}>
 										{team.teamTitle}
 									</MainText>
+
+									
 									<MainText style={{ position: 'absolute', top: 80, alignSelf: 'center' }}>
 										{teamMembersCount[team.teamId] || 0}명
 									</MainText>

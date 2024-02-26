@@ -6,7 +6,7 @@
 
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, Image, TouchableOpacity, Modal } from "react-native";
+import { ScrollView, Text, View, Image, TouchableOpacity, Modal, StyleSheet } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
@@ -34,11 +34,12 @@ function Coop({ }) {
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [events, setEvents] = useState([]);
 	const [teamMembers, setTeamMembers] = useState([]);
-	const [eventDate, setEventDate] = useState("");
-	const [mySchedules, setMySchedules] = useState([]);
 	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
 	const [todos, setTodos] = useState([]);
 	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [clicked_memo, setClicked_memo] = useState(false);
+	const [memoContent, setMemoContent] = useState('');
+	const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
 
 	const host = "192.168.30.197";
 
@@ -111,7 +112,14 @@ function Coop({ }) {
         }
 	};
 	
-    const onDayPress = (day) => {
+	const markedDates = {
+		[selectedDate]: {
+			selected: true,
+			selectedColor: currentTheme.color1,
+		}
+	};
+
+	const onDayPress = day => {
 		setSelectedDate(day.dateString);
 	};
 	
@@ -256,11 +264,53 @@ function Coop({ }) {
 		);
 	};
 
+	const fetchTeamMemo = async () => {
+		const token = await AsyncStorage.getItem('token');
+		try {
+			const response = await axios.get(`http://${host}:4000/api/v1/getTeamMemo/${teamId.teamId}`, {
+				headers: {
+					'Authorization': `Bearer ${token}`,
+				},
+			});
+			if (response.data && response.data.length > 0) {
+				setMemoContent(response.data[0].memoContent);
+			} else {
+				setMemoContent("메모가 없습니다.");
+			}
+		} catch (error) {
+			console.error("Error fetching team memo:", error);
+			setMemoContent("메모 정보를 불러올 수 없습니다.");
+		}
+	};
+
+	const MemoModal = ({ isVisible, onClose, memoContent }) => {
+		return (
+			<Modal
+				animationType="slide"
+				transparent={true}
+				visible={isVisible}
+				onRequestClose={onClose}
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						<View style={styles.modalHeader}>
+							<Text style={[styles.modalTitle, { color: '#505050' }]}>메모</Text>
+							<TouchableOpacity onPress={onClose} style={styles.closeButton}>
+								<images.close width={10} height={10} />
+							</TouchableOpacity>
+						</View>
+						<Text style={{ fontSize: 10, padding: 20 }}>{memoContent}</Text>
+					</View>
+				</View>
+			</Modal>
+		);
+	};
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
 				<MainView>
-				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
+					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
 						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
@@ -272,22 +322,22 @@ function Coop({ }) {
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1, marginBottom: 80}}>
+			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<BarContainer>
 					<MainText onPress={() => navigation.navigate('Todo')} style={{ marginRight: 20, color: "#B7BABF" }}>나의 일정</MainText>
-					<MainText onPress={() => navigation.navigate('Coop_Main')}style={{ marginLeft: 20 }}>협업 일정</MainText>
+					<MainText onPress={() => navigation.navigate('Coop_Main')} style={{ marginLeft: 20 }}>협업 일정</MainText>
 				</BarContainer>
 				<Bar />
 				<Bar_Mini />
 
 				<ScrollView >
 					<MainView>
-						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
-						<images.calendar width={20} height={20}
-						color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
-						onPress={() => setClicked_calendar(!clicked_calendar)} />
-						<images.share width={20} height={20}
-						color={clicked_share ? currentTheme.color1 : "#B7BABF"}
+						<HorisontalView style={{ justifyContent: 'space-between', padding: 20 }}>
+							<images.calendar width={20} height={20}
+								color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => setClicked_calendar(!clicked_calendar)} />
+							<images.share width={20} height={20}
+								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
 								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
 
@@ -295,13 +345,14 @@ function Coop({ }) {
 							<>
 								<Calendar
 									onDayPress={onDayPress}
+									markedDates={markedDates}
 								/>
 							</>
 						)}
 						
 						<MainText style={{ fontSize: 15, textAlign: 'center', paddingBottom: 10 }}>{teamId.teamTitle}</MainText>
 
-						<View style={{flexDirection: 'row', alignSelf: 'center', alignItems: 'center'}}>
+						<View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
 							{teamMembers.map((member, index) => (
 								<View key={index} style={{ alignItems: 'center', marginRight: 10 }}>
 									<Image
@@ -333,37 +384,66 @@ function Coop({ }) {
 
 						<ScheduleTimeTable schedule={schedule} currentTheme={currentTheme} />
 
-						<TouchableOpacity onPress={() => setIsModalVisible(true)} style={{margin: 10}}>
-          <Text style={{color: currentTheme.color1}}>일정 보기</Text>
-        </TouchableOpacity>
+						<HorisontalView style={{ justifyContent: 'space-between' }}>
+							<TouchableOpacity onPress={() => setIsModalVisible(true)} style={{ margin: 10 }}>
+								<Text style={{ color: currentTheme.color1 }}>일정 보기</Text>
+							</TouchableOpacity>
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isModalVisible}
-          onRequestClose={() => {
-            setIsModalVisible(!isModalVisible);
-          }}
-        >
-          <ModalView>
-            <ScrollView>
-              <ScheduleInfoList todos={todos} />
-            </ScrollView>
-            <TouchableOpacity
-              onPress={() => setIsModalVisible(!isModalVisible)}
-              style={{marginTop: 20, alignSelf: 'center'}}
-            >
-              <Text>닫기</Text>
-            </TouchableOpacity>
-          </ModalView>
-        </Modal>
+							<Modal
+								animationType="slide"
+								transparent={true}
+								visible={isModalVisible}
+								onRequestClose={() => {
+									setIsModalVisible(!isModalVisible);
+								}}
+							>
+								<ModalView>
+									<ScrollView>
+										<ScheduleInfoList todos={todos} />
+									</ScrollView>
+									<TouchableOpacity
+										onPress={() => setIsModalVisible(!isModalVisible)}
+										style={{ marginTop: 20, alignSelf: 'center' }}
+									>
+										<Text>닫기</Text>
+									</TouchableOpacity>
+								</ModalView>
+							</Modal>
+
+							<TouchableOpacity
+								style={{
+									backgroundColor: clicked_memo ? currentTheme.color1 : "#333333",
+									width: 45,
+									height: 45,
+									borderRadius: 100,
+									alignItems: 'center',
+									justifyContent: 'center',
+									borderColor: "#ffffff",
+									borderWidth: 2,
+									marginTop: -35
+								}}
+								onPress={() => {
+									setClicked_memo(!clicked_memo);
+									fetchTeamMemo();
+									setIsMemoModalVisible(true);
+								}}
+								>
+								<images.team_memo width={20} height={20} color={clicked_memo ? "white" : "#B7BABF"} />
+							</TouchableOpacity>
+
+							<MemoModal
+							isVisible={isMemoModalVisible}
+								onClose={() => { setIsMemoModalVisible(false); setClicked_memo(!clicked_memo); }}
+							memoContent={memoContent}
+							/>
+						</HorisontalView>
+						
 					</MainView>
 				</ScrollView>
 			</FullView>
 			<Navigation_Bar />
 		</ThemeProvider>
 	);
-
 }
 
 
@@ -491,5 +571,33 @@ const ScheduleInfoText = styled.Text`
   font-size: 12px;
   line-height: 18px;
 `;
+
+const styles = StyleSheet.create({
+	modalContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+	},
+	modalContent: {
+		width: '90%',
+		backgroundColor: '#EEEFF0',
+		borderRadius: 20,
+		padding: 20,
+		alignItems: 'center',
+	},
+	modalHeader: {
+		width: '100%',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	modalTitle: {
+		fontSize: 13,
+		fontWeight: 'bold',
+	},
+	closeButton: {
+	},
+});
 
 export default Coop;
