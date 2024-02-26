@@ -8,7 +8,10 @@ import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -89,6 +92,12 @@ public class TeamController {
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
         entity.setTeamId(teamId);
+        if (entity.getTeamTodoDate() == null){
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String formatedNow = now.format(formatter);
+            entity.setTeamTodoDate(String.valueOf(formatedNow));
+        }
         List<TeamTodo> teamTodoEntity = teamService.createTeamTodo(entity);
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
         return ResponseEntity.ok().build();
