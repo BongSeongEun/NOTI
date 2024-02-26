@@ -2,6 +2,7 @@ package hello.hellospring.controller;
 
 import hello.hellospring.dto.*;
 import hello.hellospring.model.*;
+import hello.hellospring.repository.TeamTogetherRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ public class TeamController {
     TeamService teamService;
     @Autowired
     TodoRepository todoRepository;
+    @Autowired
+    TeamTogetherRepository teamTogetherRepository;
 
     // 특정 사용자의 팀 목록 조회
     @GetMapping("/getTeam/{userId}")
@@ -73,6 +76,12 @@ public class TeamController {
         List<TeamTogetherDTO> dtosss = makeTeamTogetherDtoListFromEntityList(teamTogetherEntity);
 
         return ResponseEntity.ok().body(dtos);
+    }
+
+    @GetMapping("/getTeamInfo/{teamId}")
+    public ResponseEntity<?> getTeamInfo(@PathVariable String teamId){
+        List<TeamTogether> entity = teamTogetherRepository.findByTeamId(teamId);
+        return ResponseEntity.ok().body(entity.get(0).getTeamTitle());
     }
 
     // 팀에 새로운 Todo를 추가
