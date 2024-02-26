@@ -35,6 +35,9 @@ function Coop_Main({ onSelectTeam }) {
 	const [outClicked, setOutClicked] = useState({});
 	const [selectedTeamId, setSelectedTeamId] = useState(null);
 	const [teamTodos, setTeamTodos] = useState([]);
+	const [teamTitle, setTeamTitle] = useState("");
+	const [teamInfo, setTeamInfo] = useState(null);
+	const [searchedTeam, setSearchedTeam] = useState(null);
 
 	const host = "192.168.30.197";
 
@@ -192,6 +195,37 @@ function Coop_Main({ onSelectTeam }) {
 		}
 	};
 
+	const fetchTeamInfo = async () => {
+		try {
+			const response = await axios.get(`http://${host}:4000/api/v1/getTeamInfo/${inputTeamLink}`);
+			if (response.status === 200 && response.data) {
+				setSearchedTeam(response.data.teamTitle);
+			} else {
+				setSearchedTeam(null);
+			}
+		} catch (error) {
+			console.error("팀 정보를 가져오는데 실패했습니다:", error);
+			setSearchedTeam(null);
+		}
+	};
+
+	const handleEnterTeam = async () => {
+		const userId = getUserIdFromToken(token);
+		if (searchedTeam && userId) {
+			try {
+				const response = await axios.post(`http://${host}:4000/api/v1/enterTeam/${userId}/${searchedTeam.teamId}`);
+				if (response.status === 200) {
+					console.log("팀에 성공적으로 추가되었습니다.");
+					setSearchedTeam(null); 
+					setInputTeamLink(''); 
+					fetchTeams(); 
+				}
+			} catch (error) {
+				console.error("팀에 사용자를 추가하는데 실패했습니다:", error);
+			}
+		}
+	};
+
     return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
@@ -249,7 +283,7 @@ function Coop_Main({ onSelectTeam }) {
 										marginBottom: 20,
 									}}>
 										<images.team_search width={15} height={15}
-											style={{ margin: 10 }} />
+											style={{ margin: 10 }} onPress={() => fetchTeamInfo()} />
 										<TextInput
 											placeholder="팀 협업 링크 또는 태그 입력"
 											value={inputTeamLink}
@@ -257,6 +291,8 @@ function Coop_Main({ onSelectTeam }) {
 											style={{fontSize: 10}}
 										/>
 									</TouchableOpacity>
+
+									<Text>{searchedTeam}</Text>
 
 									<TouchableOpacity onPress={() => {
 										set_TeamAddModalVisible(!modal_TeamAddVisible);

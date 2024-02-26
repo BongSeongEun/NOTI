@@ -31,6 +31,11 @@ function Diary_Main({ }) {
     const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
+	const [clicked_calendar, setClicked_calendar] = useState(false);
+	const [clicked_share, setClicked_share] = useState(false);
+	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+	const [diaries, setDiaries] = useState([]);
+
 	const host = "192.168.30.197";
 
     useEffect(() => {
@@ -74,182 +79,126 @@ function Diary_Main({ }) {
             console.error('Error decoding token:', error);
             return null;
         }
-    };
-	const name = "홍길동";
-
-	const currentDate = new Date();
-	const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토']
-	const dayOfWeek = daysOfWeek[currentDate.getDay()];
-	const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
-
-	const [clicked_calendar, setClicked_calendar] = useState(false);
-	const [clicked_share, setClicked_share] = useState(false);
-	const [selectedPost, setSelectedPost] = useState(null);
-	//const [clicked_DiaryFrame, setClicked_DiaryFrame] = useState(false);
-
-	const posts = [
-		{
-		  id: 1,
-		  title: "하루 일기",
-		  contents: "내용입니다.",
-		  date: "2024-02-10",
-		},
-		{
-		  id: 2,
-		  title: "하루 일기",
-		  contents: "내용입니다.",
-		  date: "2024-02-12",
-		},
-		{
-			id: 3,
-			title: "하루 일기",
-			contents: "날씨는 토요일, 이태원에서 고등학교 친구인 나현이와 2시에 만남을 가졌다. \n 우리는 먼저 삼겹살집으로 향했다. 고등학교 시절의 추억을 떠올리며 삼겹살과 함께 한 잔의 소주는 정말 최고였다. 맛있는 음식과 함께 나눈 대화는 시간이 어떻게 흘렀는지 모를 만큼 즐거웠다. \n 1차에서는 끝나지 않고, 우린 2차로 소고기전골집을 향했다. 뜨끈한 소고기전골과 함께 한 잔의 소주는 특별한 순간으로 기억될 것이다. 시간 가는 줄 모르고 먹고 마시다 보니 막차를 놓치고 나현이네 집으로 향하게 되었다. \n 나현이네 집에서는 고등학교 시절의 추억을 떠올리며 웃음 속에 취해서 잠이 들었다. 그리고 다음날, 주말은 술과 함께 흐르고 말았다. \n 그리고 주말의 끝에는 현실이 다가왔다. 새로 시작된 알고리즘 계절학기 수업은 예상치 못한 어려움과 함께 찾아왔다. 수업은 지루하고 힘들게 느껴졌다. 나현이와의 즐거운 주말이 떠올라 더욱 힘든 상황이었다. \n 하지만, 이 모든 어려움도 언젠가는 극복될 것이다. 즐거운 순간들을 떠올리며 앞으로의 도전에 기대를 갖고 살아가야겠다.",
-			date: "2024-02-13",
-		},
-	];
-	const markedDates = posts.reduce((acc, current) => {
-		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
-		acc[formattedDate] = {marked: true};
-		return acc;
-	}, {});
-	
-	const [selectedDate, setSelectedDate] = useState(
-		format(new Date(), "yyyy-MM-dd"),
-	);
-	const markedSelectedDates = {
-		...markedDates,
-		[selectedDate]: {
-			selected: true,
-			marked: markedDates[selectedDate]?.marked,
-		}
 	};
 
-	const DiaryFrame = ({ diaryId }) => {
-		const post = posts.find(p => p.id === diaryId);
-	
+	useEffect(() => {
+		let isMounted = true;
+	  
+		const fetchDiaries = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (token && isMounted) {
+				const userId = getUserIdFromToken(token);
+				try {
+					const response = await axios.get(`http://${host}:4000/api/v2/diarylist/${userId}`, {
+						headers: { 'Authorization': `Bearer ${token}` },
+					});
+					if (response.status === 200 && response.data) {
+						setDiaries(response.data);
+					}
+				} catch (error) {
+					console.error("Error fetching diaries:", error);
+				}
+			}
+		};
+		fetchDiaries();
+	  
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	const DiaryFrame = ({ diary }) => {
+		const diaryDate = new Date(diary.diaryDate);
+		const isValidDate = !isNaN(diaryDate);
+	  
 		return (
 			<DiaryContainer>
-				<Diary_Frame>
-					<MainText style={{top: 10, color: currentTheme.color1, alignSelf: 'center' }}>
-						{post.date}
-					</MainText>
-					<MainText style={{top: 10, alignSelf: 'center' }}>
-						{post.title}
-					</MainText>
+				<Diary_Frame onPress={() => {
+					navigation.navigate("DiaryDetail", { diaryId: diary.diaryId });
+				}}>
+					{isValidDate && (
+						<MainText style={{ top: 10, color: currentTheme.color1, alignSelf: 'center' }}>
+							{format(diaryDate, "yyyy.MM.dd")}
+						</MainText>
+					)}
 					<DiaryText style={{ top: 20, left: 10, marginRight: 20 }}>
-						{truncateText(post.contents)}
+						{diary.diaryContent}
 					</DiaryText>
-					<DiaryText style={{ top: 10, left: 10, color: '#B7BABF', marginRight: 20 }}>
-						더보기...
-					</DiaryText>
-
-					<Diary_Image style={{top: 30, alignSelf: 'center' }}/>
 				</Diary_Frame>
-		  </DiaryContainer>
+			</DiaryContainer>
 		);
 	};
+	  
 
-	const truncateText = (text) => {
-		const lines = text.split('\n');
-		const maxLines = 8;
-		const maxCharacters = 250;
-	  
-		let truncatedText = '';
-	  
-		for (let i = 0; i < lines.length && i < maxLines; i++) {
-		  if (truncatedText.length + lines[i].length > maxCharacters) {
-			truncatedText += lines[i].substring(0,  truncatedText.length) + '...';
-			break;
-		  } else {
-			truncatedText += lines[i] + '\n';
-		  }
-		}
-		return truncatedText.trim();
+	const formatDate = date => {
+		const d = new Date(date);
+		const year = d.getFullYear();
+		const month = `0${d.getMonth() + 1}`.slice(-2);
+		const day = `0${d.getDate()}`.slice(-2);
+		return `${year}.${month}.${day}`;
 	};
-	  
+
+	const markedDates = {
+		[selectedDate]: {
+			selected: true,
+			selectedColor: currentTheme.color1,
+		}
+	};
+
+	const onDayPress = day => {
+		setSelectedDate(day.dateString);
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
 				<MainView>
-				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
+					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
 						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
-								{format(new Date(selectedDate), "yyyy.MM.dd")} 노티입니다!
+								{formatDate(new Date(), "yyyy.MM.dd")} 노티입니다!
 							</MainText>
 						</ProfileTextContainer>
 					</HorisontalView>
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1, marginBottom: 80}}>
+			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<Bar />
 
 				<ScrollView>
 					<MainView>
-						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
+						<HorisontalView style={{ justifyContent: 'space-between', padding: 20 }}>
 							<images.calendar width={20} height={20}
-							color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
-							onPress={() => setClicked_calendar(!clicked_calendar)} />
+								color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => setClicked_calendar(!clicked_calendar)} />
 							<images.share width={20} height={20}
-							color={clicked_share ? currentTheme.color1 : "#B7BABF"}
-									onPress={() => setClicked_share(!clicked_share)} />
+								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
 
 						{clicked_calendar && (
 							<>
 								<Calendar
-									markedDates={markedSelectedDates}
-									theme={{
-										selectedDayBackgroundColor: currentTheme.color1,
-										arrowColor: currentTheme.color1,
-										dotColor: currentTheme.color1,
-										todayTextColor: currentTheme.color1,
-									}}
-									onDayPress={(day) => {
-										setSelectedDate(day.dateString);
-										const selectedPost = posts.find(
-											(post) => format(new Date(post.date), 'yyyy-MM-dd') === day.dateString
-										);
-										setSelectedPost(selectedPost);
-										if (selectedPost) {
-											navigation.navigate("Diary", {
-												selectedTheme: currentTheme,
-												diaryData: {
-													date: selectedPost.date,
-													title: selectedPost.title,
-													contents: selectedPost.contents,
-												},
-											});
-										}
-									}}
+									onDayPress={onDayPress}
+									markedDates={markedDates}
 								/>
 							</>
 						)}
 
-						{posts.sort((a, b) => b.id - a.id).map(post => (
+						{diaries.sort((a, b) => new Date(b.diaryDate) - new Date(a.diaryDate)).map(diary => (
 							<DiaryFrame
-								key={post.id}
-								diaryId={post.id}
-								onPress={() => {
-									navigation.navigate("Diary", {
-									selectedTheme: currentTheme,
-									diaryData: {
-									date: post.date,
-									title: post.title,
-									contents: post.contents,
-									},
-								});
-								}}
+								key={diary.diaryId}
+								diary={diary}
 							/>
 						))}
 					</MainView>
 				</ScrollView>
 			</FullView>
 			<Navigation_Bar />
-		</ThemeProvider>	
+		</ThemeProvider>
 	);
 }
 
