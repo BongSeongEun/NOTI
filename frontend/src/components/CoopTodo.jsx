@@ -223,6 +223,17 @@ const ButtonContainer = styled.div`
   width: 100%; // 부모 컨테이너의 너비가 정의되어야 합니다.
 `;
 
+// 삭제 버튼 스타일 컴포넌트
+const DeleteScheduleButton = styled.button`
+  font-weight: bolder;
+  width: 20px;
+  padding: 0px;
+  font-size: 100%;
+  color: red;
+  border: none;
+  background-color: white;
+`;
+
 function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token");
@@ -610,7 +621,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      closeMySchedulesModal(); // 요청 성공 시 모달 닫기
+      // closeMySchedulesModal(); // 요청 성공 시 모달 닫기
       onTodoChange(); // 부모 컴포넌트에서 데이터를 새로고침
     } catch (error) {
       console.error("Failed to input schedule:", error);
@@ -805,6 +816,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                     // 이미 추가된 일정에는 특정 스타일을 적용
                     const itemStyle = isAdded
                       ? {
+                          marginLeft: "10px",
                           opacity: "0.5",
                           textDecoration: "line-through",
                           pointerEvents: "none",
@@ -813,26 +825,40 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                       : {};
 
                     return (
-                      <ScheduleItem key={scheduleItem.todoId} style={itemStyle}>
-                        <div>
-                          {isAdded && (
-                            <button
-                              onClick={() =>
-                                handleDeleteSchedule(scheduleItem.todoId)
-                              }
-                            >
-                              {" "}
-                              -{" "}
-                            </button>
-                          )}
-                          {scheduleItem.todoTitle}
-                        </div>{" "}
-                        {/* Title */}
-                        <div>
-                          {scheduleItem.todoStartTime} {/* Start Time */}
-                          {scheduleItem.todoEndTime &&
-                            `~ ${scheduleItem.todoEndTime}`}{" "}
-                          {/* End Time, if available */}
+                      <ScheduleItem
+                        key={scheduleItem.todoId}
+                        onClick={() =>
+                          !isAdded
+                            ? handleSelectSchedule(scheduleItem.todoId)
+                            : null
+                        }
+                      >
+                        {/* 삭제 버튼을 조건부로 렌더링 */}
+                        {isAdded && (
+                          <DeleteScheduleButton
+                            onClick={e => {
+                              e.stopPropagation(); // 부모 요소로의 이벤트 전파를 방지
+                              handleDeleteSchedule(scheduleItem.todoId);
+                            }}
+                          >
+                            —
+                          </DeleteScheduleButton>
+                        )}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexGrow: 1,
+                            ...itemStyle,
+                          }}
+                        >
+                          <div>{scheduleItem.todoTitle}</div> {/* Title */}
+                          <div>
+                            {scheduleItem.todoStartTime} {/* Start Time */}
+                            {scheduleItem.todoEndTime &&
+                              `~ ${scheduleItem.todoEndTime}`}{" "}
+                            {/* End Time, if available */}
+                          </div>
                         </div>
                       </ScheduleItem>
                     );
