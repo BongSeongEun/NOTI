@@ -850,6 +850,8 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                             alignItems: "center",
                             flexGrow: 1,
                             ...itemStyle,
+                            justifyContent: "space-between",
+                            width: "100%",
                           }}
                         >
                           <div>{scheduleItem.todoTitle}</div> {/* Title */}
