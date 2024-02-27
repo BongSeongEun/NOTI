@@ -5,20 +5,14 @@ import hello.hellospring.model.Chat;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
-import hello.hellospring.service.AI.GptDiaryService;
-import hello.hellospring.service.AI.GptService;
-import hello.hellospring.service.AI.GptTodoService;
-import hello.hellospring.service.AI.NlpService;
+import hello.hellospring.service.AI.*;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 public class GptController {
@@ -29,11 +23,12 @@ public class GptController {
     private final GptTodoService gptTodoService; // todo인지 아닌지 분류
     private final NlpService nlpService; // nlp기능 사용
     private final TodoRepository todoRepository; // todo 저장용
+    private final GptFinishService gptFinishService; // 이제 대답용 메시지인지
 
 
 
     @Autowired
-    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService, GptTodoService gptTodoService, NlpService nlpService, TodoRepository todoRepository) {
+    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService, GptTodoService gptTodoService, NlpService nlpService, TodoRepository todoRepository, GptFinishService gptFinishService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -41,17 +36,17 @@ public class GptController {
         this.gptTodoService = gptTodoService;
         this.nlpService = nlpService;
         this.todoRepository = todoRepository;
+        this.gptFinishService = gptFinishService;
     }
 
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
-        //Long userId = Long.parseLong(request.get("user_id")); // userId 입력받음
         String userMessage = request.get("chatContent"); // chat_content 입력받음
-        //boolean chatRole = Boolean.parseBoolean(request.get("chat_role")); // chat_role 입력받음
 
         try {
             boolean gptTodo = Boolean.parseBoolean(gptTodoService.askGpt(userMessage, userId));
             String chatEvent = null;
+            boolean gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
 
             // gptTodo가 true일 경우, nlpService 호출
             String eventsString = null;
@@ -79,8 +74,43 @@ public class GptController {
                 timesString = String.join(", ", nlpTimes);
             }
 
+
+            if (gptFinish){ // todo완료했다는 대답인지 검증
+                Chat recentTodoFinishChat = chatRepository.
+                        findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                        .orElse(null);
+                if (recentTodoFinishChat != null){
+                    String finishedTodo =  recentTodoFinishChat.getChatContent()
+                            .replace("를 달성하셨나요?","");
+
+                    // 오늘 날짜를 2024.02.26 형식으로 포맷
+                    LocalDate today = LocalDate.now();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                    String formattedToday = today.format(formatter);
+
+                    System.out.println(formattedToday);
+                    System.out.println(finishedTodo);
+
+                    // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
+//                    int updatedCount = todoRepository.
+//                            updateTodoDoneByUserIdAndTodoDateAndTodoTitle
+//                                    (userId, LocalDate.parse(formattedToday, formatter), finishedTodo);
+//                    if (updatedCount > 0) {
+//                        System.out.println("Todo 완료 상태로 업데이트 되었습니다.");
+//                    } else {
+//                        System.out.println("업데이트할 Todo가 없습니다.");
+//                    }
+                } else {
+                    System.out.println("todo 완료에 대한 최근 대화가 없어요!");
+                    // 여기도 로직 수정해야됨
+                }
+            } else {
+                System.out.println("이 메시지는 todo 완료와 관련된 내용이 아니에요!");
+            }
+
+
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
-            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, eventsString, timesString, false, false);
+            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, eventsString, timesString, false, gptFinish);
             Chat initialChat = Chat.toSaveEntity(initialChatDTO);
             chatRepository.save(initialChat);
 
