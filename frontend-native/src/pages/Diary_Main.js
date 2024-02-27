@@ -12,6 +12,7 @@ import {
 	View,
 	ScrollView,
 	TouchableOpacity,
+	Alert,
 } from "react-native";
 import { useNavigation, } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,7 +38,7 @@ function Diary_Main({ }) {
 	const [diaries, setDiaries] = useState([]);
 
 	const host = "192.168.30.197";
-
+	
     useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');
@@ -168,7 +169,6 @@ function Diary_Main({ }) {
 			</DiaryContainer>
 		);
 	};
-	  
 
 	const formatDate = date => {
 		const d = new Date(date);
@@ -187,6 +187,16 @@ function Diary_Main({ }) {
 
 	const onDayPress = day => {
 		setSelectedDate(day.dateString);
+		const selectedDiary = diaries.find(diary => {
+			const formattedDiaryDate = diary.diaryDate.replace(/\./g, '-');
+			return formattedDiaryDate === day.dateString;
+		});
+	
+		if (selectedDiary) {
+			navigation.navigate("Diary", { diaryId: selectedDiary.diaryId });
+		} else {
+			Alert.alert("선택한 날짜에 해당하는 일기가 없습니다.");
+		}
 	};
 
 	return (
@@ -194,11 +204,11 @@ function Diary_Main({ }) {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
+						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
-								{formatDate(new Date(selectedDate), "yyyy.MM.dd")} 노티입니다!
+								{formatDate(new Date(selectedDate), "yyyy.MM.dd")} 일기입니다!
 							</MainText>
 						</ProfileTextContainer>
 					</HorisontalView>

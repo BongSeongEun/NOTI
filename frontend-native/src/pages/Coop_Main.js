@@ -231,11 +231,11 @@ function Coop_Main({ onSelectTeam }) {
 			<FullView>
 				<MainView>
 				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
-						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
+						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
-								{formatDate(new Date(), "yyyy.MM.dd")} 노티입니다!
+								{formatDate(new Date(), "yyyy.MM.dd")} 팀 노티입니다!
 							</MainText>
 						</ProfileTextContainer>
 					</HorisontalView>

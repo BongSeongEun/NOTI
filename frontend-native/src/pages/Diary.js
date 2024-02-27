@@ -9,10 +9,10 @@ import {
 	ScrollView,
 	Text,
 	Modal,
+	Alert,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
 import { decode } from 'base-64';
 import axios from 'axios';
@@ -33,11 +33,10 @@ function Diary() {
 	const [clicked_modify, setClicked_modify] = useState(false);
 	const [clicked_delete, setClicked_delete] = useState(false);
 	const [modal_DeleteVisible, set_DeleteModalVisible] = useState(false);
-	const [clicked_calendar, setClicked_calendar] = useState(false);
-	const [clicked_share, setClicked_share] = useState(false);
-	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaryTitle, setDiaryTitle] = useState('');
-    const [diaryContent, setDiaryContent] = useState('');
+	const [diaryContent, setDiaryContent] = useState('');
+	const [diaryDate, setDiaryDate] = useState(format(new Date(), "yyyy-MM-dd"));
+	const [diaryImg, setDiaryImg] = useState('');
 	
 	const host = "192.168.30.197";
 
@@ -95,7 +94,9 @@ function Diary() {
 					});
 					if (response.data) {
                         setDiaryTitle(response.data.diaryTitle);
-                        setDiaryContent(response.data.diaryContent);
+						setDiaryContent(response.data.diaryContent);
+						setDiaryDate(response.data.diaryDate);
+						setDiaryImg(response.data.diaryImg);
                     }
                 } catch (error) {
                     console.error("Error fetching diary detail:", error);
@@ -104,25 +105,29 @@ function Diary() {
         };
 
         fetchDiaryDetail();
-    }, []);
+    }, [diaryId]);
 
-	const formatDate = date => {
-		const d = new Date(date);
-		const year = d.getFullYear();
-		const month = `0${d.getMonth() + 1}`.slice(-2);
-		const day = `0${d.getDate()}`.slice(-2);
-		return `${year}.${month}.${day}`;
-	};
-
-	const markedDates = {
-		[selectedDate]: {
-			selected: true,
-			selectedColor: currentTheme.color1,
-		},
-	};
-
-	const onDayPress = day => {
-		setSelectedDate(day.dateString);
+	const deleteDiary = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			try {
+				const userId = getUserIdFromToken(token);
+				console.log(userId);
+				await axios.delete(`http://${host}:4000/api/v2/diaryDelete/${userId}/${diaryId}`, {
+					headers: { 'Authorization': `Bearer ${token}` },
+				});
+				Alert.alert("삭제 성공", "일기가 성공적으로 삭제되었습니다.", [
+					{
+						text: "확인", onPress: () => {
+							navigation.goBack();
+							navigation.navigate('Diary_Main', { refresh: true });
+						},
+					}]);
+			} catch (error) {
+				console.error("Error deleting diary:", error);
+				Alert.alert("삭제 실패", "일기 삭제 중 문제가 발생했습니다.");
+			}
+		}
 	};
 
 	return (
@@ -130,11 +135,11 @@ function Diary() {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={{ uri: `data:image/png;base64,${base64Image}` }} style={{ marginTop: 20 }} />
+						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
-								{formatDate(new Date(), "yyyy.MM.dd")} 노티입니다!
+								{diaryDate} 일기입니다!
 							</MainText>
 						</ProfileTextContainer>
 					</HorisontalView>
@@ -146,15 +151,6 @@ function Diary() {
 
 				<ScrollView>
 					<MainView>
-						<HorisontalView style={{ justifyContent: 'space-between', padding: 20 }}>
-							<images.calendar width={20} height={20}
-								color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => setClicked_calendar(!clicked_calendar)} />
-							<images.share width={20} height={20}
-								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => setClicked_share(!clicked_share)} />
-						</HorisontalView>
-
 						<HorisontalView style={{ justifyContent: 'flex-end', padding: 15 }}>
 							<images.diary_modify width={20} height={20}
 								color={clicked_modify ? currentTheme.color1 : "#B7BABF"}
@@ -168,17 +164,10 @@ function Diary() {
 								}} />
 						</HorisontalView>
 
-						{clicked_calendar && (
-							<>
-								<Calendar
-									onDayPress={onDayPress}
-									markedDates={markedDates}
-								/>
-							</>
-						)}
-
-						<Text style={{ fontSize: 24, fontWeight: 'bold', marginVertical: 10 }}>{diaryTitle}</Text>
-						<Text style={{ fontSize: 16, marginVertical: 5 }}>{diaryContent}</Text>
+						<Diary_TItle color={currentTheme.color1} style={{ marginTop: 5, fontSize: 12 }}>{diaryDate}</Diary_TItle>
+						<Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
+						<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
+						<Diary_Picture source={{ uri: diaryImg }} />
 
 						<Modal
 							animationType="slide"
@@ -193,6 +182,7 @@ function Diary() {
 											onPress={() => {
 												set_DeleteModalVisible(!modal_DeleteVisible);
 												setClicked_delete(false);
+												deleteDiary();
 											}}
 											style={{ backgroundColor: "#F2F3F5" }}
 										>
@@ -298,4 +288,23 @@ const Delete = styled.TouchableOpacity`
 	justify-content: center;
 	align-items: center;
 	margin: 20px;
+`;
+
+const Diary_TItle = styled.Text`
+	font-size: ${props => props.fontSize || "15px"};
+	text-align: center;
+	font-weight: bold;
+	color: ${props => props.color || "black"};
+`;
+
+const DiaryText = styled(MainText)`
+	font-size: 10px;
+	font-weight: normal;
+`;
+
+const Diary_Picture = styled.Image`
+	width: 280px;
+	height: 280px;
+	align-self: center;
+	border-radius: 15px;
 `;

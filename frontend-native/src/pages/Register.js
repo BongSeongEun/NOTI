@@ -46,6 +46,10 @@ const Register = () => {
 		fetchAndDecodeToken();
 	}, []);
 	
+	const prepareImageDataForServer = (imageData, imageType = 'jpeg') => {
+		const prefix = `data:image/${imageType};base64,`;
+		return `${prefix}${imageData}`;
+	};
 
 	const getUserIdFromToken = (token) => {
 		if (!token) {
@@ -115,34 +119,35 @@ const Register = () => {
 
 	const postUser = async () => {
 		try {
-		  const storedToken = await AsyncStorage.getItem('token');
-	  
-		  if (!storedToken) {
-			console.log('Token not found');
-			return;
-		  }
-	  
-		  const userId = getUserIdFromToken(storedToken);
-	  
-  			const response = await axios.put(`http://${host}:4000/api/v1/user/${userId}`, {
+			const storedToken = await AsyncStorage.getItem('token');
+		
+			if (!storedToken) {
+				console.log('Token not found');
+				return;
+			}
+		
+			const userId = getUserIdFromToken(storedToken);
+			const preparedImageData = prepareImageDataForServer(imageFile);
+		
+			const response = await axios.put(`http://${host}:4000/api/v1/user/${userId}`, {
 				userNickname: String(inputName),
-				userColor: String(selectedTheme), 
+				userColor: String(selectedTheme),
 				diaryTime: String(selectedDiaryTime),
 				muteStartTime: String(selectedStartTime),
 				muteEndTime: String(selectedEndTime),
-				userProfile: String(imageFile),
-		  }, {
-			headers: {
-			  'Authorization': `Bearer ${storedToken}`,
-			},
-		  });
-	  
-		  if (response.status === 200 || response.status === 201) {
-			await AsyncStorage.setItem('userTheme', String(selectedTheme));
-			navigation.navigate('Register_Success', { currentTheme: selectedTheme });
-		  }
+				userProfile: preparedImageData,
+			}, {
+				headers: {
+					'Authorization': `Bearer ${storedToken}`,
+				},
+			});
+		
+			if (response.status === 200 || response.status === 201) {
+				await AsyncStorage.setItem('userTheme', String(selectedTheme));
+				navigation.navigate('Register_Success', { currentTheme: selectedTheme });
+			}
 		} catch (error) {
-		  console.error('Error posting user data:', error);
+			console.error('Error posting user data:', error);
 		}
 	};
 	

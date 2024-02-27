@@ -69,7 +69,7 @@ function Register_Success() {
                     <RegularText>프로필 생성 완료!</RegularText>
                     <MainText>{userNickname} 님! 노티에 {'\n'} 오신 것을 환영해요</MainText>
                     <ProfileContainer>
-                        <Profile  source={{ uri: `data:image/png;base64,${base64Image}` }}
+                        <Profile  source={{ uri: base64Image }}
 						style={{ width: 130, height: 130, position: 'absolute', marginTop: 30 }} />
 						<DecoesSvg currentTheme={currentTheme}
 							style={{ position: 'absolute', marginRight: 10 }} />
