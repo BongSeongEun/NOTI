@@ -24,6 +24,7 @@ public class GptController {
     private final NlpService nlpService; // nlp기능 사용
     private final TodoRepository todoRepository; // todo 저장용
     private final GptFinishService gptFinishService; // 이제 대답용 메시지인지
+    private final GptFinishNlpService gptFinishNlpService; // todo 완료용 대답 nlp 분류
 
     @Autowired
     public GptController(GptService gptService,
@@ -32,7 +33,7 @@ public class GptController {
                          GptTodoService gptTodoService,
                          NlpService nlpService,
                          TodoRepository todoRepository,
-                         GptFinishService gptFinishService) {
+                         GptFinishService gptFinishService, GptFinishNlpService gptFinishNlpService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -41,15 +42,18 @@ public class GptController {
         this.nlpService = nlpService;
         this.todoRepository = todoRepository;
         this.gptFinishService = gptFinishService;
+        this.gptFinishNlpService = gptFinishNlpService;
     }
     @PostMapping("/api/v2/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         String userMessage = request.get("chatContent"); // chat_content 입력받음
 
+
         try {
             boolean gptTodo = Boolean.parseBoolean(gptTodoService.askGpt(userMessage, userId));
             String chatEvent = null;
-            boolean gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+            //boolean gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+            boolean gptFinish = false;
 
             // gptTodo가 true일 경우, nlpService 호출
             String eventsString = null;
@@ -75,14 +79,33 @@ public class GptController {
                 //대괄호 없이 출력되도록
                 eventsString = String.join(", ", nlpEvents);
                 timesString = String.join(", ", nlpTimes);
+            } else {
+                // gptTodo가 false 일때만 발동하고, 해당 메시지가 일정완료와 관련된 메시지인지 판단
+                gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
             }
 
-
+            String gptFinishNlp = null;
             if (gptFinish){ // todo완료했다는 대답인지 검증
+                gptFinishNlp = gptFinishNlpService.askNlp(userMessage, userId);
+                System.out.println("Todo 완료 질문의 return 결과입니다 : " + gptFinishNlp);
+
+                if (!"false".equals(gptFinishNlp)) {
+                    // string 값 잘 출력될때
+                } else {
+                    // false 출력될때
+                }
+
+
+
+
+
+
+
                 Chat recentTodoFinishChat = chatRepository.
                         findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
                         // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
                         .orElse(null);
+
                 if (recentTodoFinishChat != null){
                     String finishedTodo =  recentTodoFinishChat.getChatContent()
                             .replace("를 달성하셨나요?","");
@@ -99,8 +122,8 @@ public class GptController {
                     int updatedCount = todoRepository.
                             updateTodoDoneByUserIdAndTodoDateAndTodoTitle
                                     (userId, formattedToday, finishedTodo);
-                    // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
-                    // 그후 todoDone을 true로 바꿈
+                        // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
+                        // 그후 todoDone을 true로 바꿈
                     if (updatedCount > 0) {
                         System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
                     } else {

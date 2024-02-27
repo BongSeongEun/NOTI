@@ -14,17 +14,24 @@ import java.net.http.HttpResponse;
 
 @Service
 public class GptFinishNlpService {
+    // todo완료 채팅에 대해서 nlp 분류
+
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
     @Value("${openai.api.key.f}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askGpt(String userMessage, Long userId) throws Exception {
+    public String askNlp(String userMessage, Long userId) throws Exception {
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
-        messagesArray.put(new JSONObject().put("role", "system")
-                .put("content", "다음 메시지가 일정 완료 관련 메시지인지 분류해주세요"));
+        messagesArray
+                .put(new JSONObject().put("role", "system")
+                .put("content"
+                        , "~를 했어, ~완료했어 처럼 문장에서 끝말을 없애줘" +
+                                "예를 들어 라면먹기를 달성했어, 공부하기를 달성했어 는 라면먹기, 공부하기 이렇게 출력해주면 돼" +
+                                "만약, 운동하기랑 김밥먹기를 달성했어 이런식으로 여러개를 달성했으면 운동하기, 밥먹기 이런식으로 출력해주면 돼" +
+                                "만약, 응 달성했어, 했어 이런식으로 ~를 ~는 라는 (목적어) 내용이 없으면 false로 출력해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
@@ -54,14 +61,10 @@ public class GptFinishNlpService {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("이 질문은 Todo 완료입니까? : " + content);
+            //System.out.println("Todo 완료 질문의 return 결과입니다 : " + content);
 
-            if ("true".equalsIgnoreCase(content) || "false".equalsIgnoreCase(content)) {
-                return content;
-            } else {
-                // content가 "true" 또는 "false"가 아닌 경우 null 반환
-                return null;
-            }
+            return content;
+
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
