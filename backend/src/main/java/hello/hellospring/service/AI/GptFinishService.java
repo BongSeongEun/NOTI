@@ -65,7 +65,7 @@ public class GptFinishService {
                 return content;
             } else {
                 // content가 "true" 또는 "false"가 아닌 경우 null 반환
-                return null;
+                return "false";
             }
         } else {
             return "사용가능한 content가 아니에요!! :(";

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestController
 public class GptController {
@@ -254,6 +256,40 @@ public class GptController {
         //findByUserIdAndTodoDateAndTodoDone
 
         String compareTodoResult = gptCompareTodo.askGpt(userMessage, userId);
-        System.out.println(compareTodoResult);
+
+        if (compareTodoResult != null){
+            Pattern pattern = Pattern.compile("^(\\d+):");
+            Matcher matcher = pattern.matcher(compareTodoResult);
+
+            if (matcher.find()) {
+                // matcher.find()가 true를 반환하면, 패턴에 맞는 부분이 있다는 뜻이다.
+                // matcher.group(1)은 첫 번째 괄호(\d+)에 해당하는 부분, 즉 숫자 부분을 가져온다.
+                String numberString = matcher.group(1);
+
+                try {
+                    // String 타입의 number를 int로 변환
+                    long number = Long.parseLong(numberString);
+
+                    // findByTodoId 메소드가 int 타입의 id를 받는다고 가정하고 수정
+                    List<Todo> todos = todoRepository.findByTodoId(number);
+
+                    if (!todos.isEmpty()) {
+                        for (Todo todo : todos) {
+                            todo.setTodoDone(true);
+                            todoRepository.save(todo);
+                            System.out.println("todoId: " + number + " 업데이트 성공! :) ");
+                        }
+                    } else {
+                        System.out.println("todoId: " + number + " 해당하는 todoId는 존재하지 않아요.. :(");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("숫자 변환 오류: " + e.getMessage());
+                }
+            } else {
+                System.out.println("숫자를 찾을 수 없습니다.");
+            }
+        } else {
+            System.out.println("todo에 존재하지 않는 내용입니다!!");
+        }
     }
 }
