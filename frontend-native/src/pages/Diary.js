@@ -10,6 +10,7 @@ import {
 	Text,
 	Modal,
 	Alert,
+	TextInput,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,8 +38,39 @@ function Diary() {
 	const [diaryContent, setDiaryContent] = useState('');
 	const [diaryDate, setDiaryDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaryImg, setDiaryImg] = useState('');
+	const [isEditing, setIsEditing] = useState(false);
 	
 	const host = "192.168.30.197";
+
+	const toggleEdit = () => {
+		setIsEditing(!isEditing);
+	};
+
+	const saveChanges = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			try {
+				const userId = getUserIdFromToken(token);
+				await axios.put(`http://${host}:4000/api/v2/diaryUpdate/${userId}/${diaryId}`, {
+					diaryTitle,
+					diaryContent,
+					diaryImg,
+				}, {
+					headers: { 'Authorization': `Bearer ${token}` },
+				});
+				Alert.alert("저장 성공", "일기가 성공적으로 업데이트되었습니다.", [
+					{
+						text: "확인", onPress: () => {
+							setIsEditing(false);
+							setClicked_modify(!clicked_modify);
+						}
+					}]);
+			} catch (error) {
+				console.error("Error updating diary:", error);
+				Alert.alert("저장 실패", "일기 업데이트 중 문제가 발생했습니다.");
+			}
+		}
+	};
 
     useEffect(() => {
 		const fetchUserData = async () => {
@@ -149,24 +181,50 @@ function Diary() {
 				<ScrollView>
 					<MainView>
 						<HorisontalView style={{ justifyContent: 'flex-end', padding: 15 }}>
-							<images.diary_modify width={20} height={20}
-								color={clicked_modify ? currentTheme.color1 : "#B7BABF"}
-								style={{ marginRight: 10 }}
-								onPress={() => setClicked_modify(!clicked_modify)} />
-							<images.diary_delete width={20} height={20}
-								color={clicked_delete ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => {
-									setClicked_delete(!clicked_delete);
-									set_DeleteModalVisible(true);
-								}} />
+							{!isEditing ? (
+								<>
+									<images.diary_modify width={20} height={20}
+										color={clicked_modify ? currentTheme.color1 : "#B7BABF"}
+										style={{ marginRight: 10 }}
+										onPress={() => {
+											setClicked_modify(!clicked_modify);
+											toggleEdit();
+										}} />
+									<images.diary_delete width={20} height={20}
+										color={clicked_delete ? currentTheme.color1 : "#B7BABF"}
+										onPress={() => {
+											setClicked_delete(!clicked_delete);
+											set_DeleteModalVisible(true);
+										}} />
+								</>
+							) : (
+								<Text onPress={saveChanges} style={{ color: currentTheme.color1 }}>완료</Text>
+							)}
 						</HorisontalView>
 
-						<Diary_TItle color={currentTheme.color1} style={{ marginTop: 5, fontSize: 12 }}>{diaryDate}</Diary_TItle>
-						<Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
-						<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
-						{diaryImg ? (
-							<Diary_Picture source={{ uri: diaryImg }} />
-						) : null}
+						{!isEditing ? (
+							<>
+								<Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
+								<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
+								{diaryImg ? (
+									<Diary_Picture source={{ uri: diaryImg }} />
+								) : null}
+							</>
+						) : (
+							<>
+								<TextInput
+									value={diaryTitle}
+									onChangeText={setDiaryTitle}
+									style={{ margin: 10, fontSize: 20, borderBottomWidth: 1, borderColor: '#ccc' }}
+								/>
+								<TextInput
+									value={diaryContent}
+									onChangeText={setDiaryContent}
+									multiline
+									style={{ margin: 10, textAlignVertical: 'top', fontSize: 10, borderRadius: 15, }}
+								/>
+							</>
+						)}
 
 						<Modal
 							animationType="slide"
