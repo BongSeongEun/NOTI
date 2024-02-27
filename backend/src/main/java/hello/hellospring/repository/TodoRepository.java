@@ -24,10 +24,14 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
 
     List<Todo> findByTodoDateAndTodoEndTime(String format, String format1);
+    // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
 
     @Modifying
     @Transactional
     @Query("update Todo t set t.todoDone = true where t.userId = ?1 and t.todoDate = ?2 and t.todoTitle = ?3")
     int updateTodoDoneByUserIdAndTodoDateAndTodoTitle(Long userId, String parse, String finishedTodo);
+    // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
+
+    List<Todo> findByUserIdAndTodoDateAndTodoDone(Long userId, String formattedToday, boolean b);
     // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
 }

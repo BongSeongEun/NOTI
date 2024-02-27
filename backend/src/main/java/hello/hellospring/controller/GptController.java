@@ -25,6 +25,7 @@ public class GptController {
     private final TodoRepository todoRepository; // todo 저장용
     private final GptFinishService gptFinishService; // 이제 대답용 메시지인지
     private final GptFinishNlpService gptFinishNlpService; // todo 완료용 대답 nlp 분류
+    private final GptCompareTodo gptCompareTodo; // todo 완료용을 title과 비교
 
     @Autowired
     public GptController(GptService gptService,
@@ -33,7 +34,9 @@ public class GptController {
                          GptTodoService gptTodoService,
                          NlpService nlpService,
                          TodoRepository todoRepository,
-                         GptFinishService gptFinishService, GptFinishNlpService gptFinishNlpService) {
+                         GptFinishService gptFinishService,
+                         GptFinishNlpService gptFinishNlpService,
+                         GptCompareTodo gptCompareTodo) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -43,16 +46,15 @@ public class GptController {
         this.todoRepository = todoRepository;
         this.gptFinishService = gptFinishService;
         this.gptFinishNlpService = gptFinishNlpService;
+        this.gptCompareTodo = gptCompareTodo;
     }
-    @PostMapping("/api/v2/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
+    @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         String userMessage = request.get("chatContent"); // chat_content 입력받음
-
 
         try {
             boolean gptTodo = Boolean.parseBoolean(gptTodoService.askGpt(userMessage, userId));
             String chatEvent = null;
-            //boolean gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
             boolean gptFinish = false;
 
             // gptTodo가 true일 경우, nlpService 호출
@@ -89,60 +91,57 @@ public class GptController {
                 gptFinishNlp = gptFinishNlpService.askNlp(userMessage, userId);
                 System.out.println("Todo 완료 질문의 return 결과입니다 : " + gptFinishNlp);
 
-                if (!"false".equals(gptFinishNlp)) {
-                    // string 값 잘 출력될때
-                } else {
-                    // false 출력될때
-                }
+                if (!"false".equals(gptFinishNlp)) {                                          // string 값 잘 출력될때
 
+//                    List<String> gptFinishNlps = Arrays.asList(eventsString.split(","));
+//
+//                    for (int j = 0; j < gptFinishNlps.size(); j++){ // 갯수대로 todo title 비교
+//                        compareTodo(gptFinishNlps.get(j).trim(), userId);
+//                    }
+                    System.out.println("여기는 구현안했지롱");
 
+                } else {                                                                     // false 출력될때
+                    Chat recentTodoFinishChat = chatRepository.
+                            findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                            // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
+                            .orElse(null);
 
+                    if (recentTodoFinishChat != null){
+                        String finishedTodo =  recentTodoFinishChat.getChatContent()
+                                .replace("를 달성하셨나요?","");
 
+                        // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
+                        LocalDate today = LocalDate.now();
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                        String formattedToday = today.format(formatter);
 
+                        System.out.println(formattedToday);
+                        System.out.println(finishedTodo);
 
-
-                Chat recentTodoFinishChat = chatRepository.
-                        findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
-                        // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
-                        .orElse(null);
-
-                if (recentTodoFinishChat != null){
-                    String finishedTodo =  recentTodoFinishChat.getChatContent()
-                            .replace("를 달성하셨나요?","");
-
-                    // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
-                    LocalDate today = LocalDate.now();
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-                    String formattedToday = today.format(formatter);
-
-                    System.out.println(formattedToday);
-                    System.out.println(finishedTodo);
-
-                    // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
-                    int updatedCount = todoRepository.
-                            updateTodoDoneByUserIdAndTodoDateAndTodoTitle
-                                    (userId, formattedToday, finishedTodo);
+                        // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
+                        int updatedCount = todoRepository.
+                                updateTodoDoneByUserIdAndTodoDateAndTodoTitle
+                                        (userId, formattedToday, finishedTodo);
                         // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
                         // 그후 todoDone을 true로 바꿈
-                    if (updatedCount > 0) {
-                        System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
+                        if (updatedCount > 0) {
+                            System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
+                        } else {
+                            System.out.println("업데이트할 Todo가 없어요... :(");
+                        }
                     } else {
-                        System.out.println("업데이트할 Todo가 없어요... :(");
+                        System.out.println("todo 완료에 대한 최근 대화가 없어요!");
+                        // 여기도 로직 수정해야됨
                     }
-                } else {
-                    System.out.println("todo 완료에 대한 최근 대화가 없어요!");
-                    // 여기도 로직 수정해야됨
                 }
             } else {
                 System.out.println("이 메시지는 todo 완료와 관련된 내용이 아니에요!");
             }
 
-
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
             ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, eventsString, timesString, false, gptFinish);
             Chat initialChat = Chat.toSaveEntity(initialChatDTO);
             chatRepository.save(initialChat);
-
 
             if (eventsString != null){ // nlp 결과값 null인지 검증
                 List<String> works = Arrays.asList(eventsString.split(","));
@@ -193,13 +192,15 @@ public class GptController {
         }
     }
 
-    @GetMapping("/api/v2/chatlist/{userId}") // 채팅내역 가져오기
+
+
+    @GetMapping("/api/v3/chatlist/{userId}") // 채팅내역 가져오기
     public List<Chat> getChatListByUserId(@PathVariable Long userId) {
 
         return chatRepository.findByUserId(userId);
     }
 
-    @GetMapping("/api/v2/createDiary/{userId}") // 일기생성하기
+    @GetMapping("/api/v3/createDiary/{userId}") // 일기생성하기
     public String createDiary(@PathVariable Long userId){
         try {
             // userId에 해당하는 chatContent들로 일기 생성
@@ -249,4 +250,11 @@ public class GptController {
 
     }
 
+    //todo 완료 비교 함수
+    private void compareTodo(String userMessage, Long userId) throws Exception {
+        //findByUserIdAndTodoDateAndTodoDone
+
+        String compareTodoResult = gptCompareTodo.askGpt(userMessage, userId);
+        System.out.println(compareTodoResult);
+    }
 }
