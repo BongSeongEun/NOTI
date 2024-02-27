@@ -14,6 +14,8 @@ import java.net.http.HttpResponse;
 
 @Service
 public class GptFinishService {
+    // 해당 대화가 일정완료 했다는 gpt인지 true or false
+
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 

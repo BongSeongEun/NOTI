@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class GptTodoService {
+    // 이 메시지가 일정 관련인지 ture or false
+
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
