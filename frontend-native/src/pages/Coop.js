@@ -1,3 +1,4 @@
+/* eslint-disable quotes */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-trailing-spaces */
@@ -15,7 +16,6 @@ import { decode } from 'base-64';
 
 import { theme } from "../components/theme";
 import images from "../components/images";
-import NotiCheck from "../asset/noticheck.svg";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
@@ -420,7 +420,7 @@ function Coop({ }) {
 									justifyContent: 'center',
 									borderColor: "#ffffff",
 									borderWidth: 2,
-									marginTop: -35
+									marginTop: -35,
 								}}
 								onPress={() => {
 									setClicked_memo(!clicked_memo);
@@ -453,14 +453,6 @@ const ModalView = styled.View`
 	border-radius: 20px;
 	padding: 35px;
 	align-items: center;
-	shadow-color: #000;
-	shadow-offset: {
-		width: 0;
-		height: 2;
-	};
-	shadow-opacity: 0.25;
-	shadow-radius: 3.84px;
-	elevation: 5;
 `;
 
 const FullView = styled.View`

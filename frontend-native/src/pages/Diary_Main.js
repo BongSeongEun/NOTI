@@ -1,26 +1,24 @@
-/* eslint-disable quotes */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable quotes */
 
 import styled, { ThemeProvider } from "styled-components/native"
 
 import React, { useState, useEffect } from 'react';
 import {
 	View,
-	Text,
 	ScrollView,
-	StyleSheet,
 	TouchableOpacity,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
 import { decode } from 'base-64';
 import axios from 'axios';
-import { launchImageLibrary } from 'react-native-image-picker';
 
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
@@ -138,20 +136,20 @@ function Diary_Main({ }) {
 			);
 		};
 
-		const pictureHeight = !isExpanded && lineCount <= 8 ? 120 : 60;
-		const pictureTop = pictureHeight === 120 ? 160 : 220;
+		const pictureHeight = !isExpanded && lineCount <= 8 ? 110 : 60;
+		const pictureTop = pictureHeight === 110 ? 170 : 220;
 
 		return (
 			<DiaryContainer>
 				<Diary_Frame onPress={() => {
-					navigation.navigate("DiaryDetail", { diaryId: diary.diaryId });
+					navigation.navigate("Diary", { diaryId: diary.diaryId });
 				}}>
 					{isValidDate && (
 						<MainText style={{ top: 10, color: currentTheme.color1, alignSelf: 'center' }}>
 							{format(diaryDate, "yyyy.MM.dd")}
 						</MainText>
 					)}
-					<Diary_TItle color={currentTheme.color1} fontSize={12} style={{ marginTop: 5 }}>{diary.diaryDate}</Diary_TItle>
+					<Diary_TItle color={currentTheme.color1} style={{ marginTop: 5, fontSize: 12 }}>{diary.diaryDate}</Diary_TItle>
 					<Diary_TItle style={{ margin: 10 }}>{diary.diaryTitle}</Diary_TItle>
 					<TouchableOpacity style={{ width: 250, height: 1, backgroundColor: '#B7BABF', alignSelf: 'center' }} />
 					{renderContent(diary.diaryContent, isExpanded)}
@@ -184,7 +182,7 @@ function Diary_Main({ }) {
 		[selectedDate]: {
 			selected: true,
 			selectedColor: currentTheme.color1,
-		}
+		},
 	};
 
 	const onDayPress = day => {
@@ -200,7 +198,7 @@ function Diary_Main({ }) {
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
-								{formatDate(new Date(), "yyyy.MM.dd")} 노티입니다!
+								{formatDate(new Date(selectedDate), "yyyy.MM.dd")} 노티입니다!
 							</MainText>
 						</ProfileTextContainer>
 					</HorisontalView>
@@ -312,23 +310,10 @@ const Diary_Frame = styled.TouchableOpacity`
 	border-radius: 15px;
 `;
 
-const Diary_Image = styled.TouchableOpacity`
-	width: 260px;
-	height: 120px;
-	background-color: #B7BABF;
-	border-radius: 15px;
-`;
-
 const Diary_TItle = styled.Text`
 	font-size: ${props => props.fontSize || "15px"};
 	text-align: center;
 	font-weight: bold;
-	color: ${props => props.color || "black"};
-`;
-
-const Diary_contentsText = styled.Text`
-	font-size: ${props => props.fontSize || "10px"};
-	text-align: left;
 	color: ${props => props.color || "black"};
 `;
 
