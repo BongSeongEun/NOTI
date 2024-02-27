@@ -25,10 +25,14 @@ public class GptController {
     private final TodoRepository todoRepository; // todo 저장용
     private final GptFinishService gptFinishService; // 이제 대답용 메시지인지
 
-
-
     @Autowired
-    public GptController(GptService gptService, ChatRepository chatRepository, GptDiaryService gptDiaryService, GptTodoService gptTodoService, NlpService nlpService, TodoRepository todoRepository, GptFinishService gptFinishService) {
+    public GptController(GptService gptService,
+                         ChatRepository chatRepository,
+                         GptDiaryService gptDiaryService,
+                         GptTodoService gptTodoService,
+                         NlpService nlpService,
+                         TodoRepository todoRepository,
+                         GptFinishService gptFinishService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -78,12 +82,13 @@ public class GptController {
             if (gptFinish){ // todo완료했다는 대답인지 검증
                 Chat recentTodoFinishChat = chatRepository.
                         findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                        // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
                         .orElse(null);
                 if (recentTodoFinishChat != null){
                     String finishedTodo =  recentTodoFinishChat.getChatContent()
                             .replace("를 달성하셨나요?","");
 
-                    // 오늘 날짜를 2024.02.26 형식으로 포맷
+                    // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
                     LocalDate today = LocalDate.now();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
                     String formattedToday = today.format(formatter);
@@ -92,14 +97,16 @@ public class GptController {
                     System.out.println(finishedTodo);
 
                     // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
-//                    int updatedCount = todoRepository.
-//                            updateTodoDoneByUserIdAndTodoDateAndTodoTitle
-//                                    (userId, LocalDate.parse(formattedToday, formatter), finishedTodo);
-//                    if (updatedCount > 0) {
-//                        System.out.println("Todo 완료 상태로 업데이트 되었습니다.");
-//                    } else {
-//                        System.out.println("업데이트할 Todo가 없습니다.");
-//                    }
+                    int updatedCount = todoRepository.
+                            updateTodoDoneByUserIdAndTodoDateAndTodoTitle
+                                    (userId, formattedToday, finishedTodo);
+                    // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
+                    // 그후 todoDone을 true로 바꿈
+                    if (updatedCount > 0) {
+                        System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
+                    } else {
+                        System.out.println("업데이트할 Todo가 없어요... :(");
+                    }
                 } else {
                     System.out.println("todo 완료에 대한 최근 대화가 없어요!");
                     // 여기도 로직 수정해야됨
