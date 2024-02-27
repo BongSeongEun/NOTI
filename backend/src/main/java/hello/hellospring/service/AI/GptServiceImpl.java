@@ -28,7 +28,7 @@ public class GptServiceImpl implements GptDiaryService {
 
     private final ChatRepository chatRepository;
 
-    @Value("${openai.api.key}")
+    @Value("${openai.api.key.b}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
 

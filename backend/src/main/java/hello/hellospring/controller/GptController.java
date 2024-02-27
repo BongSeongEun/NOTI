@@ -80,7 +80,7 @@ public class GptController {
             }
 
             // 첫 번째 Chat 엔티티를 생성하고 데이터베이스에 저장 (클라이언트가 보낸 메시지)
-            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, eventsString, timesString);
+            ChatDTO initialChatDTO = new ChatDTO(null, userId, null, userMessage, false, gptTodo, eventsString, timesString, false, false);
             Chat initialChat = Chat.toSaveEntity(initialChatDTO);
             chatRepository.save(initialChat);
 
@@ -114,7 +114,7 @@ public class GptController {
             String gptResponse = gptService.askGpt(userMessage, userId);
 
             // GPT 응답을 새로운 Chat 엔티티의 chat_content로 설정하고 데이터베이스에 저장
-            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptResponse, true, false, null, null);
+            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptResponse, true, false, null, null, false, false);
             Chat responseChat = Chat.toSaveEntity(responseChatDTO);
             chatRepository.save(responseChat);
 
@@ -124,7 +124,7 @@ public class GptController {
         } catch (Exception e) {
             String gptError = "gpt채팅 오류가 났어요.. 다시 시도해주시겠어요?";
 
-            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptError, true, false, null, null);
+            ChatDTO responseChatDTO = new ChatDTO(null, userId, null, gptError, true, false, null, null, false, false);
             Chat responseChat = Chat.toSaveEntity(responseChatDTO);
             chatRepository.save(responseChat);
 

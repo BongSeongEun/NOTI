@@ -19,7 +19,7 @@ public class NlpService {
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
-    @Value("${openai.api.key}")
+    @Value("${openai.api.key.d}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
 
