@@ -2,14 +2,17 @@ package hello.hellospring.controller;
 
 import hello.hellospring.dto.*;
 import hello.hellospring.model.*;
+import hello.hellospring.repository.TeamTogetherRepository;
+import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Random;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -17,6 +20,10 @@ public class TeamController {
 
     @Autowired
     TeamService teamService;
+    @Autowired
+    TodoRepository todoRepository;
+    @Autowired
+    TeamTogetherRepository teamTogetherRepository;
 
     // 특정 사용자의 팀 목록 조회
     @GetMapping("/getTeam/{userId}")
@@ -74,11 +81,23 @@ public class TeamController {
         return ResponseEntity.ok().body(dtos);
     }
 
+    @GetMapping("/getTeamInfo/{teamId}")
+    public ResponseEntity<?> getTeamInfo(@PathVariable String teamId){
+        List<TeamTogether> entity = teamTogetherRepository.findByTeamId(teamId);
+        return ResponseEntity.ok().body(entity.get(0).getTeamTitle());
+    }
+
     // 팀에 새로운 Todo를 추가
     @PostMapping("/createTeamTodo/{teamId}")
     public ResponseEntity<?> createTeamTodo(@PathVariable String teamId, @RequestBody TeamTodoDTO teamTodoDTO){
         TeamTodo entity = TeamTodoDTO.toEntity(teamTodoDTO);
         entity.setTeamId(teamId);
+        if (entity.getTeamTodoDate() == null){
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String formatedNow = now.format(formatter);
+            entity.setTeamTodoDate(String.valueOf(formatedNow));
+        }
         List<TeamTodo> teamTodoEntity = teamService.createTeamTodo(entity);
         List<TeamTodoDTO> dtos = makeTeamTodoDtoListFromEntityList(teamTodoEntity);
         return ResponseEntity.ok().build();
@@ -116,9 +135,32 @@ public class TeamController {
     //팀에 들어가있는 개인 일정을 조회
     @GetMapping("/getSchedule/{teamId}")
     public ResponseEntity<?> getScheduleFromTeam(@PathVariable String teamId){
+        // 팀 ID에 해당하는 TeamSchedule 목록 조회
         List<TeamSchedule> entity = teamService.getSchedule(teamId);
-        List<TeamScheduleDTO> dtos = makeTeamScheduleDtoListFromEntiyList(entity);
-        return ResponseEntity.ok().body(dtos);
+
+        // TeamSchedule 정보와 Todo의 시작/종료 시간을 포함하는 DTO 목록 생성
+        List<Map<String, Object>> scheduleWithTodoTimes = new ArrayList<>();
+
+        for (TeamSchedule schedule : entity) {
+            // TeamSchedule에 저장된 todoId로 Todo 객체 조회
+            Todo todo = todoRepository.findById(schedule.getTodoId()).orElse(null);
+
+            if (todo != null) {
+                Map<String, Object> scheduleInfo = new HashMap<>();
+                scheduleInfo.put("teamScheduleId", schedule.getTeamScheduleId());
+                scheduleInfo.put("teamId", schedule.getTeamId());
+                scheduleInfo.put("todoId", schedule.getTodoId());
+                // Todo의 시작 시간과 종료 시간 추가
+                scheduleInfo.put("todoStartTime", todo.getTodoStartTime());
+                scheduleInfo.put("todoEndTime", todo.getTodoEndTime());
+                scheduleInfo.put("todoDate", todo.getTodoDate());
+
+                scheduleWithTodoTimes.add(scheduleInfo);
+            }
+        }
+
+        // 생성된 Map 목록을 JSON 형태로 클라이언트에 반환
+        return ResponseEntity.ok().body(scheduleWithTodoTimes);
     }
     //팀에 들어가있는 개인 일정을 삭제
     @DeleteMapping("/deleteSchedule/{teamId}/{todoId}")
