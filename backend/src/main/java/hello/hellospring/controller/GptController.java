@@ -286,7 +286,7 @@ public class GptController {
                     System.out.println("숫자 변환 오류: " + e.getMessage());
                 }
             } else {
-                System.out.println("숫자를 찾을 수 없습니다.");
+                System.out.println("숫자를 찾을 수 없습니다..ㅠㅠ");
             }
         } else {
             System.out.println("todo에 존재하지 않는 내용입니다!!");
