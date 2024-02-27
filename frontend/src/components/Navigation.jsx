@@ -13,8 +13,8 @@ const Nav = styled.nav`
   align-items: center;
   height: 80px;
   width: 100%;
-  justify-content: right;
-  padding-right: 40px;
+  justify-content: space-between; // 로고와 네비게이션 링크 사이의 공간을 균등하게 분배합니다.
+  /* padding: 0 40px; // 양쪽 여백을 줍니다. */
   position: fixed;
   background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
   z-index: 1;
@@ -93,9 +93,17 @@ const RightSidebar = styled.aside`
 `;
 
 const Logo = styled.img`
+  margin-left: 30px;
   height: 50px; // 로고 이미지의 높이 설정
   width: auto;
-  margin-right: 103rem;
+`;
+
+// NavLink 스타일을 Link 컴포넌트로 확장
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  margin: 0 1.1rem;
+  font-size: 17px;
+  color: white;
 `;
 
 const StyledCalendar = styled(Calendar)`
@@ -227,12 +235,12 @@ function Navigation({ setDate }) {
     <>
       <Nav>
         <Logo src={NOTI} alt="NOTI Logo" />
-        <NavLink>
-          <NavLink to={"/Todo"}>일정</NavLink>
-          <NavLink to={"/Todo"}>협업</NavLink>
-          <NavLink to={"/Todo"}>일기</NavLink>
-          <NavLink to={"/Todo"}>설정</NavLink>
-        </NavLink>
+        <div>
+          <StyledLink to="/Main">일정</StyledLink>
+          <StyledLink to="/Coop">협업</StyledLink>
+          <StyledLink to="/Diary">일기</StyledLink>
+          <StyledLink to="/Setting">설정</StyledLink>
+        </div>
         <LeftSidebar>
           <GreetingSection>
             <UserProfileImage src={base64Image || USER} alt="User Profile" />

@@ -234,11 +234,33 @@ const DeleteScheduleButton = styled.button`
   background-color: white;
 `;
 
+const ModalTitle = styled.div`
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+`;
+
+const ModalContent = styled.div`
+  margin-bottom: 1.5em;
+  font-size: 1em;
+`;
+
+// 복사 버튼
+const CopyButton = styled.button`
+  background-color: ${props => props.theme.color2 || theme.OrangeTheme.color1};
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+`;
+
 function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token");
   const [eventDate, setEventDate] = useState("");
   const [mySchedulesModalIsOpen, setMySchedulesModalIsOpen] = useState(false); // 내 일정 모달 상태
+  const [myTeamModalIsOpen, setMyTeamModalIsOpen] = useState(false); // 내 일정 모달 상태
   const [mySchedules, setMySchedules] = useState([]); // 사용자의 일정 목록
   const [teamSchedules, setTeamSchedules] = useState([]);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
@@ -599,15 +621,27 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       console.error("Failed to fetch my schedules:", error);
     }
   };
+
+  const fetchTeamId = async () => {};
+
   // 내 일정 추가 모달을 여는 함수
   const openMySchedulesModal = () => {
     fetchMySchedules(); // 모달을 열 때 사용자의 일정을 불러온다
     setMySchedulesModalIsOpen(true);
   };
 
+  const openShareModal = () => {
+    fetchTeamId();
+    setMyTeamModalIsOpen(true);
+  };
+
   // 내 일정 추가 모달을 닫는 함수
   const closeMySchedulesModal = () => {
     setMySchedulesModalIsOpen(false);
+  };
+
+  const closeMyTeamModal = () => {
+    setMyTeamModalIsOpen(false);
   };
 
   // 일정을 선택하고 TimeTable에 추가하는 함수
@@ -685,6 +719,15 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       fetchTodoStates();
     }
   }, [onTodoChange, selectedDate, mySchedulesModalIsOpen]);
+
+  const handleCopyClipBoard = text => {
+    try {
+      navigator.clipboard.writeText(text);
+      alert("클립보드에 복사되었습니다.");
+    } catch (error) {
+      alert("클립보드 복사에 실패하였습니다.");
+    }
+  };
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -792,6 +835,9 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
             <AddSchedulesButton onClick={openMySchedulesModal}>
               + add Schedules
             </AddSchedulesButton>
+            <AddSchedulesButton onClick={openShareModal}>
+              공유
+            </AddSchedulesButton>
           </ButtonContainer>
           <TextBox>{formatDate(selectedDate)}</TextBox>
           <div>
@@ -869,6 +915,25 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
               </ModalBackdrop>
             )}
             {/* 기존 TimeTable 및 기타 컴포넌트 렌더링 */}
+          </div>
+          <div>
+            {myTeamModalIsOpen && (
+              <ModalBackdrop onClick={closeMyTeamModal}>
+                <ModalContainer onClick={e => e.stopPropagation()}>
+                  <CloseButton
+                    onClick={closeMyTeamModal}
+                    style={{ border: "none", backgroundColor: "white" }}
+                  >
+                    x
+                  </CloseButton>
+                  <ModalTitle>팀 참여 코드를 공유해보세요!</ModalTitle>
+                  <ModalContent>참여 코드: {teamId}</ModalContent>
+                  <CopyButton onClick={() => handleCopyClipBoard(teamId)}>
+                    복사하기
+                  </CopyButton>
+                </ModalContainer>
+              </ModalBackdrop>
+            )}
           </div>
           <ScheduleTimeTable
             style={{ width: "300px", height: "450px", marginBottom: "5px" }}

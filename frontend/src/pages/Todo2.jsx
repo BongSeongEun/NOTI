@@ -171,7 +171,6 @@ const DateHeader = styled.div`
   color: black;
   border-bottom: 2px solid
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
-  margin-top: 130px;
 `;
 
 const Edit = styled.img`
@@ -519,7 +518,7 @@ function Todo2() {
       <NavBar setDate={setDate} />
 
       <div>
-        <DiaryContainer>
+        <DiaryContainer style={{ paddingTop: "170px" }}>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>
           <EventList>
             {/* 이 부분에서 날짜에 해당하는 일정들을 렌더링합니다.
@@ -567,69 +566,68 @@ function Todo2() {
           <AddEventButton onClick={openNewEventModal}>
             + 새 노티 만들기
           </AddEventButton>
-          {isModalOpen && (
-            <ModalBackdrop onClick={closeModal}>
-              <ModalContainer onClick={e => e.stopPropagation()}>
-                <CloseButton
-                  onClick={closeModal}
-                  style={{ border: "none", backgroundColor: "white" }}
-                >
-                  x
-                </CloseButton>
-                <DateHeader
-                  style={{
-                    borderBottom: `2px solid ${currentTheme[selectedColor]}`,
-                    fontSize: "20px",
-                    height: "30px",
-                  }}
-                >
-                  {formatDate(selectedDate)}
-                </DateHeader>
-                <SubTextBox>노티 제목</SubTextBox>
-
-                <InputField
-                  placeholder="노티이름을 작성해주세요!"
-                  value={title}
-                  onChange={handleTitleChange}
-                  maxLength={15}
-                  style={{ marginBottom: "30px" }}
-                />
-                <SubTextBox>노티 시작</SubTextBox>
-                <TimeInput
-                  value={startTime}
-                  onChange={e => setStartTime(e.target.value)}
-                />
-                <SubTextBox>노티 종료</SubTextBox>
-                <TimeInput
-                  value={endTime}
-                  onChange={e => setEndTime(e.target.value)}
-                  style={{ marginBottom: "30px" }}
-                />
-                <SubTextBox>노티 색상</SubTextBox>
-                <ColorSelector style={{ marginBottom: "30px" }}>
-                  {Object.keys(currentTheme)
-                    .filter(key => key.startsWith("color"))
-                    .map((colorKey, index) => (
-                      <ColorOption
-                        key={index}
-                        color={currentTheme[colorKey]}
-                        onClick={() => handleColorSelect(colorKey)}
-                      />
-                    ))}
-                </ColorSelector>
-                <SubmitButton
-                  color={currentTheme[selectedColor]}
-                  onClick={handleSubmit}
-                >
-                  {isEditing ? "수정하기" : "일정 추가"}{" "}
-                </SubmitButton>
-              </ModalContainer>
-            </ModalBackdrop>
-          )}
-
           <TimeTable schedule={schedule} />
         </DiaryContainer>
       </div>
+      {isModalOpen && (
+        <ModalBackdrop onClick={closeModal}>
+          <ModalContainer onClick={e => e.stopPropagation()}>
+            <CloseButton
+              onClick={closeModal}
+              style={{ border: "none", backgroundColor: "white" }}
+            >
+              x
+            </CloseButton>
+            <DateHeader
+              style={{
+                borderBottom: `2px solid ${currentTheme[selectedColor]}`,
+                fontSize: "20px",
+                height: "30px",
+              }}
+            >
+              {formatDate(selectedDate)}
+            </DateHeader>
+            <SubTextBox>노티 제목</SubTextBox>
+
+            <InputField
+              placeholder="노티이름을 작성해주세요!"
+              value={title}
+              onChange={handleTitleChange}
+              maxLength={15}
+              style={{ marginBottom: "30px" }}
+            />
+            <SubTextBox>노티 시작</SubTextBox>
+            <TimeInput
+              value={startTime}
+              onChange={e => setStartTime(e.target.value)}
+            />
+            <SubTextBox>노티 종료</SubTextBox>
+            <TimeInput
+              value={endTime}
+              onChange={e => setEndTime(e.target.value)}
+              style={{ marginBottom: "30px" }}
+            />
+            <SubTextBox>노티 색상</SubTextBox>
+            <ColorSelector style={{ marginBottom: "30px" }}>
+              {Object.keys(currentTheme)
+                .filter(key => key.startsWith("color"))
+                .map((colorKey, index) => (
+                  <ColorOption
+                    key={index}
+                    color={currentTheme[colorKey]}
+                    onClick={() => handleColorSelect(colorKey)}
+                  />
+                ))}
+            </ColorSelector>
+            <SubmitButton
+              color={currentTheme[selectedColor]}
+              onClick={handleSubmit}
+            >
+              {isEditing ? "수정하기" : "일정 추가"}{" "}
+            </SubmitButton>
+          </ModalContainer>
+        </ModalBackdrop>
+      )}
     </ThemeProvider>
   );
 }
