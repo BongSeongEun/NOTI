@@ -197,7 +197,7 @@ function Coop_Main({ onSelectTeam }) {
 		try {
 			const response = await axios.get(`http://${host}:4000/api/v1/getTeamInfo/${inputTeamLink}`);
 			if (response.status === 200 && response.data) {
-				setSearchedTeam(response.data.teamTitle);
+				setSearchedTeam(response.data);
 			} else {
 				setSearchedTeam(null);
 			}
@@ -209,19 +209,18 @@ function Coop_Main({ onSelectTeam }) {
 
 	const handleEnterTeam = async () => {
 		const userId = getUserIdFromToken(token);
-		if (searchedTeam && userId) {
-			try {
-				const response = await axios.post(`http://${host}:4000/api/v1/enterTeam/${userId}/${searchedTeam.teamId}`);
-				if (response.status === 200) {
-					console.log("팀에 성공적으로 추가되었습니다.");
-					setSearchedTeam(null); 
-					setInputTeamLink(''); 
-					fetchTeams(); 
-				}
-			} catch (error) {
-				console.error("팀에 사용자를 추가하는데 실패했습니다:", error);
+		try {
+			const response = await axios.post(`http://${host}:4000/api/v1/enterTeam/${userId}/${inputTeamLink}`);
+			if (response.status === 200) {
+				console.log("팀에 성공적으로 추가되었습니다.");
+				setSearchedTeam(null);
+				setInputTeamLink('');
+				fetchTeams();
 			}
+		} catch (error) {
+			console.error("팀에 사용자를 추가하는데 실패했습니다:", error);
 		}
+		
 	};
 
     return (
@@ -291,7 +290,7 @@ function Coop_Main({ onSelectTeam }) {
 										/>
 									</TouchableOpacity>
 
-									<Text>{searchedTeam}</Text>
+									<Text onPress={() => handleEnterTeam()}>{searchedTeam}</Text>
 
 									<TouchableOpacity onPress={() => {
 										set_TeamAddModalVisible(!modal_TeamAddVisible);
