@@ -56,7 +56,7 @@ public class GptFinishService {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("이 질문은 TODO 완료입니까? : " + content);
+            System.out.println("이 질문은 Todo 완료입니까? : " + content);
 
             if ("true".equalsIgnoreCase(content) || "false".equalsIgnoreCase(content)) {
                 return content;

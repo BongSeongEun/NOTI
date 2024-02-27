@@ -64,7 +64,7 @@ public class GptTodoService {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("Content: " + content);
+            System.out.println("이 질문은 Todo 일정 관련 입니까?: " + content);
 
             if ("true".equalsIgnoreCase(content) || "false".equalsIgnoreCase(content)) {
                 return content;

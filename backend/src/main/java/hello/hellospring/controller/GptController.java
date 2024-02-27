@@ -42,8 +42,7 @@ public class GptController {
         this.todoRepository = todoRepository;
         this.gptFinishService = gptFinishService;
     }
-
-    @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
+    @PostMapping("/api/v2/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
         String userMessage = request.get("chatContent"); // chat_content 입력받음
 
@@ -171,13 +170,13 @@ public class GptController {
         }
     }
 
-    @GetMapping("/api/v3/chatlist/{userId}") // 채팅내역 가져오기
+    @GetMapping("/api/v2/chatlist/{userId}") // 채팅내역 가져오기
     public List<Chat> getChatListByUserId(@PathVariable Long userId) {
 
         return chatRepository.findByUserId(userId);
     }
 
-    @GetMapping("/api/v3/createDiary/{userId}") // 일기생성하기
+    @GetMapping("/api/v2/createDiary/{userId}") // 일기생성하기
     public String createDiary(@PathVariable Long userId){
         try {
             // userId에 해당하는 chatContent들로 일기 생성
