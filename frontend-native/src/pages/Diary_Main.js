@@ -11,7 +11,8 @@ import {
 	View,
 	Text,
 	ScrollView,
-	StyleSheet
+	StyleSheet,
+	TouchableOpacity,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +20,7 @@ import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
 import { decode } from 'base-64';
 import axios from 'axios';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
@@ -110,7 +112,35 @@ function Diary_Main({ }) {
 	const DiaryFrame = ({ diary }) => {
 		const diaryDate = new Date(diary.diaryDate);
 		const isValidDate = !isNaN(diaryDate);
-	  
+		const [isExpanded, setIsExpanded] = useState(false);
+		const [lineCount, setLineCount] = useState(0);
+
+		const onTextLayout = (e) => {
+			setLineCount(e.nativeEvent.lines.length);
+		};
+
+		const renderContent = (content, isExpanded) => {
+			return (
+				<>
+					<DiaryText
+						style={{ margin: 15 }}
+						numberOfLines={isExpanded ? undefined : 8}
+						onTextLayout={!isExpanded ? onTextLayout : undefined}
+					>
+						{content}
+					</DiaryText>
+					{!isExpanded && lineCount > 8 && (
+						<TouchableOpacity onPress={() => setIsExpanded(true)}>
+							<DiaryText style={{ marginLeft: 20 }} color={"#B7BABF"}>더보기...</DiaryText>
+						</TouchableOpacity>
+					)}
+				</>
+			);
+		};
+
+		const pictureHeight = !isExpanded && lineCount <= 8 ? 120 : 60;
+		const pictureTop = pictureHeight === 120 ? 160 : 220;
+
 		return (
 			<DiaryContainer>
 				<Diary_Frame onPress={() => {
@@ -121,9 +151,21 @@ function Diary_Main({ }) {
 							{format(diaryDate, "yyyy.MM.dd")}
 						</MainText>
 					)}
-					<DiaryText style={{ top: 20, left: 10, marginRight: 20 }}>
-						{diary.diaryContent}
-					</DiaryText>
+					<Diary_TItle color={currentTheme.color1} fontSize={12} style={{ marginTop: 5 }}>{diary.diaryDate}</Diary_TItle>
+					<Diary_TItle style={{ margin: 10 }}>{diary.diaryTitle}</Diary_TItle>
+					<TouchableOpacity style={{ width: 250, height: 1, backgroundColor: '#B7BABF', alignSelf: 'center' }} />
+					{renderContent(diary.diaryContent, isExpanded)}
+
+					{
+						diary.diaryImg ? (
+							<Diary_Picture
+								source={{ uri: diary.diaryImg }}
+								style={{ width: 250, height: pictureHeight, borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }}
+							/>
+						) : (
+							<View style={{ width: 250, height: pictureHeight, backgroundColor: '#D3D3D3', borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }} />
+						)
+					}
 				</Diary_Frame>
 			</DiaryContainer>
 		);
@@ -276,5 +318,24 @@ const Diary_Image = styled.TouchableOpacity`
 	background-color: #B7BABF;
 	border-radius: 15px;
 `;
+
+const Diary_TItle = styled.Text`
+	font-size: ${props => props.fontSize || "15px"};
+	text-align: center;
+	font-weight: bold;
+	color: ${props => props.color || "black"};
+`;
+
+const Diary_contentsText = styled.Text`
+	font-size: ${props => props.fontSize || "10px"};
+	text-align: left;
+	color: ${props => props.color || "black"};
+`;
+
+const Diary_Picture = styled.Image`
+	width: ${(props) => props.size || '200px'};
+	height: ${(props) => props.size || '100px'};
+`;
+
 
 export default Diary_Main;

@@ -39,7 +39,6 @@ const Register = () => {
 			try {
 				const storedToken = await AsyncStorage.getItem('token');
 				setToken(storedToken);
-				const userId = getUserIdFromToken(storedToken);
 			} catch (error) {
 				console.error('Error fetching token:', error);
 			}
