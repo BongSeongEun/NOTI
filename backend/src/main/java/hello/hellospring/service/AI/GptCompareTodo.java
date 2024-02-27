@@ -44,14 +44,15 @@ public class GptCompareTodo {
 
         // 기존 todo 내용들 학습시키기
         if (!resultTodos.isEmpty()) {
-            messagesArray.put(new JSONObject().put("role", "user").put("content", resultTodos));
+            messagesArray.put(new JSONObject().put("role", "user")
+                    .put("content",
+                            resultTodos + ". 다음과 같이 나열된 행동중에서 주어가" + userMessage +"와 비슷한 행동을 하는 번호를 찾아줄래?" +
+                                    "예를 들면, 12 : 짜장면 먹기, 18: 옷사기. 다음과 같이 나열된 행동 중에서 옷샀다와 비슷한 행동을 하는 번호를 찾아줄래? 라고 주어졌으면 18 : 옷사기 를 출력해주면돼" +
+                                    "하나만 출력해줘야해. 만약에 비슷한 행동을 하는 번호가 없으면 null값을 출력해줘"));
         } else {
-            messagesArray.put(new JSONObject().put("role", "user").put("content", resultTodos));
+            messagesArray.put(new JSONObject().put("role", "user").put("content", "null값을 출력해줘"));
 
         }
-
-        messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
-
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
         jsonBody.put("max_tokens", 10); // 답변 최대 글자수
@@ -78,7 +79,9 @@ public class GptCompareTodo {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            //System.out.println("Gpt~ : " + content);
+            System.out.println("Gpt~ : " + content);
+            System.out.println("resultTodos : " +resultTodos);
+            System.out.println("userMessage : " +userMessage);
 
             return content;
 

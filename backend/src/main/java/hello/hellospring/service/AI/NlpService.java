@@ -41,7 +41,7 @@ public class NlpService {
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 200); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 1000); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
@@ -65,8 +65,22 @@ public class NlpService {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("Content: " + content);
-            return content;
+            // 예외처리 우선 해놓음
+            try {
+                // content 형식 검증
+                JSONArray contentArray = new JSONArray(content);
+                if (contentArray.length() == 2 && contentArray.getJSONArray(0).length() > 0 && contentArray.getJSONArray(1).length() > 0) {
+                    // 형식이 올바른 경우, content 반환
+                    System.out.println("Content: " + content);
+                    return content;
+                } else {
+                    // 형식이 올바르지 않은 경우, 빈 배열 반환
+                    return "[[\"\"],[\"\"]]";
+                }
+            } catch (JSONException e) {
+                // JSON 파싱 오류 발생 시, 빈 배열 반환
+                return "[[\"\"],[\"\"]]";
+            }
 
         } else {
             return "사용가능한 content가 아니에요!! :(";

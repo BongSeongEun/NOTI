@@ -93,12 +93,11 @@ public class GptController {
 
                 if (!"false".equals(gptFinishNlp)) {                                          // string 값 잘 출력될때
 
-//                    List<String> gptFinishNlps = Arrays.asList(eventsString.split(","));
-//
-//                    for (int j = 0; j < gptFinishNlps.size(); j++){ // 갯수대로 todo title 비교
-//                        compareTodo(gptFinishNlps.get(j).trim(), userId);
-//                    }
-                    System.out.println("여기는 구현안했지롱");
+                    List<String> gptFinishNlps = Arrays.asList(gptFinishNlp.split(","));
+
+                    for (int j = 0; j < gptFinishNlps.size(); j++){ // 갯수대로 todo title 비교
+                        compareTodo(gptFinishNlps.get(j).trim(), userId);
+                    }
 
                 } else {                                                                     // false 출력될때
                     Chat recentTodoFinishChat = chatRepository.

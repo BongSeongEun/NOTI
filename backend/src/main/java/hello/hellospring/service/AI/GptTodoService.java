@@ -36,7 +36,8 @@ public class GptTodoService {
                         "1시에 운동하러왔어, 5시에 밥먹었어. 처럼 시간과 이벤트가 존재하면 일정 관련 메시지(true)로 분류해줘" +
                         "답은 오직 true 아니면 false로 해줘" +
                         "일정 관련 메시지면 true를, 일정관련 메시지가 아니면 false를 출력해줘" +
-                        "~를 했다. ~를 했었어. 같은 과거형으로 말하면 false를 출력해줘"));
+                        "~를 했다. ~를 했었어. 같은 과거형으로 말하면 false를 출력해줘" +
+                        "time에 관련된 언급이 없으면 false로 출력해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
