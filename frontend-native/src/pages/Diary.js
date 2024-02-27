@@ -117,12 +117,8 @@ function Diary() {
 					headers: { 'Authorization': `Bearer ${token}` },
 				});
 				Alert.alert("삭제 성공", "일기가 성공적으로 삭제되었습니다.", [
-					{
-						text: "확인", onPress: () => {
-							navigation.goBack();
-							navigation.navigate('Diary_Main', { refresh: true });
-						},
-					}]);
+					{ text: "확인", onPress: () => navigation.goBack() }
+				]);
 			} catch (error) {
 				console.error("Error deleting diary:", error);
 				Alert.alert("삭제 실패", "일기 삭제 중 문제가 발생했습니다.");
@@ -135,7 +131,8 @@ function Diary() {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
+						<Profile source={base64Image ? { uri: base64Image } : images.profile}
+							style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
@@ -167,7 +164,9 @@ function Diary() {
 						<Diary_TItle color={currentTheme.color1} style={{ marginTop: 5, fontSize: 12 }}>{diaryDate}</Diary_TItle>
 						<Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
 						<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
-						<Diary_Picture source={{ uri: diaryImg }} />
+						{diaryImg ? (
+							<Diary_Picture source={{ uri: diaryImg }} />
+						) : null}
 
 						<Modal
 							animationType="slide"

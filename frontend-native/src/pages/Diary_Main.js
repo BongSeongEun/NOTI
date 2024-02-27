@@ -14,7 +14,7 @@ import {
 	TouchableOpacity,
 	Alert,
 } from "react-native";
-import { useNavigation, } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
@@ -36,6 +36,7 @@ function Diary_Main({ }) {
 	const [clicked_share, setClicked_share] = useState(false);
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaries, setDiaries] = useState([]);
+	const isFocused = useIsFocused();
 
 	const host = "192.168.30.197";
 	
@@ -106,7 +107,7 @@ function Diary_Main({ }) {
 		return () => {
 			isMounted = false;
 		};
-	}, []);
+	}, [isFocused]);
 
 	const DiaryFrame = ({ diary }) => {
 		const diaryDate = new Date(diary.diaryDate);
@@ -204,7 +205,8 @@ function Diary_Main({ }) {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
+						<Profile source={base64Image ? { uri: base64Image } : images.profile}
+							style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>

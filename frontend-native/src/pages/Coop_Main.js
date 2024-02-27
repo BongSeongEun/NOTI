@@ -35,8 +35,6 @@ function Coop_Main({ onSelectTeam }) {
 	const [outClicked, setOutClicked] = useState({});
 	const [selectedTeamId, setSelectedTeamId] = useState(null);
 	const [teamTodos, setTeamTodos] = useState([]);
-	const [teamTitle, setTeamTitle] = useState("");
-	const [teamInfo, setTeamInfo] = useState(null);
 	const [searchedTeam, setSearchedTeam] = useState(null);
 
 	const host = "192.168.30.197";
@@ -231,7 +229,8 @@ function Coop_Main({ onSelectTeam }) {
 			<FullView>
 				<MainView>
 				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
-						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
+						<Profile source={base64Image ? { uri: base64Image } : images.profile}
+							style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>

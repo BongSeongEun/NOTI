@@ -8,7 +8,7 @@
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
 import { ScrollView, Text, View, Image, TouchableOpacity, Modal, StyleSheet } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -40,6 +40,7 @@ function Coop({ }) {
 	const [clicked_memo, setClicked_memo] = useState(false);
 	const [memoContent, setMemoContent] = useState('');
 	const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
+	const isFocused = useIsFocused();
 
 	const host = "192.168.30.197";
 
@@ -48,7 +49,7 @@ function Coop({ }) {
 		fetchTeamInfo();
 		fetchTeamMembers();
 		fetchTodosForTeam();
-	}, [selectedDate]);
+	}, [selectedDate, currentTheme]);
 
 	const fetchUserData = async () => {
 		const token = await AsyncStorage.getItem('token');
@@ -311,7 +312,8 @@ function Coop({ }) {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={{ uri: base64Image }} style={{ marginTop: 20 }} />
+						<Profile source={base64Image ? { uri: base64Image } : images.profile}
+							style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>

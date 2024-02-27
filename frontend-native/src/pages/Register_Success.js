@@ -11,6 +11,7 @@ import axios from 'axios';
 
 import DecoesSvg from '../asset/Deco_Svg';
 import { theme } from '../components/theme';
+import images from "../components/images";
 
 function Register_Success() {
     const navigation = useNavigation();
@@ -69,7 +70,7 @@ function Register_Success() {
                     <RegularText>프로필 생성 완료!</RegularText>
                     <MainText>{userNickname} 님! 노티에 {'\n'} 오신 것을 환영해요</MainText>
                     <ProfileContainer>
-                        <Profile  source={{ uri: base64Image }}
+                        <Profile  source={base64Image ? { uri: base64Image } : images.profile}
 						style={{ width: 130, height: 130, position: 'absolute', marginTop: 30 }} />
 						<DecoesSvg currentTheme={currentTheme}
 							style={{ position: 'absolute', marginRight: 10 }} />
