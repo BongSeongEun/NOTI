@@ -1,6 +1,5 @@
 package hello.hellospring.service.AI;
 
-import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,41 +11,34 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class GptService {
-    // GPT 대화 관련 API
+public class GptFinishNlpService {
+    // todo완료 채팅에 대해서 nlp 분류
 
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
-    @Value("${openai.api.key.a}")
+    @Value("${openai.api.key.f}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askGpt(String userMessage, Long userId) throws Exception {
-        List<Chat> userChats = chatRepository.findByUserId(userId);
-        String allChatContents = userChats.stream()
-                .map(Chat::getChatContent)
-                .collect(Collectors.joining("\n"));
-
+    public String askNlp(String userMessage, Long userId) throws Exception {
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
-        // 이전 채팅내용 학습
-        if (!allChatContents.isEmpty()) {
-            messagesArray.put(new JSONObject().put("role", "user").put("content", allChatContents));
-        }
-
-        messagesArray.put(new JSONObject().put("role", "system").put("content",
-                "내가 하는 말에 대화가 안끊기도록 해주고, 왜 이걸 하는지 물어봐줘. 대신 질문은 한번씩만 해줘" +
-                "모든 대답은 존댓말로 해주고,  공감식 말투로 대답해줘."));
+        messagesArray
+                .put(new JSONObject().put("role", "system")
+                .put("content"
+                        , "~를 했어, ~완료했어 처럼 문장에서 끝말을 없애줘" +
+                                "예를 들어 라면먹기를 달성했어, 공부하기를 달성했어 는 라면먹기, 공부하기 이렇게 출력해주면 돼" +
+                                "만약, 운동하기랑 김밥먹기를 달성했어 이런식으로 여러개를 달성했으면 운동하기, 밥먹기 이런식으로 출력해주면 돼" +
+                                "만약, 응 달성했어, 했어 이런식으로 ~를 ~는 라는 (목적어) 내용이 없으면 false로 출력해줘" +
+                                "만약 하와이에 가기 이런식으로 말했으면, 하와이에 가기 하나로만 출력해주면돼"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 200); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 10); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
@@ -69,10 +61,13 @@ public class GptService {
             JSONObject firstChoice = choices.getJSONObject(0);
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
-            return content; // content만 반환
+
+            //System.out.println("Todo 완료 질문의 return 결과입니다 : " + content);
+
+            return content;
+
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
     }
-
 }

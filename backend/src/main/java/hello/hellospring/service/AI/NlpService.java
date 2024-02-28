@@ -1,52 +1,47 @@
 package hello.hellospring.service.AI;
 
-import hello.hellospring.model.Chat;
 import hello.hellospring.repository.ChatRepository;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class GptService {
-    // GPT 대화 관련 API
+public class NlpService {
+    // 메시지를 nlp로 분류
 
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
-    @Value("${openai.api.key.a}")
+    @Value("${openai.api.key.d}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askGpt(String userMessage, Long userId) throws Exception {
-        List<Chat> userChats = chatRepository.findByUserId(userId);
-        String allChatContents = userChats.stream()
-                .map(Chat::getChatContent)
-                .collect(Collectors.joining("\n"));
+
+    public String askNlp(String userMessage, Long userId) throws JSONException, IOException, InterruptedException {
 
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
-        // 이전 채팅내용 학습
-        if (!allChatContents.isEmpty()) {
-            messagesArray.put(new JSONObject().put("role", "user").put("content", allChatContents));
-        }
-
-        messagesArray.put(new JSONObject().put("role", "system").put("content",
-                "내가 하는 말에 대화가 안끊기도록 해주고, 왜 이걸 하는지 물어봐줘. 대신 질문은 한번씩만 해줘" +
-                "모든 대답은 존댓말로 해주고,  공감식 말투로 대답해줘."));
+        messagesArray.put(new JSONObject().put("role", "system")
+                .put("content", "이 문장을 nlp기술로 event와 time을 분리해줘" +
+                        "배열 형식으로 결과값을 리턴해줘.7시에 커피집을 갔다하면 [커피집을 갔다],[07:00~07:00] 이런식으로" +
+                        "만약 a시부터 b시까지 c을 한다하면 [c를 한다],[a:00~b:00] 이런식으로"+
+                        "첫번째 배열에는 event를 넣어주고, 두번째 배열에는 time을 넣어줘" +
+                        "time의 경우에는 xx:yy~xx:yy 형식으로 값을 넣어줘" +
+                        "event랑 time이 여러개이면 : [[운전을 한다, 집에 간다],[02:00~02:00,06:00~06:00]] 이런식으로 분리해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 200); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 1000); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
@@ -69,10 +64,26 @@ public class GptService {
             JSONObject firstChoice = choices.getJSONObject(0);
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
-            return content; // content만 반환
+
+            // 예외처리 우선 해놓음
+            try {
+                // content 형식 검증
+                JSONArray contentArray = new JSONArray(content);
+                if (contentArray.length() == 2 && contentArray.getJSONArray(0).length() > 0 && contentArray.getJSONArray(1).length() > 0) {
+                    // 형식이 올바른 경우, content 반환
+                    System.out.println("Content: " + content);
+                    return content;
+                } else {
+                    // 형식이 올바르지 않은 경우, 빈 배열 반환
+                    return "[[\"\"],[\"\"]]";
+                }
+            } catch (JSONException e) {
+                // JSON 파싱 오류 발생 시, 빈 배열 반환
+                return "[[\"\"],[\"\"]]";
+            }
+
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
     }
-
 }

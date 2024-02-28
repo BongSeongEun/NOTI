@@ -43,6 +43,13 @@ public class Chat {
     @Column(name = "work_chat_time")
     private String workChatTime;
 
+    @Column(name = "todo_finish_ask")
+    private Boolean todoFinishAsk;
+
+    @Column(name = "todo_finish_ans")
+    private Boolean todoFinishAns;
+
+
     @PrePersist
     public void prePersist() {
         this.chatDate = LocalDateTime.now(); // 현재 시간으로 설정
@@ -58,6 +65,8 @@ public class Chat {
         chat.setChatRole(chatDTO.isChatRole());
         chat.setWorkChatEvent(chatDTO.getWorkChatEvent());
         chat.setWorkChatTime(chatDTO.getWorkChatTime());
+        chat.setTodoFinishAsk(chatDTO.getTodoFinishAsk());
+        chat.setTodoFinishAns(chatDTO.getTodoFinishAns());
         return chat;
     }
 
@@ -71,6 +80,8 @@ public class Chat {
         chat.setChatRole(chatDTO.isChatRole());
         chat.setWorkChatEvent(chatDTO.getWorkChatEvent());
         chat.setWorkChatTime(chatDTO.getWorkChatTime());
+        chat.setTodoFinishAsk(chatDTO.getTodoFinishAsk());
+        chat.setTodoFinishAns(chatDTO.getTodoFinishAns());
         return chat;
 
     }
