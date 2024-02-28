@@ -80,9 +80,10 @@ public class GptCompareTodo {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("Gpt~ : " + content);
             System.out.println("resultTodos : " +resultTodos);
             System.out.println("userMessage : " +userMessage);
+
+            System.out.println("Gpt의 선택은 : " + content);
 
             return content;
 
