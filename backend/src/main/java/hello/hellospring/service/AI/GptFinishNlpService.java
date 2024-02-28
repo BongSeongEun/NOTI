@@ -38,7 +38,7 @@ public class GptFinishNlpService {
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 10); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 100); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");

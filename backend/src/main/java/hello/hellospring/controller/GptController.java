@@ -101,39 +101,9 @@ public class GptController {
                         compareTodo(gptFinishNlps.get(j).trim(), userId);
                     }
 
-                } else {                                                                     // false 출력될때
-                    Chat recentTodoFinishChat = chatRepository.
-                            findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
-                            // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
-                            .orElse(null);
+                } else {                                                                        // false 출력될때
+                    gptAskTodo(userId); // gpt가 했냐고 물어보는 것에 대한 처리 함수 작동
 
-                    if (recentTodoFinishChat != null){
-                        String finishedTodo =  recentTodoFinishChat.getChatContent()
-                                .replace("를 달성하셨나요?","");
-
-                        // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
-                        LocalDate today = LocalDate.now();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-                        String formattedToday = today.format(formatter);
-
-                        System.out.println(formattedToday);
-                        System.out.println(finishedTodo);
-
-                        // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
-                        int updatedCount = todoRepository.
-                                updateTodoDoneByUserIdAndTodoDateAndTodoTitle
-                                        (userId, formattedToday, finishedTodo);
-                        // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
-                        // 그후 todoDone을 true로 바꿈
-                        if (updatedCount > 0) {
-                            System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
-                        } else {
-                            System.out.println("업데이트할 Todo가 없어요... :(");
-                        }
-                    } else {
-                        System.out.println("todo 완료에 대한 최근 대화가 없어요!");
-                        // 여기도 로직 수정해야됨
-                    }
                 }
             } else {
                 System.out.println("이 메시지는 todo 완료와 관련된 내용이 아니에요!");
@@ -254,42 +224,77 @@ public class GptController {
     //todo 완료 비교 함수
     private void compareTodo(String userMessage, Long userId) throws Exception {
         //findByUserIdAndTodoDateAndTodoDone
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        String formattedToday = today.format(formatter);
 
-        String compareTodoResult = gptCompareTodo.askGpt(userMessage, userId);
+        List<Todo> userTodos = todoRepository.
+                findByUserIdAndTodoDateAndTodoDone(userId, formattedToday, false);
 
-        if (compareTodoResult != null){
-            Pattern pattern = Pattern.compile("^(\\d+):");
-            Matcher matcher = pattern.matcher(compareTodoResult);
+        if (!userTodos.isEmpty()){
+            String compareTodoResult = gptCompareTodo.askGpt(userMessage, userId);
 
-            if (matcher.find()) {
-                // matcher.find()가 true를 반환하면, 패턴에 맞는 부분이 있다는 뜻이다.
-                // matcher.group(1)은 첫 번째 괄호(\d+)에 해당하는 부분, 즉 숫자 부분을 가져온다.
-                String numberString = matcher.group(1);
+            // GPT로부터 받은 결과와 일치하는 Todo 항목을 찾음
+            Todo matchingTodo = userTodos.stream()
+                    .filter(todo -> compareTodoResult.contains(todo.getTodoTitle()))
+                    .findFirst()
+                    .orElse(null);
 
-                try {
-                    // String 타입의 number를 int로 변환
-                    long number = Long.parseLong(numberString);
+            if (matchingTodo != null) {
+                // 일치하는 Todo 항목의 todoDone을 true로 설정
+                matchingTodo.setTodoDone(true);
+                todoRepository.save(matchingTodo);
 
-                    // findByTodoId 메소드가 int 타입의 id를 받는다고 가정하고 수정
-                    List<Todo> todos = todoRepository.findByTodoId(number);
-
-                    if (!todos.isEmpty()) {
-                        for (Todo todo : todos) {
-                            todo.setTodoDone(true);
-                            todoRepository.save(todo);
-                            System.out.println("todoId: " + number + " 업데이트 성공! :) ");
-                        }
-                    } else {
-                        System.out.println("todoId: " + number + " 해당하는 todoId는 존재하지 않아요.. :(");
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println("숫자 변환 오류: " + e.getMessage());
-                }
+                System.out.println("todoId: " + matchingTodo.getTodoId() + " 업데이트 성공! :)");
             } else {
-                System.out.println("숫자를 찾을 수 없습니다..ㅠㅠ");
+                System.out.println("compareTodoResult와 일치하는 todoTitle이 존재하지 않습니다 ㅇ3ㅇ");
+
+                gptAskTodo(userId);
+
             }
         } else {
-            System.out.println("todo에 존재하지 않는 내용입니다!!");
+            System.out.println( userId +"님의 오늘 todo가 존재하지 않습니다 ㅇ3ㅇ");
         }
+    }
+
+
+
+    // GPT가 점검해주는 Todo 완료 함수
+    private void gptAskTodo (Long userId) {
+
+        Chat recentTodoFinishChat = chatRepository.
+                findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
+                .orElse(null);
+
+        if (recentTodoFinishChat != null){
+            String finishedTodo =  recentTodoFinishChat.getChatContent()
+                    .replace("를 달성하셨나요?","");
+
+            // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String formattedToday = today.format(formatter);
+
+            System.out.println(formattedToday);
+            System.out.println(finishedTodo);
+
+            // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
+            int updatedCount = todoRepository.
+                    updateTodoDoneByUserIdAndTodoDateAndTodoTitle
+                            (userId, formattedToday, finishedTodo);
+            // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
+            // 그후 todoDone을 true로 바꿈
+            if (updatedCount > 0) {
+                System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
+                // todoFinishedAsk 다시 false로 돌리는 로직은.. 필요 없을 것 같아서 우선은 생략함
+            } else {
+                System.out.println("업데이트할 Todo가 없어요... :(");
+            }
+        } else {
+            System.out.println("todo 완료에 대한 최근 대화가 없어요!");
+            // 여기도 로직 수정해야됨
+        }
+
     }
 }
