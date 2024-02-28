@@ -46,8 +46,7 @@ public class GptCompareTodo {
         if (!resultTodos.isEmpty()) {
             messagesArray.put(new JSONObject().put("role", "user")
                     .put("content",
-                            resultTodos + ". 다음과 같이 나열된 행동 중에서 주어 또는 보어가" + userMessage +"와 비슷한 행동을 하는 번호를 찾아줘" +
-                                    "똑같은 단어가 존재하는것을 위주로 찾아줘" +
+                            resultTodos + ". 다음과 같이 나열된 행동 중에서" + userMessage +"와 똑같은 단어가 많이 들어가 있는 번호를 찾아줘" +
                                     "예를 들면, 12 : 짜장면 먹기, 18: 옷사기. 다음과 같이 나열된 행동 중에서 옷샀다와 비슷한 행동을 하는 번호를 찾아줄래? 라고 주어졌으면 18 : 옷사기 를 출력해주면돼" +
                                     "예를 들면, 12 : 중국에 간다, 18: 쌈바춤을 춘다. 20 : 코딩을 한다 다음과 같이 나열된 행동 중에서 중국가기와 비슷한 행동을 하는 번호를 찾아줄래? 라고 주어졌으면 12 : 중국에 간다를 출력해주면돼" +
                                     "하나만 출력해줘야해. 만약에 비슷한 행동을 하는 번호가 없으면 null값을 출력해줘"));
@@ -81,9 +80,10 @@ public class GptCompareTodo {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("Gpt~ : " + content);
             System.out.println("resultTodos : " +resultTodos);
             System.out.println("userMessage : " +userMessage);
+
+            System.out.println("Gpt의 선택은 : " + content);
 
             return content;
 
