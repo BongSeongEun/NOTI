@@ -1,79 +1,172 @@
-/* eslint-disable no-trailing-spaces */
 /* eslint-disable prettier/prettier */
+/* eslint-disable quotes */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-trailing-spaces */
 
 import styled, { ThemeProvider } from "styled-components/native";
 
-import React, { useState } from 'react';
-import { Text } from "react-native";
+import React, { useState, useEffect } from 'react';
+import {  } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decode } from 'base-64';
 
 import images from "../components/images";
 import theme from "../components/theme";
 
 function Todo_Add({ }) {
-    const navigation = useNavigation();
+	const navigation = useNavigation();
     const route = useRoute();
-    const { selectedTheme } = route.params || { selectedTheme: theme.OrangeTheme };
-    
-    const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
-    
-    const [isSelectedTheme, setSelectedTheme] = useState(theme.OrangeTheme);
-    const [inputTitle, setInputTitle] = useState('');
-    const [selectedStartTime, setSelectedStartTime] = useState('');
-    const [selectedEndTime, setSelectedEndTime] = useState('');
+    const {
+        todoId,
+        inputTitle: initialInputTitle,
+        selectedStartTime: initialSelectedStartTime,
+        selectedEndTime: initialSelectedEndTime,
+        selectedColor: initialSelectedColor,
+        isEditing,
+        selectedDate
+    } = route.params || {};
+
+    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [inputTitle, setInputTitle] = useState(initialInputTitle || '');
+    const [selectedStartTime, setSelectedStartTime] = useState(initialSelectedStartTime || '');
+    const [selectedEndTime, setSelectedEndTime] = useState(initialSelectedEndTime || '');
+    const [selectedColor, setSelectedColor] = useState(initialSelectedColor || '');
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
-	const [selectedColor, setSelectedColor] = useState('');
+	const host = "192.168.30.76";
+
+	useEffect(() => {
+		if (isEditing) {
+			setInputTitle(inputTitle);
+			setSelectedStartTime(selectedStartTime);
+			setSelectedEndTime(selectedEndTime);
+			setSelectedColor(selectedColor);
+		}
+	}, [isEditing, inputTitle, selectedStartTime, selectedEndTime, selectedColor]);
     
+	useEffect(() => {
+        fetchUserData();
+    }, []);
+
     const showDatePicker = (type) => {
-        switch (type) {
-            case 'startTime':
-                setStartTimePickerVisible(true);
-                break;
-            case 'endTime':
-                setEndTimePickerVisible(true);
-                break;
-            default:
-                break;
-        }
-    };
-    
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
-    };
+		switch (type) {
+			case 'startTime':
+				setStartTimePickerVisible(true);
+				break;
+			case 'endTime':
+				setEndTimePickerVisible(true);
+				break;
+			default:
+				break;
+		}
+	};
+
+	const hideDatePicker = () => {
+		setDatePickerVisibility(false);
+	};
     
     const handleTimePickerConfirm = (type, date) => {
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const formattedTime = `${hours}:${minutes}`;
-
-        switch (type) {
-            case 'startTime':
-                setSelectedStartTime(formattedTime);
-                break;
-            case 'endTime':
-                setSelectedEndTime(formattedTime);
-                break;
-            default:
-                break;
-        }
-        hideDatePicker();
+		let hours = date.getHours();
+		let minutes = date.getMinutes();
+	
+		hours = hours < 10 ? `0${hours}` : hours;
+		minutes = minutes < 10 ? `0${minutes}` : minutes;
+	
+		const formattedTime = `${hours}:${minutes}`;
+	
+		switch (type) {
+			case 'startTime':
+				setSelectedStartTime(formattedTime);
+				break;
+			case 'endTime':
+				setSelectedEndTime(formattedTime);
+				break;
+			default:
+				break;
+		}
+	
+		hideDatePicker();
 	};
 	
-	const handleAddTodo = () => {
-		navigation.navigate('Todo', {
-			inputTitle: inputTitle,
-			selectedStartTime: selectedStartTime,
-			selectedEndTime: selectedEndTime,
-			selectedColor: selectedColor,
-		});
+
+	const getUserIdFromToken = async () => {
+		try {
+		  const token = await AsyncStorage.getItem('token');
+		  const payload = token.split('.')[1];
+		  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+		  const decodedPayload = decode(base64);
+		  const decodedJSON = JSON.parse(decodedPayload);
+		  
+		  return decodedJSON.id.toString();
+		} catch (error) {
+		  console.error('Error decoding token:', error);
+		  return null;
+		}
+	};
+
+	const fetchUserData = async () => { 
+		const userId = await getUserIdFromToken();
+		try {
+			const userResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+			  headers: {
+				'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+			  },
+			});
+	  
+			if (userResponse.status === 200) {
+				const userThemeName = userResponse.data.userColor;
+				if (theme[userThemeName]) {
+					setCurrentTheme(theme[userThemeName]);
+				}
+			} else {
+                console.error("Failed to fetch theme:", userResponse);
+            }
+        } catch (error) {
+            console.error("Error fetching theme:", error);
+        }
+	};
+	
+	const handleSaveTodo = async () => {
+		const userId = await getUserIdFromToken();
+		const formattedSelectedDate = selectedDate.replace(/-/g, '.');
+		
+		const url = isEditing
+			? `http://${host}:4000/api/v1/updateTodo/${userId}/${todoId}`
+			: `http://${host}:4000/api/v1/createTodo/${userId}`;
+		
+		const method = isEditing ? 'put' : 'post';
+		
+		try {
+			const response = await axios[method](url, {
+				todoTitle: inputTitle,
+				todoStartTime: selectedStartTime,
+				todoEndTime: selectedEndTime,
+				todoColor: selectedColor,
+				todoDate: formattedSelectedDate,
+			}, {
+				headers: {
+					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+				},
+			});
+			
+			if (response.status === 200) {
+				navigation.goBack();
+			} else {
+				console.error("Failed to save todo:", response);
+			}
+		} catch (error) {
+			console.error("Error saving todo:", error);
+		}
 	};
 
     return (
-        <ThemeProvider theme={selectedTheme}>
+        <ThemeProvider theme={currentTheme}>
             <FullView>
                 <MainView>
                     <MainText>노티 제목</MainText>
@@ -107,18 +200,18 @@ function Todo_Add({ }) {
                         onCancel={hideDatePicker}
                     />
 
-                    <MainText>노티 색상</MainText>
-                    <HorisontalView>
-                        {[1, 2, 3, 4, 5].map(index => (
-                            <ThemedButton
-                                key={index}
-                                style={{ backgroundColor: color_sheet[index - 1] }}
-                                onPress={() => setSelectedTheme(selectedTheme[`color${index}`])}
-                            />
-                        ))}
-                    </HorisontalView>
+					<MainText>노티 색상</MainText>
+					<HorisontalView>
+						{Object.keys(currentTheme).filter(key => key.startsWith('color')).map((key, index) => (
+							<ThemedButton
+								key={key}
+								style={{ backgroundColor: currentTheme[key] }}
+								onPress={() => setSelectedColor(key)}
+							/>
+						))}
+					</HorisontalView>
 
-					<ResultButton onPress={() => { handleAddTodo(); navigation.navigate("Todo", { selectedTheme: selectedTheme })}}>
+					<ResultButton onPress={() => { handleSaveTodo(); }} selectedColorKey={selectedColor}>
 						<MainText style={{marginTop: 0}} color="white">완료</MainText>
 					</ResultButton>
 
@@ -197,7 +290,7 @@ const ThemedButton = styled.TouchableOpacity`
 `;
 
 const ResultButton = styled(TextBox)`
-    background-color: ${props => props.theme.color1};
+    background-color: ${props => props.theme[props.selectedColorKey] || props.theme.color1};
     margin-top: 50px;
     justify-content: center;
     align-items: center;

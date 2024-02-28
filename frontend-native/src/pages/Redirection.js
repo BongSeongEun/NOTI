@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable prettier/prettier */
 import React, {useEffect} from 'react';
 import {View, Text, Linking} from 'react-native';
@@ -9,20 +11,21 @@ const Redirection = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const handleDeepLink = event => {
-      const code = new URL(event.url).searchParams.get('code');
-      if (code) {
-        axios
-          .post(`http://172.20.10.5:4000/authnative?code=${code}`)
-          .then(async res => {
-			const params = new URLSearchParams(location.search);
-			  const token = params.get("token");
-			  await AsyncStorage.setItem(token);
-            navigation.navigate('Register');
-          })
-          .catch(err => console.log(err));
-      }
-    };
+	  const handleDeepLink = event => {
+		  const code = new URL(event.url).searchParams.get('code');
+		  if (code) {
+			  const host = "192.168.30.76";
+			  axios
+				  .post(`http://${host}/authnative?code=${code}`)
+				  .then(async res => {
+					  const params = new URLSearchParams(location.search);
+					  const token = params.get("token");
+					  await AsyncStorage.setItem(token);
+					  navigation.navigate('Register');
+				  })
+				  .catch(err => console.log(err));
+		  }
+	  };
 
     Linking.addEventListener('url', handleDeepLink);
 

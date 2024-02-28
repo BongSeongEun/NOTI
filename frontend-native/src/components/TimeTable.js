@@ -32,17 +32,14 @@ const TimeTable = ({ schedule }) => (
 const styles = StyleSheet.create({
 	timeTableContainer: {
 		flexDirection: "column",
-		marginRight: 35,
-		width: "60%",
-		marginTop: 20,
+		width: 300,
+		padding: 10,
 	},
 	hourRow: {
 		flexDirection: "row",
 		alignItems: "center",
 	},
 	hourLabel: {
-		width: 50,
-		textAlign: "right",
 		paddingRight: 10,
 	},
 	minuteBlocks: {
