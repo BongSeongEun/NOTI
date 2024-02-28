@@ -2,28 +2,49 @@ package hello.hellospring.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
 
-@Builder
-@AllArgsConstructor
-@Getter
-@Setter
-@ToString
 @Entity
+@Data
 @NoArgsConstructor
 @Table(name = "Todo")
 public class Todo {
     @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid")
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "todo_id")
+    private Long todoId;
 
-    private String title;
+    @Column(name = "user_id")
+    private Long userId;
 
-    private String time;
+    @Column(name = "todo_title")
+    private String todoTitle;
 
-    private boolean done;
+    @Column(name = "todo_start_time")
+    private String todoStartTime;
 
-    private String userCode;
+    @Column(name = "todo_end_time")
+    private String todoEndTime;
+
+    @Column(name = "todo_done")
+    private boolean todoDone;
+
+    @Column(name = "todo_color")
+    private String todoColor;
+
+    @Column(name = "todo_date")
+    private  String todoDate;
+
+    @Builder
+    public Todo(Long todoId, Long userId, String todoTitle, String todoStartTime, String todoEndTime, String todoColor, Boolean todoDone, String todoDate){
+        this.todoId = todoId;
+        this.userId = userId;
+        this.todoTitle = todoTitle;
+        this.todoStartTime = todoStartTime;
+        this.todoEndTime = todoEndTime;
+        this.todoColor = todoColor;
+        this.todoDone = todoDone;
+        this.todoDate = todoDate;
+    }
+
 
 }

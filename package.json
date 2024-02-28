@@ -25,5 +25,9 @@
     "react": "18.2.0",
     "react-docgen-typescript-loader": "^3.7.2",
     "react-dom": "18.2.0"
+  },
+  "dependencies": {
+    "stompjs": "^2.3.3",
+    "toggle": "^1.0.1"
   }
 }
