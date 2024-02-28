@@ -16,37 +16,34 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class GptService {
-    // GPT 대화 관련 API
+public class GptTodoService {
+    // 이 메시지가 일정 관련인지 ture or false
 
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
-    @Value("${openai.api.key.a}")
+    @Value("${openai.api.key.c}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
     public String askGpt(String userMessage, Long userId) throws Exception {
-        List<Chat> userChats = chatRepository.findByUserId(userId);
-        String allChatContents = userChats.stream()
-                .map(Chat::getChatContent)
-                .collect(Collectors.joining("\n"));
+        //List<Chat> userChats = chatRepository.findByUserId(userId);
+
 
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
-        // 이전 채팅내용 학습
-        if (!allChatContents.isEmpty()) {
-            messagesArray.put(new JSONObject().put("role", "user").put("content", allChatContents));
-        }
-
-        messagesArray.put(new JSONObject().put("role", "system").put("content",
-                "내가 하는 말에 대화가 안끊기도록 해주고, 왜 이걸 하는지 물어봐줘. 대신 질문은 한번씩만 해줘" +
-                "모든 대답은 존댓말로 해주고,  공감식 말투로 대답해줘."));
+        messagesArray.put(new JSONObject().put("role", "system")
+                .put("content", "다음 메시지가 일정 관련 메시지인지 분류해주세요" +
+                        "1시에 운동하러갈거야, 5시에 밥먹을거야. 처럼 시간과 이벤트가 존재하면 일정 관련 메시지(true)로 분류해줘" +
+                        "답은 오직 true 아니면 false로 해줘" +
+                        "일정 관련 메시지면 true를, 일정관련 메시지가 아니면 false를 출력해줘" +
+                        "~를 했다, ~를 했었어, ~왔어, ~갔었어 같은 과거형으로 말하면 false를 출력해줘" +
+                        "time에 관련된 언급이 없으면 false로 출력해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 200); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 10); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
@@ -69,10 +66,19 @@ public class GptService {
             JSONObject firstChoice = choices.getJSONObject(0);
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
-            return content; // content만 반환
+
+            System.out.println("이 질문은 Todo 일정 관련 입니까?: " + content);
+
+            if ("true".equalsIgnoreCase(content) || "false".equalsIgnoreCase(content)) {
+                return content;
+            } else {
+                // content가 "true" 또는 "false"가 아닌 경우 null 반환
+                return "false";
+            }
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
-    }
 
+
+    }
 }

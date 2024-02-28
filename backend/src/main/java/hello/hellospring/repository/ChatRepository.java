@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
@@ -19,4 +20,5 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
             @Param("startTime") LocalDateTime startOfPreviousDay, //현재시간으로부터 24시간 전 시간
             @Param("endTime") LocalDateTime now); //현재시간
 
+    Optional<Chat> findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc(Long userId);
 }
