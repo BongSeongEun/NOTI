@@ -1,172 +1,461 @@
+/* eslint-disable quotes */
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/self-closing-comp */
-/* eslint-disable prettier/prettier */
 
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import {
-	ScrollView,
-} from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { ScrollView, Text, View, Image, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import { useRoute, useNavigation, useIsFocused } from "@react-navigation/native";
 import 'react-native-gesture-handler';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decode } from 'base-64';
 
+import { theme } from "../components/theme";
 import images from "../components/images";
-import NotiCheck from "../asset/noticheck.svg";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
+import ScheduleTimeTable from "../components/ScheduleTimeTable";
+
 
 function Coop({ }) {
 	const navigation = useNavigation();
 	const route = useRoute();
-	
-	const { selectedTheme } = route.params;
-	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
-	const name = "홍길동";
-	const currentDate = new Date();
-	const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토']
-	const dayOfWeek = daysOfWeek[currentDate.getDay()];
-	const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
-
-	const Team_Title = "졸업작품 팀 프로젝트";
-	const team_todo = ['유산소 운동', '강아지 산책', '스터디'];
-
+	const { teamId } = route.params;
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [base64Image, setBase64Image] = useState('');
+	const [userNickname, setUserNickname] = useState('');
 	const [clicked_calendar, setClicked_calendar] = useState(false);
 	const [clicked_share, setClicked_share] = useState(false);
-	const [color_num, setColorNum] = useState(0);
-	const [clicked_check, setClicked_check] = useState(Array(5).fill(false));
+	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+	const [events, setEvents] = useState([]);
+	const [teamMembers, setTeamMembers] = useState([]);
+	const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+	const [todos, setTodos] = useState([]);
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [clicked_memo, setClicked_memo] = useState(false);
+	const [memoContent, setMemoContent] = useState('');
+	const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
+	const isFocused = useIsFocused();
 
-	useEffect(() => { setColorNum(color_num + 1); }, []);
-	const handleAddNoti = () => {
-		setColorNum((prevColorIndex) => (prevColorIndex + 1) % color_sheet.length);
+	const host = "192.168.30.76";
+
+	useEffect(() => {
+		fetchUserData();
+		fetchTeamInfo();
+		fetchTeamMembers();
+		fetchTodosForTeam();
+	}, [selectedDate, currentTheme]);
+
+	const fetchUserData = async () => {
+		const token = await AsyncStorage.getItem('token');
+
+		if (token) {
+			const userId = getUserIdFromToken(token);
+			try {
+				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+				const userThemeName = response.data.userColor || 'OrangeTheme';
+				const userProfileImage = response.data.userProfile;
+				const nickname = response.data.userNickname;
+
+				if (theme[userThemeName]) {
+					setCurrentTheme(theme[userThemeName]);
+				}
+				setBase64Image(userProfileImage || ""); 
+				setUserNickname(nickname || ""); 
+			} catch (error) {
+				console.error("Error fetching user data:", error);
+			}
+		}
 	};
 
-	const handleCheckToggle = (color_num) => {
-		setClicked_check((prevClickedChecks) => {
-			const newClickedChecks = [...prevClickedChecks];
-			newClickedChecks[color_num] = !prevClickedChecks[color_num];
-			return newClickedChecks;
-		});
-	}
-
-	const Noties = (color_num) => (
-		<Noti color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : color_sheet[color_num]}>
-			<Noti_Check onPress={() => {
-				handleCheckToggle(color_num);
-				handleAddNoti();
-			}}>
-				<images.noticheck width={15} height={15}
-					color={clicked_check[color_num] ? `${color_sheet[color_num]}80` : "#B7BABF"} />
-		  	</Noti_Check>
-		  	<NotiText> {team_todo[color_num]} </NotiText>
-		</Noti>
-	);
-
-	const posts = [
-		{
-			id: 1,
-			title: "제목입니다.",
-			contents: "내용입니다.",
-			date: "2024-02-10",
-		},
-		{
-			id: 2,
-			title: "제목입니다.",
-			contents: "내용입니다.",
-			date: "2024-02-12",
+	const fetchTeamInfo = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			try {
+				const todoresponse = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId.teamId}`, {
+					headers: {
+						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+					},
+				});
+				if (todoresponse.data && Array.isArray(todoresponse.data)) {
+					const updatedEvents = todoresponse.data.map(event => ({
+						...event,
+						teamSelectedColor: currentTheme[event.teamTodoColor] || event.teamTodoColor,
+					}));
+					setEvents(updatedEvents);
+					
+				}
+			} catch (error) {
+				console.error("Failed to fetch team info:", error);
+			}
 		}
-	];
-	const markedDates = posts.reduce((acc, current) => {
-		const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
-		acc[formattedDate] = {marked: true};
-		return acc;
-	}, {});
+	};
 	
-	const [selectedDate, setSelectedDate] = useState(
-		format(new Date(), "yyyy-MM-dd"),
-	);
-	const markedSelectedDates = {
-		...markedDates,
+	const getUserIdFromToken = (token) => {
+        try {
+            const payload = token.split('.')[1];
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            const decodedPayload = decode(base64);
+            const decodedJSON = JSON.parse(decodedPayload);
+            return decodedJSON.id.toString();
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return null;
+        }
+	};
+	
+	const markedDates = {
 		[selectedDate]: {
 			selected: true,
-			marked: markedDates[selectedDate]?.marked,
+			selectedColor: currentTheme.color1,
 		}
+	};
+
+	const onDayPress = day => {
+		setSelectedDate(day.dateString);
+	};
+	
+	const formatDate = date => {
+		const d = new Date(date);
+		const year = d.getFullYear();
+		const month = `0${d.getMonth() + 1}`.slice(-2);
+		const day = `0${d.getDate()}`.slice(-2);
+		return `${year}.${month}.${day}`;
+	};
+	
+	const toggleComplete = async (teamTodoId, index) => {
+		try {
+			const newCompletedStatus = !events[index].teamTodoDone;
+			const token = await AsyncStorage.getItem('token');
+            const response = await axios.put(
+                `http://${host}:4000/api/v1/updateTeamTodo/${teamId.teamId}/${teamTodoId}`,
+                {
+                    ...events[index],
+                    teamTodoDone: newCompletedStatus, 
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+
+            if (response.status === 200) {
+                const updatedEvents = events.map((event, evtIndex) =>
+                    evtIndex === index
+                        ? { ...event, teamTodoDone: newCompletedStatus }
+                        : event,
+                );
+                setEvents(updatedEvents);
+            } else {
+                console.error("Failed to update todo status:", response);
+            }
+        } catch (error) {
+            console.error("Error updating todo status:", error);
+        }
+	};
+
+	const fetchTeamMembers = async () => {
+		const token = await AsyncStorage.getItem('token');
+		try {
+			const response = await axios.get(`http://${host}:4000/api/v1/getUserTeam/${teamId.teamId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const memberInfos = await Promise.all(response.data.map(async (member) => {
+				const profileResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${member.userId}`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				return {
+					profile: profileResponse.data.userProfile,
+					name: profileResponse.data.userNickname,
+				};
+			}));
+	
+			setTeamMembers(memberInfos);
+		} catch (error) {
+			console.error("Failed to fetch team members:", error);
+		}
+	};
+
+	const timeToIndex = (time) => {
+		if (!time || !time.includes(":")) {
+			return -1;
+		}
+		const [hours, minutes] = time.split(':').map(Number);
+		return hours * 6 + Math.floor(minutes / 10);
+	};
+
+	const calculateDDay = date => {
+		const formattedDate = date.replace(/\./g, '-');
+
+		const today = new Date(selectedDate);
+		today.setHours(0, 0, 0, 0);
+
+		const targetDate = new Date(formattedDate);
+		targetDate.setHours(0, 0, 0, 0);
+
+		const difference = targetDate - today;
+		const dDay = Math.ceil(difference / (1000 * 60 * 60 * 24));
+	
+		if (dDay < 0) {
+			return '';
+		} else if (dDay === 0) {
+			return 'D - Day';
+		} else {
+			return `D - ${dDay}`;
+		}
+	};
+
+	const fetchTodosForTeam = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (!token) return;
+	
+		try {
+			const scheduleResponse = await axios.get(`http://${host}:4000/api/v1/getSchedule/${teamId.teamId}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+	
+			let todosDetails = await Promise.all(scheduleResponse.data.map(async ({ todoId }) => {
+				const todoResponse = await axios.get(`http://${host}:4000/api/v1/getTodoByTodoId/${todoId}`, {
+					headers: { Authorization: `Bearer ${token}` },
+				});
+				return todoResponse.data;
+			}));
+			todosDetails = todosDetails.flat();
+			const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
+			setTodos(filteredTodos);
+
+			const newSchedule = Array(24 * 6).fill(0);
+			filteredTodos.forEach(({ todoStartTime, todoEndTime }) => {
+				const startIndex = timeToIndex(todoStartTime);
+				const endIndex = timeToIndex(todoEndTime);
+	
+				if (startIndex >= 0 && endIndex > startIndex) {
+					for (let i = startIndex; i < endIndex; i++) {
+						newSchedule[i] += 0.4;
+					}
+				}
+			});
+			const adjustedSchedule = newSchedule.map(opacity => Math.min(opacity, 1));
+	
+			setSchedule(adjustedSchedule);
+		} catch (error) {
+			console.error("할 일 정보를 가져오는 중 오류가 발생했습니다.", error);
+		}
+	};
+
+	const ScheduleInfoList = ({ todos }) => {
+		return (
+			<ScheduleInfoContainer>
+				{todos.map((todo, index) => (
+					<ScheduleInfoText key={index}>
+						{todo.todoTitle}, {todo.todoStartTime} ~ {todo.todoEndTime}
+					</ScheduleInfoText>
+				))}
+			</ScheduleInfoContainer>
+		);
+	};
+
+	const fetchTeamMemo = async () => {
+		const token = await AsyncStorage.getItem('token');
+		try {
+			const response = await axios.get(`http://${host}:4000/api/v1/getTeamMemo/${teamId.teamId}`, {
+				headers: {
+					'Authorization': `Bearer ${token}`,
+				},
+			});
+			if (response.data && response.data.length > 0) {
+				setMemoContent(response.data[0].memoContent);
+			} else {
+				setMemoContent("메모가 없습니다.");
+			}
+		} catch (error) {
+			console.error("Error fetching team memo:", error);
+			setMemoContent("메모 정보를 불러올 수 없습니다.");
+		}
+	};
+
+	const MemoModal = ({ isVisible, onClose, memoContent }) => {
+		return (
+			<Modal
+				animationType="slide"
+				transparent={true}
+				visible={isVisible}
+				onRequestClose={onClose}
+			>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						<View style={styles.modalHeader}>
+							<Text style={[styles.modalTitle, { color: '#505050' }]}>메모</Text>
+							<TouchableOpacity onPress={onClose} style={styles.closeButton}>
+								<images.close width={10} height={10} />
+							</TouchableOpacity>
+						</View>
+						<Text style={{ fontSize: 10, padding: 20 }}>{memoContent}</Text>
+					</View>
+				</View>
+			</Modal>
+		);
 	};
 
 	return (
-		<ThemeProvider theme={selectedTheme}>
+		<ThemeProvider theme={currentTheme}>
 			<FullView>
-					<MainView>
-						<HorisontalView style={{marginTop: 30, marginBottom: 10}}>
-							<Profile source={images.profile} style={{ marginTop: 20 }} />
-							<ProfileTextContainer>
-								<MainText>
-									{name} 님,
-								</MainText>
-								<MainText color={color_sheet[0]}>
-									{formattedDate} 노티입니다!
-								</MainText>
-							</ProfileTextContainer>
-						</HorisontalView>
+				<MainView>
+					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
+						<Profile source={base64Image ? { uri: base64Image } : images.profile}
+							style={{ marginTop: 20 }} />
+						<ProfileTextContainer>
+							<MainText>{userNickname} 님,</MainText>
+							<MainText style={{ color: currentTheme.color1 }}>
+								{formatDate(new Date(selectedDate), "yyyy.MM.dd")} 팀 노티입니다!
+							</MainText>
+						</ProfileTextContainer>
+					</HorisontalView>
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1}}>
+			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<BarContainer>
-					<MainText onPress={() => navigation.navigate('Todo', { selectedTheme: selectedTheme })}
-						style={{ marginRight: 20 }}>나의 일정</MainText>
-                    <MainText style={{ marginLeft: 20 }}>협업 일정</MainText>
-                </BarContainer>
+					<MainText onPress={() => navigation.navigate('Todo')} style={{ marginRight: 20, color: "#B7BABF" }}>나의 일정</MainText>
+					<MainText onPress={() => navigation.navigate('Coop_Main')} style={{ marginLeft: 20 }}>협업 일정</MainText>
+				</BarContainer>
 				<Bar />
 				<Bar_Mini />
 
-				<ScrollView>
+				<ScrollView >
 					<MainView>
-						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
-						<images.calendar width={20} height={20}
-						color={clicked_calendar ? color_sheet[0] : "#B7BABF"}
-						onPress={() => setClicked_calendar(!clicked_calendar)} />
-						<images.share width={20} height={20}
-						color={clicked_share ? color_sheet[0] : "#B7BABF"}
+						<HorisontalView style={{ justifyContent: 'space-between', padding: 20 }}>
+							<images.calendar width={20} height={20}
+								color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => setClicked_calendar(!clicked_calendar)} />
+							<images.share width={20} height={20}
+								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
 								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
-						
+
 						{clicked_calendar && (
 							<>
-								<Calendar 
-									markedDates={markedSelectedDates}
-									theme={{
-										selectedDayBackgroundColor: selectedTheme.color1,
-										arrowColor: selectedTheme.color1,
-										dotColor: selectedTheme.color1,
-										todayTextColor: selectedTheme.color1,
-									}} 
-									onDayPress={(day) => {
-										setSelectedDate(day.dateString)
-								}} />
+								<Calendar
+									onDayPress={onDayPress}
+									markedDates={markedDates}
+								/>
 							</>
 						)}
-
-						<MainText style={{ fontSize: 15, textAlign: 'center' }}>{Team_Title}</MainText>
 						
-						<NotiContainer>
-							<>
-								{Noties(0)}
-								{Noties(1)}
-								{Noties(2)}
-							
-							</>
-						</NotiContainer>
+						<MainText style={{ fontSize: 15, textAlign: 'center', paddingBottom: 10 }}>{teamId.teamTitle}</MainText>
+
+						<View style={{ flexDirection: 'row', alignSelf: 'center', alignItems: 'center' }}>
+							{teamMembers.map((member, index) => (
+								<View key={index} style={{ alignItems: 'center', marginRight: 10 }}>
+									<Image
+										source={{ uri: member.profile || '' }}
+										style={{ width: 30, height: 30, borderRadius: 15, marginBottom: 5 }}
+									/>
+									<Text style={{ fontSize: 12, color: '#B7BABF', marginBottom: 10 }}>{member.name}</Text>
+								</View>
+							))}
+						</View>
+						
+						{events.map((event, index) => (
+							<Noti
+								key={event.teamTodoId}
+								style={{
+									backgroundColor: event.teamSelectedColor,
+								}}
+							>
+								<Noti_Check onPress={() => toggleComplete(event.teamTodoId, index)}>
+									{event.teamTodoDone && <images.noticheck width={15} height={15}
+										color={event.teamSelectedColor} />}
+								</Noti_Check>
+								<NotiTextContainer>
+									<NotiText>{event.teamTodoTitle}</NotiText>
+									<NotiText>{calculateDDay(event.teamTodoDate)}</NotiText>
+								</NotiTextContainer>
+							</Noti>
+						))}
+
+						<ScheduleTimeTable schedule={schedule} currentTheme={currentTheme} />
+
+						<HorisontalView style={{ justifyContent: 'space-between' }}>
+							<TouchableOpacity onPress={() => setIsModalVisible(true)} style={{ margin: 10 }}>
+								<Text style={{ color: currentTheme.color1 }}>일정 보기</Text>
+							</TouchableOpacity>
+
+							<Modal
+								animationType="slide"
+								transparent={true}
+								visible={isModalVisible}
+								onRequestClose={() => {
+									setIsModalVisible(!isModalVisible);
+								}}
+							>
+								<ModalView>
+									<ScrollView>
+										<ScheduleInfoList todos={todos} />
+									</ScrollView>
+									<TouchableOpacity
+										onPress={() => setIsModalVisible(!isModalVisible)}
+										style={{ marginTop: 20, alignSelf: 'center' }}
+									>
+										<Text>닫기</Text>
+									</TouchableOpacity>
+								</ModalView>
+							</Modal>
+
+							<TouchableOpacity
+								style={{
+									backgroundColor: clicked_memo ? currentTheme.color1 : "#333333",
+									width: 45,
+									height: 45,
+									borderRadius: 100,
+									alignItems: 'center',
+									justifyContent: 'center',
+									borderColor: "#ffffff",
+									borderWidth: 2,
+									marginTop: -35,
+								}}
+								onPress={() => {
+									setClicked_memo(!clicked_memo);
+									fetchTeamMemo();
+									setIsMemoModalVisible(true);
+								}}
+								>
+								<images.team_memo width={20} height={20} color={clicked_memo ? "white" : "#B7BABF"} />
+							</TouchableOpacity>
+
+							<MemoModal
+							isVisible={isMemoModalVisible}
+								onClose={() => { setIsMemoModalVisible(false); setClicked_memo(!clicked_memo); }}
+							memoContent={memoContent}
+							/>
+						</HorisontalView>
 						
 					</MainView>
 				</ScrollView>
-				<Navigation_Bar selectedTheme={selectedTheme} />
 			</FullView>
+			<Navigation_Bar />
 		</ThemeProvider>
 	);
-
 }
+
+
+const ModalView = styled.View`
+	margin: 20px;
+	background-color: white;
+	border-radius: 20px;
+	padding: 35px;
+	align-items: center;
+`;
 
 const FullView = styled.View`
 	width: 100%;
@@ -206,6 +495,7 @@ const Profile = styled.Image`
     width: 40px;
     height: 40px;
     margin-left: 20px;
+	border-radius: 100px;
 `;
 
 const MainText = styled.Text`
@@ -230,11 +520,12 @@ const Bar_Mini = styled(Bar)`
     margin-top: 0px;
 `;
 
-const NotiContainer = styled.View`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 15px;
+const NotiTextContainer = styled.View`
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 20px;
 `;
 
 const Noti = styled.TouchableOpacity`
@@ -265,10 +556,42 @@ const NotiText = styled.Text`
 	margin-left: 10px;
 `;
 
-const Icons = styled.Image`
-	width: 15px;
-	height: 15px;
-	margin: 20px;
+const ScheduleInfoContainer = styled.View`
+  margin-top: 20px;
 `;
+
+const ScheduleInfoText = styled.Text`
+  color: #808080;
+  font-size: 12px;
+  line-height: 18px;
+`;
+
+const styles = StyleSheet.create({
+	modalContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+	},
+	modalContent: {
+		width: '90%',
+		backgroundColor: '#EEEFF0',
+		borderRadius: 20,
+		padding: 20,
+		alignItems: 'center',
+	},
+	modalHeader: {
+		width: '100%',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	modalTitle: {
+		fontSize: 13,
+		fontWeight: 'bold',
+	},
+	closeButton: {
+	},
+});
 
 export default Coop;

@@ -261,7 +261,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-
+    implementation 'com.google.android.gms:play-services-base:17.2.1'
+    implementation 'com.google.firebase:firebase-core:17.0.0'
+    implementation "com.google.firebase:firebase-messaging:20.0.0"
+    implementation 'me.leolin:ShortcutBadger:1.1.21@aar'
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
@@ -317,3 +320,4 @@ def isNewArchitectureEnabled() {
     // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
     return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
 }
+apply plugin: 'com.google.gms.google-services'

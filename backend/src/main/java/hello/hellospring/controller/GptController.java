@@ -52,7 +52,7 @@ public class GptController {
     }
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
-        String userMessage = request.get("chatContent"); // chat_content 입력받음
+        String userMessage = request.get("chat_content"); // chat_content 입력받음
 
         try {
             boolean gptTodo = Boolean.parseBoolean(gptTodoService.askGpt(userMessage, userId));
