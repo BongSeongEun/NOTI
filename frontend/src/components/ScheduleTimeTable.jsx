@@ -1,5 +1,6 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
+import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const TimeTableContainer = styled.div`
   display: flex;

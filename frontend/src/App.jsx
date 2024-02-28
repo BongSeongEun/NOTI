@@ -31,10 +31,9 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/Main" element={<Main />} />
+          <Route path="/Main" element={<Todo2 />} />
           <Route path="/Register" element={<Register />} />
           <Route path="/Welcome" element={<Welcome />} />
-          <Route path="/Todo" element={<Todo2 />} />
           <Route path="/Coop" element={<Coop />} />
           <Route path="/Coop/:teamId" element={<CoopDetail />} />
           <Route path="/Diary" element={<Diary />} />

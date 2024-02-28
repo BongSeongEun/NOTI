@@ -8,25 +8,29 @@ import {
   Link,
   Toggle,
   redirect,
+  useParams,
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
 import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import CoopTodo from "../components/CoopTodo.jsx";
+import Memo from "../components/Memo.jsx";
+import NavBar from "../components/Navigation";
 
 const MainDiv = styled.div`
   height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 300px;
-  margin-left: 300px;
+  margin-right: 350px;
+  margin-left: 350px;
   @media (max-width: 1050px) {
     margin-left: 0;
     padding-left: 20px;
     padding-right: 20px;
   }
+  padding-top: 170px;
 `;
 
 const DateHeader = styled.div`
@@ -40,10 +44,11 @@ const DateHeader = styled.div`
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
-function CoopDetail({ team, selectedDate }) {
-  const [teamDetails, setTeamDetails] = useState(null); // 팀 상세 정보 상태
+function CoopDetail({ team }) {
+  const [teamDetails, setTeamDetails] = useState(""); // 팀 상세 정보 상태
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
+  const [selectedDate, setSelectedDate] = useState("");
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
@@ -75,14 +80,16 @@ function CoopDetail({ team, selectedDate }) {
       console.error("Error fetching user data:", error);
     }
   };
+  const { teamId } = useParams();
 
-  const fetchTeamDetails = async teamId => {
+  const fetchTeamDetails = async () => {
     try {
-      const response = await axios.get(`/api/v1/getUserTeam/${teamId}`, {
+      const response = await axios.get(`/api/v1/getTeamInfo/${teamId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.status === 200) {
         setTeamDetails(response.data); // 여기서 response.data에 teamId가 포함될 것입니다.
+        console.log(response.data); // response.data를 바로 여기서 로깅하는 것이 좋습니다.
       }
     } catch (error) {
       console.error("Failed to fetch team details:", error);
@@ -90,23 +97,28 @@ function CoopDetail({ team, selectedDate }) {
   };
 
   useEffect(() => {
-    if (team && team.teamId) {
-      // team 객체와 teamId 속성의 존재 여부를 확인합니다.
-      fetchTeamDetails(team.teamId); // 올바른 teamId를 사용하여 팀 상세 정보를 불러옵니다.
+    if (teamId) {
+      // teamId를 URL에서 직접 가져옵니다.
+      fetchTeamDetails(teamId); // fetchTeamDetails 함수에 teamId를 전달합니다.
       fetchUserData();
     }
-  }, [team, token]); // team이 변경될 때마다 useEffect를 실행합니다.
-
+  }, [teamId, token]); // team이 변경될 때마다 useEffect를 실행합니다.
+  const setDate = date => {
+    setSelectedDate(date);
+  };
   return (
     <ThemeProvider theme={currentTheme}>
+      <NavBar setDate={setDate} />
+
       <MainDiv>
-        <DateHeader>{team && team.teamTitle}</DateHeader>
+        <DateHeader>{teamDetails}</DateHeader>
         {/* 팀 상세 정보가 있으면 팀 이름을 표시하고, 없으면 로딩 텍스트를 표시한다. */}
         <CoopTodo
-          teamId={team.teamId}
+          teamId={teamId}
           onTodoChange={fetchTeamDetails}
           selectedDate={selectedDate}
         />
+        <Memo teamId={teamId} />
       </MainDiv>
     </ThemeProvider>
     // Use 'team' prop to display team details

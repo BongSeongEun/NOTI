@@ -223,18 +223,50 @@ const ButtonContainer = styled.div`
   width: 100%; // 부모 컨테이너의 너비가 정의되어야 합니다.
 `;
 
+// 삭제 버튼 스타일 컴포넌트
+const DeleteScheduleButton = styled.button`
+  font-weight: bolder;
+  width: 20px;
+  padding: 0px;
+  font-size: 100%;
+  color: red;
+  border: none;
+  background-color: white;
+`;
+
+const ModalTitle = styled.div`
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+`;
+
+const ModalContent = styled.div`
+  margin-bottom: 1.5em;
+  font-size: 1em;
+`;
+
+// 복사 버튼
+const CopyButton = styled.button`
+  background-color: ${props => props.theme.color2 || theme.OrangeTheme.color1};
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+`;
+
 function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token");
   const [eventDate, setEventDate] = useState("");
   const [mySchedulesModalIsOpen, setMySchedulesModalIsOpen] = useState(false); // 내 일정 모달 상태
+  const [myTeamModalIsOpen, setMyTeamModalIsOpen] = useState(false); // 내 일정 모달 상태
   const [mySchedules, setMySchedules] = useState([]); // 사용자의 일정 목록
   const [teamSchedules, setTeamSchedules] = useState([]);
   const [teamMembersCount, setTeamMembersCount] = useState(0);
   const [scheduleBlocks, setScheduleBlocks] = useState(Array(24 * 6).fill(0));
 
-  // 일정에 따라 색칠할 시간 블록들의 상태를 관리
-  const [schedule, setSchedule] = useState(Array(24 * 6).fill(false));
+  const [todoStates, setTodoStates] = useState([]);
 
   // 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
@@ -356,7 +388,13 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
 
   // 새 일정 만들기 버튼 클릭 시 처리 함수
   const openNewEventModal = () => {
-    // 입력 필드 상태 초기
+    // 현재 날짜를 YYYY-MM-DD 형식으로 설정
+    const today = new Date();
+    const formattedDate = today.toISOString().substring(0, 10);
+
+    // 입력 필드 상태 초기화
+    setTitle(""); // 제목 초기화
+    setEventDate(formattedDate); // 오늘 날짜로 초기화
     setSelectedColor(currentTheme.color1); // 기본 색상으로 초기화
     setIsEditing(false); // 편집 모드가 아닌 새 추가 모드로 설정
     setEditingTodoId(null); // 편집 중인 이벤트 ID 초기화
@@ -425,6 +463,19 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       }
     } catch (error) {
       console.error("Error deleting the event:", error);
+    }
+  };
+
+  // 사용자의 일정 상태를 불러오는 함수
+  const fetchTodoStates = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    try {
+      const response = await axios.get(
+        `/api/v1/getTodoState/${userId}/${teamId}`,
+      );
+      setTodoStates(response.data); // API 응답으로 받은 일정 상태를 상태 변수에 저장
+    } catch (error) {
+      console.error("Failed to fetch todo states:", error);
     }
   };
 
@@ -544,7 +595,10 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     if (dDay < 0) {
       return ""; // D-Day가 이미 지났을 경우, 표시하지 않음
     }
-    return `D - ${dDay}`; // D-Day가 양수일 경우에만 표시
+    if (dDay === 0) {
+      return "D-Day"; // D-Day가 오늘일 경우 "Day" 표시
+    }
+    return `D-${dDay}`; // D-Day가 양수일 경우 "D-숫자" 표시
   };
 
   // 사용자의 일정을 불러오는 함수
@@ -567,15 +621,27 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       console.error("Failed to fetch my schedules:", error);
     }
   };
+
+  const fetchTeamId = async () => {};
+
   // 내 일정 추가 모달을 여는 함수
   const openMySchedulesModal = () => {
     fetchMySchedules(); // 모달을 열 때 사용자의 일정을 불러온다
     setMySchedulesModalIsOpen(true);
   };
 
+  const openShareModal = () => {
+    fetchTeamId();
+    setMyTeamModalIsOpen(true);
+  };
+
   // 내 일정 추가 모달을 닫는 함수
   const closeMySchedulesModal = () => {
     setMySchedulesModalIsOpen(false);
+  };
+
+  const closeMyTeamModal = () => {
+    setMyTeamModalIsOpen(false);
   };
 
   // 일정을 선택하고 TimeTable에 추가하는 함수
@@ -589,7 +655,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      closeMySchedulesModal(); // 요청 성공 시 모달 닫기
+      // closeMySchedulesModal(); // 요청 성공 시 모달 닫기
       onTodoChange(); // 부모 컴포넌트에서 데이터를 새로고침
     } catch (error) {
       console.error("Failed to input schedule:", error);
@@ -614,8 +680,10 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       schedulesForSelectedDate.forEach(scheduleItem => {
         if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
           const startIndex = timeToIndex(scheduleItem.todoStartTime);
-          const endIndex = timeToIndex(scheduleItem.todoEndTime);
-          for (let i = startIndex; i <= endIndex; i += 1) {
+          // 수정: 종료 시간을 포함하지 않도록 endIndex 계산 변경
+          const endIndex = timeToIndex(scheduleItem.todoEndTime); // 여기에서 변경
+          for (let i = startIndex; i < endIndex; i += 1) {
+            // '<=' 에서 '<'로 변경
             newScheduleBlocks[i] += 1;
           }
         }
@@ -629,13 +697,37 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     updateScheduleBlocks();
   }, [teamSchedules, teamMembersCount, selectedDate]);
 
+  // 개인 일정을 TimeTable에서 삭제하는 함수 추가
+  const handleDeleteSchedule = async todoId => {
+    try {
+      await axios.delete(`/api/v1/deleteSchedule/${teamId}/${todoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // 성공적으로 삭제 후, TimeTable 및 개인 일정 목록 새로고침
+      fetchMySchedules(); // 개인 일정 목록 다시 불러오기
+      onTodoChange(); // TimeTable 업데이트를 위해 부모 컴포넌트의 변경사항 반영 함수 호출
+    } catch (error) {
+      console.error("Failed to delete the schedule:", error);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
     fetchTodos(); // 팀의 Todo 목록을 불러오는 함수 호출
     if (mySchedulesModalIsOpen) {
       fetchMySchedules();
+      fetchTodoStates();
     }
   }, [onTodoChange, selectedDate, mySchedulesModalIsOpen]);
+
+  const handleCopyClipBoard = text => {
+    try {
+      navigator.clipboard.writeText(text);
+      alert("클립보드에 복사되었습니다.");
+    } catch (error) {
+      alert("클립보드 복사에 실패하였습니다.");
+    }
+  };
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -743,6 +835,9 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
             <AddSchedulesButton onClick={openMySchedulesModal}>
               + add Schedules
             </AddSchedulesButton>
+            <AddSchedulesButton onClick={openShareModal}>
+              공유
+            </AddSchedulesButton>
           </ButtonContainer>
           <TextBox>{formatDate(selectedDate)}</TextBox>
           <div>
@@ -756,24 +851,89 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                     x
                   </CloseButton>
                   <h2>{formatDate(selectedDate)} 노티</h2>
-                  {mySchedules.map(scheduleItem => (
-                    <ScheduleItem
-                      key={scheduleItem.todoId}
-                      onClick={() => handleSelectSchedule(scheduleItem.todoId)}
-                    >
-                      <div>{scheduleItem.todoTitle}</div> {/* Title */}
-                      <div>
-                        {scheduleItem.todoStartTime} {/* Start Time */}
-                        {scheduleItem.todoEndTime &&
-                          `~ ${scheduleItem.todoEndTime}`}{" "}
-                        {/* End Time, if available */}
-                      </div>
-                    </ScheduleItem>
-                  ))}
+                  {mySchedules.map(scheduleItem => {
+                    // 해당 일정이 이미 추가된 상태인지 확인
+                    const isAdded = todoStates.some(
+                      todoState =>
+                        todoState.todoId === scheduleItem.todoId &&
+                        todoState.state,
+                    );
+
+                    // 이미 추가된 일정에는 특정 스타일을 적용
+                    const itemStyle = isAdded
+                      ? {
+                          marginLeft: "10px",
+                          opacity: "0.5",
+                          textDecoration: "line-through",
+                          pointerEvents: "none",
+                          cursor: "default",
+                        }
+                      : {};
+
+                    return (
+                      <ScheduleItem
+                        key={scheduleItem.todoId}
+                        onClick={() =>
+                          !isAdded
+                            ? handleSelectSchedule(scheduleItem.todoId)
+                            : null
+                        }
+                      >
+                        {/* 삭제 버튼을 조건부로 렌더링 */}
+                        {isAdded && (
+                          <DeleteScheduleButton
+                            onClick={e => {
+                              e.stopPropagation(); // 부모 요소로의 이벤트 전파를 방지
+                              handleDeleteSchedule(scheduleItem.todoId);
+                            }}
+                          >
+                            —
+                          </DeleteScheduleButton>
+                        )}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexGrow: 1,
+                            ...itemStyle,
+                            justifyContent: "space-between",
+                            width: "100%",
+                          }}
+                        >
+                          <div>{scheduleItem.todoTitle}</div> {/* Title */}
+                          <div>
+                            {scheduleItem.todoStartTime} {/* Start Time */}
+                            {scheduleItem.todoEndTime &&
+                              `~ ${scheduleItem.todoEndTime}`}{" "}
+                            {/* End Time, if available */}
+                          </div>
+                        </div>
+                      </ScheduleItem>
+                    );
+                  })}
                 </ModalContainer>
               </ModalBackdrop>
             )}
             {/* 기존 TimeTable 및 기타 컴포넌트 렌더링 */}
+          </div>
+          <div>
+            {myTeamModalIsOpen && (
+              <ModalBackdrop onClick={closeMyTeamModal}>
+                <ModalContainer onClick={e => e.stopPropagation()}>
+                  <CloseButton
+                    onClick={closeMyTeamModal}
+                    style={{ border: "none", backgroundColor: "white" }}
+                  >
+                    x
+                  </CloseButton>
+                  <ModalTitle>팀 참여 코드를 공유해보세요!</ModalTitle>
+                  <ModalContent>참여 코드: {teamId}</ModalContent>
+                  <CopyButton onClick={() => handleCopyClipBoard(teamId)}>
+                    복사하기
+                  </CopyButton>
+                </ModalContainer>
+              </ModalBackdrop>
+            )}
           </div>
           <ScheduleTimeTable
             style={{ width: "300px", height: "450px", marginBottom: "5px" }}

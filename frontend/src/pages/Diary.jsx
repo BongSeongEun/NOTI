@@ -14,19 +14,21 @@ import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import DiaryList from "../components/DiaryList"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때
+import NavBar from "../components/Navigation";
 
 const MainDiv = styled.div`
   height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 300px;
-  margin-left: 300px;
+  margin-right: 350px;
+  margin-left: 350px;
   @media (max-width: 1050px) {
     margin-left: 0;
     padding-left: 20px;
     padding-right: 20px;
   }
+  padding-top: 140px;
 `;
 const DateHeader = styled.div`
   font-size: 24px;
@@ -42,6 +44,7 @@ const DateHeader = styled.div`
 function Diary() {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token"); // 토큰 추가
+  const [selectedDate, setSelectedDate] = useState("");
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
@@ -78,8 +81,14 @@ function Diary() {
     fetchUserData();
   }, [token]);
 
+  const setDate = date => {
+    setSelectedDate(date);
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
+      <NavBar setDate={setDate} />
+
       <MainDiv>
         <DateHeader>노티의 하루 일기</DateHeader>
         <DiaryList />
