@@ -40,7 +40,7 @@ function Diary() {
 	const [diaryImg, setDiaryImg] = useState('');
 	const [isEditing, setIsEditing] = useState(false);
 	
-	const host = "192.168.30.197";
+	const host = "192.168.30.76";
 
 	const toggleEdit = () => {
 		setIsEditing(!isEditing);

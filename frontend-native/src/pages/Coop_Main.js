@@ -37,7 +37,7 @@ function Coop_Main({ onSelectTeam }) {
 	const [teamTodos, setTeamTodos] = useState([]);
 	const [searchedTeam, setSearchedTeam] = useState(null);
 
-	const host = "192.168.30.197";
+	const host = "192.168.30.76";
 
 	useEffect(() => {
 		fetchUserData();

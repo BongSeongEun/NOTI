@@ -19,7 +19,7 @@ import theme from '../components/theme';
 const Register = () => {
 	const navigation = useNavigation();
 	const email = 'streethong@naver.com';
-	const host = "192.168.30.197";
+	const host = "192.168.30.76";
 
 	const [token, setToken] = useState(null);
 

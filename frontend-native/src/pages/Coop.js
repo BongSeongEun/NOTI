@@ -42,7 +42,7 @@ function Coop({ }) {
 	const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
 	const isFocused = useIsFocused();
 
-	const host = "192.168.30.197";
+	const host = "192.168.30.76";
 
 	useEffect(() => {
 		fetchUserData();

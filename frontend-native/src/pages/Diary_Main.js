@@ -38,7 +38,7 @@ function Diary_Main({ }) {
 	const [diaries, setDiaries] = useState([]);
 	const isFocused = useIsFocused();
 
-	const host = "192.168.30.197";
+	const host = "192.168.30.76";
 	
     useEffect(() => {
 		const fetchUserData = async () => {
