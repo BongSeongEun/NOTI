@@ -1,7 +1,5 @@
 package hello.hellospring.service.AI;
 
-import hello.hellospring.model.Todo;
-import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,10 +11,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class GptCompareTodo {
@@ -28,31 +22,17 @@ public class GptCompareTodo {
     @Value("${openai.api.key.g}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askGpt(String userMessage, Long userId) throws Exception {
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        String formattedToday = today.format(formatter);
-
-        List<Todo> userTodos = todoRepository
-                .findByUserIdAndTodoDateAndTodoDone(userId, formattedToday,false);
-
-        String resultTodos = userTodos.stream()
-                .map(Todo::getTodoTitle)
-                .collect(Collectors.joining(", "));
+    public String askGpt(String userMessage, String userTodos) throws Exception {
 
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
         // 기존 todo 내용들 학습시키기
-        if (!resultTodos.isEmpty()) {
-            messagesArray.put(new JSONObject().put("role", "user")
-                    .put("content",
-                            resultTodos + ". 다음과 같이 나열된 행동 중에서" + userMessage +"와 비슷한 단어를 가장 많이 포함한 행동은 무엇인가요?" +
-                                    "하나만 출력해줘야해요." +
-                                    "비슷한 단어를 가장 많이 포함한 행동이 없으면 없다고 해주세요"));
-        } else {
-            messagesArray.put(new JSONObject().put("role", "user").put("content", "null값을 출력해줘"));
+        messagesArray.put(new JSONObject().put("role", "user")
+                .put("content",
+                        userTodos + ". 다음과 같이 나열된 행동 중에서" + userMessage +"와 동일한 단어를 찾아주세요" +
+                                "하나만 출력해줘야해요." +
+                                "비슷한 단어를 가장 많이 포함한 행동이 없으면 없다고 해주세요"));
 
-        }
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
         jsonBody.put("max_tokens", 50); // 답변 최대 글자수
@@ -79,7 +59,7 @@ public class GptCompareTodo {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("resultTodos : " +resultTodos);
+            System.out.println("resultTodos : " +userTodos);
             System.out.println("userMessage : " +userMessage);
 
             System.out.println("Gpt의 선택은 : " + content);

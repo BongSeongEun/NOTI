@@ -7,14 +7,13 @@ import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 public class GptController {
@@ -28,6 +27,7 @@ public class GptController {
     private final GptFinishService gptFinishService; // 이제 대답용 메시지인지
     private final GptFinishNlpService gptFinishNlpService; // todo 완료용 대답 nlp 분류
     private final GptCompareTodo gptCompareTodo; // todo 완료용을 title과 비교
+    private final NlpCompareTodoService nlpCompareTodoService; // todo 리스트 핵심 키워드 추출
 
     @Autowired
     public GptController(GptService gptService,
@@ -38,7 +38,8 @@ public class GptController {
                          TodoRepository todoRepository,
                          GptFinishService gptFinishService,
                          GptFinishNlpService gptFinishNlpService,
-                         GptCompareTodo gptCompareTodo) {
+                         GptCompareTodo gptCompareTodo,
+                         NlpCompareTodoService nlpCompareTodoService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -49,6 +50,7 @@ public class GptController {
         this.gptFinishService = gptFinishService;
         this.gptFinishNlpService = gptFinishNlpService;
         this.gptCompareTodo = gptCompareTodo;
+        this.nlpCompareTodoService = nlpCompareTodoService;
     }
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
@@ -98,7 +100,8 @@ public class GptController {
                     List<String> gptFinishNlps = Arrays.asList(gptFinishNlp.split(","));
 
                     for (int j = 0; j < gptFinishNlps.size(); j++){ // 갯수대로 todo title 비교
-                        compareTodo(gptFinishNlps.get(j).trim(), userId);
+
+                        compareTodo(gptFinishNlps.get(j).trim(), userId); // todo 리스트들과 userMessage와 비교하는 함수
                     }
 
                 } else {                                                                        // false 출력될때
@@ -228,35 +231,84 @@ public class GptController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         String formattedToday = today.format(formatter);
 
-        List<Todo> userTodos = todoRepository.
+        List<String> userTodos = todoRepository.
                 findByUserIdAndTodoDateAndTodoDone(userId, formattedToday, false);
 
         if (!userTodos.isEmpty()){
-            String compareTodoResult = gptCompareTodo.askGpt(userMessage, userId);
+            String nlpCompareTodo = nlpCompareTodoService.askGpt(userTodos);
+            // ["고기", "헬스장", "축구경기", "홍대", "맘스터치"] 형태로 리턴
+
+            JSONArray todoArray = new JSONArray(nlpCompareTodo);
+
+            String mostSimilarItem = findMostSimilarItem(todoArray, userMessage);
+            System.out.println("userMessage : " + userMessage);
+
+            if (mostSimilarItem.isEmpty()){
+                System.out.println("일치하는 항목 없습니다....");
+
+                gptAskTodo(userId); // gpt가 했냐고 물어보는 것에 대한 처리 함수 작동
+
+            } else {
+                System.out.println("가장 유사한 항목: " + mostSimilarItem);
+
+                todoRepository.markTodoAsDone(userId, mostSimilarItem, formattedToday);
+            }
+
+
+
+
+
+            //String compareTodoResult = gptCompareTodo.askGpt(userMessage, nlpCompareTodo);
 
             // GPT로부터 받은 결과와 일치하는 Todo 항목을 찾음
-            Todo matchingTodo = userTodos.stream()
-                    .filter(todo -> compareTodoResult.contains(todo.getTodoTitle()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (matchingTodo != null) {
-                // 일치하는 Todo 항목의 todoDone을 true로 설정
-                matchingTodo.setTodoDone(true);
-                todoRepository.save(matchingTodo);
-
-                System.out.println("todoId: " + matchingTodo.getTodoId() + " 업데이트 성공! :)");
-            } else {
-                System.out.println("compareTodoResult와 일치하는 todoTitle이 존재하지 않습니다 ㅇ3ㅇ");
-
-                gptAskTodo(userId);
-
-            }
+//            Todo matchingTodo = userTodos.stream()
+//                    .filter(todo -> compareTodoResult.contains(todo.getTodoTitle()))
+//                    .findFirst()
+//                    .orElse(null);
+//
+//            if (matchingTodo != null) {
+//                // 일치하는 Todo 항목의 todoDone을 true로 설정
+//                matchingTodo.setTodoDone(true);
+//                todoRepository.save(matchingTodo);
+//
+//                System.out.println("todoId: " + matchingTodo.getTodoId() + " 업데이트 성공! :)");
+//            } else {
+//                System.out.println("compareTodoResult와 일치하는 todoTitle이 존재하지 않습니다 ㅇ3ㅇ");
+//
+//                gptAskTodo(userId);
+//
+//            }
         } else {
             System.out.println( userId +"님의 오늘 todo가 존재하지 않습니다 ㅇ3ㅇ");
         }
     }
 
+    //message와 각 요소 사이의 일치하는 글자 수를 계산
+    private String findMostSimilarItem(JSONArray todoArray, String userMessage) throws JSONException {
+        int maxCount = 0;
+        String mostSimilarItem = "";
+
+        for (int i = 0; i < todoArray.length(); i++) {
+            String item = todoArray.getString(i);
+            int count = countMatchingCharacters(item, userMessage);
+            if (count > maxCount) {
+                maxCount = count;
+                mostSimilarItem = item;
+            }
+        }
+        return mostSimilarItem;
+    }
+
+    //메서드는 두 문자열 사이에서 공통으로 포함된 글자의 총 수를 계산
+    private int countMatchingCharacters(String item, String userMessage) {
+        int count = 0;
+        for (char c : userMessage.toCharArray()) {
+            if (item.contains(String.valueOf(c))) {
+                count++;
+            }
+        }
+        return count;
+    }
 
 
     // GPT가 점검해주는 Todo 완료 함수
