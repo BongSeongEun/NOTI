@@ -50,7 +50,7 @@ function Login() {
   };
 
   useEffect(() => {
-    fetch("/api/v1/welcome")
+    fetch("http://15.164.151.130:4000/api/v1/welcome")
       .then(response => response.json())
       .then(data => {
         setMassege(data);

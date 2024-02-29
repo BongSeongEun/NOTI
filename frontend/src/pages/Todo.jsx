@@ -224,11 +224,14 @@ function Todo({ selectedDate }) {
 
     try {
       // 사용자 정보 불러오기
-      const userResponse = await axios.get(`/api/v1/userInfo/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const userResponse = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       // 사용자의 테마 정보를 서버로부터 받아옴
       if (userResponse.status === 200) {
@@ -240,7 +243,7 @@ function Todo({ selectedDate }) {
 
           // 날짜에 맞는 일정 데이터 불러오기
           const eventsResponse = await axios.get(
-            `/api/v1/getTodo/${userId}?date=${formattedDate}`,
+            `http://15.164.151.130:4000/api/v1/getTodo/${userId}?date=${formattedDate}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -337,7 +340,7 @@ function Todo({ selectedDate }) {
     // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
     try {
       const response = await axios.put(
-        `/api/v1/updateTodo/${userId}/${todoId}`,
+        `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`,
         {
           ...events[index], // 기존 일정 데이터를 펼침
           todoDone: newCompletedStatus, // 완료 상태만 변경
@@ -391,7 +394,7 @@ function Todo({ selectedDate }) {
     const userId = getUserIdFromToken();
     try {
       const response = await axios.delete(
-        `/api/v1/deleteTodo/${userId}/${deletingTodoId}`,
+        `http://15.164.151.130:4000/api/v1/deleteTodo/${userId}/${deletingTodoId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -429,7 +432,7 @@ function Todo({ selectedDate }) {
       let response;
       if (isEditing) {
         // 수정하는 경우
-        const url = `/api/v1/updateTodo/${userId}/${editingTodoId}`; // 수정 API 엔드포인트, todoId 포함
+        const url = `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${editingTodoId}`; // 수정 API 엔드포인트, todoId 포함
         response = await axios.put(url, eventData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -437,7 +440,7 @@ function Todo({ selectedDate }) {
         });
       } else {
         // 새로 추가하는 경우
-        const url = `/api/v1/createTodo/${userId}`; // 생성 API 엔드포인트
+        const url = `http://15.164.151.130:4000/api/v1/createTodo/${userId}`; // 생성 API 엔드포인트
         response = await axios.post(url, eventData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
