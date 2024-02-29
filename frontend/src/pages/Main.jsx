@@ -245,12 +245,15 @@ function Main() {
         // 사용자 ID 가져오기 (토큰에서 디코딩 또는 다른 방식으로)
         // const userId = getUserIdFromToken();
 
-        const response = await axios.get(`/api/v1/userInfo/${userId}`, {
-          // 사용자의 테마 정보를 가져오는 API 호출
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await axios.get(
+          `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+          {
+            // 사용자의 테마 정보를 가져오는 API 호출
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         const userThemeName = response.data.userColor; // 사용자가 선택한 테마 이름
         const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
         setUserNickname(response.data.userNickname); // 사용자 닉네임 설정

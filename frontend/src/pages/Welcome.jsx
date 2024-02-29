@@ -86,11 +86,14 @@ function Welcome() {
     async function fetchUserData() {
       const userId = getUserIdFromToken(); // 사용자 ID 가져오기
       try {
-        const response = await axios.get(`/api/v1/userInfo/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await axios.get(
+          `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
         const userThemeName = response.data.userColor; // 사용자의 테마 이름
         const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지

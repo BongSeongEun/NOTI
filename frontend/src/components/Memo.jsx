@@ -44,7 +44,9 @@ function Memo({ teamId }) {
 
   const fetchMemo = async () => {
     try {
-      const response = await axios.get(`/api/v1/getTeamMemo/${teamId}`);
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getTeamMemo/${teamId}`,
+      );
       if (response.data && response.data.length > 0) {
         // 배열의 첫 번째 요소를 사용하여 메모 데이터 설정
         setMemo({
@@ -63,7 +65,7 @@ function Memo({ teamId }) {
   const handleSave = async () => {
     try {
       const response = await axios.put(
-        `/api/v1/updateTeamMemo/${teamId}/${memo.teamMemoId}`,
+        `http://15.164.151.130:4000/api/v1/updateTeamMemo/${teamId}/${memo.teamMemoId}`,
         {
           memoContent: memo.memoContent,
         },

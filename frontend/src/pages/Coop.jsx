@@ -226,11 +226,14 @@ function Coop({ onSelectTeam }) {
   const fetchUserData = async userToken => {
     const userId = getUserIdFromToken(userToken); // 사용자 ID 가져오기
     try {
-      const response = await axios.get(`/api/v1/userInfo/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
         },
-      });
+      );
       // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
       const userThemeName = response.data.userColor; // 사용자의 테마 이름
 
@@ -247,7 +250,9 @@ function Coop({ onSelectTeam }) {
   const fetchTeams = async () => {
     const userId = getUserIdFromToken();
     try {
-      const response = await axios.get(`/api/v1/getTeam/${userId}`);
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getTeam/${userId}`,
+      );
       setTeams(response.data);
     } catch (error) {
       console.error("팀 목록을 불러오는데 실패했습니다:", error);
@@ -258,7 +263,7 @@ function Coop({ onSelectTeam }) {
     const userId = getUserIdFromToken();
     try {
       await axios.post(
-        `/api/v1/createTeam/${userId}`,
+        `http://15.164.151.130:4000/api/v1/createTeam/${userId}`,
         {
           teamTitle: teamName,
         },
@@ -276,9 +281,12 @@ function Coop({ onSelectTeam }) {
   const enterTeam = async teamId => {
     const userId = getUserIdFromToken();
     try {
-      await axios.post(`/api/v1/enterTeam/${userId}/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `http://15.164.151.130:4000/api/v1/enterTeam/${userId}/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setShowEnterModal(false);
       setTeamCode("");
       // 팀 목록 다시 불러오기
@@ -297,9 +305,12 @@ function Coop({ onSelectTeam }) {
   // 특정 팀에 속한 사용자 수를 불러오는 함수
   const fetchTeamMembers = async teamId => {
     try {
-      const response = await axios.get(`/api/v1/getUserTeam/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getUserTeam/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setTeamMembersCount(prevState => ({
         ...prevState,
         [teamId]: response.data.length,
@@ -334,9 +345,12 @@ function Coop({ onSelectTeam }) {
   const leaveTeam = async teamId => {
     const userId = getUserIdFromToken();
     try {
-      await axios.delete(`/api/v1/leaveTeam/${teamId}/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://15.164.151.130:4000/api/v1/leaveTeam/${teamId}/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setShowConfirmModal(false);
       fetchTeams(); // 팀 목록 다시 불러오기
     } catch (error) {

@@ -99,7 +99,7 @@ const RegDiv = styled.div`
 
 const RegBox = styled.div`
   //회원가입 회색 큰 박스
-  border: 3px solid #b7babf;
+  border: 2px solid ${props => props.theme.color1};
   width: 350px;
   height: auto;
   padding: 30px;
@@ -123,6 +123,7 @@ const MainTextBox = styled.div`
 `;
 
 const HorizontalBox = styled.div`
+  margin-bottom: 10px;
   // 아이템을 가로정렬하는 상자
   display: flex; // 정렬하려면 이거 먼저 써야함
   //flex-direction: row; // 가로나열
@@ -164,7 +165,7 @@ const InputBox = styled.input`
 const InputBox2 = styled.input`
   // 사용자에게 입력받는 input box
   border: none;
-  width: 180px;
+  width: 90%;
   height: 30px;
   border-radius: 30px; // 모서리 둥굴게
   background-color: #f2f3f5;
@@ -173,24 +174,24 @@ const InputBox2 = styled.input`
   text-align: center;
 `;
 
-const Button2 = styled.button`
-  // 중복확인
-  border: none;
-  height: 30px;
-  width: 60px;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  border-radius: 3px;
-  font-size: 10px;
-  background-color: ${props => props.theme.color1};
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  &:hover {
-    background-color: ${props => lighten(0.1, props.theme.color1)};
-  }
-  color: #ffffff;
-`;
+// const Button2 = styled.button`
+//   // 중복확인
+//   border: none;
+//   height: 30px;
+//   width: 60px;
+//   top: 0;
+//   bottom: 0;
+//   margin: auto 0;
+//   border-radius: 3px;
+//   font-size: 10px;
+//   background-color: ${props => props.theme.color1};
+//   cursor: pointer;
+//   transition: background-color 0.3s ease;
+//   &:hover {
+//     background-color: ${props => lighten(0.1, props.theme.color1)};
+//   }
+//   color: #ffffff;
+// `;
 
 const RegBtn = styled.button`
   // 가입하기 버튼
@@ -242,6 +243,7 @@ function Register() {
   const token = window.localStorage.getItem("token");
   const [themeName, setThemeName] = useState("OrangeTheme"); // 기본 테마 이름
   const [selectedFile, setSelectedFile] = useState(null);
+  const [userEmail, setUserEmail] = useState(""); // 사용자 이메일 상태 변수 추가
 
   // 테마 변경 핸들러
   const handleThemeChange = selectedThemeName => {
@@ -277,7 +279,7 @@ function Register() {
     const userId = getUserIdFromToken();
     try {
       const response = await axios.put(
-        `/api/v1/user/${userId}`,
+        `http://15.164.151.130:4000/api/v1/user/${userId}`,
         {
           userNickname,
           userColor: themeName, // 테마의 주 색상
@@ -311,6 +313,32 @@ function Register() {
     localStorage.setItem("userColor", currentTheme.color1); // 색상을 로컬 스토리지에 저장
   };
 
+  // 사용자 정보를 가져오는 함수
+  async function fetchUserInfo() {
+    const userId = getUserIdFromToken(); // 이미 정의된 getUserIdFromToken 함수를 사용
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+      if (response.status === 200) {
+        const { kakaoEmail } = response.data; // 응답 데이터에서 kakaoEmail 추출
+        setUserEmail(kakaoEmail); // 상태 업데이트
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      // 에러 처리
+    }
+  }
+
+  useEffect(() => {
+    fetchUserInfo(); // 컴포넌트 마운트 시 사용자 정보 가져오기
+  }, []); // 빈 의존성 배열로 마운트 시에만 호출
+
   return (
     <ThemeProvider theme={currentTheme}>
       <div>
@@ -343,7 +371,6 @@ function Register() {
                       value={userNickname}
                       onChange={e => setUserNickname(e.target.value)}
                     />
-                    <Button2 style={{ marginLeft: "5px" }}>중복 확인</Button2>
                   </HorizontalBox>
                 </VerticalBox>
               </HorizontalBox>
@@ -353,6 +380,7 @@ function Register() {
                   id="user_email"
                   type="text"
                   readOnly
+                  value={userEmail}
                   style={{ width: "320px" }}
                 />
                 <HorizontalBox>

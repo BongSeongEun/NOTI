@@ -324,9 +324,11 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const fetchTeamData = async () => {
     try {
       const teamSchedulesResponse = await axios.get(
-        `/api/v1/getSchedule/${teamId}`,
+        `http://15.164.151.130:4000/api/v1/getSchedule/${teamId}`,
       );
-      const userTeamResponse = await axios.get(`/api/v1/getUserTeam/${teamId}`);
+      const userTeamResponse = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getUserTeam/${teamId}`,
+      );
 
       setTeamSchedules(teamSchedulesResponse.data);
       setTeamMembersCount(userTeamResponse.data.length);
@@ -343,11 +345,14 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const fetchUserData = async userToken => {
     const userId = getUserIdFromToken(userToken); // 사용자 ID 가져오기
     try {
-      const response = await axios.get(`/api/v1/userInfo/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
         },
-      });
+      );
       // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
       const userThemeName = response.data.userColor; // 사용자의 테마 이름
 
@@ -408,7 +413,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
     try {
       const response = await axios.put(
-        `/api/v1/updateTeamTodo/${teamId}/${teamTodoId}`,
+        `http://15.164.151.130:4000/api/v1/updateTeamTodo/${teamId}/${teamTodoId}`,
         {
           ...events[index], // 기존 일정 데이터를 펼침
           teamTodoDone: newCompletedStatus, // 완료 상태만 변경
@@ -443,7 +448,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     if (!deletingTodoId) return;
     try {
       const response = await axios.delete(
-        `/api/v1/deleteTeamTodo/${teamId}/${deletingTodoId}`,
+        `http://15.164.151.130:4000/api/v1/deleteTeamTodo/${teamId}/${deletingTodoId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -471,7 +476,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     const userId = getUserIdFromToken(); // 사용자 ID 가져오기
     try {
       const response = await axios.get(
-        `/api/v1/getTodoState/${userId}/${teamId}`,
+        `http://15.164.151.130:4000/api/v1/getTodoState/${userId}/${teamId}`,
       );
       setTodoStates(response.data); // API 응답으로 받은 일정 상태를 상태 변수에 저장
     } catch (error) {
@@ -482,9 +487,12 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   // 팀의 Todo를 가져오는 함수
   const fetchTodos = async () => {
     try {
-      const response = await axios.get(`/api/v1/getTeamTodo/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getTeamTodo/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (response.data && Array.isArray(response.data)) {
         // 서버로부터 받은 일정 데이터에 대해 각 항목의 색상을 현재 테마에 맞는 색상으로 변환
         const updatedEvents = response.data.map(event => ({
@@ -510,7 +518,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     };
 
     try {
-      const url = `/api/v1/updateTeamTodo/${teamId}/${editingTodoId}`;
+      const url = `http://15.164.151.130:4000/api/v1/updateTeamTodo/${teamId}/${editingTodoId}`;
       const response = await axios.put(url, eventData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -539,7 +547,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     };
 
     try {
-      const url = `/api/v1/createTeamTodo/${teamId}`;
+      const url = `http://15.164.151.130:4000/api/v1/createTeamTodo/${teamId}`;
       const response = await axios.post(url, eventData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -609,7 +617,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     try {
       // 서버 요청 시, 선택한 날짜(`selectedDate`)를 포함하여 요청
       const response = await axios.get(
-        `/api/v1/getTodo/${userId}?date=${formattedDate}`,
+        `http://15.164.151.130:4000/api/v1/getTodo/${userId}?date=${formattedDate}`,
       );
       // `todoStartTime`이 존재하며, 선택한 날짜에 해당하는 일정만 필터링
       const filteredSchedules = response.data.filter(
@@ -649,7 +657,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     // 선택된 일정으로 TimeTable 업데이트 로직
     try {
       await axios.post(
-        `/api/v1/inputSchedule/${teamId}/${scheduleId}`,
+        `http://15.164.151.130:4000/api/v1/inputSchedule/${teamId}/${scheduleId}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -700,9 +708,12 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   // 개인 일정을 TimeTable에서 삭제하는 함수 추가
   const handleDeleteSchedule = async todoId => {
     try {
-      await axios.delete(`/api/v1/deleteSchedule/${teamId}/${todoId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://15.164.151.130:4000/api/v1/deleteSchedule/${teamId}/${todoId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       // 성공적으로 삭제 후, TimeTable 및 개인 일정 목록 새로고침
       fetchMySchedules(); // 개인 일정 목록 다시 불러오기
       onTodoChange(); // TimeTable 업데이트를 위해 부모 컴포넌트의 변경사항 반영 함수 호출
