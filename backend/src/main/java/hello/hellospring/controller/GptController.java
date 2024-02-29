@@ -64,7 +64,10 @@ public class GptController {
             // gptTodo가 true일 경우, nlpService 호출
             String eventsString = null;
             String timesString = null;
+            String datesString = null;
             if (gptTodo) { // 합쳐져 있는 event와 time을 각각 분리
+
+
                 chatEvent = nlpService.askNlp(userMessage, userId);
 
                 JSONArray mainArray = new JSONArray(chatEvent);
@@ -82,9 +85,17 @@ public class GptController {
                     nlpTimes.add(timesArray.getString(i));
                 }
 
+                // 세 번째 배열에서 날짜 추출
+                JSONArray dateArray = mainArray.getJSONArray(2);
+                List<String> nlpDates = new ArrayList<>();
+                for (int i = 0; i < dateArray.length(); i++) {
+                    nlpDates.add(dateArray.getString(i));
+                }
+
                 //대괄호 없이 출력되도록
                 eventsString = String.join(", ", nlpEvents);
                 timesString = String.join(", ", nlpTimes);
+                datesString = String.join(", ", nlpDates);
             } else {
                 // gptTodo가 false 일때만 발동하고, 해당 메시지가 일정완료와 관련된 메시지인지 판단
 
@@ -137,12 +148,19 @@ public class GptController {
             if (eventsString != null){ // nlp 결과값 null인지 검증
                 List<String> works = Arrays.asList(eventsString.split(","));
                 List<String> times = Arrays.asList(timesString.split(","));
+                List<String> dates = Arrays.asList(datesString.split(","));
 
                 if (works.size() == times.size()){ // nlp 결과값 갯수 서로 같은지 검증
-                    for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
-                        saveTodo(works.get(i).trim(), times.get(i).trim(), userId);
-                    }
+                    if (works.size() == dates.size()){
+                        for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
+                            saveTodoAndDate(works.get(i).trim(), times.get(i).trim(), dates.get(i).trim(), userId);
+                        }
 
+                    } else {
+                        for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
+                            saveTodo(works.get(i).trim(), times.get(i).trim(), userId);
+                        }
+                    }
                 } else {
                     System.out.println("event와 time의 결과값 갯수가 서로 달라서 todo에 저장하진 않았어요!" +
                             "\n" + "event : "+eventsString + "time :" + timesString);
@@ -223,6 +241,46 @@ public class GptController {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
             String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
             newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
+
+            newTodo.setTodoDone(false);
+
+            Random random = new Random();
+            int colorIndex = random.nextInt(5) + 1; // 1~5 사이의 랜덤한 수 생성
+            newTodo.setTodoColor("color" + colorIndex); // todoColor 저장
+
+            todoRepository.save(newTodo); // Todo 저장
+
+        } else {
+            // nlpTime 형식이 예상과 다를 경우의 처리
+            System.out.println("nlpTime 형식이 이상해요...ㅡ3ㅡ : " + processedTime);
+
+        }
+
+    }
+
+    private void saveTodoAndDate (String processedEvent, String processedTime, String processedDate, Long userId){
+        String[] times = processedTime.split("~"); // ~ 기준으로 분리
+        if (times.length == 2){
+            String startTimeStr = times[0];
+            String endTimeStr = times[1];
+
+            // nlpEvent과 nlpTime을 Todo 테이블에 저장
+            Todo newTodo = new Todo();
+            newTodo.setUserId(userId); // userId 값 저장
+            newTodo.setTodoTitle(processedEvent); // nlpEvent 값 저장
+
+            // 여기서는 시간 정보를 String으로 다루고 있으므로, LocalTime을 다시 문자열로 변환
+            newTodo.setTodoStartTime(startTimeStr.toString()); // 시작 시간 저장
+            newTodo.setTodoEndTime(endTimeStr.toString()); // 종료 시간 저장
+
+            if (processedDate.matches("\\d{4}\\.\\d{2}\\.\\d{2}")) {
+                newTodo.setTodoDate(processedDate); // 포맷팅된 날짜를 todoDate에 저장
+            } else {
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
+                newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
+
+            }
 
             newTodo.setTodoDone(false);
 

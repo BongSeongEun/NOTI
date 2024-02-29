@@ -30,12 +30,13 @@ public class NlpService {
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
         messagesArray.put(new JSONObject().put("role", "system")
-                .put("content", "이 문장을 nlp기술로 event와 time을 분리해줘" +
-                        "배열 형식으로 결과값을 리턴해줘.7시에 커피집을 갔다하면 [커피집을 갔다],[07:00~07:00] 이런식으로" +
-                        "만약 a시부터 b시까지 c을 한다하면 [c를 한다],[a:00~b:00] 이런식으로"+
-                        "첫번째 배열에는 event를 넣어주고, 두번째 배열에는 time을 넣어줘" +
+                .put("content", "이 문장을 nlp기술로 event와 time과 date를 분리해줘" +
+                        "배열 형식으로 결과값을 리턴해줘.7시에 커피집을 갔다하면 [커피집을 갔다],[07:00~07:00],[2024.02.29] 이런식으로" +
+                        "만약 a시부터 b시까지 c을 한다하면 [c를 한다],[a:00~b:00][2024.02.29] 이런식으로"+
+                        "첫번째 배열에는 event를 넣어주고, 두번째 배열에는 time을 넣어주고, 세번째 배열에는 date를 넣어줘" +
                         "time의 경우에는 xx:yy~xx:yy 형식으로 값을 넣어줘" +
-                        "event랑 time이 여러개이면 : [[운전을 한다, 집에 간다],[02:00~02:00,06:00~06:00]] 이런식으로 분리해줘"));
+                        "date의 경우에는 언급이 없으면 오늘 날짜 (2024.02.29 형식으로) 를 넣어주고, 내일이라고 하면 오늘날짜를 기준으로 다음날짜를 넣어줘" +
+                        "event랑 time과 date가 여러개이면 : [[운전을 한다, 집에 간다],[02:00~02:00,06:00~06:00],[2024.02.29, 2024.02.29]] 이런식으로 분리해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
@@ -69,17 +70,20 @@ public class NlpService {
             try {
                 // content 형식 검증
                 JSONArray contentArray = new JSONArray(content);
-                if (contentArray.length() == 2 && contentArray.getJSONArray(0).length() > 0 && contentArray.getJSONArray(1).length() > 0) {
+                if (contentArray.length() == 3
+                        && contentArray.getJSONArray(0).length() > 0
+                        && contentArray.getJSONArray(1).length() > 0
+                        && contentArray.getJSONArray(2).length() > 0) {
                     // 형식이 올바른 경우, content 반환
-                    System.out.println("Content: " + content);
+                    System.out.println("NLP 결과물 : " + content);
                     return content;
                 } else {
                     // 형식이 올바르지 않은 경우, 빈 배열 반환
-                    return "[[\"\"],[\"\"]]";
+                    return "[[\"\"],[\"\"],[\"\"]]";
                 }
             } catch (JSONException e) {
                 // JSON 파싱 오류 발생 시, 빈 배열 반환
-                return "[[\"\"],[\"\"]]";
+                return "[[\"\"],[\"\"],[\"\"]]";
             }
 
         } else {
