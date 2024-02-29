@@ -42,7 +42,7 @@ const LoginImage = styled.image`
 function Login() {
   const [message, setMassege] = useState([]);
   const REACT_APP_REST_API_KEY = "77cf97c36317f2622a926b9ddb30f96f";
-  const REACT_APP_REDIRECT_URI = "http://localhost:3000/auth";
+  const REACT_APP_REDIRECT_URI = "http://15.165.100.226:3000/auth";
   // oauth 요청 URL
   const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_REST_API_KEY}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`;
   const handleLogin = () => {
