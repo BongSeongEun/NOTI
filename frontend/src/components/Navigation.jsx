@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styled, { ThemeProvider } from "styled-components";
 import axios from "axios";
 import Calendar from "react-calendar";
+import { darken, lighten } from "polished";
 import theme from "../styles/theme";
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
 import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
@@ -107,6 +108,7 @@ const StyledLink = styled(Link)`
 `;
 
 const StyledCalendar = styled(Calendar)`
+  margin-bottom: 20px;
   width: 100%;
   max-width: 300px; // 달력의 최대 너비를 설정
   background-color: white;
@@ -115,16 +117,61 @@ const StyledCalendar = styled(Calendar)`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   /* font-family: Arial, sans-serif; // 글꼴 설정 */
 
+  .react-calendar__navigation__label {
+    font-weight: 700;
+    font-size: 1em; /* 더 큰 폰트 사이즈로 조정 */
+    background-color: transparent; /* 배경색 변경 없음 */
+    transition:
+      background-color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+    &:hover {
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+      transform: translateY(-2px); /* 버튼이 약간 떠오르는 효과 */
+    }
+  }
+
+  /* 단일 화살표 크기 조절 (예: >, <) */
+  .react-calendar__navigation__arrow {
+    font-weight: 700;
+    font-size: 1.5em; /* 화살표 크기 조정 */
+  }
+
   .react-calendar__navigation button {
     border-radius: 50%;
     color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  }
+  .react-calendar__navigation button:hover {
+    background-color: transparent; /* 배경색 변경 없음 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 약간 떠오르는 효과 */
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease; /* 부드러운 전환 효과 */
+  }
+
+  .react-calendar__tile:hover {
+    background-color: transparent; /* 배경색 변경 없음 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 약간 떠오르는 효과 */
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease; /* 부드러운 전환 효과 */
+  }
+
+  /* 이중 화살표 제거 (예: >>, <<) */
+  .react-calendar__navigation__next2-button,
+  .react-calendar__navigation__prev2-button {
+    display: none; /* 이중 화살표 요소 숨김 */
   }
 
   .react-calendar__tile:enabled:hover,
   .react-calendar__tile:enabled:focus {
     border-radius: 50%;
+    transition: background-color 0.2s ease;
+    color: white;
     background-color: ${props =>
-      props.theme.color1 || theme.OrangeTheme.color1};
+      props.theme.color2 || theme.OrangeTheme.color2};
   }
 
   /* 일요일에만 빨간 폰트 */
@@ -134,9 +181,10 @@ const StyledCalendar = styled(Calendar)`
 
   .react-calendar__tile--now {
     // 오늘 날짜 하이라이트 커스텀
+    font-weight: 700;
     border-radius: 50%;
-    background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
-    color: var(--festie-gray-800, #ffffff);
+    background-color: transparent;
+    color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
   }
 
   .react-calendar__month-view__weekdays abbr {
@@ -149,6 +197,7 @@ const StyledCalendar = styled(Calendar)`
   }
 
   .react-calendar__tile--active {
+    padding: auto;
     background-color: ${props =>
       props.theme.color2 || theme.OrangeTheme.color2};
     color: white;

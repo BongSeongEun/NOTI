@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled, { ThemeProvider } from "styled-components";
+import { backgrounds, lighten } from "polished";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const MemoContainer = styled.div`
@@ -36,6 +37,10 @@ const SaveButton = styled.button`
   padding: 10px 20px;
   cursor: pointer;
   border-radius: 5px;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => lighten(0.1, props.theme.color1)};
+  }
 `;
 
 function Memo({ teamId }) {

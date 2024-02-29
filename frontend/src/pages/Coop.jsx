@@ -9,7 +9,7 @@ import {
   Toggle,
   redirect,
 } from "react-router-dom";
-import { backgrounds, lighten } from "polished";
+import { darken, lighten } from "polished";
 import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
@@ -61,8 +61,9 @@ const TeamItem = styled.div`
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  transition: background-color 0.3s ease;
   &:hover {
-    background-color: #f0f0f0;
+    background-color: ${props => lighten(0.1, props.theme.color1)};
   }
 `;
 const ButtonContainer = styled.div`
@@ -79,6 +80,10 @@ const AddTeamButton = styled.button`
   color: white;
   border: none;
   border-radius: 5px;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => darken(0.1, props.theme.color1)};
+  }
   cursor: pointer;
 `;
 
@@ -137,6 +142,10 @@ const CreateTeamButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => darken(0.1, props.theme.color1)};
+  }
 `;
 
 const CloseButton = styled.button`
@@ -180,11 +189,20 @@ const ConfirmButton = styled.button`
   padding: 10px;
   border-radius: 5px;
   border: none;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => darken(0.1, props.theme.color1)};
+  }
   cursor: pointer;
 `;
 
 const CancelButton = styled(ConfirmButton)`
   background-color: #ccc; // 회색 계열
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #999999;
+  }
+  cursor: pointer;
 `;
 
 const TeamInfo = styled.div`
@@ -418,7 +436,7 @@ function Coop({ onSelectTeam }) {
                 </CloseButton>
                 <InputField
                   type="text"
-                  placeholder="팀 코드 입력..."
+                  placeholder="팀 참여 코드 입력..."
                   value={teamCode}
                   onChange={e => setTeamCode(e.target.value)}
                 />

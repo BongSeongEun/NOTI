@@ -83,6 +83,15 @@ const EventItem = styled.div`
   justify-content: space-between;
   align-items: center;
   opacity: ${props => (props.completed ? "0.5" : "1")};
+  transition:
+    background-color 0.5s ease-in-out,
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
+  &:hover {
+    background: #6e6e6e; /* 배경색을 약간 어둡게 변경 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 버튼이 약간 떠오르는 효과 */
+  }
 `;
 
 const EventTitle = styled.div`
@@ -102,6 +111,15 @@ const EventTime = styled.div`
 `;
 
 const CompleteButton = styled.div`
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+
+  &:hover {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 버튼이 약간 떠오르는 효과 */
+  }
   margin-right: 10px;
   height: 30px;
   width: 30px;
@@ -536,6 +554,8 @@ function Todo2() {
               <EventItem
                 key={event.todoId}
                 style={{
+                  transition:
+                    "backgroundColor 0.3s ease, opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
                   backgroundColor: event.selectedColor, // 일정의 선택된 색상을 항상 사용
                   opacity: event.todoDone ? "0.5" : "1", // 완료 상태에 따라 투명도 조정
                 }}
