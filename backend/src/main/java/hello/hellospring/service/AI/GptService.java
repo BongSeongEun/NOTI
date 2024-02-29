@@ -41,7 +41,7 @@ public class GptService {
         messagesArray.put(new JSONObject().put("role", "system").put("content",
                 "내가 하는 말에 대화가 안끊기도록 해주고, 왜 이걸 하는지 물어봐줘. 질문은 한번만 해줘" +
                 "모든 대답은 존댓말로 해주고,  공감식 말투로 대답해줘. 사족은 달지말고 간결하고 짧게 대답해줘" +
-                        "100자 내외로 답변해줘. 110자는 넘지않았으면 좋겠어."));
+                        "80자 내외로 답변해줘. 90자는 넘지않았으면 좋겠어."));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
