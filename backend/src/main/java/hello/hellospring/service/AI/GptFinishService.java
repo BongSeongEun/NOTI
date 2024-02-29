@@ -29,7 +29,7 @@ public class GptFinishService {
                 .put("content", "다음 메시지가 일정 완료 관련 메시지인지 분류해주세요" +
                         "했어, 달성했어, 완료했어 처럼 ~를 했다는 내용이 존재하면 true로 분류해줘" +
                         "~를 할거야, ~ 예정이야 처럼 미래형의 내용이 존재하면 false로 분류해줘" +
-                        "답은 오직 true 아니면 false로 해줘"));
+                        "답은 오직 true 아니면 false로 해줘. 그 외에는 사족 달지 말아줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 

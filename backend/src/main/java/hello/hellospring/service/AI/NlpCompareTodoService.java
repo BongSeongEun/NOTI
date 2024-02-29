@@ -1,6 +1,6 @@
 package hello.hellospring.service.AI;
 
-import hello.hellospring.repository.ChatRepository;
+import hello.hellospring.repository.TodoRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,34 +11,30 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 @Service
-public class GptFinishNlpService {
-    // todo완료 채팅에 대해서 nlp 분류
+public class NlpCompareTodoService {
 
     @Autowired
-    private ChatRepository chatRepository; //ChatRepository 참조
+    private TodoRepository todoRepository;
 
-    @Value("${openai.api.key.f}")
+    @Value("${openai.api.key.b}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askNlp(String userMessage, Long userId) throws Exception {
+    public String askGpt(List<String> userTodos) throws Exception {
+
+
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
-        messagesArray
-                .put(new JSONObject().put("role", "system")
-                .put("content"
-                        , "~를 했어, ~완료했어 처럼 문장에서 끝말을 없애고 그 중에서 핵심 키워드를 추출해줘" +
-                                "예를 들어 라면먹기를 달성했어, 공부하기를 달성했어 는 라면, 공부 이렇게 출력해주면 돼" +
-                                "만약, 운동하기랑 김밥먹기를 달성했어 이런식으로 여러개를 달성했으면 운동, 밥 이런식으로 출력해주면 돼" +
-                                "만약, 응 달성했어, 했어, 왔어 이런식으로 ~를 ~는 라는 (목적어) 내용이 없으면 false로 출력해줘" +
-                                "만약 하와이에 가기 이런식으로 말했으면, 하와이 만 출력해주면돼"));
-
-        messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
+        // 기존 todo 내용들 학습시키기
+        messagesArray.put(new JSONObject().put("role", "user")
+                .put("content", userTodos + ". 여기서 각 배열마다 키워드를 하나씩 추출해줘" +
+                        "결과물은 배열 형식으로 리턴해줘"));
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 100); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 50); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
@@ -62,7 +58,9 @@ public class GptFinishNlpService {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            //System.out.println("Todo 완료 질문의 return 결과입니다 : " + content);
+            System.out.println("resultTodos : " +userTodos);
+
+            System.out.println("이 배열중에서 키워드 추출 : " + content);
 
             return content;
 
