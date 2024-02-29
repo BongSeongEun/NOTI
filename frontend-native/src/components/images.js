@@ -27,6 +27,7 @@ import diary_delete from "../asset/diary_delete";
 
 import message_send from "../asset/message_send.svg";
 import copy from "../asset/copy.svg";
+import plus from "../asset/plus.svg";
 
 export const images = {
 	profile: profile,
@@ -56,6 +57,7 @@ export const images = {
 
 	message_send: message_send,
 	copy: copy,
+	plus: plus,
 };
 
 export default images;

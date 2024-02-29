@@ -36,6 +36,7 @@ function Coop_Main({ onSelectTeam }) {
 	const [selectedTeamId, setSelectedTeamId] = useState(null);
 	const [teamTodos, setTeamTodos] = useState([]);
 	const [searchedTeam, setSearchedTeam] = useState(null);
+	const [clickedSearch, setClickedSearch] = useState(false);
 
 	useEffect(() => {
 		fetchUserData();
@@ -162,12 +163,15 @@ function Coop_Main({ onSelectTeam }) {
 	};
 
 	const leaveTeam = async (teamId, userId) => {
+		if (!teamId || !userId) return;
+	
 		try {
 			const response = await axios.delete(`http://15.164.151.130:4000/api/v1/leaveTeam/${teamId}/${userId}`, {
-				headers: { Authorization: `Bearer ${token}` },
+				headers: { 'Authorization': `Bearer ${token}` },
 			});
 			if (response.status === 200) {
-				setTeams(teams.filter(team => team.teamId !== teamId));
+				fetchTeams();
+				set_TeamOutModalVisible(false);
 			}
 		} catch (error) {
 			console.error("팀을 나가는데 실패했습니다:", error);
@@ -221,18 +225,22 @@ function Coop_Main({ onSelectTeam }) {
 
 	const handleEnterTeam = async () => {
 		const userId = getUserIdFromToken(token);
+		if (!userId || !inputTeamLink) return;
+	
 		try {
-			const response = await axios.post(`http://15.164.151.130:4000/api/v1/enterTeam/${userId}/${inputTeamLink}`);
+			const response = await axios.post(`http://15.164.151.130:4000/api/v1/enterTeam/${userId}/${inputTeamLink}`, {}, {
+				headers: { 'Authorization': `Bearer ${token}` },
+			});
 			if (response.status === 200) {
 				console.log("팀에 성공적으로 추가되었습니다.");
-				setSearchedTeam(null);
-				setInputTeamLink('');
 				fetchTeams();
+				set_TeamAddModalVisible(false); 
+				setClicked_add(false);
+				setInputTeamLink('');
 			}
 		} catch (error) {
 			console.error("팀에 사용자를 추가하는데 실패했습니다:", error);
 		}
-		
 	};
 
 	return (
@@ -288,12 +296,15 @@ function Coop_Main({ onSelectTeam }) {
 										backgroundColor: "#F2F3F5",
 										borderRadius: 15,
 										flexDirection: 'row',
-										justiftContent: 'center',
+										justifyContent: 'center',
 										alignItems: 'center',
 										marginBottom: 20,
 									}}>
 										<images.team_search width={15} height={15}
-											style={{ margin: 10 }} onPress={() => fetchTeamInfo()} />
+											style={{ margin: 10 }} onPress={() => {
+												fetchTeamInfo();
+												setClickedSearch(!clickedSearch);
+											}} />
 										<TextInput
 											placeholder="팀 협업 링크 또는 태그 입력"
 											value={inputTeamLink}
@@ -302,11 +313,26 @@ function Coop_Main({ onSelectTeam }) {
 										/>
 									</TouchableOpacity>
 
-									<Text onPress={() => handleEnterTeam()}>{searchedTeam}</Text>
+									{clickedSearch && (
+										<HorisontalView>
+											<Text>{searchedTeam}</Text>
+											<TouchableOpacity onPress={() => {
+												handleEnterTeam();
+												set_TeamAddModalVisible(!modal_TeamAddVisible);
+												setClicked_add(false);
+												setClickedSearch(!clickedSearch);
+											}}
+												style={{ marginLeft: 10 }}
+											>
+												<images.plus color={currentTheme.color1} width={20} height={20} />
+											</TouchableOpacity>
+										</HorisontalView>
+									)}
 
 									<TouchableOpacity onPress={() => {
 										set_TeamAddModalVisible(!modal_TeamAddVisible);
 										setClicked_add(false);
+										setClickedSearch(false); // 오류 수정: 여기를 false로 설정
 									}}>
 										<Text>닫기</Text>
 									</TouchableOpacity>
@@ -335,17 +361,19 @@ function Coop_Main({ onSelectTeam }) {
 									</MainText>
 
 									<NotiContainer>
-										{teamTodos[team.teamId] && teamTodos[team.teamId].length > 0 ? (
-											teamTodos[team.teamId].map((todo, index) => (
-												<View key={todo.teamTodoId} style={{ flexDirection: 'row', alignItems: 'center' }}>
-													<Noti todo={todo} index={index} currentTheme={currentTheme} />
-												</View>
-											))
-										) : (
-											<NoTodoNoti>
-												<NoTodoText>팀 일정이 없습니다.</NoTodoText>
-											</NoTodoNoti>
-										)}
+										{
+											teamTodos[team.teamId] && teamTodos[team.teamId].length > 0 ? (
+												teamTodos[team.teamId].map((todo, index) => (
+													<View key={todo.teamTodoId} style={{ flexDirection: 'row', alignItems: 'center' }}>
+														<Noti todo={todo} index={index} currentTheme={currentTheme} />
+													</View>
+												))
+											) : (
+												<NoTodoNoti>
+													<NoTodoText>팀 일정이 없습니다.</NoTodoText>
+												</NoTodoNoti>
+											)
+										}
 									</NotiContainer>
 
 

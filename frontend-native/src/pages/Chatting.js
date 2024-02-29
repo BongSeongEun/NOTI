@@ -51,8 +51,8 @@ function Chatting() {
 			});
 			if (response.data) {
 				addMessage(response.data.chatContent, !response.data.chatWho);
-				setInputValue(''); // 입력 필드 초기화
-				await fetchChatHistory(); // 채팅 목록을 다시 불러와 화면을 업데이트
+				setInputValue('');
+				await fetchChatHistory();
 			}
 		} catch (error) {
 			console.error('Error fetching Gpt response: ', error);
@@ -181,7 +181,8 @@ function Chatting() {
 					<TouchableOpacity onPress={() => handleSubmit(inputValue)}
 					style={{ backgroundColor: currentTheme.color1, borderRadius: 100, width: 45, height: 45, justifyContent: 'center', alignItems: 'center' }}>
 						<images.message_send width={20} height={20}
-							style={{ alignSelf:'center' }} />
+							style={{ alignSelf: 'center' }}
+						/>
 					</TouchableOpacity>
 				</View>
 			</FullView>
