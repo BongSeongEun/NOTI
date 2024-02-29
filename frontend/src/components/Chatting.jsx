@@ -50,6 +50,8 @@ const ChatRole = styled.div`
     width: 200px;
     border-radius: 15px;
     padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
     font-size: 12px;
   }
   &.user-message {
@@ -58,8 +60,8 @@ const ChatRole = styled.div`
     padding: 10px;
     font-size: 12px;
     align-self: flex-end; // 오른쪽 정렬
-    margin-bottom: 15px;
-    margin-top: 15px;
+    margin-bottom: 10px;
+    margin-top: 10px;
   }
 `;
 const SendButton = styled.img`
@@ -71,7 +73,6 @@ const SendButton = styled.img`
 const MessagesContainer = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; // 아래 정렬
   flex-grow: 1; // 부모의 flex-direction이 column이므로 flex-grow를 사용하여 여분의 공간을 채웁니다.
   overflow-y: auto; // 이 부분에서 스크롤을 가능하게 합니다.
   padding: 10px; // 메시지와 컨테이너 가장자리 사이의 여백을 추가합니다.
@@ -97,12 +98,15 @@ function ChatComponent() {
 
   const fetchChatList = async () => {
     try {
-      const response = await axios.get(`/api/v3/chatlist/${userId}`);
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v3/chatlist/${userId}`,
+      );
       setMessages(response.data);
     } catch (error) {
       console.error("채팅 내역을 불러오는 중 오류가 발생했습니다.", error);
     }
   };
+
   // 채팅 내역 불러오기
   useEffect(() => {
     fetchChatList();
@@ -114,10 +118,13 @@ function ChatComponent() {
   const sendMessage = async event => {
     event.preventDefault();
     try {
-      const response = await axios.post(`/api/v3/ask/${userId}`, {
-        chat_content: newMessage,
-        chatWho: false, // 예시로, 사용자 메시지로 설정
-      });
+      const response = await axios.post(
+        `http://15.164.151.130:4000/api/v3/ask/${userId}`,
+        {
+          chat_content: newMessage,
+          chatWho: false, // 예시로, 사용자 메시지로 설정
+        },
+      );
       setMessages([
         ...messages,
         { chat_content: newMessage, chatWho: false },
@@ -141,6 +148,7 @@ function ChatComponent() {
 
   return (
     <ChatDiv>
+      <div ref={messagesEndRef} />
       <MessagesContainer>
         {messages.map((msg, index) => (
           <ChatRole
@@ -150,7 +158,6 @@ function ChatComponent() {
             {msg.chatContent}
           </ChatRole>
         ))}
-        <div ref={messagesEndRef} />
       </MessagesContainer>
       <ChatInputDiv>
         <ChatInput

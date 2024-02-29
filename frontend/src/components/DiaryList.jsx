@@ -60,7 +60,9 @@ const DiaryList = () => {
       const userId = getUserIdFromToken(); // 사용자 ID 가져오기
       try {
         // 실제 userId를 적절히 채워야 합니다.
-        const response = await axios.get(`/api/v2/diarylist/${userId}`);
+        const response = await axios.get(
+          `http://15.164.151.130:4000/api/v2/diarylist/${userId}`,
+        );
         // 날짜 순으로 정렬합니다. (가장 최근 날짜가 먼저 오도록)
         const sortedDiaries = response.data.sort(
           (a, b) => new Date(b.diaryDate) - new Date(a.diaryDate),
