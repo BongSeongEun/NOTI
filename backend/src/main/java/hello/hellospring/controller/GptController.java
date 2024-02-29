@@ -87,7 +87,24 @@ public class GptController {
                 timesString = String.join(", ", nlpTimes);
             } else {
                 // gptTodo가 false 일때만 발동하고, 해당 메시지가 일정완료와 관련된 메시지인지 판단
-                gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+
+                if (userMessage.startsWith("응") || userMessage.startsWith("웅")) {
+
+                    Chat recentTodoFinishChat = chatRepository.
+                            findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                            // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
+                            .orElse(null);
+
+                    if (recentTodoFinishChat != null){
+
+                        gptFinish = true;
+
+                    } else {
+                        gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+                    }
+                } else {
+                    gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+                }
             }
 
             String gptFinishNlp = null;
@@ -183,7 +200,6 @@ public class GptController {
             e.printStackTrace();
             return "일기 생성 중 오류가 발생했어요... :(";
         }
-
     }
 
 
@@ -235,12 +251,8 @@ public class GptController {
                 findByUserIdAndTodoDateAndTodoDone(userId, formattedToday, false);
 
         if (!userTodos.isEmpty()){
-            String nlpCompareTodo = nlpCompareTodoService.askGpt(userTodos);
-            // ["고기", "헬스장", "축구경기", "홍대", "맘스터치"] 형태로 리턴
+            String mostSimilarItem = findMostSimilarItemBasedOnCharacterCount(userTodos, userMessage);
 
-            JSONArray todoArray = new JSONArray(nlpCompareTodo);
-
-            String mostSimilarItem = findMostSimilarItem(todoArray, userMessage);
             System.out.println("userMessage : " + userMessage);
 
             if (mostSimilarItem.isEmpty()){
@@ -254,46 +266,22 @@ public class GptController {
                 todoRepository.markTodoAsDone(userId, mostSimilarItem, formattedToday);
             }
 
-
-
-
-
-            //String compareTodoResult = gptCompareTodo.askGpt(userMessage, nlpCompareTodo);
-
-            // GPT로부터 받은 결과와 일치하는 Todo 항목을 찾음
-//            Todo matchingTodo = userTodos.stream()
-//                    .filter(todo -> compareTodoResult.contains(todo.getTodoTitle()))
-//                    .findFirst()
-//                    .orElse(null);
-//
-//            if (matchingTodo != null) {
-//                // 일치하는 Todo 항목의 todoDone을 true로 설정
-//                matchingTodo.setTodoDone(true);
-//                todoRepository.save(matchingTodo);
-//
-//                System.out.println("todoId: " + matchingTodo.getTodoId() + " 업데이트 성공! :)");
-//            } else {
-//                System.out.println("compareTodoResult와 일치하는 todoTitle이 존재하지 않습니다 ㅇ3ㅇ");
-//
-//                gptAskTodo(userId);
-//
-//            }
         } else {
             System.out.println( userId +"님의 오늘 todo가 존재하지 않습니다 ㅇ3ㅇ");
         }
     }
 
-    //message와 각 요소 사이의 일치하는 글자 수를 계산
-    private String findMostSimilarItem(JSONArray todoArray, String userMessage) throws JSONException {
+    // 가장 많이 일치하는 글자 수를 가진 항목을 찾아냄
+    private String findMostSimilarItemBasedOnCharacterCount(List<String> userTodos, String userMessage) {
+
         int maxCount = 0;
         String mostSimilarItem = "";
 
-        for (int i = 0; i < todoArray.length(); i++) {
-            String item = todoArray.getString(i);
-            int count = countMatchingCharacters(item, userMessage);
+        for (String todo : userTodos) {
+            int count = countMatchingCharacters(todo, userMessage);
             if (count > maxCount) {
                 maxCount = count;
-                mostSimilarItem = item;
+                mostSimilarItem = todo;
             }
         }
         return mostSimilarItem;
