@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-shadow */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
@@ -13,8 +15,9 @@ import {
 	ScrollView,
 	TouchableOpacity,
 	Alert,
+	Text,
 } from "react-native";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { useNavigation, useIsFocused, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
@@ -81,31 +84,28 @@ function Diary_Main({ }) {
         }
 	};
 
-	useEffect(() => {
-		let isMounted = true;
-	  
-		const fetchDiaries = async () => {
-			const token = await AsyncStorage.getItem('token');
-			if (token && isMounted) {
-				const userId = getUserIdFromToken(token);
-				try {
-					const response = await axios.get(`http://15.164.151.130:4000/api/v2/diarylist/${userId}`, {
-						headers: { 'Authorization': `Bearer ${token}` },
-					});
-					if (response.status === 200 && response.data) {
-						setDiaries(response.data);
-					}
-				} catch (error) {
-					console.error("Error fetching diaries:", error);
-				}
-			}
-		};
-		fetchDiaries();
-	  
-		return () => {
-			isMounted = false;
-		};
-	}, [isFocused]);
+	const fetchDiaries = async () => {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+            const userId = getUserIdFromToken(token);
+            try {
+                const response = await axios.get(`http://15.164.151.130:4000/api/v2/diarylist/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                if (response.status === 200 && response.data) {
+                    setDiaries(response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching diaries:", error);
+            }
+        }
+    };
+
+	useFocusEffect(
+        React.useCallback(() => {
+            fetchDiaries();
+        }, [])
+    );
 
 	const DiaryFrame = ({ diary }) => {
 		const diaryDate = new Date(diary.diaryDate);
@@ -121,13 +121,13 @@ function Diary_Main({ }) {
 			return (
 				<>
 					<DiaryText
-						style={{ margin: 15 }}
-						numberOfLines={isExpanded ? undefined : 8}
+						style={{ margin: 10 }}
+						numberOfLines={isExpanded ? undefined : 7}
 						onTextLayout={!isExpanded ? onTextLayout : undefined}
 					>
 						{content}
 					</DiaryText>
-					{!isExpanded && lineCount > 8 && (
+					{!isExpanded && lineCount > 7 && (
 						<TouchableOpacity onPress={() => setIsExpanded(true)}>
 							<DiaryText style={{ marginLeft: 20 }} color={"#B7BABF"}>더보기...</DiaryText>
 						</TouchableOpacity>
@@ -136,7 +136,7 @@ function Diary_Main({ }) {
 			);
 		};
 
-		const pictureHeight = !isExpanded && lineCount <= 8 ? 110 : 60;
+		const pictureHeight = !isExpanded && lineCount <= 5 ? 110 : 60;
 		const pictureTop = pictureHeight === 110 ? 170 : 220;
 
 		return (
@@ -198,6 +198,29 @@ function Diary_Main({ }) {
 		}
 	};
 
+	const createDiary = async () => {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+            Alert.alert("오류", "로그인 정보를 찾을 수 없습니다.");
+            return;
+        }
+        
+        try {
+            const userId = getUserIdFromToken(token);
+            const response = await axios.get(`http://15.164.151.130:4000/api/v3/createDiary/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                params: { diaryDate: selectedDate },
+            });
+
+            if (response.data) {
+                Alert.alert("성공", "일기가 성공적으로 생성되었습니다.", [{ text: "OK", onPress: () => fetchDiaries() }]);
+            }
+        } catch (error) {
+            console.error("Error creating diary:", error);
+            Alert.alert("생성 실패", "일기 생성 중 문제가 발생했습니다.");
+        }
+    };
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
@@ -244,6 +267,10 @@ function Diary_Main({ }) {
 								diary={diary}
 							/>
 						))}
+
+						<TouchableOpacity onPress={createDiary} style={{ margin: 10, alignItems: 'center' }}>
+							<Text style={{ color: currentTheme.color1, fontSize: 15 }}>일기 생성</Text>
+						</TouchableOpacity>
 					</MainView>
 				</ScrollView>
 			</FullView>
@@ -308,7 +335,7 @@ const Bar = styled.View`
 const DiaryContainer = styled.View`
 	position: relative;
 	width: 300px;
-	height: 350px;
+	height: 320px;
 `;
 
 const Diary_Frame = styled.TouchableOpacity`

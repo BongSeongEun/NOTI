@@ -17,10 +17,6 @@ function Login({}) {
         onPress={() => navigation.navigate('kakaoLogin', { nextScreen: 'Register' })}>
       </Button>
       <Button
-        title="채팅"
-        onPress={() => navigation.navigate('Chatting')}>
-      </Button>
-      <Button
         title="로그인"
         onPress={() => navigation.navigate('kakaoLogin', { nextScreen: 'Todo' })}>
       </Button>

@@ -6,12 +6,13 @@
 import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
 import {
-   ScrollView,
-   Text,
-   Modal,
-   Alert,
-   TextInput,
-   Button,
+	ScrollView,
+	Text,
+	Modal,
+	Alert,
+	TextInput,
+	Button,
+	TouchableOpacity,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -171,119 +172,123 @@ function Diary() {
 		});
 	};
 
-   return (
-      <ThemeProvider theme={currentTheme}>
-         <FullView>
-            <MainView>
-               <HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-                  <Profile source={base64Image ? { uri: base64Image } : images.profile}
-                     style={{ marginTop: 20 }} />
-                  <ProfileTextContainer>
-                     <MainText>{userNickname} 님,</MainText>
-                     <MainText style={{ color: currentTheme.color1 }}>
-                        {diaryDate} 일기입니다!
-                     </MainText>
-                  </ProfileTextContainer>
-               </HorisontalView>
-            </MainView>
-         </FullView>
+	return (
+		<ThemeProvider theme={currentTheme}>
+			<FullView>
+				<MainView>
+					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
+						<Profile source={base64Image ? { uri: base64Image } : images.profile}
+							style={{ marginTop: 20 }} />
+						<ProfileTextContainer>
+							<MainText>{userNickname} 님,</MainText>
+							<MainText style={{ color: currentTheme.color1 }}>
+								{diaryDate} 일기입니다!
+							</MainText>
+						</ProfileTextContainer>
+					</HorisontalView>
+				</MainView>
+			</FullView>
          
-         <FullView style={{ flex: 1, marginBottom: 80 }}>
-            <Bar />
+			<FullView style={{ flex: 1, marginBottom: 80 }}>
+				<Bar />
 
-            <ScrollView>
-               <MainView>
-                  <HorisontalView style={{ justifyContent: 'flex-end', padding: 15 }}>
-                     {!isEditing ? (
-                        <>
-                           <images.diary_modify width={20} height={20}
-                              color={clicked_modify ? currentTheme.color1 : "#B7BABF"}
-                              style={{ marginRight: 10 }}
-                              onPress={() => {
-                                 setClicked_modify(!clicked_modify);
-                                 toggleEdit();
-                              }} />
-                           <images.diary_delete width={20} height={20}
-                              color={clicked_delete ? currentTheme.color1 : "#B7BABF"}
-                              onPress={() => {
-                                 setClicked_delete(!clicked_delete);
-                                 set_DeleteModalVisible(true);
-                              }} />
-                        </>
-                     ) : (
-                        <Text onPress={saveChanges} style={{ color: currentTheme.color1 }}>완료</Text>
-                     )}
-                  </HorisontalView>
+				<ScrollView>
+					<MainView>
+						<HorisontalView style={{ justifyContent: 'flex-end', padding: 15 }}>
+							{!isEditing ? (
+								<>
+									<images.diary_modify width={20} height={20}
+										color={clicked_modify ? currentTheme.color1 : "#B7BABF"}
+										style={{ marginRight: 10 }}
+										onPress={() => {
+											setClicked_modify(!clicked_modify);
+											toggleEdit();
+										}} />
+									<images.diary_delete width={20} height={20}
+										color={clicked_delete ? currentTheme.color1 : "#B7BABF"}
+										onPress={() => {
+											setClicked_delete(!clicked_delete);
+											set_DeleteModalVisible(true);
+										}} />
+								</>
+							) : (
+								<Text onPress={saveChanges} style={{ color: currentTheme.color1 }}>완료</Text>
+							)}
+						</HorisontalView>
 
-                  {!isEditing ? (
-                     <>
-                        <Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
-                        <DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
-                        {diaryImg ? (
-                           <Diary_Picture source={{ uri: diaryImg }} />
-                        ) : null}
-                     </>
-                  ) : (
-                     <>
-                        <TextInput
-                           value={diaryTitle}
-                           onChangeText={setDiaryTitle}
-                           style={{ margin: 10, fontSize: 20, borderBottomWidth: 1, borderColor: '#ccc' }}
-                        />
-                        <TextInput
-                           value={diaryContent}
-                           onChangeText={setDiaryContent}
-                           multiline
-                           style={{ margin: 10, textAlignVertical: 'top', fontSize: 10, borderRadius: 15 }}
-                        />
-                        <Button title="사진 선택" onPress={selectImage} />
-                        {diaryImg && <Diary_Picture source={{ uri: diaryImg }} style={{ width: 200, height: 200, margin: 10 }} />}
-                     </>
-                  )}
+						{!isEditing ? (
+							<>
+								<Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
+								<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
+								{diaryImg ? (
+									<Diary_Picture source={{ uri: diaryImg }} style={{ width: 250, height: 250, margin: 10 }} />
+								) : null}
+							</>
+						) : (
+							<>
+								<TextInput
+									value={diaryTitle}
+									onChangeText={setDiaryTitle}
+									style={{ margin: 10, fontSize: 20, borderBottomWidth: 1, borderColor: '#ccc' }}
+								/>
+								<TextInput
+									value={diaryContent}
+									onChangeText={setDiaryContent}
+									multiline
+									style={{ margin: 10, textAlignVertical: 'top', fontSize: 10, minHeight: 100, padding: 5 }}
+								/>
+								{diaryImg ? (
+									<TouchableOpacity onPress={selectImage}>
+										<Diary_Picture source={{ uri: diaryImg }} style={{ width: 250, height: 250, margin: 10, justifyContent: 'center', alignItems: 'center', borderRadius: 15 }} />
+									</TouchableOpacity>
+								) : (
+									<TouchableOpacity onPress={selectImage} style={{ width: 250, height: 250, backgroundColor: '#D3D3D3', justifyContent: 'center', alignSelf: 'center', alignItems: 'center', margin: 10, borderRadius: 15 }}>
+										<Text style={{ color: '#ffffff' }}>사진 선택</Text>
+									</TouchableOpacity>
+								)}
+							</>
+						)}
+						<Modal
+							animationType="slide"
+							transparent={true}
+							visible={modal_DeleteVisible}
+							onRequestClose={() => set_DeleteModalVisible(false)}>
+							<ModalContainer>
+								<ModalView>
+									<MainText style={{ margin: 20, fontSize: 15 }}>일기를 정말 삭제하시겠습니까? </MainText>
+									<HorisontalView style={{ alignItems: 'center', justifyContent: 'center' }}>
+										<Delete
+											onPress={() => {
+												set_DeleteModalVisible(!modal_DeleteVisible);
+												setClicked_delete(false);
+												deleteDiary();
+											}}
+											style={{ backgroundColor: "#F2F3F5" }}
+										>
+											<Text>예</Text>
+										</Delete>
 
-                  <Modal
-                     animationType="slide"
-                     transparent={true}
-                     visible={modal_DeleteVisible}
-                     onRequestClose={() => set_DeleteModalVisible(false)}>
-                     <ModalContainer>
-                        <ModalView>
-                           <MainText style={{ margin: 20, fontSize: 15 }}>일기를 정말 삭제하시겠습니까? </MainText>
-                           <HorisontalView style={{ alignItems: 'center', justifyContent: 'center' }}>
-                              <Delete
-                                 onPress={() => {
-                                    set_DeleteModalVisible(!modal_DeleteVisible);
-                                    setClicked_delete(false);
-                                    deleteDiary();
-                                 }}
-                                 style={{ backgroundColor: "#F2F3F5" }}
-                              >
-                                 <Text>예</Text>
-                              </Delete>
-
-                              <Delete
-                                 onPress={() => {
-                                    set_DeleteModalVisible(!modal_DeleteVisible);
-                                    setClicked_delete(false);
-                                 }}
-                                 style={{ backgroundColor: currentTheme.color1 }}
-                              >
+										<Delete
+											onPress={() => {
+												set_DeleteModalVisible(!modal_DeleteVisible);
+												setClicked_delete(false);
+											}}
+											style={{ backgroundColor: currentTheme.color1 }}
+										>
                                  
-                                 <Text style={{ color: "white" }}>아니요</Text>
-                              </Delete>
-                           </HorisontalView>
-                        </ModalView>
-                     </ModalContainer>
-                  </Modal>
-               </MainView>
-            </ScrollView>
-         </FullView>
-         <Navigation_Bar selectedTheme={currentTheme} />
-      </ThemeProvider>
-   );
+											<Text style={{ color: "white" }}>아니요</Text>
+										</Delete>
+									</HorisontalView>
+								</ModalView>
+							</ModalContainer>
+						</Modal>
+					</MainView>
+				</ScrollView>
+			</FullView>
+			<Navigation_Bar />
+		</ThemeProvider>
+	);
 }
-
-export default Diary;
 
 const FullView = styled.View`
    width: 100%;
@@ -380,3 +385,5 @@ const Diary_Picture = styled.Image`
    align-self: center;
    border-radius: 15px;
 `;
+
+export default Diary;
