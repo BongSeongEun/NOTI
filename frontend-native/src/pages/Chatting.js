@@ -1,3 +1,4 @@
+/* eslint-disable curly */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
@@ -7,7 +8,7 @@
 import styled, { ThemeProvider } from 'styled-components/native';
 
 import React, {useState, useEffect, useRef } from 'react';
-import {View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import {View, Text, ScrollView, TouchableOpacity, TextInput, Keyboard, Platform } from 'react-native';
 import axios from 'axios';
 import ChatMessage from '../components/ChatMessage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -164,28 +165,23 @@ function Chatting() {
 					</MainView>
 				</ScrollView>
 
-				<View style={{ flexDirection: 'row', alignItems: 'center', padding: 8 }}>
-					<TextInput
+				<View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, width: 350, alignSelf:'center', justifyContent: 'center' }}>
+					<InputBox
 						style={{
 							flex: 1,
 							borderWidth: 1,
 							borderColor: '#ccc',
-							borderRadius: 5,
+							borderRadius: 15,
 							marginRight: 10,
 						}}
 						value={inputValue}
 						onChangeText={text => setInputValue(text)}
 						placeholder="메세지를 입력해주세요"
 					/>
-					<TouchableOpacity onPress={() => handleSubmit(inputValue)}>
-						<View
-							style={{
-								backgroundColor: currentTheme.color1,
-								borderRadius: 5,
-								padding: 5,
-							}}>
-							<Text style={{ color: 'white' }}>보내기</Text>
-						</View>
+					<TouchableOpacity onPress={() => handleSubmit(inputValue)}
+					style={{ backgroundColor: currentTheme.color1, borderRadius: 100, width: 45, height: 45, justifyContent: 'center', alignItems: 'center' }}>
+						<images.message_send width={20} height={20}
+							style={{ alignSelf:'center' }} />
 					</TouchableOpacity>
 				</View>
 			</FullView>
@@ -240,6 +236,15 @@ const Bar = styled.View`
     width: 100%;
     height: 1px;
     background-color: #B7BABF;
+`;
+
+const InputBox = styled.TextInput`
+    color: black;
+    font-size: 10px;
+    font-weight: normal;
+    width: 100%;
+    height: 100%;
+    margin-left: 10px;
 `;
 
 export default Chatting;

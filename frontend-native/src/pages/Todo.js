@@ -21,6 +21,11 @@ import { format, parseISO } from "date-fns";
 import { Calendar } from "react-native-calendars";
 import TimeTable from "../components/TimeTable";
 
+const addOpacityToColor = (color, opacity) => {
+    const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+    return `${color}${hexOpacity}`;
+};
+
 function Todo() {
 	const navigation = useNavigation();
     const [events, setEvents] = useState([]);
@@ -46,7 +51,11 @@ function Todo() {
         }, [selectedDate])
     );
 
-	
+	const addOpacityToColor = (color, opacity) => {
+		const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+		return `${color}${hexOpacity}`;
+	};
+
 	const formatDate = date => {
 		const d = new Date(date);
 		const year = d.getFullYear();
@@ -271,7 +280,7 @@ function Todo() {
 						{events.map((event, index) => (
 							<Noti key={event.todoId}
 								style={{
-									backgroundColor: event.selectedColor,
+									backgroundColor: event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor,
 								}}
 								onPress={() => {
 									setModalVisible(true);
@@ -279,7 +288,7 @@ function Todo() {
 								}}>
 								<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
 									{event.todoDone && <images.noticheck width={15} height={15}
-										color={event.selectedColor} /> }
+										color={event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor} /> }
 								</Noti_Check>
 								<NotiTextContainer>
 									<NotiText>{event.todoTitle}</NotiText>
@@ -302,7 +311,6 @@ function Todo() {
 							<ModalContainer>
 								<ModalView>
 									<ModalContent>
-
 										<TouchableOpacity onPress={() => {
 											navigation.navigate("Todo_Add", {
 												todoId: selectedEvent.todoId,

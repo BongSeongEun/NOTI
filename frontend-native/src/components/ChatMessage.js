@@ -12,18 +12,12 @@ const MessageContainer = styled.View`
 	margin: 5px 0;
 	align-self: ${props => props.isUser ? 'flex-end' : 'flex-start'};
 	max-width: 70%;
+	${(props) => props.isUser ? 'border-bottom-right-radius: 0;' : 'border-bottom-left-radius: 0;'}
 `;
 
 const MessageText = styled.Text`
 	font-size: 10px;
   	color: ${props => props.isUser ? 'white' : 'black'};
-`;
-
-const DateText = styled.Text`
-  color: #767676;
-  font-size: 12px;
-  text-align: center;
-  margin-bottom: 4px;
 `;
 
 const ChatMessage = ({ message, isUser, userColor, date }) => {
