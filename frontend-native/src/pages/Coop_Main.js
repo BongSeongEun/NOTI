@@ -37,8 +37,6 @@ function Coop_Main({ onSelectTeam }) {
 	const [teamTodos, setTeamTodos] = useState([]);
 	const [searchedTeam, setSearchedTeam] = useState(null);
 
-	const host = "192.168.30.197";
-
 	useEffect(() => {
 		fetchUserData();
 		fetchTeams();
@@ -65,13 +63,13 @@ function Coop_Main({ onSelectTeam }) {
 	};
 
 	const fetchUserData = async () => {
-		const storedToken = await AsyncStorage.getItem('token');
-		setToken(storedToken);
+		 storedToken = await AsyncStorage.getItem('token');
+		setToken(storedToken);const
 
 		if (storedToken) {
 			const userId = getUserIdFromToken(storedToken);
 			try {
-				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 					headers: {
 						'Authorization': `Bearer ${storedToken}`,
 					},
@@ -105,7 +103,7 @@ function Coop_Main({ onSelectTeam }) {
 	
 		try {
 			const userId = getUserIdFromToken(storedToken);
-			const response = await axios.get(`http://${host}:4000/api/v1/getTeam/${userId}`, {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getTeam/${userId}`, {
 				headers: { Authorization: `Bearer ${storedToken}` },
 			});
 			setTeams(response.data);
@@ -126,7 +124,7 @@ function Coop_Main({ onSelectTeam }) {
 	const fetchTeamMembers = async (teamId) => {
 		try {
 			const token = await AsyncStorage.getItem('token');
-			const response = await axios.get(`http://${host}:4000/api/v1/getUserTeam/${teamId}`, {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getUserTeam/${teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			setTeamMembersCount((prevState) => ({
@@ -151,7 +149,7 @@ function Coop_Main({ onSelectTeam }) {
 
 	const leaveTeam = async (teamId, userId) => {
 		try {
-			const response = await axios.delete(`http://${host}:4000/api/v1/leaveTeam/${teamId}/${userId}`, {
+			const response = await axios.delete(`http://15.164.151.130:4000/api/v1/leaveTeam/${teamId}/${userId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			if (response.status === 200) {
@@ -181,7 +179,7 @@ function Coop_Main({ onSelectTeam }) {
 
 	const fetchTeamTodos = async (teamId) => {
 		try {
-			const response = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId}`);
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getTeamTodo/${teamId}`);
 			if (response.status === 200) {
 				setTeamTodos(prevTodos => ({
 					...prevTodos,
@@ -195,7 +193,7 @@ function Coop_Main({ onSelectTeam }) {
 
 	const fetchTeamInfo = async () => {
 		try {
-			const response = await axios.get(`http://${host}:4000/api/v1/getTeamInfo/${inputTeamLink}`);
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getTeamInfo/${inputTeamLink}`);
 			if (response.status === 200 && response.data) {
 				setSearchedTeam(response.data);
 			} else {
@@ -210,7 +208,7 @@ function Coop_Main({ onSelectTeam }) {
 	const handleEnterTeam = async () => {
 		const userId = getUserIdFromToken(token);
 		try {
-			const response = await axios.post(`http://${host}:4000/api/v1/enterTeam/${userId}/${inputTeamLink}`);
+			const response = await axios.post(`http://15.164.151.130:4000/api/v1/enterTeam/${userId}/${inputTeamLink}`);
 			if (response.status === 200) {
 				console.log("팀에 성공적으로 추가되었습니다.");
 				setSearchedTeam(null);

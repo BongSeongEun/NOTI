@@ -38,8 +38,6 @@ function Diary_Main({ }) {
 	const [diaries, setDiaries] = useState([]);
 	const isFocused = useIsFocused();
 
-	const host = "192.168.30.197";
-	
     useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');
@@ -47,7 +45,7 @@ function Diary_Main({ }) {
 			if (token) {
 				const userId = getUserIdFromToken(token);
 				try {
-					const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+					const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 						headers: {
 							'Authorization': `Bearer ${token}`,
 						},
@@ -91,7 +89,7 @@ function Diary_Main({ }) {
 			if (token && isMounted) {
 				const userId = getUserIdFromToken(token);
 				try {
-					const response = await axios.get(`http://${host}:4000/api/v2/diarylist/${userId}`, {
+					const response = await axios.get(`http://15.164.151.130:4000/api/v2/diarylist/${userId}`, {
 						headers: { 'Authorization': `Bearer ${token}` },
 					});
 					if (response.status === 200 && response.data) {

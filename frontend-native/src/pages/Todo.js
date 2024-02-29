@@ -35,7 +35,6 @@ function Todo() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState(null);
 	const [clicked_delete, setClicked_delete] = useState(false);
-	const host = "192.168.30.197";
 
     useEffect(() => {
         fetchUserData();
@@ -60,7 +59,7 @@ function Todo() {
 		const formattedDate = formatDate(selectedDate);
 	
 		try {
-		  const userResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+		  const userResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 			headers: {
 			  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 			},
@@ -75,7 +74,7 @@ function Todo() {
 			  setCurrentTheme(theme[userThemeName]);
 			  setBase64Image(userProfileImage || ''); 
 			  setUserNickname(nickname || ''); 
-			  const eventsResponse = await axios.get(`http://${host}:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
+			  const eventsResponse = await axios.get(`http://15.164.151.130:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
 				headers: {
 				  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 				},
@@ -141,7 +140,7 @@ function Todo() {
 		const newCompletedStatus = !events[index].todoDone;
 		try {
 			const response = await axios.put(
-				`http://${host}:4000/api/v1/updateTodo/${userId}/${todoId}`, {
+				`http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`, {
 					...events[index],
 					todoDone: newCompletedStatus,
 				}, {
@@ -201,7 +200,7 @@ function Todo() {
 		const userId = await getUserIdFromToken();
 		try {
 			const response = await axios.delete(
-				`http://{${host}}:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
+				`http://15.164.151.130:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
 				{
 					headers: {
 						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,

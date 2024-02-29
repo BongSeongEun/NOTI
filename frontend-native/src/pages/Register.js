@@ -19,7 +19,7 @@ import theme from '../components/theme';
 const Register = () => {
 	const navigation = useNavigation();
 	const email = 'streethong@naver.com';
-	const host = "192.168.30.197";
+	const host = "192.168.30.214";
 
 	const [token, setToken] = useState(null);
 
@@ -33,6 +33,7 @@ const Register = () => {
 	const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 	const [isDiaryTimePickerVisible, setDiaryTimePickerVisible] = useState(false);
+	const [userEmail, setUserEmail] = useState(false);
 
 	useEffect(() => {
 		const fetchAndDecodeToken = async () => {
@@ -129,7 +130,7 @@ const Register = () => {
 			const userId = getUserIdFromToken(storedToken);
 			const preparedImageData = prepareImageDataForServer(imageFile);
 		
-			const response = await axios.put(`http://${host}:4000/api/v1/user/${userId}`, {
+			const response = await axios.put(`http://15.164.151.130:4000/api/v1/user/${userId}`, {
 				userNickname: String(inputName),
 				userColor: String(selectedTheme),
 				diaryTime: String(selectedDiaryTime),
@@ -189,8 +190,8 @@ const Register = () => {
 	const handleThemeChange = selectedThemeName  => {
 		const newTheme = theme[selectedThemeName ];
 		if (newTheme) {
-		  setCurrentTheme(newTheme); // UI 상에서 테마를 적용
-		  setSelectedTheme(selectedThemeName ); // 선택된 테마 이름을 상태에 저장
+		  setCurrentTheme(newTheme);
+		  setSelectedTheme(selectedThemeName );
 		} else {
 		  console.error("Selected theme does not exist:", selectedThemeName );
 		}

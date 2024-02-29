@@ -39,7 +39,6 @@ function Todo_Add({ }) {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
-	const host = "192.168.30.197";
 
 	useEffect(() => {
 		if (isEditing) {
@@ -113,7 +112,7 @@ function Todo_Add({ }) {
 	const fetchUserData = async () => { 
 		const userId = await getUserIdFromToken();
 		try {
-			const userResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+			const userResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 			  headers: {
 				'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 			  },
@@ -137,8 +136,8 @@ function Todo_Add({ }) {
 		const formattedSelectedDate = selectedDate.replace(/-/g, '.');
 		
 		const url = isEditing
-			? `http://${host}:4000/api/v1/updateTodo/${userId}/${todoId}`
-			: `http://${host}:4000/api/v1/createTodo/${userId}`;
+			? `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`
+			: `http://15.164.151.130:4000/api/v1/createTodo/${userId}`;
 		
 		const method = isEditing ? 'put' : 'post';
 		

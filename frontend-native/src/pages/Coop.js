@@ -40,9 +40,6 @@ function Coop({ }) {
 	const [clicked_memo, setClicked_memo] = useState(false);
 	const [memoContent, setMemoContent] = useState('');
 	const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
-	const isFocused = useIsFocused();
-
-	const host = "192.168.30.197";
 
 	useEffect(() => {
 		fetchUserData();
@@ -57,7 +54,7 @@ function Coop({ }) {
 		if (token) {
 			const userId = getUserIdFromToken(token);
 			try {
-				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 					headers: {
 						'Authorization': `Bearer ${token}`,
 					},
@@ -81,7 +78,7 @@ function Coop({ }) {
 		const token = await AsyncStorage.getItem('token');
 		if (token) {
 			try {
-				const todoresponse = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId.teamId}`, {
+				const todoresponse = await axios.get(`http://15.164.151.130:4000/api/v1/getTeamTodo/${teamId.teamId}`, {
 					headers: {
 						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 					},
@@ -137,7 +134,7 @@ function Coop({ }) {
 			const newCompletedStatus = !events[index].teamTodoDone;
 			const token = await AsyncStorage.getItem('token');
             const response = await axios.put(
-                `http://${host}:4000/api/v1/updateTeamTodo/${teamId.teamId}/${teamTodoId}`,
+                `http://15.164.151.130:4000/api/v1/updateTeamTodo/${teamId.teamId}/${teamTodoId}`,
                 {
                     ...events[index],
                     teamTodoDone: newCompletedStatus, 
@@ -167,11 +164,11 @@ function Coop({ }) {
 	const fetchTeamMembers = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await axios.get(`http://${host}:4000/api/v1/getUserTeam/${teamId.teamId}`, {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getUserTeam/${teamId.teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			const memberInfos = await Promise.all(response.data.map(async (member) => {
-				const profileResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${member.userId}`, {
+				const profileResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${member.userId}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				return {
@@ -220,12 +217,12 @@ function Coop({ }) {
 		if (!token) return;
 	
 		try {
-			const scheduleResponse = await axios.get(`http://${host}:4000/api/v1/getSchedule/${teamId.teamId}`, {
+			const scheduleResponse = await axios.get(`http://15.164.151.130:4000/api/v1/getSchedule/${teamId.teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 	
 			let todosDetails = await Promise.all(scheduleResponse.data.map(async ({ todoId }) => {
-				const todoResponse = await axios.get(`http://${host}:4000/api/v1/getTodoByTodoId/${todoId}`, {
+				const todoResponse = await axios.get(`http://15.164.151.130:4000/api/v1/getTodoByTodoId/${todoId}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				return todoResponse.data;
@@ -268,7 +265,7 @@ function Coop({ }) {
 	const fetchTeamMemo = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await axios.get(`http://${host}:4000/api/v1/getTeamMemo/${teamId.teamId}`, {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getTeamMemo/${teamId.teamId}`, {
 				headers: {
 					'Authorization': `Bearer ${token}`,
 				},
