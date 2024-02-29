@@ -2,9 +2,8 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import styled, { ThemeProvider } from 'styled-components/native';
-import { ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import styled from 'styled-components/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { decode } from 'base-64';
 import axios from 'axios';
 
@@ -14,9 +13,10 @@ import images from "../components/images";
 import theme from "../components/theme";
 
 const Navigation_Bar = ({ selectedTheme }) => {
-    const navigation = useNavigation();
+	const navigation = useNavigation();
+	const route = useRoute();
+
     const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
-	const [selectedIcon, setSelectedIcon] = useState(null);
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -55,11 +55,13 @@ const Navigation_Bar = ({ selectedTheme }) => {
         }
     };
 
-    const handlePress = (type) => {
-        if (selectedIcon !== type) {
-            setSelectedIcon(type);
-        }
-        navigation.navigate(type,  { selectedTheme: selectedTheme });
+	const handlePress = (type) => {
+        navigation.navigate(type);
+    };
+
+    const getIconColor = (pageNameGroup) => {
+        const isCurrentPage = pageNameGroup.includes(route.name);
+        return isCurrentPage ? currentTheme.color1 : "#B7BABF";
     };
 
     return (
@@ -67,31 +69,31 @@ const Navigation_Bar = ({ selectedTheme }) => {
             <images.diary
                 width={25}
                 height={25}
-                color={selectedIcon === 'Diary_Main' ? currentTheme.color1 : "#B7BABF"}
+                color={getIconColor(['Diary_Main', 'Diary'])}
                 onPress={() => handlePress('Diary_Main')}
             />
             <images.stat
                 width={25}
                 height={25}
-                color={selectedIcon === 'Stat' ? currentTheme.color1 : "#B7BABF"}
+                color={getIconColor(['Stat'])}
                 onPress={() => handlePress('Stat')}
             />
             <images.todo
-				width={25}
-				height={25}
-				color={selectedIcon === 'Todo' ? currentTheme.color1 : "#B7BABF"}
-				onPress={() => handlePress('Todo')}
+                width={25}
+                height={25}
+                color={getIconColor(['Todo', 'Coop', 'Coop_Main'])}
+                onPress={() => handlePress('Todo')}
             />
             <images.chatting
                 width={25}
                 height={25}
-                color={selectedIcon === 'Chatting' ? currentTheme.color1 : "#B7BABF"}
+                color={getIconColor(['Chatting'])}
                 onPress={() => handlePress('Chatting')}
             />
             <images.setting
                 width={25}
                 height={25}
-                color={selectedIcon === 'Setting' ? currentTheme.color1 : "#B7BABF"}
+                color={getIconColor(['Setting'])}
                 onPress={() => handlePress('Setting')}
             />
         </NavigationView>

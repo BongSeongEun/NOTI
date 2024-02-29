@@ -38,13 +38,14 @@ function Todo() {
 
     useEffect(() => {
         fetchUserData();
-    }, [selectedDate]);
+    }, []);
 
-	useFocusEffect(
+    useFocusEffect(
         useCallback(() => {
             fetchUserData();
         }, [selectedDate])
-	);
+    );
+
 	
 	const formatDate = date => {
 		const d = new Date(date);
@@ -209,8 +210,8 @@ function Todo() {
 			);
 	
 			if (response.status === 200) {
-				setModalVisible(false); // 모달을 닫습니다.
-				fetchUserData(); // Todo 목록을 새로고침합니다.
+				setModalVisible(false);
+				fetchUserData();
 			} else {
 				console.error("Failed to delete the event:", response);
 			}

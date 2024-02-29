@@ -1,7 +1,11 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-shadow */
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable quotes */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
-/* eslint-disable prettier/prettier */
 
 import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
@@ -161,7 +165,7 @@ const Register = () => {
 				madiaType: 'photo',
 				maxWidth: 512,
 				maxHeight: 512,
-				includeBase64: true
+				includeBase64: true,
 			},
 			(response) => {
 				if (response.didCancel) {
@@ -210,97 +214,97 @@ const Register = () => {
 								source={response ? { uri: response.assets[0].uri } : images.profile}
 								style={{ width: 100, height: 100, borderRadius: 100 }}
 							/>
-							<GalleryButton onPress={()=>onSelectImage()}>
+							<GalleryButton onPress={() => onSelectImage()}>
 								<Images source={images.gallery} size="20px" />
 							</GalleryButton>
 						</HorisontalView>
 
 						<RegularText>사용자 이름 *</RegularText>
 						<TextBox>
-						<InputName
-							placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
-							value={inputName}
-							onChangeText={(text) => setInputName(text)}
-						/>
+							<InputName
+								placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
+								value={inputName}
+								onChangeText={(text) => setInputName(text)}
+							/>
 						</TextBox>
 
 						<RegularText>이메일</RegularText>
 						<TextBox color="#D5D5D5">
-						<TextBoxText>{email}</TextBoxText>
+							<TextBoxText>{email}</TextBoxText>
 						</TextBox>
 
 						<HorisontalView>
-						<RegularText>방해 금지 시간</RegularText>
-						<HorisontalViewEnd>
-							<DisturbTimeButton
-							thumbColor="#FFFF"
-							onValueChange={() => setButtonClicked((prevState) => !prevState)}
-							value={Buttonclicked}
-							/>
-						</HorisontalViewEnd>
+							<RegularText>방해 금지 시간</RegularText>
+							<HorisontalViewEnd>
+								<DisturbTimeButton
+									thumbColor="#FFFF"
+									onValueChange={() => setButtonClicked((prevState) => !prevState)}
+									value={Buttonclicked}
+								/>
+							</HorisontalViewEnd>
 						</HorisontalView>
 
 						{Buttonclicked && (
-						<>
-							<TextBox
-							onPress={() => showDatePicker('startTime')}
-							style={{ flexDirection: 'row' }}
-							>
-							<TextBoxText>시작 시간</TextBoxText>
-							<Time>{selectedStartTime}</Time>
-							</TextBox>
-							<DateTimePickerModal
-							isVisible={isStartTimePickerVisible}
-							mode="time"
-							onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
-							onCancel={hideDatePicker}
-							/>
+							<>
+								<TextBox
+									onPress={() => showDatePicker('startTime')}
+									style={{ flexDirection: 'row' }}
+								>
+									<TextBoxText>시작 시간</TextBoxText>
+									<Time>{selectedStartTime}</Time>
+								</TextBox>
+								<DateTimePickerModal
+									isVisible={isStartTimePickerVisible}
+									mode="time"
+									onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
+									onCancel={hideDatePicker}
+								/>
 
-							<TextBox onPress={() => showDatePicker('endTime')}>
-							<TextBoxText>종료 시간</TextBoxText>
-							<Time>{selectedEndTime}</Time>
-							</TextBox>
-							<DateTimePickerModal
-							isVisible={isEndTimePickerVisible}
-							mode="time"
-							onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
-							onCancel={hideDatePicker}
-							/>
-						</>
+								<TextBox onPress={() => showDatePicker('endTime')}>
+									<TextBoxText>종료 시간</TextBoxText>
+									<Time>{selectedEndTime}</Time>
+								</TextBox>
+								<DateTimePickerModal
+									isVisible={isEndTimePickerVisible}
+									mode="time"
+									onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
+									onCancel={hideDatePicker}
+								/>
+							</>
 						)}
 
 						<RegularText>일기 생성 시간 *</RegularText>
 						<TextBox onPress={() => showDatePicker('diary')}>
-						<Time>{selectedDiaryTime}</Time>
-						<DateTimePickerModal
-							isVisible={isDiaryTimePickerVisible}
-							mode="time"
-							onConfirm={(date) => handleTimePickerConfirm('diary', date)}
-							onCancel={hideDatePicker}
-						/>
+							<Time>{selectedDiaryTime}</Time>
+							<DateTimePickerModal
+								isVisible={isDiaryTimePickerVisible}
+								mode="time"
+								onConfirm={(date) => handleTimePickerConfirm('diary', date)}
+								onCancel={hideDatePicker}
+							/>
 						</TextBox>
 
 						<RegularText>테마 선택</RegularText>
 						<HorisontalView>
 							<ThemedButton
-							style={{ backgroundColor: theme.OrangeTheme.color1 }}
-							onPress={() => handleThemeChange("OrangeTheme")}
+								style={{ backgroundColor: theme.OrangeTheme.color1 }}
+								onPress={() => handleThemeChange("OrangeTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.RedTheme.color1 }}
-							onPress={() => handleThemeChange("RedTheme")}
+								style={{ backgroundColor: theme.RedTheme.color1 }}
+								onPress={() => handleThemeChange("RedTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.PinkTheme.color1 }}
-							onPress={() => handleThemeChange("PinkTheme")}
+								style={{ backgroundColor: theme.PinkTheme.color1 }}
+								onPress={() => handleThemeChange("PinkTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.GreenTheme.color1 }}
-							onPress={() => handleThemeChange("GreenTheme")}
+								style={{ backgroundColor: theme.GreenTheme.color1 }}
+								onPress={() => handleThemeChange("GreenTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.BlueTheme.color1 }}
-							onPress={() => handleThemeChange("BlueTheme")}
+								style={{ backgroundColor: theme.BlueTheme.color1 }}
+								onPress={() => handleThemeChange("BlueTheme")}
 							></ThemedButton>
 						</HorisontalView>
 						<ResultButton onPress={handleSubmit}>

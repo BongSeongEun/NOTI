@@ -1,24 +1,24 @@
 /* eslint-disable prettier/prettier */
-import React, {useEffect} from 'react';
-import {View, Text, Button} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import React from 'react';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {WebView} from 'react-native-webview';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import { Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import queryString from 'query-string';
 
 const KakaoLogin = () => {
-  const navigation = useNavigation();
+	const navigation = useNavigation();
+	const route = useRoute();
+	const { nextScreen } = route.params;
 
 	const handleNavigationStateChange = navState => {
 		if (navState.url.includes('success')) {
 			const { url } = navState;
 			const jwtToken = url.split('token=')[1];
 			AsyncStorage.setItem('token', jwtToken)
-				.then(() => console.log('Token stored successfully'))
+				.then(() => {
+					navigation.navigate(nextScreen);
+				})
 				.catch(error => console.error('Error storing token:', error));
-			navigation.navigate('Register');
 		}
 	};
 
@@ -34,4 +34,5 @@ const KakaoLogin = () => {
 		</SafeAreaView>
 	);
 };
+
 export default KakaoLogin;

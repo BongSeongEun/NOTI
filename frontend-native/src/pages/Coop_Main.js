@@ -63,8 +63,9 @@ function Coop_Main({ onSelectTeam }) {
 	};
 
 	const fetchUserData = async () => {
-		 storedToken = await AsyncStorage.getItem('token');
-		setToken(storedToken);const
+		const storedToken = await AsyncStorage.getItem('token');
+		setToken(storedToken);
+		if (!storedToken) return;
 
 		if (storedToken) {
 			const userId = getUserIdFromToken(storedToken);

@@ -3,46 +3,36 @@
 /* eslint-disable quotes */
 /* eslint-disable no-trailing-spaces */
 import React from 'react';
-import { View, Text } from 'react-native';
 import styled from 'styled-components/native';
 
-const ChatView = styled.View`
-  justify-content: center;
-  align-items: center;
-  background-color: #f5f5f5;
-  margin-bottom: ${(props) => (props.isUser ? '8px' : '0')};
+const MessageContainer = styled.View`
+	background-color: ${props => props.isUser ? props.userColor : '#E7E6E6'};
+	padding: 10px;
+	border-radius: 10px;
+	margin: 5px 0;
+	align-self: ${props => props.isUser ? 'flex-end' : 'flex-start'};
+	max-width: 70%;
 `;
 
-const UserMessage = styled(ChatView)`
-  align-self: flex-end;
-  background-color: #d2ebff;
-  border-radius: 10px;
-  padding: 8px;
-  max-width: 60%;
+const MessageText = styled.Text`
+	font-size: 10px;
+  	color: ${props => props.isUser ? 'white' : 'black'};
 `;
 
-const BotMessage = styled(ChatView)`
-  align-self: flex-start;
-  background-color: #f1f1f1;
-  border-radius: 10px;
-  padding: 8px;
-  max-width: 60%;
+const DateText = styled.Text`
+  color: #767676;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 4px;
 `;
 
-const ChatMessage = ({ message, isUser }) => {
-  return (
-    <View>
-      {isUser ? (
-        <UserMessage>
-          <Text>{message}</Text>
-        </UserMessage>
-      ) : (
-        <BotMessage>
-          <Text>{message}</Text>
-        </BotMessage>
-      )}
-    </View>
-  );
+const ChatMessage = ({ message, isUser, userColor, date }) => {
+	return (
+		<MessageContainer isUser={isUser} userColor={userColor}>
+			<MessageText isUser={isUser}>{message}</MessageText>
+		</MessageContainer>
+	);
 };
 
 export default ChatMessage;
+
