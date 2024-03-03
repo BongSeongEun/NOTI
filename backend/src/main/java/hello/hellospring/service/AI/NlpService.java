@@ -13,6 +13,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class NlpService {
@@ -24,6 +26,8 @@ public class NlpService {
     @Value("${openai.api.key.d}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+    String formattedDate = LocalDate.now().format(dateFormatter);
 
     public String askNlp(String userMessage, Long userId) throws JSONException, IOException, InterruptedException {
 
@@ -35,7 +39,7 @@ public class NlpService {
                         "만약 a시부터 b시까지 c을 한다하면 [c를 한다],[a:00~b:00][2024.02.29] 이런식으로"+
                         "첫번째 배열에는 event를 넣어주고, 두번째 배열에는 time을 넣어주고, 세번째 배열에는 date를 넣어줘" +
                         "time의 경우에는 xx:yy~xx:yy 형식으로 값을 넣어줘" +
-                        "date의 경우에는 언급이 없으면 오늘 날짜 (2024.02.29 형식으로) 를 넣어주고, 내일이라고 하면 오늘날짜를 기준으로 다음날짜를 넣어줘" +
+                        "date의 경우에는 언급이 없으면 오늘 날짜인"+ formattedDate +"를 넣어주고, 내일이라고 하면 오늘날짜를 기준으로 다음날짜를 넣어줘" +
                         "event랑 time과 date가 여러개이면 : [[운전을 한다, 집에 간다],[02:00~02:00,06:00~06:00],[2024.02.29, 2024.02.29]] 이런식으로 분리해줘"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));

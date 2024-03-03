@@ -312,6 +312,7 @@ public class GptController {
             String mostSimilarItem = findMostSimilarItemBasedOnCharacterCount(userTodos, userMessage);
 
             System.out.println("userMessage : " + userMessage);
+            System.out.println( userTodos);
 
             if (mostSimilarItem.isEmpty()){
                 System.out.println("일치하는 항목 없습니다....");
@@ -326,6 +327,7 @@ public class GptController {
 
         } else {
             System.out.println( userId +"님의 오늘 todo가 존재하지 않습니다 ㅇ3ㅇ");
+            System.out.println( userTodos);
         }
     }
 
