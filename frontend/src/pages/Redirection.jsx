@@ -16,11 +16,13 @@ const Redirection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.post(`http://15.164.151.130:4000/auth?code=${code}`).then(res => {
-      const token = res.headers.authorization;
-      window.localStorage.setItem("token", token);
-      navigate("/Register");
-    });
+    axios
+      .post(`http://15.164.151.130:4000/authreact?code=${code}`)
+      .then(res => {
+        const token = res.headers.authorization;
+        window.localStorage.setItem("token", token);
+        navigate("/Register");
+      });
   }, [code, navigate]);
 
   return <div>로그인 중입니다.</div>;
