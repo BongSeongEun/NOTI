@@ -35,6 +35,18 @@ public class UserController {
         return ResponseEntity.ok().headers(headers).body("success");
     }
 
+    @RequestMapping(value = "/authreact", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity getLoginReact(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
+
+        // 넘어온 인가 코드를 통해 access_token 발급
+        OauthToken oauthToken = userService.getAccessTokenReact(code);
+        // 발급 받은 accessToken 으로 카카오 회원 정보 DB 저장
+        String jwtToken = userService.SaveUserAndGetToken(oauthToken.getAccess_token());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
+        return ResponseEntity.ok().headers(headers).body("success");
+    }
+
     @RequestMapping(value = "/authnative", method = {RequestMethod.GET, RequestMethod.POST})
     public RedirectView getLoginNative(@RequestParam String code) throws JsonProcessingException {
         // 넘어온 인가 코드를 통해 access_token 발급
