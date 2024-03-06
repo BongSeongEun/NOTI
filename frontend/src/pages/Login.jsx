@@ -17,7 +17,7 @@ const MainDiv = styled.div`
   align-items: center;
   width: 100%;
   justify-content: center;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   height: 100vh;
 `;
 
@@ -28,6 +28,7 @@ const MainLogo = styled.img`
 `;
 
 const SocialImg = styled.img`
+  margin-top: 10px;
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 3rem;
@@ -63,14 +64,8 @@ function Login() {
         <MainLogo src={NOTI} />
         <h1>{message}</h1>
         <SocialWrap>
-          <a href="/Main">
-            <SocialImg style={{ margin: "1rem" }} src={GOOGLE} />
-          </a>
-          <a href="/Main">
-            <SocialImg style={{ margin: "1rem" }} src={NAVER} />
-          </a>
           <a href={kakaoURL}>
-            <SocialImg style={{ margin: "1rem" }} src={KAKAO} />
+            <SocialImg src={KAKAO} />
           </a>
         </SocialWrap>
       </MainDiv>

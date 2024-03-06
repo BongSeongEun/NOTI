@@ -67,6 +67,7 @@ function Welcome() {
   const navigate = useNavigate();
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
+  const [userNickname, setUserNickname] = useState("사용자");
 
   // Base64 이미지 데이터를 저장할 상태
   const [base64Image, setBase64Image] = useState("");
@@ -97,6 +98,7 @@ function Welcome() {
         // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
         const userThemeName = response.data.userColor; // 사용자의 테마 이름
         const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
+        setUserNickname(response.data.userNickname); // 사용자 닉네임 설정
 
         // 사용자의 테마를 상태에 적용
         if (theme[userThemeName]) {
@@ -128,7 +130,7 @@ function Welcome() {
             프로필 생성 완료!
           </MainTextBox>
           <MainTextBox style={{ fontWeight: "700", color: "#ffffff" }}>
-            홍길동 님! 노티에 오신 것을 환영해요
+            {userNickname} 님! 노티에 오신 것을 환영해요
           </MainTextBox>
           <ImgBox>
             <GestImgBox
