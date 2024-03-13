@@ -34,7 +34,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
         List<Todo> todos =
-                todoRepository.findByTodoDateAndTodoEndTime(
+                todoRepository.findByTodoDateAndTodoEndTimeAndTodoDoneIsFalse(
                         today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
                         now.format(DateTimeFormatter.ofPattern("HH:mm")));
 
