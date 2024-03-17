@@ -15,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -27,12 +28,16 @@ public class NlpService {
     @Value("${openai.api.key.d}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
+    // 서울시간대로 가져오기
+    ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+
     // 현재 날짜 가져오기
+    LocalDate today = LocalDate.now(seoulZoneId);
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-    String formattedDate = LocalDate.now().format(dateFormatter);
+    String formattedDate = today.format(dateFormatter);
 
     // 현재 시간 가져오기
-    LocalTime now = LocalTime.now();
+    LocalTime now = LocalTime.now(seoulZoneId);
     String formattedTime = now.format(DateTimeFormatter.ofPattern("HH:mm"));
 
     public String askNlp(String userMessage, Long userId) throws JSONException, IOException, InterruptedException {
@@ -86,6 +91,8 @@ public class NlpService {
                         && contentArray.getJSONArray(2).length() > 0) {
                     // 형식이 올바른 경우, content 반환
                     System.out.println("NLP 결과물 : " + content);
+                    System.out.println("오늘 날짜는 : " + formattedDate);
+                    System.out.println("현재 시간은 : " + formattedTime);
                     return content;
                 } else {
                     // 형식이 올바르지 않은 경우, 빈 배열 반환

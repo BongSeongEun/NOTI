@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -31,8 +33,12 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         scheduleTask();
     }
     private void checkTodosAndCreateChat() {
-        LocalDate today = LocalDate.now();
-        LocalTime now = LocalTime.now();
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        ZonedDateTime nowSeoul = ZonedDateTime.now(seoulZoneId);
+
+        LocalDate today = nowSeoul.toLocalDate();
+        LocalTime now = nowSeoul.toLocalTime();
+        
         List<Todo> todos =
                 todoRepository.findByTodoDateAndTodoEndTimeAndTodoDoneIsFalse(
                         today.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
