@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -239,7 +241,9 @@ public class GptController {
             newTodo.setTodoEndTime(endTimeStr.toString()); // 종료 시간 저장
 
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-            String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
+            ZonedDateTime nowInSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul")); // 서울 시간대로 선언
+
+            String formattedDate = nowInSeoul.format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
             newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
 
             newTodo.setTodoDone(false);
