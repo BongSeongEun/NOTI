@@ -33,6 +33,10 @@ const MinuteBlock = styled.div`
   height: 20px;
   background-color: ${props =>
     props.opacity ? `rgba(0, 0, 0, ${props.opacity})` : "transparent"};
+  transition:
+    background-color 0.5s ease-in-out,
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
 `;
 
 // TimeTableUI는 시각적 구조만 정의하고, isFilled 값은 외부에서 받습니다.

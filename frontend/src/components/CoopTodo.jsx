@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled, { ThemeProvider } from "styled-components";
+import { backgrounds, lighten } from "polished";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import AddEventButton from "../components/AddEventButton";
 import editIcon from "../asset/fi-rr-pencil.png"; // 수정하기
@@ -67,12 +68,22 @@ const EventItem = styled.div`
   background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
   color: white;
   padding: 10px;
+  transition:
+    background-color 0.5s ease-in-out,
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
   border-radius: 20px;
   margin: 10px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   opacity: ${props => (props.completed ? "0.5" : "1")};
+
+  &:hover {
+    background: #6e6e6e; /* 배경색을 약간 어둡게 변경 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 버튼이 약간 떠오르는 효과 */
+  }
 `;
 
 const EventTitle = styled.div`
@@ -99,6 +110,15 @@ const CompleteButton = styled.div`
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+
+  &:hover {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 버튼이 약간 떠오르는 효과 */
+  }
 `;
 
 const CheckMark = styled.div`
@@ -135,6 +155,7 @@ const SubmitButton = styled.button`
   border-radius: 5px;
   padding: 10px 20px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 `;
 
 const SubTextBox = styled.div`
@@ -213,6 +234,10 @@ const AddSchedulesButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => lighten(0.1, props.theme.color1)};
+  }
 `;
 
 const ButtonContainer = styled.div`
@@ -267,6 +292,8 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
   const [scheduleBlocks, setScheduleBlocks] = useState(Array(24 * 6).fill(0));
 
   const [todoStates, setTodoStates] = useState([]);
+
+  const [deleteSuccess, setDeleteSuccess] = useState(Date.now());
 
   // 일정 목록을 관리하기 위한 상태
   const [events, setEvents] = useState([]);
@@ -652,6 +679,37 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     setMyTeamModalIsOpen(false);
   };
 
+  const timeToIndex = time => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 6 + Math.floor(minutes / 10);
+  };
+
+  const updateScheduleBlocks = () => {
+    const formattedSelectedDate = formatDateForInput(selectedDate);
+    const schedulesForSelectedDate = teamSchedules.filter(
+      scheduleItem =>
+        formatDateForInput(scheduleItem.todoDate) === formattedSelectedDate,
+    );
+
+    const newScheduleBlocks = Array(24 * 6).fill(0);
+
+    schedulesForSelectedDate.forEach(scheduleItem => {
+      if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
+        const startIndex = timeToIndex(scheduleItem.todoStartTime);
+        // 수정: 종료 시간을 포함하지 않도록 endIndex 계산 변경
+        const endIndex = timeToIndex(scheduleItem.todoEndTime); // 여기에서 변경
+        for (let i = startIndex; i < endIndex; i += 1) {
+          // '<=' 에서 '<'로 변경
+          newScheduleBlocks[i] += 1;
+        }
+      }
+    });
+
+    // 팀원 수로 나누어 각 블록의 투명도 결정
+    const membersCount = teamMembersCount || 1; // 팀원 수가 0인 경우를 대비해 기본값 1 설정
+    setScheduleBlocks(newScheduleBlocks.map(block => block / membersCount));
+  };
+
   // 일정을 선택하고 TimeTable에 추가하는 함수
   const handleSelectSchedule = async scheduleId => {
     // 선택된 일정으로 TimeTable 업데이트 로직
@@ -665,47 +723,12 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       );
       // closeMySchedulesModal(); // 요청 성공 시 모달 닫기
       onTodoChange(); // 부모 컴포넌트에서 데이터를 새로고침
+      setDeleteSuccess(Date.now());
     } catch (error) {
       console.error("Failed to input schedule:", error);
     }
   };
 
-  useEffect(() => {
-    const timeToIndex = time => {
-      const [hours, minutes] = time.split(":").map(Number);
-      return hours * 6 + Math.floor(minutes / 10);
-    };
-
-    const updateScheduleBlocks = () => {
-      const formattedSelectedDate = formatDateForInput(selectedDate);
-      const schedulesForSelectedDate = teamSchedules.filter(
-        scheduleItem =>
-          formatDateForInput(scheduleItem.todoDate) === formattedSelectedDate,
-      );
-
-      const newScheduleBlocks = Array(24 * 6).fill(0);
-
-      schedulesForSelectedDate.forEach(scheduleItem => {
-        if (scheduleItem.todoStartTime && scheduleItem.todoEndTime) {
-          const startIndex = timeToIndex(scheduleItem.todoStartTime);
-          // 수정: 종료 시간을 포함하지 않도록 endIndex 계산 변경
-          const endIndex = timeToIndex(scheduleItem.todoEndTime); // 여기에서 변경
-          for (let i = startIndex; i < endIndex; i += 1) {
-            // '<=' 에서 '<'로 변경
-            newScheduleBlocks[i] += 1;
-          }
-        }
-      });
-
-      // 팀원 수로 나누어 각 블록의 투명도 결정
-      const membersCount = teamMembersCount || 1; // 팀원 수가 0인 경우를 대비해 기본값 1 설정
-      setScheduleBlocks(newScheduleBlocks.map(block => block / membersCount));
-    };
-
-    updateScheduleBlocks();
-  }, [teamSchedules, teamMembersCount, selectedDate]);
-
-  // 개인 일정을 TimeTable에서 삭제하는 함수 추가
   const handleDeleteSchedule = async todoId => {
     try {
       await axios.delete(
@@ -716,11 +739,21 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       );
       // 성공적으로 삭제 후, TimeTable 및 개인 일정 목록 새로고침
       fetchMySchedules(); // 개인 일정 목록 다시 불러오기
+      setDeleteSuccess(Date.now());
       onTodoChange(); // TimeTable 업데이트를 위해 부모 컴포넌트의 변경사항 반영 함수 호출
     } catch (error) {
       console.error("Failed to delete the schedule:", error);
     }
   };
+
+  useEffect(() => {
+    fetchMySchedules();
+    fetchTodoStates();
+    updateScheduleBlocks();
+    console.log(1);
+  }, [teamSchedules, teamMembersCount, selectedDate, deleteSuccess]);
+
+  // 개인 일정을 TimeTable에서 삭제하는 함수 추가
 
   useEffect(() => {
     fetchUserData();
@@ -729,7 +762,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
       fetchMySchedules();
       fetchTodoStates();
     }
-  }, [onTodoChange, selectedDate, mySchedulesModalIsOpen]);
+  }, [selectedDate, mySchedulesModalIsOpen]);
 
   const handleCopyClipBoard = text => {
     try {

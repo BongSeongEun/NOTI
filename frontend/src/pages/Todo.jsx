@@ -83,6 +83,7 @@ const EventTime = styled.div`
 `;
 
 const CompleteButton = styled.div`
+  transition: background-color 0.3s ease;
   margin-right: 10px;
   height: 30px;
   width: 30px;
@@ -504,6 +505,9 @@ function Todo({ selectedDate }) {
               <EventItem
                 key={event.todoId}
                 style={{
+                  transition:
+                    "backgroundColor 0.3s ease, opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
+
                   backgroundColor: event.selectedColor, // 일정의 선택된 색상을 항상 사용
                   opacity: event.todoDone ? "0.5" : "1", // 완료 상태에 따라 투명도 조정
                 }}
