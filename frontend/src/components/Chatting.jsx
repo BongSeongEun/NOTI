@@ -54,13 +54,16 @@ const ChatRole = styled.div`
     padding: 10px;
     margin-bottom: 10px;
     margin-top: 10px;
-    font-size: 12px;
+    font-size: 13px;
   }
   &.user-message {
-    background-color: white; // 배경색 변경
+    background-color: ${props =>
+      props.theme.color1 || theme.OrangeTheme.color1}; // 배경색 변경
+    color: white;
+    font-weight: bold;
     border-radius: 15px;
     padding: 10px;
-    font-size: 12px;
+    font-size: 13px;
     align-self: flex-end; // 오른쪽 정렬
     margin-bottom: 10px;
     margin-top: 10px;
@@ -85,6 +88,8 @@ const MessagesContainer = styled.div`
 function ChatComponent() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
+
   const token = window.localStorage.getItem("token");
   const messagesEndRef = useRef(null); // 메시지 목록의 끝을 참조하기 위한 ref
 
@@ -98,6 +103,28 @@ function ChatComponent() {
     return decodedJSON.id.toString();
   };
   const userId = getUserIdFromToken();
+
+  const fetchUserData = async userToken => {
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        },
+      );
+      // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
+      const userThemeName = response.data.userColor; // 사용자의 테마 이름
+
+      // 사용자의 테마를 상태에 적용
+      if (theme[userThemeName]) {
+        setCurrentTheme(theme[userThemeName]);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
   // 메시지 목록의 끝으로 스크롤하는 함수
   const scrollToBottom = () => {
@@ -123,6 +150,7 @@ function ChatComponent() {
 
   // 채팅 내역 불러오기
   useEffect(() => {
+    fetchUserData();
     fetchChatList();
     // 메시지 목록의 끝으로 스크롤하기 위한 코드 추가
   }, [newMessage]); // messages가 변경될 때마다 이 effect를 실행
@@ -160,29 +188,31 @@ function ChatComponent() {
   console.log(scrollRef.current);
 
   return (
-    <ChatDiv onClick={handleChatDivClick}>
-      <MessagesContainer>
-        {messages.map((msg, index) => (
-          <ChatRole
-            key={index}
-            className={msg.chatWho ? "bot-message" : "user-message"}
-          >
-            {msg.chatContent}
-          </ChatRole>
-        ))}
-        <div ref={messagesEndRef} />
-      </MessagesContainer>
-      <ChatInputDiv>
-        <ChatInput
-          type="text"
-          value={newMessage}
-          onChange={e => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="노티에게 보낼 내용을 입력하세요!"
-        />
-        <SendButton src={SEND} alt="보내기" onClick={sendMessage} />
-      </ChatInputDiv>
-    </ChatDiv>
+    <ThemeProvider theme={currentTheme}>
+      <ChatDiv onClick={handleChatDivClick}>
+        <MessagesContainer>
+          {messages.map((msg, index) => (
+            <ChatRole
+              key={index}
+              className={msg.chatWho ? "bot-message" : "user-message"}
+            >
+              {msg.chatContent}
+            </ChatRole>
+          ))}
+          <div ref={messagesEndRef} />
+        </MessagesContainer>
+        <ChatInputDiv>
+          <ChatInput
+            type="text"
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="노티에게 보낼 내용을 입력하세요!"
+          />
+          <SendButton src={SEND} alt="보내기" onClick={sendMessage} />
+        </ChatInputDiv>
+      </ChatDiv>
+    </ThemeProvider>
   );
 }
 

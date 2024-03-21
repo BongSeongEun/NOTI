@@ -63,7 +63,7 @@ const TeamItem = styled.div`
   cursor: pointer;
   transition: background-color 0.3s ease;
   &:hover {
-    background-color: ${props => lighten(0.1, props.theme.color1)};
+    background-color: ${props => lighten(0.2, props.theme.color1)};
   }
 `;
 const ButtonContainer = styled.div`
@@ -169,6 +169,10 @@ const ConfirmModalContainer = styled.div`
   align-items: center; // 가운데 놓기
   flex-direction: column;
   gap: 10px;
+  @media (max-width: 1050px) {
+    // LeftSidebar가 사라지는 화면 너비
+    margin-right: 300px; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
+  }
 `;
 
 const ConfirmButtonContainer = styled.div`
