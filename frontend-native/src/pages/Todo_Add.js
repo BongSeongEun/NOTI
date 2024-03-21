@@ -257,7 +257,7 @@ const TextBox = styled.TouchableOpacity`
 
 const InputBox = styled.TextInput.attrs({ maxLength: 15 })`
     color: black;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: normal;
     width: 100%;
     height: 100%;
@@ -265,7 +265,7 @@ const InputBox = styled.TextInput.attrs({ maxLength: 15 })`
 `;
 
 const TextBoxText = styled.Text`
-    font-size: 8px;
+    font-size: 10px;
     text-align: left;
     font-weight: normal;
     margin: 0px;
