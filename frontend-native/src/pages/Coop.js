@@ -51,7 +51,6 @@ function Coop({ }) {
 
 	const fetchUserData = async () => {
 		const token = await AsyncStorage.getItem('token');
-
 		if (token) {
 			const userId = getUserIdFromToken(token);
 			try {
@@ -228,6 +227,7 @@ function Coop({ }) {
 				});
 				return todoResponse.data;
 			}));
+
 			todosDetails = todosDetails.flat();
 			const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
 			setTodos(filteredTodos);
@@ -367,17 +367,27 @@ function Coop({ }) {
 							>
 								<ModalContainer>
 									<ModalView style={{ justifyContent: 'center', alignItems: 'center' }}>
-										<MainText style={{ marginBottom: 50, fontSize: 15 }}>팀ID 공유하기</MainText>
+										<MainText style={{ marginBottom: 30, fontSize: 15 }}>팀ID 공유하기</MainText>
 										<HorisontalView style={{ justifyContent: 'center', alignItems: 'center' }}>
-											<MainText>Team ID: {teamId.teamId}</MainText>
-											<images.copy color={currentTheme.color1} width={20} height={20}
-												onPress={() => {
-													copyTeamId();
-													setIsShareModalVisible(false);
-													setClicked_share(!clicked_share);
-												}}
-												style={{ marginLeft: 10 }}
-											/>
+											<TouchableOpacity style={{
+												width: 300, height: 60,
+												backgroundColor: "#F2F3F5",
+												borderRadius: 15,
+												flexDirection: 'row',
+												justifyContent: 'center',
+												alignItems: 'center',
+												marginBottom: 20,
+											}}>
+												<MainText style={{ fontSize: 13 }}>Team ID: {teamId.teamId}</MainText>
+												<images.copy color={currentTheme.color1} width={20} height={20}
+													onPress={() => {
+														copyTeamId();
+														setIsShareModalVisible(false);
+														setClicked_share(!clicked_share);
+													}}
+													style={{ marginLeft: 10 }}
+												/>
+											</TouchableOpacity>
 										</HorisontalView>
 										<TouchableOpacity onPress={() => {
 											setIsShareModalVisible(false);
@@ -446,17 +456,19 @@ function Coop({ }) {
 									setIsModalVisible(!isModalVisible);
 								}}
 							>
-								<ModalView>
-									<ScrollView>
-										<ScheduleInfoList todos={todos} />
-									</ScrollView>
-									<TouchableOpacity
-										onPress={() => setIsModalVisible(!isModalVisible)}
-										style={{ marginTop: 20, alignSelf: 'center' }}
-									>
-										<Text>닫기</Text>
-									</TouchableOpacity>
-								</ModalView>
+								<ModalContainer>
+									<ModalView style={{ justifyContent: 'center', alignItems: 'center' }}>
+										<ScrollView>
+											<ScheduleInfoList todos={todos} />
+										</ScrollView>
+										<TouchableOpacity
+											onPress={() => setIsModalVisible(!isModalVisible)}
+											style={{ marginTop: 20, alignSelf: 'center' }}
+										>
+											<Text style={{ marginBottom: 40 }}>닫기</Text>
+										</TouchableOpacity>
+									</ModalView>
+								</ModalContainer>
 							</Modal>
 
 							<TouchableOpacity
@@ -620,9 +632,11 @@ const ScheduleInfoContainer = styled.View`
 `;
 
 const ScheduleInfoText = styled.Text`
-  color: #808080;
+  color: black;
   font-size: 12px;
-  line-height: 18px;
+  font-weight: normal;
+  align-self: center;
+  margin-top: 10px;
 `;
 
 const styles = StyleSheet.create({

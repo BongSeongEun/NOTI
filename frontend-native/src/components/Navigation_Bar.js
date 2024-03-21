@@ -76,7 +76,7 @@ const Navigation_Bar = ({ selectedTheme }) => {
                 width={25}
                 height={25}
                 color={getIconColor(['Stat'])}
-                onPress={() => handlePress('Stat')}
+                //onPress={() => handlePress('Stat')}
             />
             <images.todo
                 width={25}
@@ -94,7 +94,7 @@ const Navigation_Bar = ({ selectedTheme }) => {
                 width={25}
                 height={25}
                 color={getIconColor(['Setting'])}
-                onPress={() => handlePress('Setting')}
+                //onPress={() => handlePress('Setting')}
             />
         </NavigationView>
     );

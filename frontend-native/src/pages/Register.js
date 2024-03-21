@@ -22,11 +22,7 @@ import theme from '../components/theme';
 
 const Register = () => {
 	const navigation = useNavigation();
-	const email = 'streethong@naver.com';
-	const host = "192.168.30.214";
-
 	const [token, setToken] = useState(null);
-
 	const [selectedTheme, setSelectedTheme] = useState(theme.OrangeTheme);
 	const [Buttonclicked, setButtonClicked] = useState(false);
 	const [inputName, setInputName] = useState("");
@@ -121,6 +117,33 @@ const Register = () => {
 		hideDatePicker();
 	};
 	
+	useEffect(() => {
+		const fetchAndDecodeToken = async () => {
+			try {
+				const storedToken = await AsyncStorage.getItem('token');
+				setToken(storedToken);
+	
+				if (!storedToken) {
+					console.log('Token not found');
+					return;
+				}
+	
+				const userId = getUserIdFromToken(storedToken);
+				
+				const userInfoResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+					headers: {
+						'Authorization': `Bearer ${storedToken}`,
+					},
+				});
+				
+				const userEmail = userInfoResponse.data.kakaoEmail;
+				setUserEmail(userEmail);
+			} catch (error) {
+				console.error('Error fetching user info:', error);
+			}
+		};
+		fetchAndDecodeToken();
+	}, []);
 
 	const postUser = async () => {
 		try {
@@ -230,18 +253,16 @@ const Register = () => {
 
 						<RegularText>이메일</RegularText>
 						<TextBox color="#D5D5D5">
-							<TextBoxText>{email}</TextBoxText>
+							<TextBoxText>{userEmail}</TextBoxText>
 						</TextBox>
 
-						<HorisontalView>
+						<HorisontalView style={{ justifyContent: 'space-between' }}>
 							<RegularText>방해 금지 시간</RegularText>
-							<HorisontalViewEnd>
-								<DisturbTimeButton
-									thumbColor="#FFFF"
-									onValueChange={() => setButtonClicked((prevState) => !prevState)}
-									value={Buttonclicked}
-								/>
-							</HorisontalViewEnd>
+							<DisturbTimeButton
+								thumbColor="#FFFF"
+								onValueChange={() => setButtonClicked((prevState) => !prevState)}
+								value={Buttonclicked}
+							/>
 						</HorisontalView>
 
 						{Buttonclicked && (
@@ -307,11 +328,13 @@ const Register = () => {
 								onPress={() => handleThemeChange("BlueTheme")}
 							></ThemedButton>
 						</HorisontalView>
+
 						<ResultButton onPress={handleSubmit}>
 							<RegularText color="white" style={{ marginTop: 0, fontSize: 15 }}>
 								완료
 							</RegularText>
 						</ResultButton>
+
 					</MainView>
 				</ScrollView>
 			</FullView>
@@ -411,7 +434,7 @@ const DisturbTimeButton = styled.Switch.attrs((props) => ({
 		true: props.theme.color1,
 	},
 }))`
-  	margin-top: 10px;
+	margin-top: 10px;
 `;
 
 const ThemedButton = styled.TouchableOpacity`

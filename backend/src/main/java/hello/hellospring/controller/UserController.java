@@ -43,7 +43,7 @@ public class UserController {
         String jwtToken = userService.SaveUserAndGetToken(oauthToken.getAccess_token());
 
         // 클라이언트에게 전달할 커스텀 URL 생성
-        String redirectUrl = "http://192.168.30.214:4000/success&token=" + jwtToken;
+        String redirectUrl = "http://192.168.30.115:4000/success&token=" + jwtToken;
 
         // 클라이언트를 리디렉트 URL로 리디렉션
         return new RedirectView(redirectUrl);

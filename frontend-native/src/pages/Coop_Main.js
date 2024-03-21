@@ -314,26 +314,35 @@ function Coop_Main({ onSelectTeam }) {
 									</TouchableOpacity>
 
 									{clickedSearch && (
-										<HorisontalView>
-											<Text>{searchedTeam}</Text>
+										<TouchableOpacity style={{ borderWidth: 1,
+											borderColor: currentTheme.color1,
+											borderRadius: 15,
+											width: 300,
+											height: 40,
+										}}>
+											<HorisontalView style={{ justifyContent: 'space-between', alignItems: 'center', width: 270, height: 30 }}>
+												<MainText style={{ marginTop: 10 }}>{searchedTeam}</MainText>
 											<TouchableOpacity onPress={() => {
 												handleEnterTeam();
 												set_TeamAddModalVisible(!modal_TeamAddVisible);
 												setClicked_add(false);
 												setClickedSearch(!clickedSearch);
 											}}
-												style={{ marginLeft: 10 }}
+											style={{ marginTop: 10}}
 											>
 												<images.plus color={currentTheme.color1} width={20} height={20} />
 											</TouchableOpacity>
 										</HorisontalView>
+										</TouchableOpacity>
 									)}
 
 									<TouchableOpacity onPress={() => {
 										set_TeamAddModalVisible(!modal_TeamAddVisible);
 										setClicked_add(false);
-										setClickedSearch(false); // 오류 수정: 여기를 false로 설정
-									}}>
+										setClickedSearch(false);
+									}}
+										style={{ marginTop: 20}}
+									>
 										<Text>닫기</Text>
 									</TouchableOpacity>
 								</ModalView>
