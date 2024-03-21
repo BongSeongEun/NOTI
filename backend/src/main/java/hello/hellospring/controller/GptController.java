@@ -7,14 +7,13 @@ import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
 public class GptController {
@@ -28,6 +27,7 @@ public class GptController {
     private final GptFinishService gptFinishService; // 이제 대답용 메시지인지
     private final GptFinishNlpService gptFinishNlpService; // todo 완료용 대답 nlp 분류
     private final GptCompareTodo gptCompareTodo; // todo 완료용을 title과 비교
+    private final NlpCompareTodoService nlpCompareTodoService; // todo 리스트 핵심 키워드 추출
 
     @Autowired
     public GptController(GptService gptService,
@@ -38,7 +38,8 @@ public class GptController {
                          TodoRepository todoRepository,
                          GptFinishService gptFinishService,
                          GptFinishNlpService gptFinishNlpService,
-                         GptCompareTodo gptCompareTodo) {
+                         GptCompareTodo gptCompareTodo,
+                         NlpCompareTodoService nlpCompareTodoService) {
 
         this.gptService = gptService;
         this.chatRepository = chatRepository;
@@ -49,6 +50,7 @@ public class GptController {
         this.gptFinishService = gptFinishService;
         this.gptFinishNlpService = gptFinishNlpService;
         this.gptCompareTodo = gptCompareTodo;
+        this.nlpCompareTodoService = nlpCompareTodoService;
     }
     @PostMapping("/api/v3/ask/{userId}") //채팅보내기 및 gpt답변호출 + 내가보낸 채팅이 일정이면, 채팅을 todo에 저장해줌
     public String ask(@PathVariable Long userId, @RequestBody Map<String, String> request) {
@@ -62,7 +64,10 @@ public class GptController {
             // gptTodo가 true일 경우, nlpService 호출
             String eventsString = null;
             String timesString = null;
+            String datesString = null;
             if (gptTodo) { // 합쳐져 있는 event와 time을 각각 분리
+
+
                 chatEvent = nlpService.askNlp(userMessage, userId);
 
                 JSONArray mainArray = new JSONArray(chatEvent);
@@ -80,12 +85,37 @@ public class GptController {
                     nlpTimes.add(timesArray.getString(i));
                 }
 
+                // 세 번째 배열에서 날짜 추출
+                JSONArray dateArray = mainArray.getJSONArray(2);
+                List<String> nlpDates = new ArrayList<>();
+                for (int i = 0; i < dateArray.length(); i++) {
+                    nlpDates.add(dateArray.getString(i));
+                }
+
                 //대괄호 없이 출력되도록
                 eventsString = String.join(", ", nlpEvents);
                 timesString = String.join(", ", nlpTimes);
+                datesString = String.join(", ", nlpDates);
             } else {
                 // gptTodo가 false 일때만 발동하고, 해당 메시지가 일정완료와 관련된 메시지인지 판단
-                gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+
+                if (userMessage.startsWith("응") || userMessage.startsWith("웅")) {
+
+                    Chat recentTodoFinishChat = chatRepository.
+                            findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                            // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
+                            .orElse(null);
+
+                    if (recentTodoFinishChat != null){
+
+                        gptFinish = true;
+
+                    } else {
+                        gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+                    }
+                } else {
+                    gptFinish = Boolean.parseBoolean(gptFinishService.askGpt(userMessage, userId));
+                }
             }
 
             String gptFinishNlp = null;
@@ -98,42 +128,13 @@ public class GptController {
                     List<String> gptFinishNlps = Arrays.asList(gptFinishNlp.split(","));
 
                     for (int j = 0; j < gptFinishNlps.size(); j++){ // 갯수대로 todo title 비교
-                        compareTodo(gptFinishNlps.get(j).trim(), userId);
+
+                        compareTodo(gptFinishNlps.get(j).trim(), userId); // todo 리스트들과 userMessage와 비교하는 함수
                     }
 
-                } else {                                                                     // false 출력될때
-                    Chat recentTodoFinishChat = chatRepository.
-                            findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
-                            // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
-                            .orElse(null);
+                } else {                                                                        // false 출력될때
+                    gptAskTodo(userId); // gpt가 했냐고 물어보는 것에 대한 처리 함수 작동
 
-                    if (recentTodoFinishChat != null){
-                        String finishedTodo =  recentTodoFinishChat.getChatContent()
-                                .replace("를 달성하셨나요?","");
-
-                        // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
-                        LocalDate today = LocalDate.now();
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-                        String formattedToday = today.format(formatter);
-
-                        System.out.println(formattedToday);
-                        System.out.println(finishedTodo);
-
-                        // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
-                        int updatedCount = todoRepository.
-                                updateTodoDoneByUserIdAndTodoDateAndTodoTitle
-                                        (userId, formattedToday, finishedTodo);
-                        // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
-                        // 그후 todoDone을 true로 바꿈
-                        if (updatedCount > 0) {
-                            System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
-                        } else {
-                            System.out.println("업데이트할 Todo가 없어요... :(");
-                        }
-                    } else {
-                        System.out.println("todo 완료에 대한 최근 대화가 없어요!");
-                        // 여기도 로직 수정해야됨
-                    }
                 }
             } else {
                 System.out.println("이 메시지는 todo 완료와 관련된 내용이 아니에요!");
@@ -147,12 +148,19 @@ public class GptController {
             if (eventsString != null){ // nlp 결과값 null인지 검증
                 List<String> works = Arrays.asList(eventsString.split(","));
                 List<String> times = Arrays.asList(timesString.split(","));
+                List<String> dates = Arrays.asList(datesString.split(","));
 
                 if (works.size() == times.size()){ // nlp 결과값 갯수 서로 같은지 검증
-                    for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
-                        saveTodo(works.get(i).trim(), times.get(i).trim(), userId);
-                    }
+                    if (works.size() == dates.size()){
+                        for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
+                            saveTodoAndDate(works.get(i).trim(), times.get(i).trim(), dates.get(i).trim(), userId);
+                        }
 
+                    } else {
+                        for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
+                            saveTodo(works.get(i).trim(), times.get(i).trim(), userId);
+                        }
+                    }
                 } else {
                     System.out.println("event와 time의 결과값 갯수가 서로 달라서 todo에 저장하진 않았어요!" +
                             "\n" + "event : "+eventsString + "time :" + timesString);
@@ -210,7 +218,6 @@ public class GptController {
             e.printStackTrace();
             return "일기 생성 중 오류가 발생했어요... :(";
         }
-
     }
 
 
@@ -251,45 +258,143 @@ public class GptController {
 
     }
 
+    private void saveTodoAndDate (String processedEvent, String processedTime, String processedDate, Long userId){
+        String[] times = processedTime.split("~"); // ~ 기준으로 분리
+        if (times.length == 2){
+            String startTimeStr = times[0];
+            String endTimeStr = times[1];
+
+            // nlpEvent과 nlpTime을 Todo 테이블에 저장
+            Todo newTodo = new Todo();
+            newTodo.setUserId(userId); // userId 값 저장
+            newTodo.setTodoTitle(processedEvent); // nlpEvent 값 저장
+
+            // 여기서는 시간 정보를 String으로 다루고 있으므로, LocalTime을 다시 문자열로 변환
+            newTodo.setTodoStartTime(startTimeStr.toString()); // 시작 시간 저장
+            newTodo.setTodoEndTime(endTimeStr.toString()); // 종료 시간 저장
+
+            if (processedDate.matches("\\d{4}\\.\\d{2}\\.\\d{2}")) {
+                newTodo.setTodoDate(processedDate); // 포맷팅된 날짜를 todoDate에 저장
+            } else {
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+                String formattedDate = LocalDate.now().format(dateFormatter); // 현재 날짜를 "yyyy.MM.dd" 형식으로 포맷팅
+                newTodo.setTodoDate(formattedDate); // 포맷팅된 날짜를 todoDate에 저장
+
+            }
+
+            newTodo.setTodoDone(false);
+
+            Random random = new Random();
+            int colorIndex = random.nextInt(5) + 1; // 1~5 사이의 랜덤한 수 생성
+            newTodo.setTodoColor("color" + colorIndex); // todoColor 저장
+
+            todoRepository.save(newTodo); // Todo 저장
+
+        } else {
+            // nlpTime 형식이 예상과 다를 경우의 처리
+            System.out.println("nlpTime 형식이 이상해요...ㅡ3ㅡ : " + processedTime);
+
+        }
+
+    }
+
     //todo 완료 비교 함수
     private void compareTodo(String userMessage, Long userId) throws Exception {
         //findByUserIdAndTodoDateAndTodoDone
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        String formattedToday = today.format(formatter);
 
-        String compareTodoResult = gptCompareTodo.askGpt(userMessage, userId);
+        List<String> userTodos = todoRepository.
+                findByUserIdAndTodoDateAndTodoDone(userId, formattedToday, false);
 
-        if (compareTodoResult != null){
-            Pattern pattern = Pattern.compile("^(\\d+):");
-            Matcher matcher = pattern.matcher(compareTodoResult);
+        if (!userTodos.isEmpty()){
+            String mostSimilarItem = findMostSimilarItemBasedOnCharacterCount(userTodos, userMessage);
 
-            if (matcher.find()) {
-                // matcher.find()가 true를 반환하면, 패턴에 맞는 부분이 있다는 뜻이다.
-                // matcher.group(1)은 첫 번째 괄호(\d+)에 해당하는 부분, 즉 숫자 부분을 가져온다.
-                String numberString = matcher.group(1);
+            System.out.println("userMessage : " + userMessage);
+            System.out.println( userTodos);
 
-                try {
-                    // String 타입의 number를 int로 변환
-                    long number = Long.parseLong(numberString);
+            if (mostSimilarItem.isEmpty()){
+                System.out.println("일치하는 항목 없습니다....");
 
-                    // findByTodoId 메소드가 int 타입의 id를 받는다고 가정하고 수정
-                    List<Todo> todos = todoRepository.findByTodoId(number);
+                gptAskTodo(userId); // gpt가 했냐고 물어보는 것에 대한 처리 함수 작동
 
-                    if (!todos.isEmpty()) {
-                        for (Todo todo : todos) {
-                            todo.setTodoDone(true);
-                            todoRepository.save(todo);
-                            System.out.println("todoId: " + number + " 업데이트 성공! :) ");
-                        }
-                    } else {
-                        System.out.println("todoId: " + number + " 해당하는 todoId는 존재하지 않아요.. :(");
-                    }
-                } catch (NumberFormatException e) {
-                    System.out.println("숫자 변환 오류: " + e.getMessage());
-                }
             } else {
-                System.out.println("숫자를 찾을 수 없습니다..ㅠㅠ");
+                System.out.println("가장 유사한 항목: " + mostSimilarItem);
+
+                todoRepository.markTodoAsDone(userId, mostSimilarItem, formattedToday);
+            }
+
+        } else {
+            System.out.println( userId +"님의 오늘 todo가 존재하지 않습니다 ㅇ3ㅇ");
+            System.out.println( userTodos);
+        }
+    }
+
+    // 가장 많이 일치하는 글자 수를 가진 항목을 찾아냄
+    private String findMostSimilarItemBasedOnCharacterCount(List<String> userTodos, String userMessage) {
+
+        int maxCount = 0;
+        String mostSimilarItem = "";
+
+        for (String todo : userTodos) {
+            int count = countMatchingCharacters(todo, userMessage);
+            if (count > maxCount) {
+                maxCount = count;
+                mostSimilarItem = todo;
+            }
+        }
+        return mostSimilarItem;
+    }
+
+    //메서드는 두 문자열 사이에서 공통으로 포함된 글자의 총 수를 계산
+    private int countMatchingCharacters(String item, String userMessage) {
+        int count = 0;
+        for (char c : userMessage.toCharArray()) {
+            if (item.contains(String.valueOf(c))) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+    // GPT가 점검해주는 Todo 완료 함수
+    private void gptAskTodo (Long userId) {
+
+        Chat recentTodoFinishChat = chatRepository.
+                findFirstByUserIdAndTodoFinishAskTrueOrderByChatDateDesc (userId)
+                // chat 생성날짜를 역순으로 돌려서 (최근 생성 순으로) todoFinishedAsk가 ture인거 찾기
+                .orElse(null);
+
+        if (recentTodoFinishChat != null){
+            String finishedTodo =  recentTodoFinishChat.getChatContent()
+                    .replace("를 달성하셨나요?","");
+
+            // 오늘 날짜를 xxxx.yy.zz 형식으로 포맷
+            LocalDate today = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String formattedToday = today.format(formatter);
+
+            System.out.println(formattedToday);
+            System.out.println(finishedTodo);
+
+            // todoDate가 오늘 날짜와 동일하고, todoTitle이 finishedTodo와 같은 Todo 찾아서 todoDone을 true로 업데이트
+            int updatedCount = todoRepository.
+                    updateTodoDoneByUserIdAndTodoDateAndTodoTitle
+                            (userId, formattedToday, finishedTodo);
+            // userId랑 오늘 날짜, finishedTodo를 기반으로 todo에서 데이터 찾기
+            // 그후 todoDone을 true로 바꿈
+            if (updatedCount > 0) {
+                System.out.println("Todo 완료 상태로 업데이트 되었습니다!");
+                // todoFinishedAsk 다시 false로 돌리는 로직은.. 필요 없을 것 같아서 우선은 생략함
+            } else {
+                System.out.println("업데이트할 Todo가 없어요... :(");
             }
         } else {
-            System.out.println("todo에 존재하지 않는 내용입니다!!");
+            System.out.println("todo 완료에 대한 최근 대화가 없어요!");
+            // 여기도 로직 수정해야됨
         }
+
     }
 }

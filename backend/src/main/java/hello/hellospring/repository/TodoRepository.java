@@ -23,7 +23,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
             @Param("todoDateStr") String todoDateStr);
 
 
-    List<Todo> findByTodoDateAndTodoEndTime(String format, String format1);
+    List<Todo> findByTodoDateAndTodoEndTimeAndTodoDoneIsFalse(String format, String format1);
     // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
 
     @Modifying
@@ -32,6 +32,12 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     int updateTodoDoneByUserIdAndTodoDateAndTodoTitle(Long userId, String parse, String finishedTodo);
     // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
 
-    List<Todo> findByUserIdAndTodoDateAndTodoDone(Long userId, String formattedToday, boolean b);
+    @Query("SELECT t.todoTitle FROM Todo t WHERE t.userId = :userId AND t.todoDate = :todoDate AND t.todoDone = :todoDone")
+    List<String> findByUserIdAndTodoDateAndTodoDone(@Param("userId") Long userId, @Param("todoDate") String todoDate, @Param("todoDone") boolean todoDone);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Todo t SET t.todoDone = true WHERE t.userId = :userId AND t.todoTitle = :todoTitle AND t.todoDate = :todoDate")
+    void markTodoAsDone(@Param("userId") Long userId, @Param("todoTitle") String todoTitle, @Param("todoDate") String todoDate);
     // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
 }

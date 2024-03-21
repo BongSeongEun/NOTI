@@ -18,6 +18,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,8 +53,13 @@ public class GptServiceImpl implements GptDiaryService {
 
     @Override
     public String createDiary(Long userId) {
+        // 서울 시간대 설정
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+
+
         // 채팅했던 내역들 끌어다오기
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime nowSeoul = ZonedDateTime.now(seoulZoneId);
+        LocalDateTime now = nowSeoul.toLocalDateTime();
         LocalDateTime startOfPreviousDay = now.minusDays(1);
 
         // 지정된 사용자 ID와 시간 범위에 해당하는 chatContent 조회
@@ -68,7 +75,7 @@ public class GptServiceImpl implements GptDiaryService {
 
 
         // 투두리스트 내용 끌어다오기
-        String todayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //타입 변환
+        String todayStr = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //타입 변환
         List<Todo> todos = todoRepository.findByUserIdAndTodoDate(userId, todayStr);
 
         String todoContents = todos.stream()
@@ -98,7 +105,7 @@ public class GptServiceImpl implements GptDiaryService {
             diary.setDiaryTitle(diaryTitle); //diary_title에 저장
             diary.setDiaryContent(diaryContent); //diary_content에 저장
 
-            String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
+            String formattedDate = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
             diary.setDiaryDate(formattedDate); //diary_date에 저장
             diaryRepository.save(diary);
 

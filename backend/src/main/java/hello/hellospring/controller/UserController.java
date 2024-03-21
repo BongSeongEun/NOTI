@@ -35,6 +35,18 @@ public class UserController {
         return ResponseEntity.ok().headers(headers).body("success");
     }
 
+    @RequestMapping(value = "/authreact", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity getLoginReact(@RequestParam String code, HttpServletRequest response) throws JsonProcessingException {
+
+        // 넘어온 인가 코드를 통해 access_token 발급
+        OauthToken oauthToken = userService.getAccessTokenReact(code);
+        // 발급 받은 accessToken 으로 카카오 회원 정보 DB 저장
+        String jwtToken = userService.SaveUserAndGetToken(oauthToken.getAccess_token());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX + jwtToken);
+        return ResponseEntity.ok().headers(headers).body("success");
+    }
+
     @RequestMapping(value = "/authnative", method = {RequestMethod.GET, RequestMethod.POST})
     public RedirectView getLoginNative(@RequestParam String code) throws JsonProcessingException {
         // 넘어온 인가 코드를 통해 access_token 발급
@@ -43,7 +55,7 @@ public class UserController {
         String jwtToken = userService.SaveUserAndGetToken(oauthToken.getAccess_token());
 
         // 클라이언트에게 전달할 커스텀 URL 생성
-        String redirectUrl = "http://192.168.30.76:4000/success&token=" + jwtToken;
+        String redirectUrl = "http://15.164.151.130:4000/success&token=" + jwtToken;
 
         // 클라이언트를 리디렉트 URL로 리디렉션
         return new RedirectView(redirectUrl);
