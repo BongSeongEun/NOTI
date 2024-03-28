@@ -17,7 +17,7 @@ const Redirection = () => {
 
   useEffect(() => {
     axios
-      .post(`http://15.164.151.130:4000/authreact?code=${code}`)
+      .post(`http://15.164.151.130:4000/auth?code=${code}`)
       .then(res => {
         const token = res.headers.authorization;
         window.localStorage.setItem("token", token);
