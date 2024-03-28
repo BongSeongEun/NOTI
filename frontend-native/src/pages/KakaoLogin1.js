@@ -21,7 +21,7 @@ const KakaoLogin = () => {
         .catch(error => console.error('Error storing token:', error));
     }
   };
-
+  
   return (
     <SafeAreaView style={{flex: 1}}>
       <WebView

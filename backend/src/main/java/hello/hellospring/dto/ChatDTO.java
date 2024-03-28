@@ -22,6 +22,8 @@ public class ChatDTO {
     private boolean chatRole;
     private String workChatEvent;
     private String workChatTime;
+    private Boolean todoFinishAsk;
+    private Boolean todoFinishAns;
 
     public static ChatDTO chatDTO(Chat chat){
         ChatDTO chatDTO = new ChatDTO();
@@ -33,6 +35,8 @@ public class ChatDTO {
         chatDTO.setChatRole(chat.isChatRole());
         chatDTO.setWorkChatEvent(chat.getWorkChatEvent());
         chatDTO.setWorkChatTime(chat.getWorkChatTime());
+        chatDTO.setTodoFinishAsk(chat.getTodoFinishAsk());
+        chatDTO.setTodoFinishAns(chat.getTodoFinishAns());
         return chatDTO;
     }
 }

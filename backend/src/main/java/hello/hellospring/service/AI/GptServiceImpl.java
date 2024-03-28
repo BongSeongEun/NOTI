@@ -18,6 +18,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +30,7 @@ public class GptServiceImpl implements GptDiaryService {
 
     private final ChatRepository chatRepository;
 
-    @Value("${openai.api.key}")
+    @Value("${openai.api.key.b}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
 
@@ -51,8 +53,13 @@ public class GptServiceImpl implements GptDiaryService {
 
     @Override
     public String createDiary(Long userId) {
+        // 서울 시간대 설정
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+
+
         // 채팅했던 내역들 끌어다오기
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime nowSeoul = ZonedDateTime.now(seoulZoneId);
+        LocalDateTime now = nowSeoul.toLocalDateTime();
         LocalDateTime startOfPreviousDay = now.minusDays(1);
 
         // 지정된 사용자 ID와 시간 범위에 해당하는 chatContent 조회
@@ -68,7 +75,7 @@ public class GptServiceImpl implements GptDiaryService {
 
 
         // 투두리스트 내용 끌어다오기
-        String todayStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //타입 변환
+        String todayStr = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //타입 변환
         List<Todo> todos = todoRepository.findByUserIdAndTodoDate(userId, todayStr);
 
         String todoContents = todos.stream()
@@ -85,7 +92,7 @@ public class GptServiceImpl implements GptDiaryService {
                     "모든 내용을 조합할 필요는 없고 많이 언급된 토픽들 위주로 일기를 생성해줘. 마치 내가 쓴것처럼." +
                     "답변은 존댓말로 통일해줘" +
                     "했던말은 반복하지마" +
-                    "하루동안의 일정목록 내용들을 통해 ~~는 달성했고, ~~는 달성하지못했다 라는 내용도 넣어줘" +
+                    "그 다음 문단에는 하루동안의 일정목록 내용들을 통해 ~~는 달성했고, ~~는 달성하지못했다 라는 내용도 넣어줘" +
                     "꼭 몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
                     "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘");
 
@@ -98,7 +105,7 @@ public class GptServiceImpl implements GptDiaryService {
             diary.setDiaryTitle(diaryTitle); //diary_title에 저장
             diary.setDiaryContent(diaryContent); //diary_content에 저장
 
-            String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
+            String formattedDate = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
             diary.setDiaryDate(formattedDate); //diary_date에 저장
             diaryRepository.save(diary);
 

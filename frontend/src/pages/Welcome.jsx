@@ -2,7 +2,8 @@
 /* eslint-disable prettier/prettier */
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { Navigate, useNavigate, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import axios from "axios"; // axios import 확인
 import theme from "../styles/theme";
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import STAR from "../asset/star.png";
@@ -62,14 +63,62 @@ const GestImgBox = styled.img`
 `;
 
 function Welcome() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const token = window.localStorage.getItem("token"); // 토큰 추가
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태 변수
+  const [userNickname, setUserNickname] = useState("사용자");
+
+  // Base64 이미지 데이터를 저장할 상태
+  const [base64Image, setBase64Image] = useState("");
+
+  // jwt토큰을 디코딩해서 userid를 가져오는 코드
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
 
   useEffect(() => {
-    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
-    if (savedThemeName && theme[savedThemeName]) {
-      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
+    async function fetchUserData() {
+      const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+      try {
+        const response = await axios.get(
+          `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
+        const userThemeName = response.data.userColor; // 사용자의 테마 이름
+        const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
+        setUserNickname(response.data.userNickname); // 사용자 닉네임 설정
+
+        // 사용자의 테마를 상태에 적용
+        if (theme[userThemeName]) {
+          setCurrentTheme(theme[userThemeName]);
+        }
+
+        // 사용자의 프로필 이미지를 상태에 적용
+        setBase64Image(userProfileImage);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
     }
-  }, []);
+
+    fetchUserData();
+  }, [token]);
+
+  // 완료 버튼 클릭 핸들러
+  const handleCompleteClick = () => {
+    navigate("/main"); // 메인 페이지로 이동
+  };
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -81,11 +130,11 @@ function Welcome() {
             프로필 생성 완료!
           </MainTextBox>
           <MainTextBox style={{ fontWeight: "700", color: "#ffffff" }}>
-            홍길동 님! 노티에 오신 것을 환영해요
+            {userNickname} 님! 노티에 오신 것을 환영해요
           </MainTextBox>
           <ImgBox>
             <GestImgBox
-              src={NOTI}
+              src={base64Image || NOTI} // 기본값으로 NOTI 이미지 사용
               style={{
                 top: "50%",
                 left: "50%",
@@ -107,11 +156,12 @@ function Welcome() {
               }}
             />
           </ImgBox>
-          <Link to="/main">
-            <WelBtn style={{ backgroundColor: currentTheme.color1 }}>
-              완료
-            </WelBtn>
-          </Link>
+          <WelBtn
+            onClick={handleCompleteClick}
+            style={{ backgroundColor: currentTheme.color1 }}
+          >
+            완료
+          </WelBtn>
         </MainDiv>
       </div>
     </ThemeProvider>

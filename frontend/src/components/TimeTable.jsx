@@ -8,6 +8,7 @@ const TimeTableContainer = styled.div`
   margin-right: 35px;
   width: 60%;
   margin-top: 20px;
+  min-width: 200px;
 `;
 
 const HourRow = styled.div`
@@ -28,10 +29,14 @@ const MinuteBlocks = styled.div`
 
 const MinuteBlock = styled.div`
   flex: 1;
-  border: 1px solid #ddd;
+  border: 0.5px solid #ddd;
   height: 20px;
   background-color: ${props =>
     props.isFilled ? props.fillColor : "transparent"};
+  transition:
+    background-color 0.5s ease-in-out,
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
 `;
 
 const TimeTable = ({ schedule }) => (
