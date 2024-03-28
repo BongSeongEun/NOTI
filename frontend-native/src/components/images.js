@@ -25,6 +25,10 @@ import setting from "../asset/setting";
 import diary_modify from "../asset/diary_modify";
 import diary_delete from "../asset/diary_delete";
 
+import message_send from "../asset/message_send.svg";
+import copy from "../asset/copy.svg";
+import plus from "../asset/plus.svg";
+
 export const images = {
 	profile: profile,
 	gallery: gallery,
@@ -50,6 +54,10 @@ export const images = {
 
 	diary_modify: diary_modify,
 	diary_delete: diary_delete,
+
+	message_send: message_send,
+	copy: copy,
+	plus: plus,
 };
 
 export default images;

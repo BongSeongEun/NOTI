@@ -57,6 +57,7 @@ public class UserController {
         // 클라이언트에게 전달할 커스텀 URL 생성
         String redirectUrl = "http://15.164.151.130:4000/success&token=" + jwtToken;
 
+
         // 클라이언트를 리디렉트 URL로 리디렉션
         return new RedirectView(redirectUrl);
     }

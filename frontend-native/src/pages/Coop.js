@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable quotes */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
@@ -13,14 +14,13 @@ import 'react-native-gesture-handler';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode } from 'base-64';
-
 import { theme } from "../components/theme";
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
 import ScheduleTimeTable from "../components/ScheduleTimeTable";
-
+import Clipboard from '@react-native-community/clipboard';
 
 function Coop({ }) {
 	const navigation = useNavigation();
@@ -40,9 +40,7 @@ function Coop({ }) {
 	const [clicked_memo, setClicked_memo] = useState(false);
 	const [memoContent, setMemoContent] = useState('');
 	const [isMemoModalVisible, setIsMemoModalVisible] = useState(false);
-	const isFocused = useIsFocused();
-
-	const host = "192.168.30.76";
+	const [isShareModalVisible, setIsShareModalVisible] = useState(false);
 
 	useEffect(() => {
 		fetchUserData();
@@ -53,11 +51,10 @@ function Coop({ }) {
 
 	const fetchUserData = async () => {
 		const token = await AsyncStorage.getItem('token');
-
 		if (token) {
 			const userId = getUserIdFromToken(token);
 			try {
-				const response = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 					headers: {
 						'Authorization': `Bearer ${token}`,
 					},
@@ -81,7 +78,7 @@ function Coop({ }) {
 		const token = await AsyncStorage.getItem('token');
 		if (token) {
 			try {
-				const todoresponse = await axios.get(`http://${host}:4000/api/v1/getTeamTodo/${teamId.teamId}`, {
+				const todoresponse = await axios.get(`http://15.164.151.130:4000/api/v1/getTeamTodo/${teamId.teamId}`, {
 					headers: {
 						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 					},
@@ -137,7 +134,7 @@ function Coop({ }) {
 			const newCompletedStatus = !events[index].teamTodoDone;
 			const token = await AsyncStorage.getItem('token');
             const response = await axios.put(
-                `http://${host}:4000/api/v1/updateTeamTodo/${teamId.teamId}/${teamTodoId}`,
+                `http://15.164.151.130:4000/api/v1/updateTeamTodo/${teamId.teamId}/${teamTodoId}`,
                 {
                     ...events[index],
                     teamTodoDone: newCompletedStatus, 
@@ -167,11 +164,11 @@ function Coop({ }) {
 	const fetchTeamMembers = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await axios.get(`http://${host}:4000/api/v1/getUserTeam/${teamId.teamId}`, {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getUserTeam/${teamId.teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			const memberInfos = await Promise.all(response.data.map(async (member) => {
-				const profileResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${member.userId}`, {
+				const profileResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${member.userId}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				return {
@@ -220,16 +217,17 @@ function Coop({ }) {
 		if (!token) return;
 	
 		try {
-			const scheduleResponse = await axios.get(`http://${host}:4000/api/v1/getSchedule/${teamId.teamId}`, {
+			const scheduleResponse = await axios.get(`http://15.164.151.130:4000/api/v1/getSchedule/${teamId.teamId}`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 	
 			let todosDetails = await Promise.all(scheduleResponse.data.map(async ({ todoId }) => {
-				const todoResponse = await axios.get(`http://${host}:4000/api/v1/getTodoByTodoId/${todoId}`, {
+				const todoResponse = await axios.get(`http://15.164.151.130:4000/api/v1/getTodoByTodoId/${todoId}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				});
 				return todoResponse.data;
 			}));
+
 			todosDetails = todosDetails.flat();
 			const filteredTodos = todosDetails.filter(todo => todo.todoDate === format(new Date(selectedDate), "yyyy.MM.dd"));
 			setTodos(filteredTodos);
@@ -268,7 +266,7 @@ function Coop({ }) {
 	const fetchTeamMemo = async () => {
 		const token = await AsyncStorage.getItem('token');
 		try {
-			const response = await axios.get(`http://${host}:4000/api/v1/getTeamMemo/${teamId.teamId}`, {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v1/getTeamMemo/${teamId.teamId}`, {
 				headers: {
 					'Authorization': `Bearer ${token}`,
 				},
@@ -282,6 +280,11 @@ function Coop({ }) {
 			console.error("Error fetching team memo:", error);
 			setMemoContent("메모 정보를 불러올 수 없습니다.");
 		}
+	};
+
+	const addOpacityToColor = (color, opacity) => {
+		const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+		return `${color}${hexOpacity}`;
 	};
 
 	const MemoModal = ({ isVisible, onClose, memoContent }) => {
@@ -305,6 +308,14 @@ function Coop({ }) {
 				</View>
 			</Modal>
 		);
+	};
+
+	const shareShowModal = () => {
+		setIsShareModalVisible(true);
+	};
+
+	const copyTeamId = () => {
+		Clipboard.setString(teamId.teamId);
 	};
 
 	return (
@@ -340,8 +351,54 @@ function Coop({ }) {
 								onPress={() => setClicked_calendar(!clicked_calendar)} />
 							<images.share width={20} height={20}
 								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => setClicked_share(!clicked_share)} />
+								onPress={() => {
+									setClicked_share(!clicked_share);
+									shareShowModal();
+								}}
+							/>
 						</HorisontalView>
+
+						{isShareModalVisible && (
+							<Modal
+								animationType="slide"
+								transparent={true}
+								visible={isShareModalVisible}
+								onRequestClose={() => setIsShareModalVisible(false)}
+							>
+								<ModalContainer>
+									<ModalView style={{ justifyContent: 'center', alignItems: 'center' }}>
+										<MainText style={{ marginBottom: 30, fontSize: 15 }}>팀ID 공유하기</MainText>
+										<HorisontalView style={{ justifyContent: 'center', alignItems: 'center' }}>
+											<TouchableOpacity style={{
+												width: 300, height: 60,
+												backgroundColor: "#F2F3F5",
+												borderRadius: 15,
+												flexDirection: 'row',
+												justifyContent: 'center',
+												alignItems: 'center',
+												marginBottom: 20,
+											}}>
+												<MainText style={{ fontSize: 13 }}>Team ID: {teamId.teamId}</MainText>
+												<images.copy color={currentTheme.color1} width={20} height={20}
+													onPress={() => {
+														copyTeamId();
+														setIsShareModalVisible(false);
+														setClicked_share(!clicked_share);
+													}}
+													style={{ marginLeft: 10 }}
+												/>
+											</TouchableOpacity>
+										</HorisontalView>
+										<TouchableOpacity onPress={() => {
+											setIsShareModalVisible(false);
+											setClicked_share(!clicked_share);
+										}}>
+											<Text style={{ marginTop: 20 }}>닫기</Text>
+										</TouchableOpacity>
+									</ModalView>
+								</ModalContainer>
+							</Modal>
+						)}
 
 						{clicked_calendar && (
 							<>
@@ -358,7 +415,7 @@ function Coop({ }) {
 							{teamMembers.map((member, index) => (
 								<View key={index} style={{ alignItems: 'center', marginRight: 10 }}>
 									<Image
-										source={{ uri: member.profile || '' }}
+										source={member.profile ? { uri: member.profile } : images.profile}
 										style={{ width: 30, height: 30, borderRadius: 15, marginBottom: 5 }}
 									/>
 									<Text style={{ fontSize: 12, color: '#B7BABF', marginBottom: 10 }}>{member.name}</Text>
@@ -370,7 +427,7 @@ function Coop({ }) {
 							<Noti
 								key={event.teamTodoId}
 								style={{
-									backgroundColor: event.teamSelectedColor,
+									backgroundColor: event.teamTodoDone ? addOpacityToColor(event.teamSelectedColor, 0.6) : event.teamSelectedColor,
 								}}
 							>
 								<Noti_Check onPress={() => toggleComplete(event.teamTodoId, index)}>
@@ -399,17 +456,19 @@ function Coop({ }) {
 									setIsModalVisible(!isModalVisible);
 								}}
 							>
-								<ModalView>
-									<ScrollView>
-										<ScheduleInfoList todos={todos} />
-									</ScrollView>
-									<TouchableOpacity
-										onPress={() => setIsModalVisible(!isModalVisible)}
-										style={{ marginTop: 20, alignSelf: 'center' }}
-									>
-										<Text>닫기</Text>
-									</TouchableOpacity>
-								</ModalView>
+								<ModalContainer>
+									<ModalView style={{ justifyContent: 'center', alignItems: 'center' }}>
+										<ScrollView>
+											<ScheduleInfoList todos={todos} />
+										</ScrollView>
+										<TouchableOpacity
+											onPress={() => setIsModalVisible(!isModalVisible)}
+											style={{ marginTop: 20, alignSelf: 'center' }}
+										>
+											<Text style={{ marginBottom: 40 }}>닫기</Text>
+										</TouchableOpacity>
+									</ModalView>
+								</ModalContainer>
 							</Modal>
 
 							<TouchableOpacity
@@ -429,14 +488,14 @@ function Coop({ }) {
 									fetchTeamMemo();
 									setIsMemoModalVisible(true);
 								}}
-								>
+							>
 								<images.team_memo width={20} height={20} color={clicked_memo ? "white" : "#B7BABF"} />
 							</TouchableOpacity>
 
 							<MemoModal
-							isVisible={isMemoModalVisible}
+								isVisible={isMemoModalVisible}
 								onClose={() => { setIsMemoModalVisible(false); setClicked_memo(!clicked_memo); }}
-							memoContent={memoContent}
+								memoContent={memoContent}
 							/>
 						</HorisontalView>
 						
@@ -449,12 +508,24 @@ function Coop({ }) {
 }
 
 
+const ModalContainer = styled.View`
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: flex-end;
+    align-items: center;
+`;
+
 const ModalView = styled.View`
-	margin: 20px;
-	background-color: white;
-	border-radius: 20px;
-	padding: 35px;
-	align-items: center;
+    background-color: white;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
+	width: 100%;
+	height: 250px;
+    align-items: center;
 `;
 
 const FullView = styled.View`
@@ -561,9 +632,11 @@ const ScheduleInfoContainer = styled.View`
 `;
 
 const ScheduleInfoText = styled.Text`
-  color: #808080;
+  color: black;
   font-size: 12px;
-  line-height: 18px;
+  font-weight: normal;
+  align-self: center;
+  margin-top: 10px;
 `;
 
 const styles = StyleSheet.create({

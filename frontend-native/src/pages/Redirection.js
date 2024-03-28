@@ -11,25 +11,23 @@ const Redirection = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-	  const handleDeepLink = event => {
-		  const code = new URL(event.url).searchParams.get('code');
-		  if (code) {
-			  const host = "192.168.30.76";
-			  axios
-				  .post(`http://${host}/authnative?code=${code}`)
-				  .then(async res => {
-					  const params = new URLSearchParams(location.search);
-					  const token = params.get("token");
-					  await AsyncStorage.setItem(token);
-					  navigation.navigate('Register');
-				  })
-				  .catch(err => console.log(err));
-		  }
-	  };
+    const handleDeepLink = event => {
+      const code = new URL(event.url).searchParams.get('code');
+      if (code) {
+        axios
+          .post(`http://15.164.151.130:4000/authnative?code=${code}`)
+          .then(async res => {
+            const params = new URLSearchParams(location.search);
+            const token = params.get('token');
+            await AsyncStorage.setItem(token);
+            navigation.navigate('Todo');
+          })
+          .catch(err => console.log(err));
+      }
+    };
 
     Linking.addEventListener('url', handleDeepLink);
 
-    // Cleanup
     return () => {
       Linking.removeEventListener('url', handleDeepLink);
     };

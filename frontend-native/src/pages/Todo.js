@@ -21,6 +21,11 @@ import { format, parseISO } from "date-fns";
 import { Calendar } from "react-native-calendars";
 import TimeTable from "../components/TimeTable";
 
+const addOpacityToColor = (color, opacity) => {
+    const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+    return `${color}${hexOpacity}`;
+};
+
 function Todo() {
 	const navigation = useNavigation();
     const [events, setEvents] = useState([]);
@@ -35,18 +40,22 @@ function Todo() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState(null);
 	const [clicked_delete, setClicked_delete] = useState(false);
-	const host = "192.168.30.76";
 
     useEffect(() => {
         fetchUserData();
-    }, [selectedDate]);
+    }, []);
 
-	useFocusEffect(
+    useFocusEffect(
         useCallback(() => {
             fetchUserData();
         }, [selectedDate])
-	);
-	
+    );
+
+	const addOpacityToColor = (color, opacity) => {
+		const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
+		return `${color}${hexOpacity}`;
+	};
+
 	const formatDate = date => {
 		const d = new Date(date);
 		const year = d.getFullYear();
@@ -60,7 +69,7 @@ function Todo() {
 		const formattedDate = formatDate(selectedDate);
 	
 		try {
-		  const userResponse = await axios.get(`http://${host}:4000/api/v1/userInfo/${userId}`, {
+		  const userResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
 			headers: {
 			  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 			},
@@ -75,7 +84,7 @@ function Todo() {
 			  setCurrentTheme(theme[userThemeName]);
 			  setBase64Image(userProfileImage || ''); 
 			  setUserNickname(nickname || ''); 
-			  const eventsResponse = await axios.get(`http://${host}:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
+			  const eventsResponse = await axios.get(`http://15.164.151.130:4000/api/v1/getTodo/${userId}?date=${formattedDate}`, {
 				headers: {
 				  'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
 				},
@@ -141,7 +150,7 @@ function Todo() {
 		const newCompletedStatus = !events[index].todoDone;
 		try {
 			const response = await axios.put(
-				`http://${host}:4000/api/v1/updateTodo/${userId}/${todoId}`, {
+				`http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`, {
 					...events[index],
 					todoDone: newCompletedStatus,
 				}, {
@@ -201,7 +210,7 @@ function Todo() {
 		const userId = await getUserIdFromToken();
 		try {
 			const response = await axios.delete(
-				`http://{${host}}:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
+				`http://15.164.151.130:4000/api/v1/deleteTodo/${userId}/${selectedEvent.todoId}`,
 				{
 					headers: {
 						'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
@@ -210,8 +219,8 @@ function Todo() {
 			);
 	
 			if (response.status === 200) {
-				setModalVisible(false); // 모달을 닫습니다.
-				fetchUserData(); // Todo 목록을 새로고침합니다.
+				setModalVisible(false);
+				fetchUserData();
 			} else {
 				console.error("Failed to delete the event:", response);
 			}
@@ -271,7 +280,7 @@ function Todo() {
 						{events.map((event, index) => (
 							<Noti key={event.todoId}
 								style={{
-									backgroundColor: event.selectedColor,
+									backgroundColor: event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor,
 								}}
 								onPress={() => {
 									setModalVisible(true);
@@ -279,7 +288,7 @@ function Todo() {
 								}}>
 								<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
 									{event.todoDone && <images.noticheck width={15} height={15}
-										color={event.selectedColor} /> }
+										color={event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor} /> }
 								</Noti_Check>
 								<NotiTextContainer>
 									<NotiText>{event.todoTitle}</NotiText>
@@ -302,7 +311,6 @@ function Todo() {
 							<ModalContainer>
 								<ModalView>
 									<ModalContent>
-
 										<TouchableOpacity onPress={() => {
 											navigation.navigate("Todo_Add", {
 												todoId: selectedEvent.todoId,

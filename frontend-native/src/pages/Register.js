@@ -1,7 +1,11 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-shadow */
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable quotes */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
-/* eslint-disable prettier/prettier */
 
 import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
@@ -18,11 +22,7 @@ import theme from '../components/theme';
 
 const Register = () => {
 	const navigation = useNavigation();
-	const email = 'streethong@naver.com';
-	const host = "192.168.30.76";
-
 	const [token, setToken] = useState(null);
-
 	const [selectedTheme, setSelectedTheme] = useState(theme.OrangeTheme);
 	const [Buttonclicked, setButtonClicked] = useState(false);
 	const [inputName, setInputName] = useState("");
@@ -33,6 +33,7 @@ const Register = () => {
 	const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 	const [isDiaryTimePickerVisible, setDiaryTimePickerVisible] = useState(false);
+	const [userEmail, setUserEmail] = useState(false);
 
 	useEffect(() => {
 		const fetchAndDecodeToken = async () => {
@@ -116,6 +117,33 @@ const Register = () => {
 		hideDatePicker();
 	};
 	
+	useEffect(() => {
+		const fetchAndDecodeToken = async () => {
+			try {
+				const storedToken = await AsyncStorage.getItem('token');
+				setToken(storedToken);
+	
+				if (!storedToken) {
+					console.log('Token not found');
+					return;
+				}
+	
+				const userId = getUserIdFromToken(storedToken);
+				
+				const userInfoResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+					headers: {
+						'Authorization': `Bearer ${storedToken}`,
+					},
+				});
+				
+				const userEmail = userInfoResponse.data.kakaoEmail;
+				setUserEmail(userEmail);
+			} catch (error) {
+				console.error('Error fetching user info:', error);
+			}
+		};
+		fetchAndDecodeToken();
+	}, []);
 
 	const postUser = async () => {
 		try {
@@ -129,7 +157,7 @@ const Register = () => {
 			const userId = getUserIdFromToken(storedToken);
 			const preparedImageData = prepareImageDataForServer(imageFile);
 		
-			const response = await axios.put(`http://${host}:4000/api/v1/user/${userId}`, {
+			const response = await axios.put(`http://15.164.151.130:4000/api/v1/user/${userId}`, {
 				userNickname: String(inputName),
 				userColor: String(selectedTheme),
 				diaryTime: String(selectedDiaryTime),
@@ -160,7 +188,7 @@ const Register = () => {
 				madiaType: 'photo',
 				maxWidth: 512,
 				maxHeight: 512,
-				includeBase64: true
+				includeBase64: true,
 			},
 			(response) => {
 				if (response.didCancel) {
@@ -189,8 +217,8 @@ const Register = () => {
 	const handleThemeChange = selectedThemeName  => {
 		const newTheme = theme[selectedThemeName ];
 		if (newTheme) {
-		  setCurrentTheme(newTheme); // UI 상에서 테마를 적용
-		  setSelectedTheme(selectedThemeName ); // 선택된 테마 이름을 상태에 저장
+		  setCurrentTheme(newTheme);
+		  setSelectedTheme(selectedThemeName );
 		} else {
 		  console.error("Selected theme does not exist:", selectedThemeName );
 		}
@@ -209,104 +237,104 @@ const Register = () => {
 								source={response ? { uri: response.assets[0].uri } : images.profile}
 								style={{ width: 100, height: 100, borderRadius: 100 }}
 							/>
-							<GalleryButton onPress={()=>onSelectImage()}>
+							<GalleryButton onPress={() => onSelectImage()}>
 								<Images source={images.gallery} size="20px" />
 							</GalleryButton>
 						</HorisontalView>
 
 						<RegularText>사용자 이름 *</RegularText>
 						<TextBox>
-						<InputName
-							placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
-							value={inputName}
-							onChangeText={(text) => setInputName(text)}
-						/>
+							<InputName
+								placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
+								value={inputName}
+								onChangeText={(text) => setInputName(text)}
+							/>
 						</TextBox>
 
 						<RegularText>이메일</RegularText>
 						<TextBox color="#D5D5D5">
-						<TextBoxText>{email}</TextBoxText>
+							<TextBoxText>{userEmail}</TextBoxText>
 						</TextBox>
 
-						<HorisontalView>
-						<RegularText>방해 금지 시간</RegularText>
-						<HorisontalViewEnd>
+						<HorisontalView style={{ justifyContent: 'space-between' }}>
+							<RegularText>방해 금지 시간</RegularText>
 							<DisturbTimeButton
-							thumbColor="#FFFF"
-							onValueChange={() => setButtonClicked((prevState) => !prevState)}
-							value={Buttonclicked}
+								thumbColor="#FFFF"
+								onValueChange={() => setButtonClicked((prevState) => !prevState)}
+								value={Buttonclicked}
 							/>
-						</HorisontalViewEnd>
 						</HorisontalView>
 
 						{Buttonclicked && (
-						<>
-							<TextBox
-							onPress={() => showDatePicker('startTime')}
-							style={{ flexDirection: 'row' }}
-							>
-							<TextBoxText>시작 시간</TextBoxText>
-							<Time>{selectedStartTime}</Time>
-							</TextBox>
-							<DateTimePickerModal
-							isVisible={isStartTimePickerVisible}
-							mode="time"
-							onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
-							onCancel={hideDatePicker}
-							/>
+							<>
+								<TextBox
+									onPress={() => showDatePicker('startTime')}
+									style={{ flexDirection: 'row' }}
+								>
+									<TextBoxText>시작 시간</TextBoxText>
+									<Time>{selectedStartTime}</Time>
+								</TextBox>
+								<DateTimePickerModal
+									isVisible={isStartTimePickerVisible}
+									mode="time"
+									onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
+									onCancel={hideDatePicker}
+								/>
 
-							<TextBox onPress={() => showDatePicker('endTime')}>
-							<TextBoxText>종료 시간</TextBoxText>
-							<Time>{selectedEndTime}</Time>
-							</TextBox>
-							<DateTimePickerModal
-							isVisible={isEndTimePickerVisible}
-							mode="time"
-							onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
-							onCancel={hideDatePicker}
-							/>
-						</>
+								<TextBox onPress={() => showDatePicker('endTime')}>
+									<TextBoxText>종료 시간</TextBoxText>
+									<Time>{selectedEndTime}</Time>
+								</TextBox>
+								<DateTimePickerModal
+									isVisible={isEndTimePickerVisible}
+									mode="time"
+									onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
+									onCancel={hideDatePicker}
+								/>
+							</>
 						)}
 
 						<RegularText>일기 생성 시간 *</RegularText>
 						<TextBox onPress={() => showDatePicker('diary')}>
-						<Time>{selectedDiaryTime}</Time>
-						<DateTimePickerModal
-							isVisible={isDiaryTimePickerVisible}
-							mode="time"
-							onConfirm={(date) => handleTimePickerConfirm('diary', date)}
-							onCancel={hideDatePicker}
-						/>
+							<Time>{selectedDiaryTime}</Time>
+							<DateTimePickerModal
+								isVisible={isDiaryTimePickerVisible}
+								mode="time"
+								onConfirm={(date) => handleTimePickerConfirm('diary', date)}
+								onCancel={hideDatePicker}
+							/>
 						</TextBox>
 
 						<RegularText>테마 선택</RegularText>
 						<HorisontalView>
 							<ThemedButton
-							style={{ backgroundColor: theme.OrangeTheme.color1 }}
-							onPress={() => handleThemeChange("OrangeTheme")}
+								style={{ backgroundColor: theme.OrangeTheme.color1 }}
+								onPress={() => handleThemeChange("OrangeTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.RedTheme.color1 }}
-							onPress={() => handleThemeChange("RedTheme")}
+								style={{ backgroundColor: theme.RedTheme.color1 }}
+								onPress={() => handleThemeChange("RedTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.PinkTheme.color1 }}
-							onPress={() => handleThemeChange("PinkTheme")}
+								style={{ backgroundColor: theme.PinkTheme.color1 }}
+								onPress={() => handleThemeChange("PinkTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.GreenTheme.color1 }}
-							onPress={() => handleThemeChange("GreenTheme")}
+								style={{ backgroundColor: theme.GreenTheme.color1 }}
+								onPress={() => handleThemeChange("GreenTheme")}
 							></ThemedButton>
 							<ThemedButton
-							style={{ backgroundColor: theme.BlueTheme.color1 }}
-							onPress={() => handleThemeChange("BlueTheme")}
+								style={{ backgroundColor: theme.BlueTheme.color1 }}
+								onPress={() => handleThemeChange("BlueTheme")}
 							></ThemedButton>
 						</HorisontalView>
+
 						<ResultButton onPress={handleSubmit}>
 							<RegularText color="white" style={{ marginTop: 0, fontSize: 15 }}>
 								완료
 							</RegularText>
 						</ResultButton>
+
 					</MainView>
 				</ScrollView>
 			</FullView>
@@ -406,7 +434,7 @@ const DisturbTimeButton = styled.Switch.attrs((props) => ({
 		true: props.theme.color1,
 	},
 }))`
-  	margin-top: 10px;
+	margin-top: 10px;
 `;
 
 const ThemedButton = styled.TouchableOpacity`
