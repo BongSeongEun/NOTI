@@ -17,7 +17,7 @@ const MainDiv = styled.div`
   align-items: center;
   width: 100%;
   justify-content: center;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   height: 100vh;
 `;
 
@@ -28,6 +28,7 @@ const MainLogo = styled.img`
 `;
 
 const SocialImg = styled.img`
+  margin-top: 10px;
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 3rem;
@@ -42,7 +43,7 @@ const LoginImage = styled.image`
 function Login() {
   const [message, setMassege] = useState([]);
   const REACT_APP_REST_API_KEY = "77cf97c36317f2622a926b9ddb30f96f";
-  const REACT_APP_REDIRECT_URI = "http://localhost:3000/auth";
+  const REACT_APP_REDIRECT_URI = "http://15.165.100.226:3000/auth";
   // oauth 요청 URL
   const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_REST_API_KEY}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`;
   const handleLogin = () => {
@@ -50,7 +51,7 @@ function Login() {
   };
 
   useEffect(() => {
-    fetch("/api/v1/welcome")
+    fetch("http://15.164.151.130:4000/api/v1/welcome")
       .then(response => response.json())
       .then(data => {
         setMassege(data);
@@ -63,14 +64,8 @@ function Login() {
         <MainLogo src={NOTI} />
         <h1>{message}</h1>
         <SocialWrap>
-          <a href="/Main">
-            <SocialImg style={{ margin: "1rem" }} src={GOOGLE} />
-          </a>
-          <a href="/Main">
-            <SocialImg style={{ margin: "1rem" }} src={NAVER} />
-          </a>
           <a href={kakaoURL}>
-            <SocialImg style={{ margin: "1rem" }} src={KAKAO} />
+            <SocialImg src={KAKAO} />
           </a>
         </SocialWrap>
       </MainDiv>
