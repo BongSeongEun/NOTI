@@ -3,92 +3,102 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import styled, { ThemeProvider } from 'styled-components/native';
+import styled, {ThemeProvider} from "styled-components/native"
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Modal, Text, TouchableOpacity, } from "react-native";
+import {
+	ScrollView,
+	Text,
+	Modal,
+	Alert,
+	TextInput,
+	Button,
+	TouchableOpacity,
+} from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
+import { decode } from 'base-64';
+import axios from 'axios';
 
-import { theme } from "../components/theme";
 import images from "../components/images";
-import { TextInput } from 'react-native-gesture-handler';
 import Navigation_Bar from "../components/Navigation_Bar";
-import {ProgressChart, } from "react-native-chart-kit";
-
+import { theme } from '../components/theme';
 
 function Stat({ }) {
 	const navigation = useNavigation();
-	const route = useRoute();
-	const { selectedTheme } = route.params;
-	const color_sheet = [selectedTheme.color1, selectedTheme.color2, selectedTheme.color3, selectedTheme.color4, selectedTheme.color5];
-	const name = "홍길동";
-    const currentDate = new Date();
-    const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
-    const dayOfWeek = daysOfWeek[currentDate.getDay()];
-    const formattedDate = `${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일 ${dayOfWeek}요일`;
-	  return (
-        <ThemeProvider theme={selectedTheme}>
+
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [base64Image, setBase64Image] = useState('');
+	const [userNickname, setUserNickname] = useState('');
+	
+	useEffect(() => {
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
+  
+			if (token) {
+				const userId = getUserIdFromToken(token);
+				try {
+					const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+					});
+					const userThemeName = response.data.userColor || 'OrangeTheme';
+					const userProfileImage = response.data.userProfile;
+					const nickname = response.data.userNickname;
+  
+					if (theme[userThemeName]) {
+						setCurrentTheme(theme[userThemeName]);
+					}
+					setBase64Image(userProfileImage || '');
+					setUserNickname(nickname || '');
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, []);
+	
+	const getUserIdFromToken = (token) => {
+		try {
+			const payload = token.split('.')[1];
+			const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+			const decodedPayload = decode(base64);
+			const decodedJSON = JSON.parse(decodedPayload);
+
+			return decodedJSON.id.toString();
+		} catch (error) {
+			console.error('Error decoding token:', error);
+			return null;
+		}
+	};
+
+	return (
+		<ThemeProvider theme={currentTheme}>
 			<FullView>
 				<MainView>
-						<HorisontalView style={{marginTop: 30 }}>
-							<Profile source={images.profile} style={{ marginTop: 20 }} />
-							<ProfileTextContainer>
-								<MainText>
-									{name} 님,
-								</MainText>
-								<MainText color={color_sheet[0]}>
-									{formattedDate} 노티입니다!
-								</MainText>
-							</ProfileTextContainer>
-						</HorisontalView>
+					<MainText>{userNickname} 님의 한 달</MainText>
+					<MainText>노티 활동을 모아봤어요!</MainText>
 				</MainView>
-			  </FullView>
-			  
-			  <FullView style={{ flex: 1 }}>
-				  <Bar />
-				  <ScrollView>
-					  <MainView>
-						  
-					  </MainView>
-				  </ScrollView>
-				  <Navigation_Bar selectedTheme={selectedTheme} />
-			  </FullView>
-		  </ThemeProvider>
+			</FullView>
+		</ThemeProvider>
     );
 }
 
 const FullView = styled.View`
-	width: 100%;
-	background-color: white;
+   width: 100%;
+   background-color: white;
 `;
 
 const MainView = styled(FullView)`
-	height: auto;
-	align-items: stretch;
-	align-self: center;
-	width: 300px;
+   height: auto;
+   align-self: center;
+   width: 300px;
 `;
 
 const HorisontalView = styled(MainView)`
-	flex-direction: row;
-`;
-
-
-const ProfileContainer = styled.View`
-    display: flex;
-    flex-direction: row;
-`;
-
-const ProfileTextContainer = styled(ProfileContainer)`
-	flex-direction: column;
-	margin-top: 25px;
-	margin-left: 15px;
-	margin-bottom: 20px;
-`;
-
-const Profile = styled.Image`
-    width: 40px;
-    height: 40px;
+   flex-direction: row;
 `;
 
 const MainText = styled.Text`
@@ -98,11 +108,5 @@ const MainText = styled.Text`
     text-align: left;
 `;
 
-const Bar = styled.View`
-    width: 100%;
-    height: 1px;
-    margin-top: 10px;
-    background-color: #B7BABF;
-`;
 
 export default Stat;
