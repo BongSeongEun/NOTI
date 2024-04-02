@@ -14,7 +14,7 @@ import java.net.http.HttpResponse;
 
 @Service
 public class GptFinishNlpService {
-    // todo완료 채팅에 대해서 nlp 분류
+    // todo완료 채팅에 대해서 핵심키워드 추출
 
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조

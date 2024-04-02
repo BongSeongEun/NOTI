@@ -47,12 +47,22 @@ public class StatisticsController {
 
 
         Map<String, Object> response = new HashMap<>();
-        response.put("thisMonth", thisMonth); 
+        response.put("thisMonth", thisMonth);
         response.put("prevMonth", prevMonth);
         response.put("difference", difference);
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("statsTag/{userId}/{statsDate}")
+    public ResponseEntity<?> getTagTodos(@PathVariable Long userId, @PathVariable String statsDate){
+
+
+        return null;
+    }
+
+
+
 
 }
 

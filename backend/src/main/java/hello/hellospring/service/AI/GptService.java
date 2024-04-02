@@ -22,7 +22,7 @@ public class GptService {
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
-    @Value("${openai.api.key.a}")
+    @Value("${openai.api.key.g}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
     public String askGpt(String userMessage, Long userId) throws Exception {

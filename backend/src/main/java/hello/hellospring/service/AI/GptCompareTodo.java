@@ -15,11 +15,12 @@ import java.net.http.HttpResponse;
 @Service
 public class GptCompareTodo {
     // 분류된 todo달성 메시지를 분석
+    // 이거 안씁니다!!!!!!!!!!!!!!!!!!!!!!
 
     @Autowired
     private TodoRepository todoRepository;
 
-    @Value("${openai.api.key.g}")
+    @Value("${openai.api.key.a}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
     public String askGpt(String userMessage, String userTodos) throws Exception {
