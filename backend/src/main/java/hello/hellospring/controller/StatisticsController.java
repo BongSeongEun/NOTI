@@ -58,22 +58,11 @@ public class StatisticsController {
     public ResponseEntity<?> getTagTodos(@PathVariable Long userId, @PathVariable String statsDate){
 
         todoService.updateTodoTags(userId, statsDate);
-<<<<<<< HEAD
+
 
         Map<String, Object> topFourWords = todoService.findTopFourFrequentWordsInTodoTags();
         return ResponseEntity.ok(topFourWords);
-=======
 
-        Map<String, Object> topFourWords = todoService.findTopFourFrequentWordsInTodoTags();
-
-        // 상위 두 단어를 JSON 형태로 클라이언트에게 반환
-        return ResponseEntity.ok(topFourWords);
-
-
-
-        //이값들 배열이니까 하나하나씩 서비스 호출해서 태그화 ㄱㄱ
-        //return ResponseEntity.ok().build();
->>>>>>> 03b99c49d5012116412c8da5a6b6657032eba3a4
     }
 }
 
