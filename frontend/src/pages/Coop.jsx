@@ -9,7 +9,7 @@ import {
   Toggle,
   redirect,
 } from "react-router-dom";
-import { backgrounds, lighten } from "polished";
+import { darken, lighten } from "polished";
 import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
@@ -61,8 +61,9 @@ const TeamItem = styled.div`
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  transition: background-color 0.3s ease;
   &:hover {
-    background-color: #f0f0f0;
+    background-color: ${props => lighten(0.2, props.theme.color1)};
   }
 `;
 const ButtonContainer = styled.div`
@@ -79,6 +80,10 @@ const AddTeamButton = styled.button`
   color: white;
   border: none;
   border-radius: 5px;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => darken(0.1, props.theme.color1)};
+  }
   cursor: pointer;
 `;
 
@@ -137,6 +142,10 @@ const CreateTeamButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => darken(0.1, props.theme.color1)};
+  }
 `;
 
 const CloseButton = styled.button`
@@ -160,6 +169,10 @@ const ConfirmModalContainer = styled.div`
   align-items: center; // 가운데 놓기
   flex-direction: column;
   gap: 10px;
+  @media (max-width: 1050px) {
+    // LeftSidebar가 사라지는 화면 너비
+    margin-right: 300px; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
+  }
 `;
 
 const ConfirmButtonContainer = styled.div`
@@ -180,11 +193,20 @@ const ConfirmButton = styled.button`
   padding: 10px;
   border-radius: 5px;
   border: none;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => darken(0.1, props.theme.color1)};
+  }
   cursor: pointer;
 `;
 
 const CancelButton = styled(ConfirmButton)`
   background-color: #ccc; // 회색 계열
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #999999;
+  }
+  cursor: pointer;
 `;
 
 const TeamInfo = styled.div`
@@ -226,11 +248,14 @@ function Coop({ onSelectTeam }) {
   const fetchUserData = async userToken => {
     const userId = getUserIdFromToken(userToken); // 사용자 ID 가져오기
     try {
-      const response = await axios.get(`/api/v1/userInfo/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
         },
-      });
+      );
       // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
       const userThemeName = response.data.userColor; // 사용자의 테마 이름
 
@@ -247,7 +272,9 @@ function Coop({ onSelectTeam }) {
   const fetchTeams = async () => {
     const userId = getUserIdFromToken();
     try {
-      const response = await axios.get(`/api/v1/getTeam/${userId}`);
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getTeam/${userId}`,
+      );
       setTeams(response.data);
     } catch (error) {
       console.error("팀 목록을 불러오는데 실패했습니다:", error);
@@ -258,7 +285,7 @@ function Coop({ onSelectTeam }) {
     const userId = getUserIdFromToken();
     try {
       await axios.post(
-        `/api/v1/createTeam/${userId}`,
+        `http://15.164.151.130:4000/api/v1/createTeam/${userId}`,
         {
           teamTitle: teamName,
         },
@@ -276,9 +303,12 @@ function Coop({ onSelectTeam }) {
   const enterTeam = async teamId => {
     const userId = getUserIdFromToken();
     try {
-      await axios.post(`/api/v1/enterTeam/${userId}/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `http://15.164.151.130:4000/api/v1/enterTeam/${userId}/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setShowEnterModal(false);
       setTeamCode("");
       // 팀 목록 다시 불러오기
@@ -297,9 +327,12 @@ function Coop({ onSelectTeam }) {
   // 특정 팀에 속한 사용자 수를 불러오는 함수
   const fetchTeamMembers = async teamId => {
     try {
-      const response = await axios.get(`/api/v1/getUserTeam/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getUserTeam/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setTeamMembersCount(prevState => ({
         ...prevState,
         [teamId]: response.data.length,
@@ -334,9 +367,12 @@ function Coop({ onSelectTeam }) {
   const leaveTeam = async teamId => {
     const userId = getUserIdFromToken();
     try {
-      await axios.delete(`/api/v1/leaveTeam/${teamId}/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://15.164.151.130:4000/api/v1/leaveTeam/${teamId}/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setShowConfirmModal(false);
       fetchTeams(); // 팀 목록 다시 불러오기
     } catch (error) {
@@ -404,7 +440,7 @@ function Coop({ onSelectTeam }) {
                 </CloseButton>
                 <InputField
                   type="text"
-                  placeholder="팀 코드 입력..."
+                  placeholder="팀 참여 코드 입력..."
                   value={teamCode}
                   onChange={e => setTeamCode(e.target.value)}
                 />

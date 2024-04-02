@@ -64,11 +64,14 @@ function CoopDetail({ team }) {
   const fetchUserData = async userToken => {
     const userId = getUserIdFromToken(userToken); // 사용자 ID 가져오기
     try {
-      const response = await axios.get(`/api/v1/userInfo/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
         },
-      });
+      );
       // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
       const userThemeName = response.data.userColor; // 사용자의 테마 이름
 
@@ -84,9 +87,12 @@ function CoopDetail({ team }) {
 
   const fetchTeamDetails = async () => {
     try {
-      const response = await axios.get(`/api/v1/getTeamInfo/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getTeamInfo/${teamId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (response.status === 200) {
         setTeamDetails(response.data); // 여기서 response.data에 teamId가 포함될 것입니다.
         console.log(response.data); // response.data를 바로 여기서 로깅하는 것이 좋습니다.

@@ -83,6 +83,10 @@ const EventItem = styled.div`
   justify-content: space-between;
   align-items: center;
   opacity: ${props => (props.completed ? "0.5" : "1")};
+  transition:
+    background-color 0.5s ease-in-out,
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
 `;
 
 const EventTitle = styled.div`
@@ -102,6 +106,15 @@ const EventTime = styled.div`
 `;
 
 const CompleteButton = styled.div`
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+
+  &:hover {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 그림자 추가 */
+    transform: translateY(-2px); /* 버튼이 약간 떠오르는 효과 */
+  }
   margin-right: 10px;
   height: 30px;
   width: 30px;
@@ -244,11 +257,14 @@ function Todo2() {
 
     try {
       // 사용자 정보 불러오기
-      const userResponse = await axios.get(`/api/v1/userInfo/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const userResponse = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       // 사용자의 테마 정보를 서버로부터 받아옴
       if (userResponse.status === 200) {
@@ -260,7 +276,7 @@ function Todo2() {
 
           // 날짜에 맞는 일정 데이터 불러오기
           const eventsResponse = await axios.get(
-            `/api/v1/getTodo/${userId}?date=${formattedDate}`,
+            `http://15.164.151.130:4000/api/v1/getTodo/${userId}?date=${formattedDate}`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -271,6 +287,12 @@ function Todo2() {
           if (eventsResponse.status === 200) {
             const filteredEvents = eventsResponse.data.filter(
               event => event.todoDate === formattedDate,
+            );
+
+            // 시간 순서대로 정렬
+            const sortedEvents = filteredEvents.sort((a, b) =>
+              // todoStartTime을 기준으로 오름차순 정렬
+              a.todoStartTime.localeCompare(b.todoStartTime),
             );
             const updatedEvents = filteredEvents.map(event => ({
               ...event,
@@ -357,7 +379,7 @@ function Todo2() {
     // 서버에 일정의 완료 상태를 업데이트하는 요청을 보냅니다.
     try {
       const response = await axios.put(
-        `/api/v1/updateTodo/${userId}/${todoId}`,
+        `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`,
         {
           ...events[index], // 기존 일정 데이터를 펼침
           todoDone: newCompletedStatus, // 완료 상태만 변경
@@ -411,7 +433,7 @@ function Todo2() {
     const userId = getUserIdFromToken();
     try {
       const response = await axios.delete(
-        `/api/v1/deleteTodo/${userId}/${deletingTodoId}`,
+        `http://15.164.151.130:4000/api/v1/deleteTodo/${userId}/${deletingTodoId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -449,7 +471,7 @@ function Todo2() {
       let response;
       if (isEditing) {
         // 수정하는 경우
-        const url = `/api/v1/updateTodo/${userId}/${editingTodoId}`; // 수정 API 엔드포인트, todoId 포함
+        const url = `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${editingTodoId}`; // 수정 API 엔드포인트, todoId 포함
         response = await axios.put(url, eventData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -457,7 +479,7 @@ function Todo2() {
         });
       } else {
         // 새로 추가하는 경우
-        const url = `/api/v1/createTodo/${userId}`; // 생성 API 엔드포인트
+        const url = `http://15.164.151.130:4000/api/v1/createTodo/${userId}`; // 생성 API 엔드포인트
         response = await axios.post(url, eventData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -527,6 +549,8 @@ function Todo2() {
               <EventItem
                 key={event.todoId}
                 style={{
+                  transition:
+                    "backgroundColor 0.3s ease, opacity 0.5s ease-in-out, transform 0.5s ease-in-out",
                   backgroundColor: event.selectedColor, // 일정의 선택된 색상을 항상 사용
                   opacity: event.todoDone ? "0.5" : "1", // 완료 상태에 따라 투명도 조정
                 }}

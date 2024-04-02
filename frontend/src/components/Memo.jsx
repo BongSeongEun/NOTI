@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled, { ThemeProvider } from "styled-components";
+import { backgrounds, lighten } from "polished";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const MemoContainer = styled.div`
@@ -36,6 +37,10 @@ const SaveButton = styled.button`
   padding: 10px 20px;
   cursor: pointer;
   border-radius: 5px;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: ${props => lighten(0.1, props.theme.color1)};
+  }
 `;
 
 function Memo({ teamId }) {
@@ -44,7 +49,9 @@ function Memo({ teamId }) {
 
   const fetchMemo = async () => {
     try {
-      const response = await axios.get(`/api/v1/getTeamMemo/${teamId}`);
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/getTeamMemo/${teamId}`,
+      );
       if (response.data && response.data.length > 0) {
         // 배열의 첫 번째 요소를 사용하여 메모 데이터 설정
         setMemo({
@@ -63,7 +70,7 @@ function Memo({ teamId }) {
   const handleSave = async () => {
     try {
       const response = await axios.put(
-        `/api/v1/updateTeamMemo/${teamId}/${memo.teamMemoId}`,
+        `http://15.164.151.130:4000/api/v1/updateTeamMemo/${teamId}/${memo.teamMemoId}`,
         {
           memoContent: memo.memoContent,
         },
