@@ -48,4 +48,10 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE :month%")
     //userId가 일치하고, todoDate중에 month값이 포함된것들
     List<Todo> findAllTodosByMonthAndUserId(@Param("userId") Long userId, @Param("month") String month);
+
+
+    List<Todo> findByUserIdAndTodoDateLikeAndTodoTagIsNull(Long userId, String todoDate);
+
+    @Query("SELECT t.todoTag FROM Todo t WHERE t.todoTag IS NOT NULL")
+    List<String> findAllTodoTags();
 }
