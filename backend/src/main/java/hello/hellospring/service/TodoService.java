@@ -63,4 +63,24 @@ public class TodoService {
         }
     }
 
+    public int countCompletedTodosByMonthAndUserId(Long userId, String month) {
+        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, month);
+        List<Todo> completedTodos = todoRepository.findCompletedTodosByMonthAndUserId(userId, month);
+
+        // 모든 일정의 수
+        int totalTodos = allTodos.size();
+        // 완료된 일정의 수
+        int completedTodosCount = completedTodos.size();
+
+        // 모든 일정 중에서 달성한 일정의 비율 계산
+        double completionRate = 0;
+        if (totalTodos > 0) { // 분모가 0이 되는 경우를 방지
+            completionRate = ((double) completedTodosCount / totalTodos) * 100;
+        }
+
+        System.out.println("이번달 일정 :" + totalTodos);
+        System.out.println("일정 중 달성갯수 :" + completedTodosCount);
+
+        return (int) completionRate;
+    }
 }
