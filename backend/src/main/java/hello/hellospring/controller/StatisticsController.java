@@ -54,7 +54,7 @@ public class StatisticsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("statsTag/{userId}/{statsDate}")
+    @GetMapping("statsTag/{userId}/{statsDate}") // 해당하는 달에 가장많이 나온 태그 & 퍼센트
     public ResponseEntity<?> getTagTodos(@PathVariable Long userId, @PathVariable String statsDate){
 
         todoService.updateTodoTags(userId, statsDate);

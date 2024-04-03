@@ -133,14 +133,15 @@ public class TodoService {
         long etc = 0;
         for (Map.Entry<String, Long> entry : sortedEntries) {
             int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
-            result.put(rank + "번째로 많은 태그", entry.getKey());
+            result.put("Word"+rank+"st", entry.getKey());
             // 소수점 제거하여 정수로 저장
-            result.put(rank + "번째 단어의 퍼센트", frequencyPercentage);
+            result.put("Word"+rank+"stPercent", frequencyPercentage);
             etc += frequencyPercentage;
             rank++;
         }
         long etcResult = 100 - etc; // 그외 퍼센트 계산
-        result.put("그 외 퍼센트", etcResult);
+        result.put("etcPercent", etcResult);
+
         System.out.println("totalTodos는 : "+totalTodos);
 
         return result;
