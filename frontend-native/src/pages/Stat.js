@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
 import { decode } from 'base-64';
 import axios from 'axios';
+import { PieChart } from "react-native-gifted-charts";
 
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
@@ -74,16 +75,61 @@ function Stat({ }) {
 		}
 	};
 
+	const pieData = [
+		{ id: 'data1', value: 50, color: currentTheme.color1 },
+		{ id: 'data2', value: 40, color: currentTheme.color2 },
+		{ id: 'data3', value: 20, color: currentTheme.color3 },
+		{ id: 'data4', value: 25, color: currentTheme.color4 },
+		{ id: 'data5', value: 15, color: currentTheme.color5 },
+	];
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
-				<MainView>
-					<MainText>{userNickname} 님의 한 달</MainText>
-					<MainText>노티 활동을 모아봤어요!</MainText>
-				</MainView>
+				<ScrollView>
+					<MainView>
+						<MainText>{userNickname} 님의 한 달</MainText>
+						<MainText>노티 활동을 모아봤어요!</MainText>
+
+						<MainText>기간 선택</MainText>
+
+						<ScrollView
+							horizontal={true}
+							showsHorizontalScrollIndicator={true}
+						>
+							<States color={currentTheme.color1}>
+								<MainText>통계1</MainText>
+							</States>
+
+							<States color={currentTheme.color2}>
+								<MainText>통계2</MainText>
+							</States>
+						</ScrollView>
+					
+						<MainText>상세 리포트</MainText>
+
+						<StatFrame>
+							<MainText>통계자료</MainText>
+							<PieChart
+								data={pieData}
+								showText
+								textColor="black"
+								radius={80}
+								textSize={10}
+								focusOnPress
+								showValuesAsLabels
+							/>
+						</StatFrame>
+
+						<StatFrame>
+							<MainText>통계자료</MainText>
+						</StatFrame>
+
+					</MainView>
+				</ScrollView>
 			</FullView>
 		</ThemeProvider>
-    );
+	);
 }
 
 const FullView = styled.View`
@@ -108,5 +154,22 @@ const MainText = styled.Text`
     text-align: left;
 `;
 
+const States = styled.TouchableOpacity`
+	width: 290px;
+	height: 100px;
+	border-radius: 15px;
+	background-color: ${props => props.color || "#FF7154"};
+	flex-direction: row;
+	align-items: center;
+	margin: 5px;
+`;
+
+const StatFrame = styled.TouchableOpacity`
+	width: 300px;
+	height: 200px;
+	border-radius: 15px;
+	border-width: 1px;
+	border-color: #B7BABF;
+`;
 
 export default Stat;
