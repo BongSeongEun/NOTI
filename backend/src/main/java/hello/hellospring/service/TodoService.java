@@ -106,8 +106,13 @@ public class TodoService {
         }
     }
 
-    public Map<String, Object> findTopFourFrequentWordsInTodoTags() {
-        List<String> todoTags = todoRepository.findAllTodoTags();
+    public Map<String, Object> findWords(Long userId, String statsDate) {
+        // 단순 일정의 총 개수 구하는 로직
+        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+        int totalTodos = allTodos.size();
+
+        //
+        List<String> todoTags = todoRepository.findAllTodoTagsByUserIdAndStatsDate(userId, statsDate);
         Map<String, Long> wordFrequency = new HashMap<>();
 
         // ',' 기준으로 단어 분리 및 "없음" 단어 제외 후 빈도수 계산
@@ -125,14 +130,22 @@ public class TodoService {
         // 상위 네 단어와 빈도수를 JSON 형태로 매핑
         Map<String, Object> result = new LinkedHashMap<>();
         int rank = 1;
+        long etc = 0;
         for (Map.Entry<String, Long> entry : sortedEntries) {
-            result.put(rank + "번째", entry.getKey());
-            result.put(rank + "번째빈도수", entry.getValue());
+            int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
+            result.put(rank + "번째로 많은 태그", entry.getKey());
+            // 소수점 제거하여 정수로 저장
+            result.put(rank + "번째 단어의 퍼센트", frequencyPercentage);
+            etc += frequencyPercentage;
             rank++;
         }
+        long etcResult = 100 - etc; // 그외 퍼센트 계산
+        result.put("그 외 퍼센트", etcResult);
+        System.out.println("totalTodos는 : "+totalTodos);
 
         return result;
     }
+
 
 
 

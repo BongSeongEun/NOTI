@@ -60,7 +60,7 @@ public class StatisticsController {
         todoService.updateTodoTags(userId, statsDate);
 
 
-        Map<String, Object> topFourWords = todoService.findTopFourFrequentWordsInTodoTags();
+        Map<String, Object> topFourWords = todoService.findWords(userId, statsDate);
         return ResponseEntity.ok(topFourWords);
 
     }

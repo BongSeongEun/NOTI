@@ -52,6 +52,8 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     List<Todo> findByUserIdAndTodoDateLikeAndTodoTagIsNull(Long userId, String todoDate);
 
-    @Query("SELECT t.todoTag FROM Todo t WHERE t.todoTag IS NOT NULL")
-    List<String> findAllTodoTags();
+
+    @Query("SELECT t.todoTag FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag IS NOT NULL")
+    List<String> findAllTodoTagsByUserIdAndStatsDate(@Param("userId") Long userId, @Param("statsDate") String statsDate);
+
 }
