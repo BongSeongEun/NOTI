@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -39,5 +40,20 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     @Transactional
     @Query("UPDATE Todo t SET t.todoDone = true WHERE t.userId = :userId AND t.todoTitle = :todoTitle AND t.todoDate = :todoDate")
     void markTodoAsDone(@Param("userId") Long userId, @Param("todoTitle") String todoTitle, @Param("todoDate") String todoDate);
-    // gpt 관련으로 추가함, 혹시 오류 발생시 없애버려주세요
+
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE :month% AND t.todoDone = true")
+    //userId가 일치하고, todoDate중에 month값이 포함되고, todoDone이 true인것들
+    List<Todo> findCompletedTodosByMonthAndUserId(@Param("userId") Long userId, @Param("month") String month);
+
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE :month%")
+    //userId가 일치하고, todoDate중에 month값이 포함된것들
+    List<Todo> findAllTodosByMonthAndUserId(@Param("userId") Long userId, @Param("month") String month);
+
+
+    List<Todo> findByUserIdAndTodoDateLikeAndTodoTagIsNull(Long userId, String todoDate);
+
+
+    @Query("SELECT t.todoTag FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag IS NOT NULL")
+    List<String> findAllTodoTagsByUserIdAndStatsDate(@Param("userId") Long userId, @Param("statsDate") String statsDate);
+
 }

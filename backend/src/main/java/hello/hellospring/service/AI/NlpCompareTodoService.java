@@ -15,6 +15,7 @@ import java.util.List;
 
 @Service
 public class NlpCompareTodoService {
+    // 이거 안씁니다!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     @Autowired
     private TodoRepository todoRepository;

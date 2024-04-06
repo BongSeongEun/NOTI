@@ -1,6 +1,7 @@
 package hello.hellospring.service.AI;
 
-import hello.hellospring.repository.TodoRepository;
+import hello.hellospring.model.Chat;
+import hello.hellospring.repository.ChatRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,32 +12,33 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
-public class GptCompareTodo {
-    // 분류된 todo달성 메시지를 분석
-    // 이거 안씁니다!!!!!!!!!!!!!!!!!!!!!!
+public class GptTagService {
+    // 이 메시지가 일정 관련인지 ture or false
 
     @Autowired
-    private TodoRepository todoRepository;
+    private ChatRepository chatRepository; //ChatRepository 참조
 
-    @Value("${openai.api.key.a}")
+    @Value("${openai.api.key.e}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askGpt(String userMessage, String userTodos) throws Exception {
-
+    public String askGpt(String todoTitle) throws Exception{
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
-        // 기존 todo 내용들 학습시키기
-        messagesArray.put(new JSONObject().put("role", "user")
-                .put("content",
-                        userTodos + ". 다음과 같이 나열된 행동 중에서" + userMessage +"와 동일한 단어를 찾아주세요" +
-                                "하나만 출력해줘야해요." +
-                                "비슷한 단어를 가장 많이 포함한 행동이 없으면 없다고 해주세요"));
+        messagesArray.put(new JSONObject().put("role", "system")
+                .put("content", "다음 메시지의 핵심 키워드를 단어를 추출해주세요. " +
+                        "딱 하나의 단어로만 추출해줘야하고 (키워드 : 밥 이런거 안된다는 소리야), 대략적이면서 포괄적인 단어로 추출해주세요." +
+                        "예를들어서 수학 수업 학습 공부 이런 말이 들어가있으면 공부를 추출해주세요" +
+                        "예를들어서 식사 점심 저녁 밥 먹는다 이런 말이 들어가있으면 식사로 추출해주세요"));
+
+        messagesArray.put(new JSONObject().put("role", "user").put("content", todoTitle));
 
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("messages", messagesArray);
-        jsonBody.put("max_tokens", 50); // 답변 최대 글자수
+        jsonBody.put("max_tokens", 10); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
         jsonBody.put("model", "gpt-3.5-turbo");
@@ -60,15 +62,12 @@ public class GptCompareTodo {
             JSONObject message = firstChoice.getJSONObject("message");
             String content = message.getString("content");
 
-            System.out.println("resultTodos : " +userTodos);
-            System.out.println("userMessage : " +userMessage);
-
-            System.out.println("Gpt의 선택은 : " + content);
+            System.out.println("todo 핵심키워드 추출: " + content);
 
             return content;
-
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
+
     }
 }
