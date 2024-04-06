@@ -66,12 +66,14 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             chat.setTodoFinishAns(false);
             chatRepository.save(chat);
 
+            String body = chat.getChatContent();
+
             String jsonRequest = "{\n" +
             "    \"message\": {\n" +
             "        \"token\": \"e1M8MFyBRbe_tMIkQeKOVf:APA91bHMn2FYfFNqbNJcLDA_ctnK5jlrCAn-ITCOp-JYiEv-LmoL-1VesZbuO36DtACKLh-SSY-WzbfCVwWC9cru2Ubu4neNt_QUcG1ZPCR4_b9wWvff64yq0yflfKyWWblT_j7d1Bmo\",\n" +
             "        \"notification\": {\n" +
-            "          \"body\": \"Body of Your Notification in data\",\n" +
-            "          \"title\": \"Title of Your Notification in data\"\n" +
+            "          \"body\": \"" + body + "\",\n" +
+            "          \"title\": \"노티\"\n" +
             "        }\n" +
             "    }\n" +
             "}";
