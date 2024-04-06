@@ -16,6 +16,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 
 import java.net.http.HttpRequest;
 import java.time.LocalDate;
