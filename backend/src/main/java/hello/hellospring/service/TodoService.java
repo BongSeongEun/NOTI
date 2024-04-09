@@ -153,62 +153,44 @@ public class TodoService {
     }
 
 
-    public Map<String, Object> findWeekDay(Long userId, String statsDate) {
+    public Map<String, Long> findWeekDay(Long userId, String statsDate) {
         List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
         List<Todo> doneTodos = todoRepository.findAllTodosByMonthAndUserIdAndTodoDone(userId, statsDate, true);
 
-
-
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        LocalDate startOfMonth = LocalDate.parse(statsDate + ".01", DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        LocalDate startOfMonth = LocalDate.parse(statsDate + ".01", formatter);
         LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 
-        List<String> Mon = new ArrayList<>();
-        List<String> Tue = new ArrayList<>();
-        List<String> Wed = new ArrayList<>();
-        List<String> Thu = new ArrayList<>();
-        List<String> Fri = new ArrayList<>();
-        List<String> Sat = new ArrayList<>();
-        List<String> Sun = new ArrayList<>();
+        Map<String, List<String>> weekDaysMap = new HashMap<>();
+        weekDaysMap.put("MONDAY", new ArrayList<>());
+        weekDaysMap.put("TUESDAY", new ArrayList<>());
+        weekDaysMap.put("WEDNESDAY", new ArrayList<>());
+        weekDaysMap.put("THURSDAY", new ArrayList<>());
+        weekDaysMap.put("FRIDAY", new ArrayList<>());
+        weekDaysMap.put("SATURDAY", new ArrayList<>());
+        weekDaysMap.put("SUNDAY", new ArrayList<>());
 
+        Map<String, Long> result = new HashMap<>();
         for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            switch (date.getDayOfWeek()) {
-                case MONDAY:
-                    Mon.add(date.format(formatter));
-                    break;
-                case TUESDAY:
-                    Tue.add(date.format(formatter));
-                    break;
-                case WEDNESDAY:
-                    Wed.add(date.format(formatter));
-                    break;
-                case THURSDAY:
-                    Thu.add(date.format(formatter));
-                    break;
-                case FRIDAY:
-                    Fri.add(date.format(formatter));
-                    break;
-                case SATURDAY:
-                    Sat.add(date.format(formatter));
-                    break;
-                case SUNDAY:
-                    Sun.add(date.format(formatter));
-                    break;
-            }
+            String dayOfWeek = date.getDayOfWeek().toString();
+            weekDaysMap.get(dayOfWeek).add(date.format(formatter));
         }
-        System.out.println("Mon: " + Mon);
-        System.out.println("Tue: " + Tue);
-        System.out.println("Wed: " + Wed);
-        System.out.println("Thu: " + Thu);
-        System.out.println("Fri: " + Fri);
-        System.out.println("Sat: " + Sat);
-        System.out.println("Sun: " + Sun);
 
+        // 일정 개수와 달성 일정 개수 계산하여 결과 맵에 저장
+        weekDaysMap.forEach((dayOfWeek, dates) -> {
+            long totalTodosCount = allTodos.stream()
+                    .filter(todo -> dates.contains(todo.getTodoDate()))
+                    .count();
+            long doneTodosCount = doneTodos.stream()
+                    .filter(todo -> dates.contains(todo.getTodoDate()))
+                    .count();
 
+            // 결과 맵에 요일별로 저장
+            String prefix = dayOfWeek.substring(0, 3).toUpperCase();
+            result.put(prefix + "doneTodos", doneTodosCount);
+            result.put(prefix + "totalTodos", totalTodosCount);
+        });
 
-
-
-        return null;
+        return result;
     }
 }

@@ -67,7 +67,7 @@ public class StatisticsController {
     @GetMapping("dayWeek/{userId}/{statsDate}") // 요일마다 달성률
     public ResponseEntity<?> getDayWeek(@PathVariable Long userId, @PathVariable String statsDate){
 
-        Map<String, Object> dayWeeks = todoService.findWeekDay(userId, statsDate);
+        Map<String, Long> dayWeeks = todoService.findWeekDay(userId, statsDate);
         return ResponseEntity.ok(dayWeeks);
 
     }
