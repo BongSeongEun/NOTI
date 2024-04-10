@@ -32,6 +32,8 @@ import message_send from "../asset/message_send.svg";
 import copy from "../asset/copy.svg";
 import plus from "../asset/plus.svg";
 
+import creat_down from "../asset/caret-down";
+
 export const images = {
 	Noti: Noti,
 	Kakao: Kakao,
@@ -63,6 +65,8 @@ export const images = {
 	message_send: message_send,
 	copy: copy,
 	plus: plus,
+
+	creat_down: creat_down,
 };
 
 export default images;

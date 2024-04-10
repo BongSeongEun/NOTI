@@ -20,6 +20,7 @@ import { PieChart } from "react-native-gifted-charts";
 import { ProgressCircle } from 'react-native-svg-charts';
 import { Circle, G } from 'react-native-svg';
 
+import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { theme } from '../components/theme';
 
@@ -29,6 +30,7 @@ function Stat({ }) {
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
+	const [clicked_share, setClicked_share] = useState(false);
 	const [statData, setStatData] = useState({
         prevMonth: 0,
         difference: 0,
@@ -151,34 +153,34 @@ function Stat({ }) {
 		const circleCoordinates = calculateCircleCoordinates(75, thisMonthValue, 100);
 	
 		return (
-			<View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
+			<View style={{ justifyContent: 'center', alignItems: 'center' }}>
 				<ProgressCircle
 					style={{ height: 150, width: 150 }}
 					progress={1}
 					progressColor={'#E3E4E6'}
 					backgroundColor={'transparent'}
-					strokeWidth={15}
+					strokeWidth={10}
 				/>
 				<ProgressCircle
-					style={{ height: 100, width: 100, position: 'absolute' }}
+					style={{ height: 115, width: 115, position: 'absolute' }}
 					progress={1}
 					progressColor={'#E3E4E6'}
 					backgroundColor={'transparent'}
-					strokeWidth={15}
+					strokeWidth={10}
 				/>
 				<ProgressCircle
-					style={{ height: 100, width: 100, position: 'absolute' }}
+					style={{ height: 115, width: 115, position: 'absolute' }}
 					progress={prevMonthValue}
 					progressColor={'#B7BABF'}
 					backgroundColor={'transparent'}
-					strokeWidth={15}
+					strokeWidth={10}
 				/>
 				<ProgressCircle
 					style={{ height: 150, width: 150, position: 'absolute' }}
 					progress={thisMonthValue}
 					progressColor={currentTheme.color1}
 					backgroundColor={'transparent'}
-					strokeWidth={15}
+					strokeWidth={10}
 				/>
 				<G x={circleCoordinates.x} y={circleCoordinates.y}>
 					<Circle
@@ -202,22 +204,26 @@ function Stat({ }) {
 
 	return (
 		<ThemeProvider theme={currentTheme}>
-			<FullView>
+			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<ScrollView>
 					<MainView>
-						<MainText>{userNickname} 님의 한 달</MainText>
-						<MainText>노티 활동을 모아봤어요!</MainText>
+						<MainText style={{ fontSize: 15, marginTop: 50 }}>{userNickname} 님의 한 달</MainText>
+						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요!</MainText>
 
-						<MainText>기간 선택</MainText>
+						<MainText style={{ marginBottom: 5 }}>기간 선택</MainText>
 
 						<ScrollView
 							horizontal={true}
 							showsHorizontalScrollIndicator={true}
 						>
-							<States color={currentTheme.color1}>
-								<Text>지난 달: {statData.prevMonth}</Text>
-								<Text>이번 달: {statData.thisMonth}</Text>
-								<Text>차이: {statData.difference}</Text>
+							<States color={currentTheme.color1}
+								style={{ padding: 10 }}
+							>
+								<View>
+									<MainText color='white'>{userNickname} 님의 가장 많은 노티는</MainText>
+									<MainText color='white'>{tagStats.Word1st}로 00개의 노티 중 00개를 달성했어요!</MainText>
+									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word1stPercent}%로, 지난달 이맘때 쯤보다 00%로 증가/감소했어요</Stat_Text>
+								</View>
 							</States>
 
 							<States color={currentTheme.color2}>
@@ -229,29 +235,98 @@ function Stat({ }) {
 							</States>
 						</ScrollView>
 					
-						<MainText>상세 리포트</MainText>
+						<HorisontalView style={{ justifyContent: 'space-between', marginTop: 25, marginBottom: 10 }}>
+							<MainText style={{ fontSize: 15 }}>상세 리포트</MainText>
+							<images.share width={20} height={20}
+								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => setClicked_share(!clicked_share)} />
+						</HorisontalView>
+						
 
 						<StatFrame>
-							<MainText>통계자료</MainText>
-							<PieChart
-								data={pieData}
-								showText
-								textColor="black"
-								radius={80}
-								textSize={10}
-								focusOnPress
-								showValuesAsLabels
+							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
+								<View>
+									<MainText>{userNickname} 님의</MainText>
+									<MainText>{tagStats.Word1st} 일정이 전체 일정의</MainText>
+									<MainText>{tagStats.Word1stPercent}% 를 차지했어요!</MainText>
+								</View>
+							
+								<View style={{ marginRight: 20 }}>
+									<PieChart
+										data={pieData}
+										showText
+										textColor="white"
+										radius={70}
+										textSize={10}
+										focusOnPress
+										showValuesAsLabels
+									/>
+								</View>
+							</HorisontalView>
+
+							<View style={{ position: 'absolute', marginTop: 85, alignSelf: 'flex-start', marginLeft: 20 }}>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={currentTheme.color1} />
+									<Text style={{ fontSize: 10 }}>{tagStats.Word1st} - {tagStats.Word1stPercent}%</Text>
+								</HorisontalView>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={currentTheme.color2} />
+									<Text style={{ fontSize: 10 }}>{tagStats.Word2st} - {tagStats.Word2stPercent}%</Text>
+								</HorisontalView>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={currentTheme.color3} />
+									<Text style={{ fontSize: 10 }}>{tagStats.Word3st} - {tagStats.Word3stPercent}%</Text>
+								</HorisontalView>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={currentTheme.color4} />
+									<Text style={{ fontSize: 10 }}>{tagStats.Word4st} - {tagStats.Word4stPercent}%</Text>
+								</HorisontalView>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={currentTheme.color5} />
+									<Text style={{ fontSize: 10 }}>그 외 - {tagStats.etcPercent}%</Text>
+								</HorisontalView>
+							</View>
+							
+
+							<images.creat_down width={20} height={20}
+								style={{ alignSelf: 'center' }}
 							/>
 						</StatFrame>
 
-						<StatFrame>
-							<MainText>통계자료</MainText>
-							<RingChart />
+						<StatFrame style={{ marginTop: 10 }}>
+							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
+								<View>
+									<MainText>전체 노티의 달성률이</MainText>
+									<MainText>지난 달 이맘때보다</MainText>
+									<MainText>{statData.difference}% 늘었어요!</MainText>
+								</View>
+								<View style={{ alignItems: 'center', justifyContent: 'center' }}>
+									<RingChart />
+									<View style={{ position: 'absolute' }}>
+										<Text style={{ fontSize: 10, color: 'balck' }}>이번 달 달성률</Text>
+										<Text style={{ fontSize: 10, color: currentTheme.color1, alignSelf: 'center' }}>{statData.thisMonth}%</Text>
+									</View>
+								</View>
+							</HorisontalView>
+							<View style={{ position: 'absolute', marginTop: 120, alignSelf: 'flex-start', marginLeft: 20 }}>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={currentTheme.color1} />
+									<Text style={{ fontSize: 10 }}>이번 달 달성률</Text>
+								</HorisontalView>
+								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+									<Stat_Label color={'#B7BABF'} />
+									<Text style={{ fontSize: 10 }}>저번 달 달성률</Text>
+								</HorisontalView>
+							</View>
+							<images.creat_down width={20} height={20}
+								style={{ alignSelf: 'center' }}
+							/>
 						</StatFrame>
 
 					</MainView>
 				</ScrollView>
 			</FullView>
+			<Navigation_Bar />
 		</ThemeProvider>
 	);
 }
@@ -259,6 +334,7 @@ function Stat({ }) {
 const FullView = styled.View`
    width: 100%;
    background-color: white;
+   height: 100%;
 `;
 
 const MainView = styled(FullView)`
@@ -294,6 +370,21 @@ const StatFrame = styled.TouchableOpacity`
 	border-radius: 15px;
 	border-width: 1px;
 	border-color: #B7BABF;
+	padding: 20px;
+`;
+
+const Stat_Text = styled.Text`
+	font-size: 10px;
+	color: white;
+	font-weight: normal;
+`;
+
+const Stat_Label = styled.TouchableOpacity`
+	width: 10px;
+	height: 10px;
+	border-radius: 50px;
+	background-color: ${props => props.color || "#FF7154"};
+	margin-right: 5px;
 `;
 
 export default Stat;
