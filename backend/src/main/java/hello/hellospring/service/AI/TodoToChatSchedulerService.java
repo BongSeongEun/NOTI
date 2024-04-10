@@ -70,11 +70,11 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
 
             String jsonRequest = "{\n" +
             "    \"message\": {\n" +
-            "        \"topic\": \"allDevices\",\n" + 
-            "        \"data\": {\n" + // 
-            "            \"body\": \"" + body + "\",\n" +
-            "            \"title\": \"노티\",\n" +
-            "            \"action\": \"YES_OR_NO\"\n" + 
+            "        \"token\": \"e1M8MFyBRbe_tMIkQeKOVf:APA91bHMn2FYfFNqbNJcLDA_ctnK5jlrCAn-ITCOp-JYiEv-LmoL-1VesZbuO36DtACKLh-SSY-WzbfCVwWC9cru2Ubu4neNt_QUcG1ZPCR4_b9wWvff64yq0yflfKyWWblT_j7d1Bmo\",\n" +
+            "        \"data\": {\n" +
+            "          \"body\": \"" + body + "\",\n" +
+            "          \"title\": \"노티\", \n" +
+            "          \"action\": \"YES_OR_NO\", \n" +
             "        }\n" +
             "    }\n" +
             "}";
@@ -82,7 +82,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             RestTemplate rt = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", "Bearer ya29.a0Ad52N397nDEXP8eLKCRBQCwsBeAvv49jImueGES3ORbzVH6iGuc59QD6x_XM7NcPtK-rcW8eA4L-BhLtZ_3RrBj3fIPoLV1Sl6vvog1aB0fiOqZ75uDWcWLhvZKkxiEebkQYlu9qhBDBV3XUxePa7qg3QFCYMZ5RG7zbaCgYKAZcSARASFQHGX2Miu9seVYubxg4Z5WEWKjDW9g0171");
+            headers.add("Authorization", "Bearer ya29.a0Ad52N3_whivUEplHjHQwExsYAT9uxMJK8K1dUL4Zk-wl-DmafFRt9V05v5BhpGGvpLyUbAjuvx6ztHQ4mRexIWesBpBQUh2wjgb6Uo96pm8ZUyGsryOlGVWIp7TpFnpby_CT-c3kVf60divEgDCrOtRly0yObTnCO0ZfaCgYKAc4SARASFQHGX2MiPItkuFIh8d6S173PlG93Wg0171");
             
             HttpEntity<String> entity = new HttpEntity<>(jsonRequest, headers);
             
