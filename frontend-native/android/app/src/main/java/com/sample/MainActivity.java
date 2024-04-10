@@ -4,6 +4,21 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.app.PendingIntent;
+import androidx.core.app.NotificationCompat;
+import android.app.NotificationManager;
+import android.app.NotificationChannel;
+import java.util.Map;
+import android.os.Build;
+
+
+
+
 public class MainActivity extends ReactActivity {
 
   /**

@@ -12,6 +12,8 @@ import com.facebook.soloader.SoLoader;
 import com.sample.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import android.os.Build;
+
 
 public class MainApplication extends Application implements ReactApplication {
 
