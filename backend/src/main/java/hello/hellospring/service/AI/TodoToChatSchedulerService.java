@@ -70,11 +70,11 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
 
             String jsonRequest = "{\n" +
             "    \"message\": {\n" +
-            "        \"topic\": \"allDevices\"\n" +
-            "        \"token\": \"e1M8MFyBRbe_tMIkQeKOVf:APA91bHMn2FYfFNqbNJcLDA_ctnK5jlrCAn-ITCOp-JYiEv-LmoL-1VesZbuO36DtACKLh-SSY-WzbfCVwWC9cru2Ubu4neNt_QUcG1ZPCR4_b9wWvff64yq0yflfKyWWblT_j7d1Bmo\",\n" +
-            "        \"notification\": {\n" +
-            "          \"body\": \"" + body + "\",\n" +
-            "          \"title\": \"노티\"\n" +
+            "        \"topic\": \"allDevices\",\n" + 
+            "        \"data\": {\n" + // 
+            "            \"body\": \"" + body + "\",\n" +
+            "            \"title\": \"노티\",\n" +
+            "            \"action\": \"YES_OR_NO\"\n" + 
             "        }\n" +
             "    }\n" +
             "}";
