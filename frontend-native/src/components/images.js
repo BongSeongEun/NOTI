@@ -1,6 +1,9 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable quotes */
 
+import Noti from "../asset/Noti.png";
+import Kakao from "../asset/kakao.png";
+
 import profile from "../asset/profile.png";
 import gallery from "../asset/gallery.png";
 import noticheck from "../asset/noticheck.svg";
@@ -30,6 +33,8 @@ import copy from "../asset/copy.svg";
 import plus from "../asset/plus.svg";
 
 export const images = {
+	Noti: Noti,
+	Kakao: Kakao,
 	profile: profile,
 	gallery: gallery,
 

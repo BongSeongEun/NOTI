@@ -3,25 +3,23 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable no-mixed-spaces-and-tabs */
 
-import styled, {ThemeProvider} from "styled-components/native"
+import styled, { ThemeProvider } from "styled-components/native";
 import React, { useState, useEffect } from 'react';
 import {
-	ScrollView,
-	Text,
-	Modal,
-	Alert,
-	TextInput,
-	Button,
-	TouchableOpacity,
+  ScrollView,
+  Text,
+  View,
+  TouchableOpacity,
 } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
 import { decode } from 'base-64';
 import axios from 'axios';
 import { PieChart } from "react-native-gifted-charts";
+import { ProgressCircle } from 'react-native-svg-charts';
+import { Circle, G } from 'react-native-svg';
 
-import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { theme } from '../components/theme';
 
@@ -31,6 +29,22 @@ function Stat({ }) {
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
+	const [statData, setStatData] = useState({
+        prevMonth: 0,
+        difference: 0,
+        thisMonth: 0
+    });
+	const [tagStats, setTagStats] = useState({
+		Word1st: '',
+		Word1stPercent: 0,
+		Word2st: '',
+		Word2stPercent: 0,
+		Word3st: '',
+		Word3stPercent: 0,
+		Word4st: '',
+		Word4stPercent: 0,
+		etcPercent: 0
+	});
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -75,13 +89,116 @@ function Stat({ }) {
 		}
 	};
 
+	useEffect(() => {
+        const fetchStats = async () => {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) return;
+
+            const userId = getUserIdFromToken(token);
+            const statsDate = '2024.03';
+
+            try {
+                const response = await axios.get(`http://15.164.151.130:4000/api/v4/statsMonth/${userId}/${statsDate}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setStatData(response.data);
+            } catch (error) {
+                console.error("Error fetching stats data:", error);
+            }
+        };
+
+        fetchStats();
+	}, []);
+	
+	useEffect(() => {
+		const fetchTagStats = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (!token) return;
+	
+			const userId = getUserIdFromToken(token);
+			const statsDate = '2024.03';
+	
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v4/statsTag/${userId}/${statsDate}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+				setTagStats(response.data);
+			} catch (error) {
+				console.error("Error fetching tag stats data:", error);
+			}
+		};
+	
+		fetchTagStats();
+	}, []);
+
 	const pieData = [
-		{ id: 'data1', value: 50, color: currentTheme.color1 },
-		{ id: 'data2', value: 40, color: currentTheme.color2 },
-		{ id: 'data3', value: 20, color: currentTheme.color3 },
-		{ id: 'data4', value: 25, color: currentTheme.color4 },
-		{ id: 'data5', value: 15, color: currentTheme.color5 },
+		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1 },
+		{ id: tagStats.Word2st, value: tagStats.Word2stPercent, color: currentTheme.color2 },
+		{ id: tagStats.Word3st, value: tagStats.Word3stPercent, color: currentTheme.color3 },
+		{ id: tagStats.Word4st, value: tagStats.Word4stPercent, color: currentTheme.color4 },
+		{ id: '그 외', value: tagStats.etcPercent, color: currentTheme.color5 },
 	];
+
+	const RingChart = () => {
+		const thisMonthValue = statData.thisMonth / 100;
+		const prevMonthValue = statData.prevMonth / 100;
+		const differenceValue = statData.difference / 100;
+	
+		const circleCoordinates = calculateCircleCoordinates(75, thisMonthValue, 100);
+	
+		return (
+			<View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
+				<ProgressCircle
+					style={{ height: 150, width: 150 }}
+					progress={1}
+					progressColor={'#E3E4E6'}
+					backgroundColor={'transparent'}
+					strokeWidth={15}
+				/>
+				<ProgressCircle
+					style={{ height: 100, width: 100, position: 'absolute' }}
+					progress={1}
+					progressColor={'#E3E4E6'}
+					backgroundColor={'transparent'}
+					strokeWidth={15}
+				/>
+				<ProgressCircle
+					style={{ height: 100, width: 100, position: 'absolute' }}
+					progress={prevMonthValue}
+					progressColor={'#B7BABF'}
+					backgroundColor={'transparent'}
+					strokeWidth={15}
+				/>
+				<ProgressCircle
+					style={{ height: 150, width: 150, position: 'absolute' }}
+					progress={thisMonthValue}
+					progressColor={currentTheme.color1}
+					backgroundColor={'transparent'}
+					strokeWidth={15}
+				/>
+				<G x={circleCoordinates.x} y={circleCoordinates.y}>
+					<Circle
+						cx={0}
+						cy={0}
+						r="5"
+						fill={differenceValue > 0 ? currentTheme.color2 : 'red'}
+					/>
+				</G>
+			</View>
+		);
+	};
+	
+	function calculateCircleCoordinates(chartRadius, progressValue, chartDiameter) {
+		const angle = 2 * Math.PI * progressValue;
+		const x = chartRadius + chartDiameter * Math.sin(angle) - chartRadius;
+		const y = chartRadius - chartDiameter * Math.cos(angle) - chartRadius;
+		return { x, y };
+	}
+	
 
 	return (
 		<ThemeProvider theme={currentTheme}>
@@ -98,11 +215,17 @@ function Stat({ }) {
 							showsHorizontalScrollIndicator={true}
 						>
 							<States color={currentTheme.color1}>
-								<MainText>통계1</MainText>
+								<Text>지난 달: {statData.prevMonth}</Text>
+								<Text>이번 달: {statData.thisMonth}</Text>
+								<Text>차이: {statData.difference}</Text>
 							</States>
 
 							<States color={currentTheme.color2}>
-								<MainText>통계2</MainText>
+								<Text>{tagStats.Word1st}: {tagStats.Word1stPercent}%</Text>
+								<Text>{tagStats.Word2st}: {tagStats.Word2stPercent}%</Text>
+								<Text>{tagStats.Word3st}: {tagStats.Word3stPercent}%</Text>
+								<Text>{tagStats.Word4st}: {tagStats.Word4stPercent}%</Text>
+								<Text>기타: {tagStats.etcPercent}%</Text>
 							</States>
 						</ScrollView>
 					
@@ -123,6 +246,7 @@ function Stat({ }) {
 
 						<StatFrame>
 							<MainText>통계자료</MainText>
+							<RingChart />
 						</StatFrame>
 
 					</MainView>
