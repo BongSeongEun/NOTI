@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-trailing-spaces */
@@ -6,17 +7,17 @@
 import styled, { ThemeProvider } from "styled-components/native";
 import React, { useState, useEffect } from 'react';
 import {
-  ScrollView,
-  Text,
-  View,
-  TouchableOpacity,
+	ScrollView,
+	Text,
+	View,
+	TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
 import { decode } from 'base-64';
 import axios from 'axios';
-import { PieChart } from "react-native-gifted-charts";
+import { PieChart, BarChart } from "react-native-gifted-charts";
 import { ProgressCircle } from 'react-native-svg-charts';
 import { Circle, G } from 'react-native-svg';
 
@@ -30,6 +31,13 @@ function Stat({ }) {
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
     const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
+	const [dailyCompletionRates, setDailyCompletionRates] = useState({
+		MON: 0, TUE: 0, WED: 0, THU: 0, FRI: 0, SAT: 0, SUN: 0,
+	});
+	const [expandedStates, setExpandedStates] = useState({
+		statFrame1: false,
+		statFrame2: false,
+	});
 	const [clicked_share, setClicked_share] = useState(false);
 	const [statData, setStatData] = useState({
         prevMonth: 0,
@@ -137,13 +145,73 @@ function Stat({ }) {
 		fetchTagStats();
 	}, []);
 
+	/*
+	useEffect(() => {
+		const fetchDayWeekStats = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (!token) return;
+	  
+			const userId = getUserIdFromToken(token);
+			const statsDate = '2024.03';
+	  
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v4/dayWeek/${userId}/${statsDate}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+	  
+				// 데이터 처리 로직
+				const stats = response.data;
+				const newDailyCompletionRates = {
+					MON: calculateCompletionRate(stats.MONtotalTodos, stats.MONdoneTodos),
+					TUE: calculateCompletionRate(stats.TUEtotalTodos, stats.TUEdoneTodos),
+					WED: calculateCompletionRate(stats.WEDtotalTodos, stats.WEDdoneTodos),
+					THU: calculateCompletionRate(stats.THUtotalTodos, stats.THUdoneTodos),
+					FRI: calculateCompletionRate(stats.FRItotalTodos, stats.FRIdoneTodos),
+					SAT: calculateCompletionRate(stats.SATtotalTodos, stats.SATdoneTodos),
+					SUN: calculateCompletionRate(stats.SUNtotalTodos, stats.SUNdoneTodos),
+				};
+			
+				setDailyCompletionRates(newDailyCompletionRates);
+			} catch (error) {
+				console.error("Error fetching day week stats data:", error);
+			}
+		};
+	  
+		fetchDayWeekStats();
+	}, []);
+	*/
+
 	const pieData = [
-		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1 },
+		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },
 		{ id: tagStats.Word2st, value: tagStats.Word2stPercent, color: currentTheme.color2 },
 		{ id: tagStats.Word3st, value: tagStats.Word3stPercent, color: currentTheme.color3 },
 		{ id: tagStats.Word4st, value: tagStats.Word4stPercent, color: currentTheme.color4 },
 		{ id: '그 외', value: tagStats.etcPercent, color: currentTheme.color5 },
 	];
+
+	const barData = [
+		{ value: tagStats.Word1stPercent, frontColor: currentTheme.color1 },
+		{ value: tagStats.Word2stPercent, frontColor: currentTheme.color2 },
+		{ value: tagStats.Word3stPercent, frontColor: currentTheme.color3 },
+		{ value: tagStats.Word4stPercent, frontColor: currentTheme.color4 },
+		{ value: tagStats.etcPercent, frontColor: currentTheme.color5 },
+	];
+
+	const barData_Day = [
+		{ value: 150, label: '일', frontColor: "#B7BABF" },
+		{ value: 150, label: '월', frontColor: "#B7BABF" },
+		{ value: 150, label: '화', frontColor: "#B7BABF"},
+		{ value: 150, label: '수', frontColor: "#B7BABF"},
+		{ value: 150, label: '목', frontColor: "#B7BABF"},
+		{ value: 150, label: '금', frontColor: "#B7BABF"},
+		{ value: 150, label: '토', frontColor: "#B7BABF"},
+	];
+
+	const calculateCompletionRate = (total, done) => {
+		return total > 0 ? (done / total) * 100 : 0;
+	};
 
 	const RingChart = () => {
 		const thisMonthValue = statData.thisMonth / 100;
@@ -201,6 +269,12 @@ function Stat({ }) {
 		return { x, y };
 	}
 	
+	const toggleExpanded = (frameKey) => {
+		setExpandedStates(prevState => ({
+			...prevState,
+			[frameKey]: !prevState[frameKey],
+		}));
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>
@@ -243,7 +317,7 @@ function Stat({ }) {
 						</HorisontalView>
 						
 
-						<StatFrame>
+						<StatFrame style={{ marginTop: 10, height: expandedStates.statFrame1 ? 380 : 200, }}>
 							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
 								<View>
 									<MainText>{userNickname} 님의</MainText>
@@ -286,22 +360,63 @@ function Stat({ }) {
 									<Text style={{ fontSize: 10 }}>그 외 - {tagStats.etcPercent}%</Text>
 								</HorisontalView>
 							</View>
-							
 
-							<images.creat_down width={20} height={20}
-								style={{ alignSelf: 'center' }}
+							{expandedStates.statFrame1 && (
+								<>
+									<View style={{ transform: [{ rotate: '90deg' }], width: 'auto', height: 150, marginTop: 20, marginLeft: 10, marginBottom: 20 }}>
+										<BarChart
+											data={barData}
+											hideYAxis
+											hideGrid
+											fromZero
+											barWidth={20}
+											hideAxesAndRules={true}
+											noOfSections={5}
+											barBorderRadius={10}
+											isAnimated
+											animationDuration={500}
+											spacing={10}
+											frontColor={currentTheme.color1}
+											chartConfig={{
+												backgroundGradientFromOpacity: 0,
+												backgroundGradientToOpacity: 0,
+											}}
+											style={{
+												marginVertical: 8,
+												borderRadius: 16,
+											}}
+										/>
+									</View>
+									
+								</>
+							)}
+
+							<images.creat_down
+								width={20}
+								height={20}
+								style={{
+									alignSelf: 'center',
+									position: 'absolute',
+									bottom: 10,
+									transform: [{ rotate: expandedStates.statFrame1 ? '180deg' : '0deg' }],
+									color: expandedStates.statFrame1 ? currentTheme.color1 : "#B7BABF",
+								}}
+								onPress={() => toggleExpanded('statFrame1')}
 							/>
 						</StatFrame>
 
-						<StatFrame style={{ marginTop: 10 }}>
+						<StatFrame style={{ marginTop: 10, height: expandedStates.statFrame2 ? 350 : 200, }}>
 							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
-								<View>
+								<View style={{ marginTop: 20 }}>
 									<MainText>전체 노티의 달성률이</MainText>
 									<MainText>지난 달 이맘때보다</MainText>
 									<MainText>{statData.difference}% 늘었어요!</MainText>
 								</View>
 								<View style={{ alignItems: 'center', justifyContent: 'center' }}>
-									<RingChart />
+									<RingChart
+										animate={true}
+										animationDuration={800}
+									/>
 									<View style={{ position: 'absolute' }}>
 										<Text style={{ fontSize: 10, color: 'balck' }}>이번 달 달성률</Text>
 										<Text style={{ fontSize: 10, color: currentTheme.color1, alignSelf: 'center' }}>{statData.thisMonth}%</Text>
@@ -318,8 +433,53 @@ function Stat({ }) {
 									<Text style={{ fontSize: 10 }}>저번 달 달성률</Text>
 								</HorisontalView>
 							</View>
-							<images.creat_down width={20} height={20}
-								style={{ alignSelf: 'center' }}
+
+							{expandedStates.statFrame2 && (
+								<>
+									<View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 20 }}>
+										<MainText>이번 달은 </MainText>
+										<MainText style={{ color: currentTheme.color1 }}>0요일 </MainText>
+										<MainText>달성률이 가장 높아요!</MainText>
+									</View>
+									
+									<View>
+										<BarChart
+											data={barData_Day}
+											hideYAxis
+											hideGrid
+											fromZero
+											barWidth={20}
+											hideAxesAndRules={true}
+											noOfSections={5}
+											barBorderRadius={10}
+											isAnimated
+											animationDuration={500}
+											spacing={10}
+											frontColor={currentTheme.color1}
+											chartConfig={{
+												backgroundGradientFromOpacity: 0,
+												backgroundGradientToOpacity: 0,
+											}}
+											style={{
+												marginVertical: 8,
+												borderRadius: 16,
+											}}
+										/>
+									</View>
+								</>
+							)}
+
+							<images.creat_down
+								width={20}
+								height={20}
+								style={{
+									alignSelf: 'center',
+									position: 'absolute',
+									bottom: 10,
+									transform: [{ rotate: expandedStates.statFrame2 ? '180deg' : '0deg' }],
+									color: expandedStates.statFrame2 ? currentTheme.color1 : "#B7BABF",
+								}}
+								onPress={() => toggleExpanded('statFrame2')}
 							/>
 						</StatFrame>
 
