@@ -116,6 +116,8 @@ public class TodoService {
         List<String> todoTags = todoRepository.findAllTodoTagsByUserIdAndStatsDate(userId, statsDate);
         Map<String, Long> wordFrequency = new HashMap<>();
 
+
+
         // ',' 기준으로 단어 분리 및 "없음" 단어 제외 후 빈도수 계산
         todoTags.forEach(tags -> Arrays.stream(tags.split(","))
                 .map(String::trim) // 공백 제거
@@ -134,9 +136,14 @@ public class TodoService {
         long etc = 0;
         long etcNum = 0;
         for (Map.Entry<String, Long> entry : sortedEntries) {
+
+            List<Todo> todosDone = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(userId, statsDate, entry.getKey(), true);
+
+
             int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
             result.put("Word"+rank+"st", entry.getKey());
             result.put("Word"+rank+"stNum", entry.getValue());
+            result.put("Word" + rank + "stDoneTodos", todosDone.size());
             result.put("Word"+rank+"stPercent", frequencyPercentage);
             etc += frequencyPercentage;
             etcNum += entry.getValue();
