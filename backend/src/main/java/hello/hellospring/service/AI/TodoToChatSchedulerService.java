@@ -1,11 +1,15 @@
 package hello.hellospring.service.AI;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hello.hellospring.Oauth.OauthToken;
 import hello.hellospring.model.Chat;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
@@ -18,7 +22,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 
-import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -34,12 +37,24 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     private final ChatRepository chatRepository;
     private ScheduledFuture<?> scheduledFuture;
 
+    @Value("${google.client.id}")
+    private String CLIENT_ID;
+
+    @Value("${google.refresh.token}")
+    private String REFRESH_TOKEN;
+
+    @Value("${google.client.secret}")
+    private String CLIENT_SECRET;
+
+    private String accessToken = "ya29.a0Ad52N39IVkYnxofNcqgsLGDNpinD7znmXhfoI50ordzyNM8Fs3LYaZL9n2yTjmYiTdG8wGiNRFo50nQOR8pfS7gxlpxACVjiIXoDiMH_-MmQGkNF4Yt5OOrKzWSxzc-nH7eUzcv8Zvbhlpv2DQ5CT8A3MAE-1-jbDoRqNQaCgYKAaISARASFQHGX2Mi61TdtNWo7snTVYVyqYmavg0173";
+
     @Autowired
     public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository) {
         this.taskScheduler = taskScheduler;
         this.todoRepository = todoRepository;
         this.chatRepository = chatRepository;
         scheduleTask();
+        scheduleTokenRefresh();
     }
     private void checkTodosAndCreateChat() {
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
@@ -82,7 +97,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             RestTemplate rt = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", "Bearer ya29.a0Ad52N3_whivUEplHjHQwExsYAT9uxMJK8K1dUL4Zk-wl-DmafFRt9V05v5BhpGGvpLyUbAjuvx6ztHQ4mRexIWesBpBQUh2wjgb6Uo96pm8ZUyGsryOlGVWIp7TpFnpby_CT-c3kVf60divEgDCrOtRly0yObTnCO0ZfaCgYKAc4SARASFQHGX2MiPItkuFIh8d6S173PlG93Wg0171");
+            headers.add("Authorization", accessToken);
             
             HttpEntity<String> entity = new HttpEntity<>(jsonRequest, headers);
             
@@ -96,8 +111,48 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         });
     }
 
+    private void getGoogleAccessToken(){
+        RestTemplate rt = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "refresh_token");
+        params.add("client_id", CLIENT_ID);
+        params.add("client_secret", CLIENT_SECRET);
+        params.add("refresh_token", REFRESH_TOKEN);
+
+
+        HttpEntity<MultiValueMap<String, String>> GoogleTokenRequest =
+                new HttpEntity<>(params, headers);
+
+        ResponseEntity<String> accessTokenResponse = rt.exchange(
+                "https://kauth.kakao.com/oauth/token",
+                HttpMethod.POST,
+                GoogleTokenRequest,
+                String.class
+        );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        OauthToken oauthToken = null;
+        try {
+            oauthToken = objectMapper.readValue(accessTokenResponse.getBody(), OauthToken.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        accessToken = String.valueOf(oauthToken);
+
+    }
+
     private void scheduleTask() {
         String cronExpression = "0 * * * * ?"; // 매 분마다 작업 실행
         scheduledFuture = taskScheduler.schedule(this::checkTodosAndCreateChat, new CronTrigger(cronExpression));
+    }
+
+    private void scheduleTokenRefresh(){
+        String cronExpression = "0 0 * * * ?";
+        scheduledFuture = taskScheduler.schedule(this::getGoogleAccessToken, new CronTrigger(cronExpression));
     }
 }
