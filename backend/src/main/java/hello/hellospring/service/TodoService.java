@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,7 +65,7 @@ public class TodoService {
         }
     }
 
-    public int countCompletedTodosByMonthAndUserId(Long userId, String month) {
+    public int completedTodos(Long userId, String month) {
         List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, month);
         List<Todo> completedTodos = todoRepository.findCompletedTodosByMonthAndUserId(userId, month);
 
@@ -95,14 +97,14 @@ public class TodoService {
                 try {
                     tag = gptTagService.askGpt(todo.getTodoTitle());
                 } catch (Exception e) {
-                    System.err.println("이 문구가 뜨면.. 좀만 이따가 다시 실행해주세요..: " + todo.getTodoId() + " - " + e.getMessage());
+                    System.err.println("이 문구가 뜨면.. gpt가 터진거에요..: " + todo.getTodoId() + " - " + e.getMessage());
                 }
                 todo.setTodoTag(tag);
                 todoRepository.save(todo); // 태그 저장
             });
         } else {
             // todos 리스트가 비어 있는 경우
-            System.out.println("No todos found for userId: " + userId + " and statsDate: " + statsDate);
+            System.out.println("태그화 다 성공~!!" + userId + ", " + statsDate);
         }
     }
 
@@ -111,7 +113,6 @@ public class TodoService {
         List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
         int totalTodos = allTodos.size();
 
-        //
         List<String> todoTags = todoRepository.findAllTodoTagsByUserIdAndStatsDate(userId, statsDate);
         Map<String, Long> wordFrequency = new HashMap<>();
 
@@ -131,16 +132,20 @@ public class TodoService {
         Map<String, Object> result = new LinkedHashMap<>();
         int rank = 1;
         long etc = 0;
+        long etcNum = 0;
         for (Map.Entry<String, Long> entry : sortedEntries) {
             int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
             result.put("Word"+rank+"st", entry.getKey());
-            // 소수점 제거하여 정수로 저장
+            result.put("Word"+rank+"stNum", entry.getValue());
             result.put("Word"+rank+"stPercent", frequencyPercentage);
             etc += frequencyPercentage;
+            etcNum += entry.getValue();
             rank++;
         }
         long etcResult = 100 - etc; // 그외 퍼센트 계산
+        long etcNumResult = totalTodos - etcNum;
         result.put("etcPercent", etcResult);
+        result.put("etcNum", etcNumResult);
 
         System.out.println("totalTodos는 : "+totalTodos);
 
@@ -148,6 +153,44 @@ public class TodoService {
     }
 
 
+    public Map<String, Long> findWeekDay(Long userId, String statsDate) {
+        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+        List<Todo> doneTodos = todoRepository.findAllTodosByMonthAndUserIdAndTodoDone(userId, statsDate, true);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        LocalDate startOfMonth = LocalDate.parse(statsDate + ".01", formatter);
+        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 
+        Map<String, List<String>> weekDaysMap = new HashMap<>();
+        weekDaysMap.put("MONDAY", new ArrayList<>());
+        weekDaysMap.put("TUESDAY", new ArrayList<>());
+        weekDaysMap.put("WEDNESDAY", new ArrayList<>());
+        weekDaysMap.put("THURSDAY", new ArrayList<>());
+        weekDaysMap.put("FRIDAY", new ArrayList<>());
+        weekDaysMap.put("SATURDAY", new ArrayList<>());
+        weekDaysMap.put("SUNDAY", new ArrayList<>());
+
+        Map<String, Long> result = new HashMap<>();
+        for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
+            String dayOfWeek = date.getDayOfWeek().toString();
+            weekDaysMap.get(dayOfWeek).add(date.format(formatter));
+        }
+
+        // 일정 개수와 달성 일정 개수 계산하여 결과 맵에 저장
+        weekDaysMap.forEach((dayOfWeek, dates) -> {
+            long totalTodosCount = allTodos.stream()
+                    .filter(todo -> dates.contains(todo.getTodoDate()))
+                    .count();
+            long doneTodosCount = doneTodos.stream()
+                    .filter(todo -> dates.contains(todo.getTodoDate()))
+                    .count();
+
+            // 결과 맵에 요일별로 저장
+            String prefix = dayOfWeek.substring(0, 3).toUpperCase();
+            result.put(prefix + "doneTodos", doneTodosCount);
+            result.put(prefix + "totalTodos", totalTodosCount);
+        });
+
+        return result;
+    }
 }
