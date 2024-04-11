@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -116,8 +119,6 @@ public class TodoService {
         List<String> todoTags = todoRepository.findAllTodoTagsByUserIdAndStatsDate(userId, statsDate);
         Map<String, Long> wordFrequency = new HashMap<>();
 
-
-
         // ',' 기준으로 단어 분리 및 "없음" 단어 제외 후 빈도수 계산
         todoTags.forEach(tags -> Arrays.stream(tags.split(","))
                 .map(String::trim) // 공백 제거
@@ -135,16 +136,33 @@ public class TodoService {
         int rank = 1;
         long etc = 0;
         long etcNum = 0;
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm"); // 문자열 날짜 포맷 정의
+
         for (Map.Entry<String, Long> entry : sortedEntries) {
 
+            //몇개중에 몇개달성했어요 용도
             List<Todo> todosDone = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(userId, statsDate, entry.getKey(), true);
 
+            // 태그마다 총 시간 출력 용도
+            List<Todo> todosWithTag = todoRepository.findAllByUserIdAndStatsDateAndTag(userId, statsDate, entry.getKey());
+            long totalDurationMinutes = todosWithTag.stream()
+                    .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
+                    .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
+                    .mapToLong(todo -> {
+                        LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), timeFormatter);
+                        LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), timeFormatter);
+                        Duration duration = Duration.between(startTime, endTime);
+                        return duration.isNegative() ? duration.plusDays(1).toMinutes() : duration.toMinutes();
+                    })
+                    .sum();
 
             int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
-            result.put("Word"+rank+"st", entry.getKey());
-            result.put("Word"+rank+"stNum", entry.getValue());
-            result.put("Word" + rank + "stDoneTodos", todosDone.size());
-            result.put("Word"+rank+"stPercent", frequencyPercentage);
+            result.put("Word"+rank+"st", entry.getKey()); // 태그 이름
+            result.put("Word"+rank+"stNum", entry.getValue()); // 태그 갯수
+            result.put("Word"+rank+"stDoneTodos", todosDone.size()); // 태그 완료 갯수
+            result.put("Word"+rank+"stPercent", frequencyPercentage); // 태그 퍼센트
+            result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 퍼센트
             etc += frequencyPercentage;
             etcNum += entry.getValue();
             rank++;
@@ -157,6 +175,15 @@ public class TodoService {
         System.out.println("totalTodos는 : "+totalTodos);
 
         return result;
+    }
+
+    private boolean isValidTimeFormat(String timeStr, DateTimeFormatter formatter) {
+        try {
+            LocalTime.parse(timeStr, formatter);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false; // 문자열이 유효한 시간 포맷이 아니면 false 반환
+        }
     }
 
 
