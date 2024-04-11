@@ -34,6 +34,7 @@ function Stat({ }) {
 	const [dailyCompletionRates, setDailyCompletionRates] = useState({
 		MON: 0, TUE: 0, WED: 0, THU: 0, FRI: 0, SAT: 0, SUN: 0,
 	});
+	const [highestDay, setHighestDay] = useState('');
 	const [expandedStates, setExpandedStates] = useState({
 		statFrame1: false,
 		statFrame2: false,
@@ -145,7 +146,6 @@ function Stat({ }) {
 		fetchTagStats();
 	}, []);
 
-	/*
 	useEffect(() => {
 		const fetchDayWeekStats = async () => {
 			const token = await AsyncStorage.getItem('token');
@@ -161,7 +161,6 @@ function Stat({ }) {
 					},
 				});
 	  
-				// 데이터 처리 로직
 				const stats = response.data;
 				const newDailyCompletionRates = {
 					MON: calculateCompletionRate(stats.MONtotalTodos, stats.MONdoneTodos),
@@ -181,7 +180,6 @@ function Stat({ }) {
 	  
 		fetchDayWeekStats();
 	}, []);
-	*/
 
 	const pieData = [
 		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },
@@ -200,17 +198,18 @@ function Stat({ }) {
 	];
 
 	const barData_Day = [
-		{ value: 150, label: '일', frontColor: "#B7BABF" },
-		{ value: 150, label: '월', frontColor: "#B7BABF" },
-		{ value: 150, label: '화', frontColor: "#B7BABF"},
-		{ value: 150, label: '수', frontColor: "#B7BABF"},
-		{ value: 150, label: '목', frontColor: "#B7BABF"},
-		{ value: 150, label: '금', frontColor: "#B7BABF"},
-		{ value: 150, label: '토', frontColor: "#B7BABF"},
+		{ value: dailyCompletionRates.SUN, label: '일', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.MON, label: '월', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.TUE, label: '화', frontColor: "#B7BABF"},
+		{ value: dailyCompletionRates.WED, label: '수', frontColor: "#B7BABF"},
+		{ value: dailyCompletionRates.THU, label: '목', frontColor: "#B7BABF"},
+		{ value: dailyCompletionRates.FRI, label: '금', frontColor: "#B7BABF"},
+		{ value: dailyCompletionRates.SAT, label: '토', frontColor: "#B7BABF"},
 	];
 
 	const calculateCompletionRate = (total, done) => {
-		return total > 0 ? (done / total) * 100 : 0;
+		let rate = total > 0 ? Math.floor((done / total) * 100) : 0;
+		return rate === 0 ? 5 : rate;
 	};
 
 	const RingChart = () => {
@@ -405,7 +404,7 @@ function Stat({ }) {
 							/>
 						</StatFrame>
 
-						<StatFrame style={{ marginTop: 10, height: expandedStates.statFrame2 ? 350 : 200, }}>
+						<StatFrame style={{ marginTop: 10, height: expandedStates.statFrame2 ? 500 : 200, }}>
 							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
 								<View style={{ marginTop: 20 }}>
 									<MainText>전체 노티의 달성률이</MainText>
@@ -442,7 +441,7 @@ function Stat({ }) {
 										<MainText>달성률이 가장 높아요!</MainText>
 									</View>
 									
-									<View>
+									<View style={{ width: 'auto', height: 80, marginBottom: 20, marginLeft: -15 }}>
 										<BarChart
 											data={barData_Day}
 											hideYAxis
@@ -465,6 +464,7 @@ function Stat({ }) {
 												borderRadius: 16,
 											}}
 										/>
+										
 									</View>
 								</>
 							)}
