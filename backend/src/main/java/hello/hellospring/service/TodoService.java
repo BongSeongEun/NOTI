@@ -136,14 +136,25 @@ public class TodoService {
         int rank = 1;
         long etc = 0;
         long etcNum = 0;
+        long etcTime = 0;
 
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm"); // 문자열 날짜 포맷 정의
+
+        long totalDurationAllTodos = allTodos.stream()
+                .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
+                .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
+                .mapToLong(todo -> {
+                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), timeFormatter);
+                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), timeFormatter);
+                    Duration duration = Duration.between(startTime, endTime);
+                    return duration.isNegative() ? duration.plusDays(1).toMinutes() : duration.toMinutes();
+                })
+                .sum();
 
         for (Map.Entry<String, Long> entry : sortedEntries) {
 
             //몇개중에 몇개달성했어요 용도
             List<Todo> todosDone = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(userId, statsDate, entry.getKey(), true);
-
             // 태그마다 총 시간 출력 용도
             List<Todo> todosWithTag = todoRepository.findAllByUserIdAndStatsDateAndTag(userId, statsDate, entry.getKey());
             long totalDurationMinutes = todosWithTag.stream()
@@ -163,15 +174,17 @@ public class TodoService {
             result.put("Word"+rank+"stDoneTodos", todosDone.size()); // 태그 완료 갯수
             result.put("Word"+rank+"stPercent", frequencyPercentage); // 태그 퍼센트
             result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 퍼센트
-            etc += frequencyPercentage;
-            etcNum += entry.getValue();
+            etc += frequencyPercentage; //기타 퍼센트 계산
+            etcNum += entry.getValue();  //기타 갯수 계산
+            etcTime += totalDurationMinutes; //기타 시간 계산
             rank++;
         }
         long etcResult = 100 - etc; // 그외 퍼센트 계산
-        long etcNumResult = totalTodos - etcNum;
+        long etcNumResult = totalTodos - etcNum; // 그외 갯수 계산
+        long etcTimeResult = totalDurationAllTodos - etcTime;
         result.put("etcPercent", etcResult);
         result.put("etcNum", etcNumResult);
-
+        result.put("etcTime", etcTimeResult);
         System.out.println("totalTodos는 : "+totalTodos);
 
         return result;
