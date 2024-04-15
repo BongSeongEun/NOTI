@@ -46,7 +46,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     @Value("${google.client.secret}")
     private String CLIENT_SECRET;
 
-    private String accessToken = "ya29.a0Ad52N39IVkYnxofNcqgsLGDNpinD7znmXhfoI50ordzyNM8Fs3LYaZL9n2yTjmYiTdG8wGiNRFo50nQOR8pfS7gxlpxACVjiIXoDiMH_-MmQGkNF4Yt5OOrKzWSxzc-nH7eUzcv8Zvbhlpv2DQ5CT8A3MAE-1-jbDoRqNQaCgYKAaISARASFQHGX2Mi61TdtNWo7snTVYVyqYmavg0173";
+    private String accessToken = "ya29.a0Ad52N39xQkqvEFgAYIyr6mVZtBWqhOFcginiIQGRmn-aJRU-4kJp6_qFSbhXIqU5xlpI5r_NDgqat_ecXhm9WjT2HuIjcbbSzx9ZeXtw2rfp0hXjjPps2zFQ8qJTz4-ybg1Zvg75eqfGRG1YUbp2A_CD4eQp2A8xE4UkFwaCgYKAbISARASFQHGX2MiF-h6y9Tz-ooHZBXLmNcEYw0173";
 
     @Autowired
     public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository) {
@@ -54,6 +54,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         this.todoRepository = todoRepository;
         this.chatRepository = chatRepository;
         scheduleTask();
+        getGoogleAccessToken();
         scheduleTokenRefresh();
     }
     private void checkTodosAndCreateChat() {
@@ -128,7 +129,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
                 new HttpEntity<>(params, headers);
 
         ResponseEntity<String> accessTokenResponse = rt.exchange(
-                "https://kauth.kakao.com/oauth/token",
+                "https://oauth2.googleapis.com/token",
                 HttpMethod.POST,
                 GoogleTokenRequest,
                 String.class
