@@ -56,6 +56,16 @@ function Stat({ }) {
 		Word4stPercent: 0,
 		etcPercent: 0
 	});
+
+	const [barDataDay, setBarDataDay] = useState([
+		{ value: dailyCompletionRates.SUN, label: '일', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.MON, label: '월', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.TUE, label: '화', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.WED, label: '수', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.THU, label: '목', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.FRI, label: '금', frontColor: "#B7BABF" },
+		{ value: dailyCompletionRates.SAT, label: '토', frontColor: "#B7BABF" },
+	]);
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -212,6 +222,34 @@ function Stat({ }) {
 		return rate === 0 ? 5 : rate;
 	};
 
+	useEffect(() => {
+		const dayCompletionRates = [
+			{ day: 'MON', rate: dailyCompletionRates.MON },
+			{ day: 'TUE', rate: dailyCompletionRates.TUE },
+			{ day: 'WED', rate: dailyCompletionRates.WED },
+			{ day: 'THU', rate: dailyCompletionRates.THU },
+			{ day: 'FRI', rate: dailyCompletionRates.FRI },
+			{ day: 'SAT', rate: dailyCompletionRates.SAT },
+			{ day: 'SUN', rate: dailyCompletionRates.SUN },
+		];
+	
+		const highestDayRate = dayCompletionRates.reduce((max, day) => day.rate > max.rate ? day : max, { rate: 0 });
+		
+		const updatedBarData_Day = dayCompletionRates.map(day => ({
+			value: day.rate,
+			label: dayLabel(day.day),
+			frontColor: day.day === highestDayRate.day ? currentTheme.color1 : "#B7BABF",
+		}));
+	
+		setBarDataDay(updatedBarData_Day);
+		setHighestDay(dayLabel(highestDayRate.day));
+	}, [dailyCompletionRates, currentTheme]);
+
+	const dayLabel = (dayCode) => {
+		const labels = { MON: '월', TUE: '화', WED: '수', THU: '목', FRI: '금', SAT: '토', SUN: '일' };
+		return labels[dayCode] || '';
+	};
+
 	const RingChart = () => {
 		const thisMonthValue = statData.thisMonth / 100;
 		const prevMonthValue = statData.prevMonth / 100;
@@ -295,16 +333,42 @@ function Stat({ }) {
 								<View>
 									<MainText color='white'>{userNickname} 님의 가장 많은 노티는</MainText>
 									<MainText color='white'>{tagStats.Word1st}로 00개의 노티 중 00개를 달성했어요!</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word1stPercent}%로, 지난달 이맘때 쯤보다 00%로 증가/감소했어요</Stat_Text>
+									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word1stPercent}% 입니다!</Stat_Text>
 								</View>
 							</States>
 
-							<States color={currentTheme.color2}>
-								<Text>{tagStats.Word1st}: {tagStats.Word1stPercent}%</Text>
-								<Text>{tagStats.Word2st}: {tagStats.Word2stPercent}%</Text>
-								<Text>{tagStats.Word3st}: {tagStats.Word3stPercent}%</Text>
-								<Text>{tagStats.Word4st}: {tagStats.Word4stPercent}%</Text>
-								<Text>기타: {tagStats.etcPercent}%</Text>
+							<States color={currentTheme.color2}
+								style={{ padding: 10 }}
+							>
+								<View>
+									<MainText color='white'>{userNickname} 님의 2번째 많은 노티는</MainText>
+									<MainText color='white'>{tagStats.Word2st}로 00개의 노티 중 00개를 달성했어요!</MainText>
+									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word2stPercent}% 입니다!</Stat_Text>
+								</View>
+							</States>
+
+							<States color={currentTheme.color3}
+								style={{ padding: 10 }}
+							>
+								<View>
+									<MainText>3</MainText>
+								</View>
+							</States>
+
+							<States color={currentTheme.color4}
+								style={{ padding: 10 }}
+							>
+								<View>
+									<MainText>4</MainText>
+								</View>
+							</States>
+
+							<States color={currentTheme.color5}
+								style={{ padding: 10 }}
+							>
+								<View>
+									<MainText>5</MainText>
+								</View>
 							</States>
 						</ScrollView>
 					
@@ -437,13 +501,13 @@ function Stat({ }) {
 								<>
 									<View style={{ flexDirection: 'row', alignSelf: 'center', marginTop: 20 }}>
 										<MainText>이번 달은 </MainText>
-										<MainText style={{ color: currentTheme.color1 }}>0요일 </MainText>
+										<MainText style={{ color: currentTheme.color1 }}>{highestDay}요일 </MainText>
 										<MainText>달성률이 가장 높아요!</MainText>
 									</View>
 									
 									<View style={{ width: 'auto', height: 80, marginBottom: 20, marginLeft: -15 }}>
 										<BarChart
-											data={barData_Day}
+											data={barDataDay}
 											hideYAxis
 											hideGrid
 											fromZero
