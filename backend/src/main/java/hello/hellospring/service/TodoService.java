@@ -240,4 +240,14 @@ public class TodoService {
 
         return result;
     }
+
+    public Map<String, Long> findGoal(Long userId, String statsDate) {
+        // 내용 꺼내기
+
+        // 꺼낸거 gpt 돌리기
+
+        // response 작성
+
+        return null;
+    }
 }
