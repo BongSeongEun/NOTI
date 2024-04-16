@@ -2,7 +2,9 @@ package hello.hellospring.service;
 
 import hello.hellospring.Exception.AppException;
 import hello.hellospring.dto.TodoDTO;
+import hello.hellospring.model.Goal;
 import hello.hellospring.model.Todo;
+import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.GptTagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +26,14 @@ public class TodoService {
 
     private final GptTagService gptTagService;
     private final TodoRepository todoRepository;
+    private final GoalRepository goalRepository;
     @Autowired
-    public TodoService(GptTagService gptTagService, TodoRepository todoRepository) {
+    public TodoService(GptTagService gptTagService,
+                       TodoRepository todoRepository,
+                       GoalRepository goalRepository) {
         this.gptTagService = gptTagService;
         this.todoRepository = todoRepository;
+        this.goalRepository = goalRepository;
     }
     public List<Todo> createTodo(Todo todo){
         validateEmptyTodoTile(todo);
@@ -243,6 +249,15 @@ public class TodoService {
 
     public Map<String, Long> getGoal(Long userId, String statsDate) {
         // 내용 꺼내기
+        List<Goal> GoalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
+
+        if (GoalExist.isEmpty()) {
+            System.out.println("비었다");
+            // 데이터가 없을 경우 처리 로직, 필요하다면 추가적인 동작을 여기에 구현
+        } else {
+            System.out.println("있다");
+
+        }
 
 
         // 꺼낸거 gpt 돌리기
