@@ -1,7 +1,10 @@
 package hello.hellospring.controller;
 
+import hello.hellospring.dto.GoalDTO;
 import hello.hellospring.dto.TodoDTO;
+import hello.hellospring.model.Goal;
 import hello.hellospring.model.Todo;
+import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -19,14 +23,15 @@ import java.util.Map;
 @RequestMapping("/api/v4")
 public class StatisticsController {
 
-    private final TodoRepository todoRepository;
+    private final GoalRepository goalRepository;
     private final TodoService todoService;
 
 
     @Autowired
-    public StatisticsController(TodoRepository todoRepository, TodoService todoService) {
+    public StatisticsController(TodoService todoService,
+                                GoalRepository goalRepository) {
 
-        this.todoRepository = todoRepository;
+        this.goalRepository = goalRepository;
         this.todoService = todoService;
     }
 
@@ -79,10 +84,24 @@ public class StatisticsController {
 
     }
 
-    @PostMapping("GoalWrite/{userId}/{statsDate}")
-    public ResponseEntity<?> GoalWrite(@PathVariable Long userId, @PathVariable String statsDate) throws Exception {
-        return null;
+    @PostMapping("GoalWrite/{userId}/{statsDate}") // 목표 작성 로직
+    public ResponseEntity<?> GoalWrite(@PathVariable Long userId,
+                                       @PathVariable String statsDate,
+                                       @RequestBody GoalDTO goalDTO) throws Exception {
 
+        Goal goal = new Goal();
+        goal.setUserId(userId);  // PathVariable로부터 받은 userId 설정
+        goal.setGoalDate(statsDate);  // PathVariable로부터 받은 statsDate 설정
+        goal.setGoalTitle(goalDTO.getGoalTitle());
+        goal.setGoalTime(goalDTO.getGoalTime());
+        goal.setGoalAchieveRate(goalDTO.getGoalAchieveRate());
+
+        // 데이터베이스에 저장
+        Goal savedGoal = goalRepository.save(goal);
+
+        // 저장된 Goal 엔티티를 GoalDTO로 변환하여 반환
+        GoalDTO savedGoalDTO = GoalDTO.from(savedGoal);
+        return ResponseEntity.ok(savedGoalDTO);
     }
 
 
