@@ -71,11 +71,11 @@ public class StatisticsController {
         return ResponseEntity.ok(dayWeeks);
 
     }
-    @GetMapping("suggestGoal/{userId}/statsDate")
+    @GetMapping("suggestGoal/{userId}/{statsDate}") // 목표 설정
     public ResponseEntity<?> getGoal(@PathVariable Long userId, @PathVariable String statsDate){
 
-        Map<String, Long> monthGoal = todoService.findGoal(userId, statsDate);
-        return null;
+        Map<String, Long> monthGoal = todoService.getGoal(userId, statsDate);
+        return ResponseEntity.ok(monthGoal);
 
     }
 
