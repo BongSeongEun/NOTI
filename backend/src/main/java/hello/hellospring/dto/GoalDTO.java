@@ -16,6 +16,7 @@ public class GoalDTO {
     private String goalDate;
     private String goalTitle;
     private Long goalTime;
+    private Long goalAchieveRate;
 
     public static GoalDTO goalDTO(Goal goal){
         GoalDTO goalDTO = new GoalDTO();
@@ -24,6 +25,7 @@ public class GoalDTO {
         goalDTO.setGoalDate(goalDTO.getGoalDate());
         goalDTO.setGoalTitle(goal.getGoalTitle());
         goalDTO.setGoalTime(goal.getGoalTime());
+        goalDTO.setGoalAchieveRate(goal.getGoalAchieveRate());
         return goalDTO;
     }
 }

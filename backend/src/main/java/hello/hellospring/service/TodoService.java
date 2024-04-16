@@ -251,13 +251,13 @@ public class TodoService {
         return result;
     }
 
-    public Map<String, Long> getGoal(Long userId, String statsDate) throws Exception {
+    public Map<String, Object> getGoal(Long userId, String statsDate) throws Exception {
         List<Goal> GoalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
         // 목표가 이미 존재하는지 아닌지 확인하는 로직
+        Map<String, Object> response = null;
         if (GoalExist.isEmpty()) {
             // 해당하는 달의 목표가 존재하지 않음
             System.out.println("비었다");
-
 
             // gpt에게 보낼 promt 가공
             List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
@@ -279,21 +279,22 @@ public class TodoService {
             }
 
             // gpt에게 추천받기
-            gptGoalService.askGpt(output);
+            String goalResult = gptGoalService.askGpt(output);
 
+            response = new HashMap<>();
+            response.put("GptSuggest", goalResult);
 
         } else {
             // 해당하는 달의 목표가 존재함
             System.out.println("있다");
 
-
+            response = new HashMap<>();
+            for (Goal goal : GoalExist) {
+                response.put("goalTitle", goal.getGoalTitle());
+                response.put("goalTime", goal.getGoalTime());
+                response.put("goalAchieveRate", goal.getGoalAchieveRate());
+            }
         }
-
-
-        // 꺼낸거 gpt 돌리기
-
-        // response 작성
-
-        return null;
+        return response;
     }
 }

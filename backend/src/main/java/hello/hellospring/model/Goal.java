@@ -31,6 +31,9 @@ public class Goal {
     @Column(name = "goal_time")
     private Long goalTime;
 
+    @Column(name = "goal_achieve_rate")
+    private Long goalAchieveRate;
+
     public static Goal toSaveEntity(GoalDTO goalDTO){
         Goal goal = new Goal();
         goal.setGoalId(goalDTO.getGoalId());
@@ -38,6 +41,7 @@ public class Goal {
         goal.setGoalDate(goalDTO.getGoalDate());
         goal.setGoalTitle(goalDTO.getGoalTitle());
         goal.setGoalTime(goalDTO.getGoalTime());
+        goal.setGoalAchieveRate(goalDTO.getGoalAchieveRate());
         return goal;
     }
 
@@ -48,6 +52,7 @@ public class Goal {
         goal.setGoalDate(goalDTO.getGoalDate());
         goal.setGoalTitle(goalDTO.getGoalTitle());
         goal.setGoalTime(goalDTO.getGoalTime());
+        goal.setGoalAchieveRate(goalDTO.getGoalAchieveRate());
         return goal;
     }
 

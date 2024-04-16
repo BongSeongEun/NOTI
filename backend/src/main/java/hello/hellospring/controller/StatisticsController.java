@@ -74,8 +74,14 @@ public class StatisticsController {
     @GetMapping("suggestGoal/{userId}/{statsDate}") // 목표 없을때 제시
     public ResponseEntity<?> getGoal(@PathVariable Long userId, @PathVariable String statsDate) throws Exception {
 
-        Map<String, Long> monthGoal = todoService.getGoal(userId, statsDate);
+        Map<String, Object> monthGoal = todoService.getGoal(userId, statsDate);
         return ResponseEntity.ok(monthGoal);
+
+    }
+
+    @PostMapping("GoalWrite/{userId}/{statsDate}")
+    public ResponseEntity<?> GoalWrite(@PathVariable Long userId, @PathVariable String statsDate) throws Exception {
+        return null;
 
     }
 
