@@ -2,8 +2,11 @@ package hello.hellospring.service;
 
 import hello.hellospring.Exception.AppException;
 import hello.hellospring.dto.TodoDTO;
+import hello.hellospring.model.Goal;
 import hello.hellospring.model.Todo;
+import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.TodoRepository;
+import hello.hellospring.service.AI.GptGoalService;
 import hello.hellospring.service.AI.GptTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +27,17 @@ public class TodoService {
 
     private final GptTagService gptTagService;
     private final TodoRepository todoRepository;
+    private final GoalRepository goalRepository;
+    private final GptGoalService gptGoalService;
     @Autowired
-    public TodoService(GptTagService gptTagService, TodoRepository todoRepository) {
+    public TodoService(GptTagService gptTagService,
+                       TodoRepository todoRepository,
+                       GoalRepository goalRepository,
+                       GptGoalService gptGoalService) {
         this.gptTagService = gptTagService;
         this.todoRepository = todoRepository;
+        this.goalRepository = goalRepository;
+        this.gptGoalService = gptGoalService;
     }
     public List<Todo> createTodo(Todo todo){
         validateEmptyTodoTile(todo);
@@ -239,5 +249,52 @@ public class TodoService {
         });
 
         return result;
+    }
+
+    public Map<String, Object> getGoal(Long userId, String statsDate) throws Exception {
+        List<Goal> GoalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
+        // 목표가 이미 존재하는지 아닌지 확인하는 로직
+        Map<String, Object> response = null;
+        if (GoalExist.isEmpty()) {
+            // 해당하는 달의 목표가 존재하지 않음
+            System.out.println("비었다");
+
+            // gpt에게 보낼 promt 가공
+            List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            String output = null;
+            for (Todo todo : aaa) {
+                String title = todo.getTodoTitle();
+                String status = todo.isTodoDone() ? "달성 완료" : "미달성";
+                try {
+                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), formatter);
+                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), formatter);
+                    long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
+                    output = String.format("Title: %s, Status: %s, Duration: %d minutes", title, status, durationMinutes);
+                } catch (DateTimeParseException e) {
+                    output = String.format("Title: %s, Status: %s (time data not available)", title, status);
+                }
+                //System.out.println(output);
+            }
+
+            // gpt에게 추천받기
+            String goalResult = gptGoalService.askGpt(output);
+
+            response = new HashMap<>();
+            response.put("GptSuggest", goalResult);
+
+        } else {
+            // 해당하는 달의 목표가 존재함
+            System.out.println("있다");
+
+            response = new HashMap<>();
+            for (Goal goal : GoalExist) {
+                response.put("goalTitle", goal.getGoalTitle());
+                response.put("goalTime", goal.getGoalTime());
+                response.put("goalAchieveRate", goal.getGoalAchieveRate());
+            }
+        }
+        return response;
     }
 }
