@@ -21,6 +21,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -36,6 +38,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     private final TodoRepository todoRepository;
     private final ChatRepository chatRepository;
     private ScheduledFuture<?> scheduledFuture;
+    private static final Logger logger = LoggerFactory.getLogger(TodoToChatSchedulerService.class);
 
     @Value("${google.client.id}")
     private String CLIENT_ID;
@@ -53,6 +56,9 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         this.taskScheduler = taskScheduler;
         this.todoRepository = todoRepository;
         this.chatRepository = chatRepository;
+        logger.info("Loaded CLIENT_ID: {}", CLIENT_ID);
+        logger.info("Loaded CLIENT_SECRET: {}", CLIENT_SECRET);
+        logger.info("Loaded REFRESH_TOKEN: {}", REFRESH_TOKEN);
         scheduleTask();
         getGoogleAccessToken();
         scheduleTokenRefresh();
