@@ -66,7 +66,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     @Value("${google.client.secret}")
     private String CLIENT_SECRET;
 
-    private String accessToken = "ya29.a0Ad52N39xQkqvEFgAYIyr6mVZtBWqhOFcginiIQGRmn-aJRU-4kJp6_qFSbhXIqU5xlpI5r_NDgqat_ecXhm9WjT2HuIjcbbSzx9ZeXtw2rfp0hXjjPps2zFQ8qJTz4-ybg1Zvg75eqfGRG1YUbp2A_CD4eQp2A8xE4UkFwaCgYKAbISARASFQHGX2MiF-h6y9Tz-ooHZBXLmNcEYw0173";
+    public String accessToken = "ya29.a0Ad52N39xQkqvEFgAYIyr6mVZtBWqhOFcginiIQGRmn-aJRU-4kJp6_qFSbhXIqU5xlpI5r_NDgqat_ecXhm9WjT2HuIjcbbSzx9ZeXtw2rfp0hXjjPps2zFQ8qJTz4-ybg1Zvg75eqfGRG1YUbp2A_CD4eQp2A8xE4UkFwaCgYKAbISARASFQHGX2MiF-h6y9Tz-ooHZBXLmNcEYw0173";
 
     @Autowired
     public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository, Environment environment) {
@@ -82,6 +82,47 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         getGoogleAccessToken();
         scheduleTokenRefresh();
     }
+
+    private void getGoogleAccessToken(){
+
+        String clientId = environment.getProperty("google.client.id");
+        String clientSecret = environment.getProperty("google.client.secret");
+        String refreshToken = environment.getProperty("google.refresh.token");
+
+        RestTemplate rt = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded");
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "refresh_token");
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("refresh_token", refreshToken);
+
+
+        HttpEntity<MultiValueMap<String, String>> GoogleTokenRequest =
+                new HttpEntity<>(params, headers);
+
+        ResponseEntity<String> accessTokenResponse = rt.exchange(
+                "https://oauth2.googleapis.com/token",
+                HttpMethod.POST,
+                GoogleTokenRequest,
+                String.class
+        );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        OauthToken oauthToken = null;
+        try {
+            oauthToken = objectMapper.readValue(accessTokenResponse.getBody(), OauthToken.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        accessToken = oauthToken.getAccess_token();
+        logger.info("Loaded ACCESS_TOKEN: {}", accessToken);
+
+    }
+
     private void checkTodosAndCreateChat() {
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
         ZonedDateTime nowSeoul = ZonedDateTime.now(seoulZoneId);
@@ -123,7 +164,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             RestTemplate rt = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Authorization", accessToken);
+            headers.add("Authorization", "Bearer " + accessToken);
             
             HttpEntity<String> entity = new HttpEntity<>(jsonRequest, headers);
             
@@ -137,45 +178,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         });
     }
 
-    private void getGoogleAccessToken(){
 
-        String clientId = environment.getProperty("google.client.id");
-        String clientSecret = environment.getProperty("google.client.secret");
-        String refreshToken = environment.getProperty("google.refresh.token");
-
-        RestTemplate rt = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-type", "application/x-www-form-urlencoded");
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "refresh_token");
-        params.add("client_id", clientId);
-        params.add("client_secret", clientSecret);
-        params.add("refresh_token", refreshToken);
-
-
-        HttpEntity<MultiValueMap<String, String>> GoogleTokenRequest =
-                new HttpEntity<>(params, headers);
-
-        ResponseEntity<String> accessTokenResponse = rt.exchange(
-                "https://oauth2.googleapis.com/token",
-                HttpMethod.POST,
-                GoogleTokenRequest,
-                String.class
-        );
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        OauthToken oauthToken = null;
-        try {
-            oauthToken = objectMapper.readValue(accessTokenResponse.getBody(), OauthToken.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        accessToken = String.valueOf(oauthToken.getAccess_token());
-        logger.info("Loaded ACCESS_TOKEN: {}", accessToken);
-
-    }
 
     private void scheduleTask() {
         String cronExpression = "0 * * * * ?"; // 매 분마다 작업 실행
