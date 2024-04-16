@@ -8,10 +8,14 @@ import hello.hellospring.model.Chat;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -21,6 +25,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,14 +35,28 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
-
 @Service
 public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간이 되면 자동으로 gpt가 물어보게 하기
     private final TaskScheduler taskScheduler;
     private final TodoRepository todoRepository;
     private final ChatRepository chatRepository;
     private ScheduledFuture<?> scheduledFuture;
+    private static final Logger logger = LoggerFactory.getLogger(TodoToChatSchedulerService.class);
 
+    private final Environment environment;
+
+    public void someMethod() {
+        String clientId = environment.getProperty("google.client.id");
+        System.out.println(clientId);
+    }
+    public void someMethod2() {
+        String clientSecret = environment.getProperty("google.refresh.token");
+        System.out.println(clientSecret);
+    }
+    public void someMethod3() {
+        String refreshToken = environment.getProperty("google.client.secret");
+        System.out.println(refreshToken);
+    }
     @Value("${google.client.id}")
     private String CLIENT_ID;
 
@@ -49,10 +69,15 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     private String accessToken = "ya29.a0Ad52N39xQkqvEFgAYIyr6mVZtBWqhOFcginiIQGRmn-aJRU-4kJp6_qFSbhXIqU5xlpI5r_NDgqat_ecXhm9WjT2HuIjcbbSzx9ZeXtw2rfp0hXjjPps2zFQ8qJTz4-ybg1Zvg75eqfGRG1YUbp2A_CD4eQp2A8xE4UkFwaCgYKAbISARASFQHGX2MiF-h6y9Tz-ooHZBXLmNcEYw0173";
 
     @Autowired
-    public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository) {
+    public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository, Environment environment) {
         this.taskScheduler = taskScheduler;
         this.todoRepository = todoRepository;
         this.chatRepository = chatRepository;
+        this.environment = environment;
+
+        logger.info("Loaded CLIENT_ID: {}", CLIENT_ID);
+        logger.info("Loaded CLIENT_SECRET: {}", CLIENT_SECRET);
+        logger.info("Loaded REFRESH_TOKEN: {}", REFRESH_TOKEN);
         scheduleTask();
         getGoogleAccessToken();
         scheduleTokenRefresh();
@@ -113,6 +138,11 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     }
 
     private void getGoogleAccessToken(){
+
+        String clientId = environment.getProperty("google.client.id");
+        String clientSecret = environment.getProperty("google.client.secret");
+        String refreshToken = environment.getProperty("google.refresh.token");
+
         RestTemplate rt = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -120,9 +150,9 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "refresh_token");
-        params.add("client_id", CLIENT_ID);
-        params.add("client_secret", CLIENT_SECRET);
-        params.add("refresh_token", REFRESH_TOKEN);
+        params.add("client_id", clientId);
+        params.add("client_secret", clientSecret);
+        params.add("refresh_token", refreshToken);
 
 
         HttpEntity<MultiValueMap<String, String>> GoogleTokenRequest =
@@ -142,8 +172,8 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
-        accessToken = String.valueOf(oauthToken);
+        accessToken = String.valueOf(oauthToken.getAccess_token());
+        logger.info("Loaded ACCESS_TOKEN: {}", accessToken);
 
     }
 
