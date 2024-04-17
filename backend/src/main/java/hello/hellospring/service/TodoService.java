@@ -288,11 +288,34 @@ public class TodoService {
             // 해당하는 달의 목표가 존재함
             System.out.println("있다");
 
+            // gpt에게 보낼 promt 가공
+            List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
+            String output = null;
+            for (Todo todo : aaa) {
+                String title = todo.getTodoTitle();
+                String status = todo.isTodoDone() ? "달성 완료" : "미달성";
+                try {
+                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), formatter);
+                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), formatter);
+                    long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
+                    output = String.format("Title: %s, Status: %s, Duration: %d minutes", title, status, durationMinutes);
+                } catch (DateTimeParseException e) {
+                    output = String.format("Title: %s, Status: %s (time data not available)", title, status);
+                }
+                //System.out.println(output);
+            }
+
+            // gpt에게 추천받기
+            String goalResult = gptGoalService.askGpt(output);
+            
             response = new HashMap<>();
             for (Goal goal : GoalExist) {
                 response.put("goalTitle", goal.getGoalTitle());
                 response.put("goalTime", goal.getGoalTime());
                 response.put("goalAchieveRate", goal.getGoalAchieveRate());
+                response.put("GptSuggest", goalResult);
             }
         }
         return response;

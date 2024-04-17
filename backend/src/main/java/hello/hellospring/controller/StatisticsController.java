@@ -96,10 +96,8 @@ public class StatisticsController {
         goal.setGoalTime(goalDTO.getGoalTime());
         goal.setGoalAchieveRate(goalDTO.getGoalAchieveRate());
 
-        // 데이터베이스에 저장
         Goal savedGoal = goalRepository.save(goal);
 
-        // 저장된 Goal 엔티티를 GoalDTO로 변환하여 반환
         GoalDTO savedGoalDTO = GoalDTO.from(savedGoal);
         return ResponseEntity.ok(savedGoalDTO);
     }
