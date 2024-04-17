@@ -11,6 +11,7 @@ import {
 	Text,
 	View,
 	TouchableOpacity,
+	TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -66,6 +67,18 @@ function Stat({ }) {
 		{ value: dailyCompletionRates.FRI, label: '금', frontColor: "#B7BABF" },
 		{ value: dailyCompletionRates.SAT, label: '토', frontColor: "#B7BABF" },
 	]);
+
+	const [goalText, setGoalText] = useState('');
+	const [goal, setGoal] = useState({
+		schedule: '', // '일정'에 해당하는 텍스트 상태
+		time: '',     // '시간'에 해당하는 텍스트 상태
+		rate: '',     // '달성률'에 해당하는 텍스트 상태
+	});
+	const [recommendedGoals, setRecommendedGoals] = useState([]);
+	const [showRecommendedGoals, setShowRecommendedGoals] = useState(false);
+	const handleScheduleChange = (text) => setGoal(prev => ({ ...prev, schedule: text }));
+const handleTimeChange = (text) => setGoal(prev => ({ ...prev, time: text }));
+const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -191,6 +204,16 @@ function Stat({ }) {
 		fetchDayWeekStats();
 	}, []);
 
+	useEffect(() => {
+		setRecommendedGoals([
+			{ schedule: '매일 적어도 1개', time: '2', rate: '100' },
+			{ schedule: '주 3회 운동', time: '1', rate: '70' },
+			{ schedule: '하루 2시간 공부', time: '2', rate: '50' },
+			// 이런 식으로 추천 목표를 설정합니다.
+		]);
+	}, []);
+	
+
 	const pieData = [
 		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },
 		{ id: tagStats.Word2st, value: tagStats.Word2stPercent, color: currentTheme.color2 },
@@ -313,6 +336,19 @@ function Stat({ }) {
 		}));
 	};
 
+	const toggleRecommendedGoals = () => {
+		setShowRecommendedGoals(!showRecommendedGoals);
+	};
+
+	const handleSelectRecommendedGoal = (selectedGoal) => {
+		setGoal({
+			schedule: selectedGoal.schedule,
+			time: selectedGoal.time,
+			rate: selectedGoal.rate
+		});
+		setShowRecommendedGoals(false);
+	};
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
@@ -371,8 +407,66 @@ function Stat({ }) {
 								</View>
 							</States>
 						</ScrollView>
+
+
+
+						<GoalFrame color={currentTheme.color1} style={{ marginTop: 20, height: showRecommendedGoals ? 200 : 100, }}>
+							<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: 280 }}>
+								<TextInput
+									style={inputStyle}
+									onChangeText={handleScheduleChange}
+									value={goal.schedule}
+									placeholder="일정"
+									keyboardType="default"
+								/>
+								<MainText>일정</MainText>
+								<TextInput
+									style={inputStyle}
+									onChangeText={handleTimeChange}
+									value={goal.time}
+									placeholder="시간"
+									keyboardType="numeric"
+								/>
+								<MainText>시간</MainText>
+								<TextInput
+									style={inputStyle}
+									onChangeText={handleRateChange}
+									value={goal.rate}
+									placeholder="달성률"
+									keyboardType="numeric"
+								/>
+								<MainText>달성률 달성하기!</MainText>
+							</View>
+
+							<TouchableOpacity onPress={toggleRecommendedGoals} style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+								<MainText>추천 목표 보기</MainText>
+								<images.creat_down
+									width={20}
+									height={20}
+									style={{
+										transform: [{ rotate: showRecommendedGoals ? '180deg' : '0deg' }],
+										color: currentTheme.color1,
+									}}
+								/>
+							</TouchableOpacity>
+							{showRecommendedGoals && (
+    <View style={{ marginTop: 10 }}>
+      {recommendedGoals.map((goal, index) => (
+        <TouchableOpacity key={index} onPress={() => handleSelectRecommendedGoal(goal)}>
+          <MainText style={{ padding: 5, color: 'gray' }}>
+            {goal.schedule} 일정 {goal.time} 시간 {goal.rate} 달성률
+          </MainText>
+        </TouchableOpacity>
+      ))}
+    </View>
+							)}
+						</GoalFrame>
 					
-						<HorisontalView style={{ justifyContent: 'space-between', marginTop: 25, marginBottom: 10 }}>
+						
+
+
+						
+						<HorisontalView style={{ justifyContent: 'space-between', marginTop: 25 }}>
 							<MainText style={{ fontSize: 15 }}>상세 리포트</MainText>
 							<images.share width={20} height={20}
 								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
@@ -610,5 +704,24 @@ const Stat_Label = styled.TouchableOpacity`
 	background-color: ${props => props.color || "#FF7154"};
 	margin-right: 5px;
 `;
+
+const GoalFrame = styled.TouchableOpacity`
+	width: 300px;
+	height: 80px;
+	border-radius: 15px;
+	border-width: 1px;
+	border-color:  ${props => props.color || "#B7BABF"};
+	padding: 20px;
+	margin-top: 20px;
+`;
+
+const inputStyle = styled.TextInput`
+	height: 40;
+	border-color: 'gray';
+	border-width: 1;
+	padding: 10;
+	border-radius: 5;
+	flex: 1;
+`; 
 
 export default Stat;
