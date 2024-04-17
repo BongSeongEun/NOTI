@@ -33,7 +33,7 @@ public class UserService {
 
     public void updateUser(Long userId, UserDTO userDTO) {
         User user = userRepository.findByUserId(userId);
-        user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime());
+        user.updateUserInfo(userDTO.getUserNickname(), userDTO.getUserProfile(), userDTO.getUserColor(), userDTO.getMuteStartTime(), userDTO.getMuteEndTime(), userDTO.getDiaryTime(), userDTO.getDeviceToken());
         userRepository.save(user);
     }
     public OauthToken getAccessToken(String code) {
