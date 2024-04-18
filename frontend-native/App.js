@@ -13,6 +13,7 @@ import Diary from "./src/pages/Diary";
 import Register from "./src/pages/Register";
 import Register_Success from "./src/pages/Register_Success";
 import Setting from "./src/pages/Setting";
+import Setting_user from "./src/pages/Setting_user";
 import Todo from "./src/pages/Todo";
 import Chatting from "./src/pages/Chatting";
 import Todo_Add from "./src/pages/Todo_Add";
@@ -52,6 +53,7 @@ export default function App() {
 			  <Stack.Screen name="Diary_Main" component={Diary_Main} />
 			  <Stack.Screen name="Diary" component={Diary} />
 			  <Stack.Screen name="Setting" component={Setting} />
+			  <Stack.Screen name="Setting_user" component={Setting_user} />
 			  <Stack.Screen name="Stat" component={Stat} />
       	</Stack.Navigator>
     </NavigationContainer>

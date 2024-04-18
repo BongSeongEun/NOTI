@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react/self-closing-comp */
@@ -30,7 +31,7 @@ function Stat({ }) {
 	const navigation = useNavigation();
 
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
-    const [base64Image, setBase64Image] = useState('');
+	const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
 	const [dailyCompletionRates, setDailyCompletionRates] = useState({
 		MON: 0, TUE: 0, WED: 0, THU: 0, FRI: 0, SAT: 0, SUN: 0,
@@ -42,19 +43,35 @@ function Stat({ }) {
 	});
 	const [clicked_share, setClicked_share] = useState(false);
 	const [statData, setStatData] = useState({
-        prevMonth: 0,
-        difference: 0,
-        thisMonth: 0
-    });
+		prevMonth: 0,
+		difference: 0,
+		thisMonth: 0
+	});
 	const [tagStats, setTagStats] = useState({
 		Word1st: '',
 		Word1stPercent: 0,
+		Word1stNum: 0,
+		Word1stDoneTodos: 0,
+		Word1stTime: 0,
+		
 		Word2st: '',
 		Word2stPercent: 0,
+		Word2stNum: 0,
+		Word2stDoneTodos: 0,
+		Word2stTime: 0,
+
 		Word3st: '',
 		Word3stPercent: 0,
+		Word3stNum: 0,
+		Word3stDoneTodos: 0,
+		Word3stTime: 0,
+
 		Word4st: '',
 		Word4stPercent: 0,
+		Word4stNum: 0,
+		Word4stDoneTodos: 0,
+		Word4stTime: 0,
+
 		etcPercent: 0
 	});
 
@@ -68,17 +85,18 @@ function Stat({ }) {
 		{ value: dailyCompletionRates.SAT, label: '토', frontColor: "#B7BABF" },
 	]);
 
-	const [goalText, setGoalText] = useState('');
 	const [goal, setGoal] = useState({
-		schedule: '', // '일정'에 해당하는 텍스트 상태
-		time: '',     // '시간'에 해당하는 텍스트 상태
-		rate: '',     // '달성률'에 해당하는 텍스트 상태
+		schedule: '',
+		time: '',
+		rate: '',
 	});
 	const [recommendedGoals, setRecommendedGoals] = useState([]);
 	const [showRecommendedGoals, setShowRecommendedGoals] = useState(false);
 	const handleScheduleChange = (text) => setGoal(prev => ({ ...prev, schedule: text }));
-const handleTimeChange = (text) => setGoal(prev => ({ ...prev, time: text }));
-const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
+	const handleTimeChange = (text) => setGoal(prev => ({ ...prev, time: text }));
+	const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
+	const [isGoalSet, setIsGoalSet] = useState(false);
+	const goalPersent = 58;
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -124,26 +142,26 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 	};
 
 	useEffect(() => {
-        const fetchStats = async () => {
-            const token = await AsyncStorage.getItem('token');
-            if (!token) return;
+		const fetchStats = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (!token) return;
 
-            const userId = getUserIdFromToken(token);
-            const statsDate = '2024.03';
+			const userId = getUserIdFromToken(token);
+			const statsDate = '2024.03';
 
-            try {
-                const response = await axios.get(`http://15.164.151.130:4000/api/v4/statsMonth/${userId}/${statsDate}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                setStatData(response.data);
-            } catch (error) {
-                console.error("Error fetching stats data:", error);
-            }
-        };
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v4/statsMonth/${userId}/${statsDate}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+				setStatData(response.data);
+			} catch (error) {
+				console.error("Error fetching stats data:", error);
+			}
+		};
 
-        fetchStats();
+		fetchStats();
 	}, []);
 	
 	useEffect(() => {
@@ -204,12 +222,86 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 		fetchDayWeekStats();
 	}, []);
 
+	/*
+	const fetchAndSetGoal = async () => {
+		try {
+			const token = await AsyncStorage.getItem('token');
+			if (!token) {
+				console.error("Token not available");
+				return;
+			}
+
+			const userId = getUserIdFromToken(token);
+			const statsDate = '2024.03';
+	  
+			const url = `http://15.164.151.130:4000/api/v4/suggestGoal/${userId}/${statsDate}`;
+			const headers = { Authorization: `Bearer ${token}` };
+			const response = await axios.get(url, { headers });
+	  
+			const { data } = response;
+			if (data.goalTitle) {
+				setGoal({
+					schedule: data.goalTitle,
+					time: data.goalTime.toString(),
+					rate: data.goalAchieveRate.toString(),
+				});
+			} else if (data.GptSuggest) {
+				const regex = /Title: (.*), 추천하는 달성률: (\d+)%, Duration: (\d+)/;
+				const match = data.GptSuggest.match(regex);
+				if (match) {
+					const [, title, rate, time] = match;
+					setGoal({
+						schedule: title,
+						time: time,
+						rate: rate,
+					});
+				}
+			}
+		} catch (error) {
+			console.error("Error fetching goal:", error);
+		}
+	};
+	  
+	useEffect(() => {
+		fetchAndSetGoal();
+	}, []);
+	*/
+
+	const saveGoalToServer = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (!token) {
+			console.error("Token not available");
+			return;
+		}
+	
+		const userId = getUserIdFromToken(token);
+		const statsDate = '2024.03'; 
+		const url = `http://15.164.151.130:4000/api/v4/GoalWrite/${userId}/${statsDate}`;
+	
+		const headers = {
+			'Authorization': `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		};
+	
+		const data = {
+			goalTitle: goal.schedule,
+			goalTime: goal.time,
+			goalAchieveRate: goal.rate,
+		};
+	
+		try {
+			const response = await axios.post(url, data, { headers });
+			console.log("Goal saved successfully:", response.data);
+		} catch (error) {
+			console.error("Error saving goal:", error);
+		}
+	};
+
 	useEffect(() => {
 		setRecommendedGoals([
-			{ schedule: '매일 적어도 1개', time: '2', rate: '100' },
-			{ schedule: '주 3회 운동', time: '1', rate: '70' },
-			{ schedule: '하루 2시간 공부', time: '2', rate: '50' },
-			// 이런 식으로 추천 목표를 설정합니다.
+			{ schedule: '산책', time: '2', rate: '100' },
+			{ schedule: '운동', time: '1', rate: '70' },
+			{ schedule: '공부', time: '2', rate: '50' },
 		]);
 	}, []);
 	
@@ -228,16 +320,6 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 		{ value: tagStats.Word3stPercent, frontColor: currentTheme.color3 },
 		{ value: tagStats.Word4stPercent, frontColor: currentTheme.color4 },
 		{ value: tagStats.etcPercent, frontColor: currentTheme.color5 },
-	];
-
-	const barData_Day = [
-		{ value: dailyCompletionRates.SUN, label: '일', frontColor: "#B7BABF" },
-		{ value: dailyCompletionRates.MON, label: '월', frontColor: "#B7BABF" },
-		{ value: dailyCompletionRates.TUE, label: '화', frontColor: "#B7BABF"},
-		{ value: dailyCompletionRates.WED, label: '수', frontColor: "#B7BABF"},
-		{ value: dailyCompletionRates.THU, label: '목', frontColor: "#B7BABF"},
-		{ value: dailyCompletionRates.FRI, label: '금', frontColor: "#B7BABF"},
-		{ value: dailyCompletionRates.SAT, label: '토', frontColor: "#B7BABF"},
 	];
 
 	const calculateCompletionRate = (total, done) => {
@@ -347,6 +429,7 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 			rate: selectedGoal.rate
 		});
 		setShowRecommendedGoals(false);
+		setIsGoalSet(true);
 	};
 
 	return (
@@ -368,7 +451,7 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 							>
 								<View>
 									<MainText color='white'>{userNickname} 님의 가장 많은 노티는</MainText>
-									<MainText color='white'>{tagStats.Word1st}로 00개의 노티 중 00개를 달성했어요!</MainText>
+									<MainText color='white'>{tagStats.Word1st}로 {tagStats.Word1stNum}개의 노티 중 {tagStats.Word1stDoneTodos}개를 달성했어요!</MainText>
 									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word1stPercent}% 입니다!</Stat_Text>
 								</View>
 							</States>
@@ -378,7 +461,7 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 							>
 								<View>
 									<MainText color='white'>{userNickname} 님의 2번째 많은 노티는</MainText>
-									<MainText color='white'>{tagStats.Word2st}로 00개의 노티 중 00개를 달성했어요!</MainText>
+									<MainText color='white'>{tagStats.Word2st}로 {tagStats.Word2stNum}개의 노티 중 {tagStats.Word2stDoneTodos}개를 달성했어요!</MainText>
 									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word2stPercent}% 입니다!</Stat_Text>
 								</View>
 							</States>
@@ -408,28 +491,28 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 							</States>
 						</ScrollView>
 
-
-
-						<GoalFrame color={currentTheme.color1} style={{ marginTop: 20, height: showRecommendedGoals ? 200 : 100, }}>
-							<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: 280 }}>
-								<TextInput
-									style={inputStyle}
+						<GoalFrame color={currentTheme.color1} style={{
+							marginTop: 20,
+							height: isGoalSet
+								? (showRecommendedGoals ? 270 : 180)
+								: (showRecommendedGoals ? 240 : 150),
+						}}>
+							<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+								<StyledTextInput
 									onChangeText={handleScheduleChange}
 									value={goal.schedule}
 									placeholder="일정"
 									keyboardType="default"
 								/>
 								<MainText>일정</MainText>
-								<TextInput
-									style={inputStyle}
+								<StyledTextInput
 									onChangeText={handleTimeChange}
 									value={goal.time}
 									placeholder="시간"
 									keyboardType="numeric"
 								/>
 								<MainText>시간</MainText>
-								<TextInput
-									style={inputStyle}
+								<StyledTextInput
 									onChangeText={handleRateChange}
 									value={goal.rate}
 									placeholder="달성률"
@@ -438,6 +521,18 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 								<MainText>달성률 달성하기!</MainText>
 							</View>
 
+							{isGoalSet && (
+								<View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', width: 265 }}>
+									<View style={{ flexDirection: 'row', backgroundColor: 'transparent' }}>
+										<GoalChart />
+										<GoalChart style={{ backgroundColor: currentTheme.color1, width: `${goalPersent}%`, position: 'absolute' }} />
+									</View>
+
+									<MainText>{goalPersent}%</MainText>
+								</View>
+							)}
+
+							
 							<TouchableOpacity onPress={toggleRecommendedGoals} style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 								<MainText>추천 목표 보기</MainText>
 								<images.creat_down
@@ -445,27 +540,29 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 									height={20}
 									style={{
 										transform: [{ rotate: showRecommendedGoals ? '180deg' : '0deg' }],
-										color: currentTheme.color1,
+										color: showRecommendedGoals ? currentTheme.color1 : "#B7BABF",
 									}}
 								/>
 							</TouchableOpacity>
+
 							{showRecommendedGoals && (
-    <View style={{ marginTop: 10 }}>
-      {recommendedGoals.map((goal, index) => (
-        <TouchableOpacity key={index} onPress={() => handleSelectRecommendedGoal(goal)}>
-          <MainText style={{ padding: 5, color: 'gray' }}>
-            {goal.schedule} 일정 {goal.time} 시간 {goal.rate} 달성률
-          </MainText>
-        </TouchableOpacity>
-      ))}
-    </View>
+								<View style={{ marginTop: 10 }}>
+									{recommendedGoals.map((goal, index) => (
+										<TouchableOpacity key={index} onPress={() => handleSelectRecommendedGoal(goal)}>
+											<MainText style={{ padding: 5, color: 'gray' }}>
+												{goal.schedule} 일정 {goal.time} 시간 {goal.rate} 달성률
+											</MainText>
+										</TouchableOpacity>
+									))}
+								</View>
 							)}
+							
+							<TouchableOpacity onPress={saveGoalToServer} style={{ padding: 10, backgroundColor: currentTheme.color1, borderRadius: 5, marginTop: 10 }}>
+								<MainText style={{ textAlign: 'center', color: 'white' }}>목표 저장하기</MainText>
+							</TouchableOpacity>
+							
 						</GoalFrame>
 					
-						
-
-
-						
 						<HorisontalView style={{ justifyContent: 'space-between', marginTop: 25 }}>
 							<MainText style={{ fontSize: 15 }}>상세 리포트</MainText>
 							<images.share width={20} height={20}
@@ -495,26 +592,26 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 								</View>
 							</HorisontalView>
 
-							<View style={{ position: 'absolute', marginTop: 85, alignSelf: 'flex-start', marginLeft: 20 }}>
-								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+							<View style={{ position: 'absolute', top: 85, left: 20 }}>
+								<HorisontalView style={{ width: 100, marginTop: 2 }}>
 									<Stat_Label color={currentTheme.color1} />
-									<Text style={{ fontSize: 10 }}>{tagStats.Word1st} - {tagStats.Word1stPercent}%</Text>
+									<Text style={{ fontSize: 10 }}>{tagStats.Word1st} - {tagStats.Word1stTime}분</Text>
 								</HorisontalView>
-								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+								<HorisontalView style={{ width: 100, marginTop: 2 }}>
 									<Stat_Label color={currentTheme.color2} />
-									<Text style={{ fontSize: 10 }}>{tagStats.Word2st} - {tagStats.Word2stPercent}%</Text>
+									<Text style={{ fontSize: 10 }}>{tagStats.Word2st} - {tagStats.Word2stTime}분</Text>
 								</HorisontalView>
-								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+								<HorisontalView style={{ width: 100, marginTop: 2 }}>
 									<Stat_Label color={currentTheme.color3} />
-									<Text style={{ fontSize: 10 }}>{tagStats.Word3st} - {tagStats.Word3stPercent}%</Text>
+									<Text style={{ fontSize: 10 }}>{tagStats.Word3st} - {tagStats.Word3stTime}분</Text>
 								</HorisontalView>
-								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+								<HorisontalView style={{ width: 100, marginTop: 2 }}>
 									<Stat_Label color={currentTheme.color4} />
-									<Text style={{ fontSize: 10 }}>{tagStats.Word4st} - {tagStats.Word4stPercent}%</Text>
+									<Text style={{ fontSize: 10 }}>{tagStats.Word4st} - {tagStats.Word4stTime}분</Text>
 								</HorisontalView>
-								<HorisontalView style={{ width: 'auto', marginTop: 2 }}>
+								<HorisontalView style={{ width: 100, marginTop: 2 }}>
 									<Stat_Label color={currentTheme.color5} />
-									<Text style={{ fontSize: 10 }}>그 외 - {tagStats.etcPercent}%</Text>
+									<Text style={{ fontSize: 10 }}>그 외</Text>
 								</HorisontalView>
 							</View>
 
@@ -575,7 +672,7 @@ const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 										animationDuration={800}
 									/>
 									<View style={{ position: 'absolute' }}>
-										<Text style={{ fontSize: 10, color: 'balck' }}>이번 달 달성률</Text>
+										<Text style={{ fontSize: 10, color: 'black' }}>이번 달 달성률</Text>
 										<Text style={{ fontSize: 10, color: currentTheme.color1, alignSelf: 'center' }}>{statData.thisMonth}%</Text>
 									</View>
 								</View>
@@ -670,6 +767,7 @@ const MainText = styled.Text`
     font-weight: bold;
     color: ${props => props.color || "black"};
     text-align: left;
+	flex-wrap: wrap;
 `;
 
 const States = styled.TouchableOpacity`
@@ -711,17 +809,24 @@ const GoalFrame = styled.TouchableOpacity`
 	border-radius: 15px;
 	border-width: 1px;
 	border-color:  ${props => props.color || "#B7BABF"};
-	padding: 20px;
+	padding: 15px;
 	margin-top: 20px;
 `;
 
-const inputStyle = styled.TextInput`
-	height: 40;
-	border-color: 'gray';
-	border-width: 1;
-	padding: 10;
-	border-radius: 5;
-	flex: 1;
-`; 
+const StyledTextInput = styled.TextInput`
+  height: 40px;
+  border-width: 0;
+  border-radius: 5px;
+  margin: 3px;
+  background-color: white;
+  font-size: 10px;
+`;
+
+const GoalChart = styled.TouchableOpacity`
+	width: 230px;
+	height: 20px;
+	border-radius: 100px;
+	background-color: ${props => props.color || "#B7BABF"};
+`;
 
 export default Stat;
