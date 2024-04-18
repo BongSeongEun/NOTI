@@ -538,7 +538,6 @@ function Todo2() {
   return (
     <ThemeProvider theme={currentTheme}>
       <NavBar setDate={setDate} />
-
       <div>
         <DiaryContainer style={{ paddingTop: "170px" }}>
           <DateHeader>{formatDate(selectedDate)}</DateHeader>

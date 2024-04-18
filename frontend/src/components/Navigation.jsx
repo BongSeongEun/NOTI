@@ -296,6 +296,7 @@ function Navigation({ setDate }) {
           <StyledLink to="/Main">일정</StyledLink>
           <StyledLink to="/Coop">협업</StyledLink>
           <StyledLink to="/Diary">일기</StyledLink>
+          <StyledLink to="/Stat">통계</StyledLink>
           <StyledLink to="/Setting">설정</StyledLink>
         </div>
         <LeftSidebar>
