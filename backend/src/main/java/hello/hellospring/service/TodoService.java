@@ -8,6 +8,9 @@ import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.GptGoalService;
 import hello.hellospring.service.AI.GptTagService;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -183,7 +186,7 @@ public class TodoService {
             result.put("Word"+rank+"stNum", entry.getValue()); // 태그 갯수
             result.put("Word"+rank+"stDoneTodos", todosDone.size()); // 태그 완료 갯수
             result.put("Word"+rank+"stPercent", frequencyPercentage); // 태그 퍼센트
-            result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 퍼센트
+            result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 달성시간
             etc += frequencyPercentage; //기타 퍼센트 계산
             etcNum += entry.getValue();  //기타 갯수 계산
             etcTime += totalDurationMinutes; //기타 시간 계산
@@ -251,73 +254,134 @@ public class TodoService {
         return result;
     }
 
-    public Map<String, Object> getGoal(Long userId, String statsDate) throws Exception {
-        List<Goal> GoalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
-        // 목표가 이미 존재하는지 아닌지 확인하는 로직
-        Map<String, Object> response = null;
-        if (GoalExist.isEmpty()) {
-            // 해당하는 달의 목표가 존재하지 않음
-            System.out.println("비었다");
+    public Map<String, Object> getGoal(Long userId, String statsDate) {
+        Map<String, Object> response = new HashMap<>();
 
-            // gpt에게 보낼 promt 가공
-            List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        try {
+            // 목표가 존재하는지 확인하는 로직
+            List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
 
-            String output = null;
-            for (Todo todo : aaa) {
-                String title = todo.getTodoTitle();
-                String status = todo.isTodoDone() ? "달성 완료" : "미달성";
-                try {
-                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), formatter);
-                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), formatter);
-                    long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
-                    output = String.format("Title: %s, Status: %s, Duration: %d minutes", title, status, durationMinutes);
-                } catch (DateTimeParseException e) {
-                    output = String.format("Title: %s, Status: %s (time data not available)", title, status);
+            //prompt 가공 로직
+            Map<String, Object> wordsResult = findWords(userId, statsDate); // 최빈도 단어들 추출
+            String wordsResultText = formatWordsResult(wordsResult); //텍스트 화
+            String goalResult = gptGoalService.askGpt(wordsResultText); // gpt 작동
+            String cleanedGoalResult = removeNewLines(goalResult); // 줄바꿈 제거
+            String cleanCleanResult = convertToJosonFormat(cleanedGoalResult); //json 형식 검사
+
+            parseGoalResult(cleanCleanResult, response); // json 내용들 추출
+
+            if (!goalExist.isEmpty()) {
+                // 해당하는 달의 목표가 존재하는 경우
+                System.out.println("있음");
+
+                // 기존 목표 정보를 response에 추가
+                for (Goal goal : goalExist) {
+                    response.put("goalTitle", goal.getGoalTitle());
+                    response.put("goalTime", goal.getGoalTime());
+                    response.put("goalAchieveRate", goal.getGoalAchieveRate());
                 }
-                //System.out.println(output);
             }
-
-            // gpt에게 추천받기
-            String goalResult = gptGoalService.askGpt(output);
-
-            response = new HashMap<>();
-            response.put("GptSuggest", goalResult);
-
-        } else {
-            // 해당하는 달의 목표가 존재함
-            System.out.println("있다");
-
-            // gpt에게 보낼 promt 가공
-            List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-
-            String output = null;
-            for (Todo todo : aaa) {
-                String title = todo.getTodoTitle();
-                String status = todo.isTodoDone() ? "달성 완료" : "미달성";
-                try {
-                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), formatter);
-                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), formatter);
-                    long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
-                    output = String.format("Title: %s, Status: %s, Duration: %d minutes", title, status, durationMinutes);
-                } catch (DateTimeParseException e) {
-                    output = String.format("Title: %s, Status: %s (time data not available)", title, status);
-                }
-                //System.out.println(output);
-            }
-
-            // gpt에게 추천받기
-            String goalResult = gptGoalService.askGpt(output);
-            
-            response = new HashMap<>();
-            for (Goal goal : GoalExist) {
-                response.put("goalTitle", goal.getGoalTitle());
-                response.put("goalTime", goal.getGoalTime());
-                response.put("goalAchieveRate", goal.getGoalAchieveRate());
-                response.put("GptSuggest", goalResult);
-            }
+        } catch (Exception e) {
+            response.put("error", "An error occurred: " + e.getMessage());
         }
         return response;
+    }
+
+
+    private String convertToJosonFormat(String cleanedGoalResult) {
+        // 각 배열 항목을 쉼표로 구분하여 분리
+        String[] parts = cleanedGoalResult.split("],");
+
+        // 각 부분의 끝에 "]"가 없으면 추가 (마지막 항목 제외)
+        for (int i = 0; i < parts.length; i++) {
+            if (!parts[i].trim().endsWith("]")) {
+                parts[i] = parts[i].trim() + "]";
+            }
+        }
+
+        // 각 항목을 쌍따옴표로 감싸서 JSON 문자열 배열로 만들기
+        String result = "[";
+        for (String part : parts) {
+            // 숫자 배열은 그대로 두고, 문자 배열에 대해 쌍따옴표 추가
+            if (part.matches("\\[\\d+(, \\d+)*\\]")) { // 숫자 배열 검사
+                result += part + ",";
+            } else {
+                // 문자 배열이면 각 요소에 쌍따옴표 추가
+                String[] items = part.replaceAll("[\\[\\]]", "").split(", ");
+                result += "[\"" + String.join("\", \"", items) + "\"],";
+            }
+        }
+        result = result.replaceAll(",+$", ""); // 마지막 쉼표 제거
+        result += "]";
+
+        return result;
+    }
+
+    // 현재 목표 달성 상태 체크하는 로직
+    public Map<String, Object> currentGoal(Long userId, String statsDate) {
+        List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
+        if (!goalExist.isEmpty()) {
+            // 여기에 로직 쑤쎠너ㅓ어ㅓ어!!
+
+        } else {
+            System.out.println("목표가 없어용");
+        }
+        return null;
+    }
+
+
+    //nlp 추출 로직
+    private void parseGoalResult(String goalResult, Map<String, Object> response) {
+        try {
+            JSONArray mainArray = new JSONArray(goalResult);
+            if (mainArray.length() != 3) {
+                response.put("error", "Invalid JSON format: Expected three arrays.");
+                return;
+            }
+
+            JSONArray titles = mainArray.getJSONArray(0);
+            JSONArray rates = mainArray.getJSONArray(1);
+            JSONArray times = mainArray.getJSONArray(2);
+
+            for (int i = 0; i < titles.length(); i++) {
+                response.put("suggestGoalTitle" + (i + 1), titles.getString(i));
+                response.put("suggestGoalAchieveRate" + (i + 1), rates.getInt(i));
+                response.put("suggestGoalTime" + (i + 1), times.getInt(i));
+            }
+        } catch (JSONException e) {
+            response.put("error", "JSON parsing error: " + e.getMessage());
+        }
+    }
+
+
+    //gpt로 보내기 전에 prompt 정리하는 로직 (포맷팅)
+    private String formatWordsResult(Map<String, Object> wordsResult) {
+        StringBuilder resultText = new StringBuilder();
+        for (Map.Entry<String, Object> entry : wordsResult.entrySet()) {
+            resultText.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        return resultText.toString();
+    }
+
+    // \n제거 로직
+    private String removeNewLines(String input) {
+        if (input != null) {
+            return input.replace("\n", ",");
+        }
+        return input;
+    }
+
+    @Transactional
+    public void deleteGoal(Long userId, String goalDate) {
+        // 일치하는 데이터가 있는지 확인
+        if (goalRepository.existsByUserIdAndGoalDate(userId, goalDate)) {
+            // 존재하면 삭제 수행
+            goalRepository.deleteByUserIdAndGoalDate(userId, goalDate);
+            System.out.println("삭제해드렸습니다");
+        } else {
+            // 해당 데이터가 없으면 콘솔에 메시지 출력
+            System.out.println("목표가 없으세요");
+        }
+
     }
 }
