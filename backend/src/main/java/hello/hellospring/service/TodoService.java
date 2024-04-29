@@ -287,7 +287,7 @@ public class TodoService {
         return response;
     }
 
-    
+
     private String convertToJosonFormat(String cleanedGoalResult) {
         // 각 배열 항목을 쉼표로 구분하여 분리
         String[] parts = cleanedGoalResult.split("],");
@@ -317,6 +317,16 @@ public class TodoService {
         return result;
     }
 
+    // 현재 목표 달성 상태 체크하는 로직
+    public Map<String, Object> currentGoal(Long userId, String statsDate) {
+        List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
+
+
+        return null;
+    }
+
+
+    //nlp 추출 로직
     private void parseGoalResult(String goalResult, Map<String, Object> response) {
         try {
             JSONArray mainArray = new JSONArray(goalResult);
@@ -357,4 +367,17 @@ public class TodoService {
         return input;
     }
 
+    @Transactional
+    public void deleteGoal(Long userId, String goalDate) {
+        // 일치하는 데이터가 있는지 확인
+        if (goalRepository.existsByUserIdAndGoalDate(userId, goalDate)) {
+            // 존재하면 삭제 수행
+            goalRepository.deleteByUserIdAndGoalDate(userId, goalDate);
+            System.out.println("삭제해드렸습니다");
+        } else {
+            // 해당 데이터가 없으면 콘솔에 메시지 출력
+            System.out.println("목표가 없으세요");
+        }
+
+    }
 }

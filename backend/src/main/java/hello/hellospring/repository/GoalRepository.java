@@ -17,4 +17,9 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             @Param("userId") Long userId,
             @Param("statsDate") String statsDate);
 
+    // 일치하는 데이터 삭제
+    void deleteByUserIdAndGoalDate(Long userId, String goalDate);
+
+    // 일치하는 데이터 있는지 조회
+    boolean existsByUserIdAndGoalDate(Long userId, String goalDate);
 }

@@ -84,10 +84,20 @@ public class StatisticsController {
 
     }
 
+    @GetMapping("currentGoal/{userId}/{statsDate}") // 현재 목표 달성 상황 가져오기
+    public ResponseEntity<?> getCurrent(@PathVariable Long userId, @PathVariable String statsDate) throws Exception {
+
+        Map<String, Object> currentResult = todoService.currentGoal(userId, statsDate);
+        return ResponseEntity.ok(currentResult);// 로직바꿔!!!!!!!!!
+
+    }
+
     @PostMapping("GoalWrite/{userId}/{statsDate}") // 목표 작성 로직
     public ResponseEntity<?> GoalWrite(@PathVariable Long userId,
                                        @PathVariable String statsDate,
                                        @RequestBody GoalDTO goalDTO) throws Exception {
+
+        todoService.deleteGoal(userId, statsDate);
 
         Goal goal = new Goal();
         goal.setUserId(userId);  // PathVariable로부터 받은 userId 설정
