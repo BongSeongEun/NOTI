@@ -254,59 +254,74 @@ public class TodoService {
         return result;
     }
 
-    public Map<String, Object> getGoal(Long userId, String statsDate) throws Exception {
+    public Map<String, Object> getGoal(Long userId, String statsDate) {
+        Map<String, Object> response = new HashMap<>();
 
+        try {
+            // 목표가 존재하는지 확인하는 로직
+            List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
 
+            //prompt 가공 로직
+            Map<String, Object> wordsResult = findWords(userId, statsDate); // 최빈도 단어들 추출
+            String wordsResultText = formatWordsResult(wordsResult); //텍스트 화
+            String goalResult = gptGoalService.askGpt(wordsResultText); // gpt 작동
+            String cleanedGoalResult = removeNewLines(goalResult); // 줄바꿈 제거
+            String cleanCleanResult = convertToJosonFormat(cleanedGoalResult); //json 형식 검사
 
-        List<Goal> GoalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
-        // 목표가 이미 존재하는지 아닌지 확인하는 로직
-        Map<String, Object> response = null;
-        if (GoalExist.isEmpty()) {
-            // 해당하는 달의 목표가 존재하지 않음
-            System.out.println("비었다");
+            parseGoalResult(cleanCleanResult, response); // json 내용들 추출
 
-            // gpt에게 추천받기
-            String goalResult = gptGoalService.askGpt(null);
+            if (!goalExist.isEmpty()) {
+                // 해당하는 달의 목표가 존재하는 경우
+                System.out.println("있음");
 
-            response = new HashMap<>();
-            response.put("GptSuggest", goalResult);
-
-        } else {
-            // 해당하는 달의 목표가 존재함
-            System.out.println("있다");
-
-            Map<String, Object> wordsResult = findWords(userId, statsDate);
-            String wordsResultText = formatWordsResult(wordsResult);
-
-            // gpt에게 추천받기
-            String goalResult = gptGoalService.askGpt(wordsResultText);
-            String goalReResult = removeNewLines(goalResult); // \n제거
-
-            //결과물 response에 추가
-            parseGoalResult(goalReResult, response);
-
-            response = new HashMap<>();
-            for (Goal goal : GoalExist) {
-                response.put("goalTitle", goal.getGoalTitle()); // 기존 목표 제목
-                response.put("goalTime", goal.getGoalTime()); // 기존 목표 시간
-                response.put("goalAchieveRate", goal.getGoalAchieveRate()); // 기존 목표 달성률
+                // 기존 목표 정보를 response에 추가
+                for (Goal goal : goalExist) {
+                    response.put("goalTitle", goal.getGoalTitle());
+                    response.put("goalTime", goal.getGoalTime());
+                    response.put("goalAchieveRate", goal.getGoalAchieveRate());
+                }
             }
+        } catch (Exception e) {
+            response.put("error", "An error occurred: " + e.getMessage());
         }
         return response;
     }
 
+    
+    private String convertToJosonFormat(String cleanedGoalResult) {
+        // 각 배열 항목을 쉼표로 구분하여 분리
+        String[] parts = cleanedGoalResult.split("],");
+
+        // 각 부분의 끝에 "]"가 없으면 추가 (마지막 항목 제외)
+        for (int i = 0; i < parts.length; i++) {
+            if (!parts[i].trim().endsWith("]")) {
+                parts[i] = parts[i].trim() + "]";
+            }
+        }
+
+        // 각 항목을 쌍따옴표로 감싸서 JSON 문자열 배열로 만들기
+        String result = "[";
+        for (String part : parts) {
+            // 숫자 배열은 그대로 두고, 문자 배열에 대해 쌍따옴표 추가
+            if (part.matches("\\[\\d+(, \\d+)*\\]")) { // 숫자 배열 검사
+                result += part + ",";
+            } else {
+                // 문자 배열이면 각 요소에 쌍따옴표 추가
+                String[] items = part.replaceAll("[\\[\\]]", "").split(", ");
+                result += "[\"" + String.join("\", \"", items) + "\"],";
+            }
+        }
+        result = result.replaceAll(",+$", ""); // 마지막 쉼표 제거
+        result += "]";
+
+        return result;
+    }
+
     private void parseGoalResult(String goalResult, Map<String, Object> response) {
         try {
-            Object json = new JSONTokener(goalResult).nextValue(); // JSON 데이터의 타입을 동적으로 확인
-            if (!(json instanceof JSONArray)) {
-                response.put("error", "Invalid JSON format: Root element is not an array.");
-                return;
-            }
-
-            JSONArray mainArray = (JSONArray) json;
-
-            if (mainArray.length() != 3 || !(mainArray.get(0) instanceof JSONArray)) {
-                response.put("error", "Expected three arrays at the root of the JSON structure.");
+            JSONArray mainArray = new JSONArray(goalResult);
+            if (mainArray.length() != 3) {
+                response.put("error", "Invalid JSON format: Expected three arrays.");
                 return;
             }
 
@@ -314,16 +329,10 @@ public class TodoService {
             JSONArray rates = mainArray.getJSONArray(1);
             JSONArray times = mainArray.getJSONArray(2);
 
-            // 세 배열의 길이 검증
-            int minLength = Math.min(titles.length(), Math.min(rates.length(), times.length()));
-            for (int i = 0; i < minLength; i++) {
-                String title = titles.optString(i, "N/A");
-                int rate = rates.optInt(i, 0);
-                int time = times.optInt(i, 0);
-
-                response.put("suggestGoalTitle" + (i+1), title);
-                response.put("suggestGoalAchieveRate" + (i+1), rate);
-                response.put("suggestGoalTime" + (i+1), time);
+            for (int i = 0; i < titles.length(); i++) {
+                response.put("suggestGoalTitle" + (i + 1), titles.getString(i));
+                response.put("suggestGoalAchieveRate" + (i + 1), rates.getInt(i));
+                response.put("suggestGoalTime" + (i + 1), times.getInt(i));
             }
         } catch (JSONException e) {
             response.put("error", "JSON parsing error: " + e.getMessage());
