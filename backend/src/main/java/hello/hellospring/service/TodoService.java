@@ -183,7 +183,7 @@ public class TodoService {
             result.put("Word"+rank+"stNum", entry.getValue()); // 태그 갯수
             result.put("Word"+rank+"stDoneTodos", todosDone.size()); // 태그 완료 갯수
             result.put("Word"+rank+"stPercent", frequencyPercentage); // 태그 퍼센트
-            result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 퍼센트
+            result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 달성시간
             etc += frequencyPercentage; //기타 퍼센트 계산
             etcNum += entry.getValue();  //기타 갯수 계산
             etcTime += totalDurationMinutes; //기타 시간 계산
@@ -288,36 +288,30 @@ public class TodoService {
             // 해당하는 달의 목표가 존재함
             System.out.println("있다");
 
-            // gpt에게 보낼 promt 가공
-            List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-
-            String output = null;
-            for (Todo todo : aaa) {
-                String title = todo.getTodoTitle();
-                String status = todo.isTodoDone() ? "달성 완료" : "미달성";
-                try {
-                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), formatter);
-                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), formatter);
-                    long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
-                    output = String.format("Title: %s, Status: %s, Duration: %d minutes", title, status, durationMinutes);
-                } catch (DateTimeParseException e) {
-                    output = String.format("Title: %s, Status: %s (time data not available)", title, status);
-                }
-                //System.out.println(output);
-            }
+            Map<String, Object> wordsResult = findWords(userId, statsDate);
+            String wordsResultText = formatWordsResult(wordsResult);
+            System.out.println("포맷팅 한거 : "+wordsResultText);
 
             // gpt에게 추천받기
-            String goalResult = gptGoalService.askGpt(output);
-            
+            String goalResult = gptGoalService.askGpt(wordsResultText);
+
             response = new HashMap<>();
             for (Goal goal : GoalExist) {
-                response.put("goalTitle", goal.getGoalTitle());
-                response.put("goalTime", goal.getGoalTime());
-                response.put("goalAchieveRate", goal.getGoalAchieveRate());
+                response.put("goalTitle", goal.getGoalTitle()); // 기존 목표 제목
+                response.put("goalTime", goal.getGoalTime()); // 기존 목표 시간
+                response.put("goalAchieveRate", goal.getGoalAchieveRate()); // 기존 목표 달성률
                 response.put("GptSuggest", goalResult);
             }
         }
         return response;
+    }
+
+    //gpt로 보내기 전에 prompt 정리하는 로직 (포맷팅)
+    private String formatWordsResult(Map<String, Object> wordsResult) {
+        StringBuilder resultText = new StringBuilder();
+        for (Map.Entry<String, Object> entry : wordsResult.entrySet()) {
+            resultText.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        return resultText.toString();
     }
 }
