@@ -320,8 +320,12 @@ public class TodoService {
     // 현재 목표 달성 상태 체크하는 로직
     public Map<String, Object> currentGoal(Long userId, String statsDate) {
         List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
+        if (!goalExist.isEmpty()) {
+            // 여기에 로직 쑤쎠너ㅓ어ㅓ어!!
 
-
+        } else {
+            System.out.println("목표가 없어용");
+        }
         return null;
     }
 

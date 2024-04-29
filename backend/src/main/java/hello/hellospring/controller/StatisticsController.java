@@ -88,7 +88,7 @@ public class StatisticsController {
     public ResponseEntity<?> getCurrent(@PathVariable Long userId, @PathVariable String statsDate) throws Exception {
 
         Map<String, Object> currentResult = todoService.currentGoal(userId, statsDate);
-        return ResponseEntity.ok(currentResult);// 로직바꿔!!!!!!!!!
+        return ResponseEntity.ok(currentResult);
 
     }
 
