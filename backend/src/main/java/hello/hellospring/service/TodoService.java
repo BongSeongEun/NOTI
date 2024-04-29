@@ -8,6 +8,9 @@ import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.GptGoalService;
 import hello.hellospring.service.AI.GptTagService;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -252,6 +255,9 @@ public class TodoService {
     }
 
     public Map<String, Object> getGoal(Long userId, String statsDate) throws Exception {
+
+
+
         List<Goal> GoalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
         // 목표가 이미 존재하는지 아닌지 확인하는 로직
         Map<String, Object> response = null;
@@ -259,27 +265,8 @@ public class TodoService {
             // 해당하는 달의 목표가 존재하지 않음
             System.out.println("비었다");
 
-            // gpt에게 보낼 promt 가공
-            List<Todo> aaa = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-
-            String output = null;
-            for (Todo todo : aaa) {
-                String title = todo.getTodoTitle();
-                String status = todo.isTodoDone() ? "달성 완료" : "미달성";
-                try {
-                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), formatter);
-                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), formatter);
-                    long durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes();
-                    output = String.format("Title: %s, Status: %s, Duration: %d minutes", title, status, durationMinutes);
-                } catch (DateTimeParseException e) {
-                    output = String.format("Title: %s, Status: %s (time data not available)", title, status);
-                }
-                //System.out.println(output);
-            }
-
             // gpt에게 추천받기
-            String goalResult = gptGoalService.askGpt(output);
+            String goalResult = gptGoalService.askGpt(null);
 
             response = new HashMap<>();
             response.put("GptSuggest", goalResult);
@@ -290,21 +277,59 @@ public class TodoService {
 
             Map<String, Object> wordsResult = findWords(userId, statsDate);
             String wordsResultText = formatWordsResult(wordsResult);
-            System.out.println("포맷팅 한거 : "+wordsResultText);
 
             // gpt에게 추천받기
             String goalResult = gptGoalService.askGpt(wordsResultText);
+            String goalReResult = removeNewLines(goalResult); // \n제거
+
+            //결과물 response에 추가
+            parseGoalResult(goalReResult, response);
 
             response = new HashMap<>();
             for (Goal goal : GoalExist) {
                 response.put("goalTitle", goal.getGoalTitle()); // 기존 목표 제목
                 response.put("goalTime", goal.getGoalTime()); // 기존 목표 시간
                 response.put("goalAchieveRate", goal.getGoalAchieveRate()); // 기존 목표 달성률
-                response.put("GptSuggest", goalResult);
             }
         }
         return response;
     }
+
+    private void parseGoalResult(String goalResult, Map<String, Object> response) {
+        try {
+            Object json = new JSONTokener(goalResult).nextValue(); // JSON 데이터의 타입을 동적으로 확인
+            if (!(json instanceof JSONArray)) {
+                response.put("error", "Invalid JSON format: Root element is not an array.");
+                return;
+            }
+
+            JSONArray mainArray = (JSONArray) json;
+
+            if (mainArray.length() != 3 || !(mainArray.get(0) instanceof JSONArray)) {
+                response.put("error", "Expected three arrays at the root of the JSON structure.");
+                return;
+            }
+
+            JSONArray titles = mainArray.getJSONArray(0);
+            JSONArray rates = mainArray.getJSONArray(1);
+            JSONArray times = mainArray.getJSONArray(2);
+
+            // 세 배열의 길이 검증
+            int minLength = Math.min(titles.length(), Math.min(rates.length(), times.length()));
+            for (int i = 0; i < minLength; i++) {
+                String title = titles.optString(i, "N/A");
+                int rate = rates.optInt(i, 0);
+                int time = times.optInt(i, 0);
+
+                response.put("suggestGoalTitle" + (i+1), title);
+                response.put("suggestGoalAchieveRate" + (i+1), rate);
+                response.put("suggestGoalTime" + (i+1), time);
+            }
+        } catch (JSONException e) {
+            response.put("error", "JSON parsing error: " + e.getMessage());
+        }
+    }
+
 
     //gpt로 보내기 전에 prompt 정리하는 로직 (포맷팅)
     private String formatWordsResult(Map<String, Object> wordsResult) {
@@ -314,4 +339,13 @@ public class TodoService {
         }
         return resultText.toString();
     }
+
+    // \n제거 로직
+    private String removeNewLines(String input) {
+        if (input != null) {
+            return input.replace("\n", ",");
+        }
+        return input;
+    }
+
 }
