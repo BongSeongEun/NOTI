@@ -169,7 +169,7 @@ public class TodoService {
             //몇개중에 몇개달성했어요 용도
             List<Todo> todosDone = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(userId, statsDate, entry.getKey(), true);
             // 태그마다 총 시간 출력 용도
-            List<Todo> todosWithTag = todoRepository.findAllByUserIdAndStatsDateAndTag(userId, statsDate, entry.getKey());
+            List<Todo> todosWithTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, entry.getKey());
             long totalDurationMinutes = todosWithTag.stream()
                     .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
                     .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
@@ -320,13 +320,33 @@ public class TodoService {
     // 현재 목표 달성 상태 체크하는 로직
     public Map<String, Object> currentGoal(Long userId, String statsDate) {
         List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
+        Map<String, Object> result = null;
         if (!goalExist.isEmpty()) {
-            // 여기에 로직 쑤쎠너ㅓ어ㅓ어!!
+            // 첫번째 goal_title 가져오기
+            String goalTitle = goalExist.get(0).getGoalTitle();
 
+            List<Todo> allTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, goalTitle);
+            List<Todo> completeTagTodo = todoRepository.findCompletedTodosByUserIdAndStatsDateAndTodoTag(userId, statsDate, goalTitle);
+
+            int totalTags = allTag.size();
+            int totalCompleteTag = completeTagTodo.size();
+
+            double completionRate = 0;
+            if (totalTags > 0) { // 분모가 0이 되는 경우를 방지
+                completionRate = ((double) totalCompleteTag / totalTags) * 100;
+
+            } else {
+                // 애초에 일정이 없을때 코드 작성하기
+                completionRate = 0;
+            }
+            int intCompletionRate = (int) completionRate;
+
+            result = new LinkedHashMap<>();
+            result.put("currentGoalRate", intCompletionRate);
         } else {
             System.out.println("목표가 없어용");
         }
-        return null;
+        return result;
     }
 
 
