@@ -26,6 +26,7 @@ import { Circle, G } from 'react-native-svg';
 import images from "../components/images";
 import Navigation_Bar from "../components/Navigation_Bar";
 import { theme } from '../components/theme';
+import DropDownPicker from 'react-native-dropdown-picker'
 
 function Stat({ }) {
 	const navigation = useNavigation();
@@ -97,6 +98,14 @@ function Stat({ }) {
 	const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 	const [isGoalSet, setIsGoalSet] = useState(false);
 	const goalPersent = 58;
+	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState(null);
+	const [items, setItems] = useState([
+		{ label: '2024.04', value: '2024.04' },
+		{ label: '2024.03', value: '2024.03' },
+		{ label: '2024.02', value: '2024.02' },
+		{ label: '2024.01', value: '2024.01' },
+	]);
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -147,7 +156,7 @@ function Stat({ }) {
 			if (!token) return;
 
 			const userId = getUserIdFromToken(token);
-			const statsDate = '2024.03';
+			const statsDate = value;
 
 			try {
 				const response = await axios.get(`http://15.164.151.130:4000/api/v4/statsMonth/${userId}/${statsDate}`, {
@@ -161,8 +170,10 @@ function Stat({ }) {
 			}
 		};
 
-		fetchStats();
-	}, []);
+		if (value) {
+			fetchStats();
+		}
+	}, [value]);
 	
 	useEffect(() => {
 		const fetchTagStats = async () => {
@@ -170,7 +181,7 @@ function Stat({ }) {
 			if (!token) return;
 	
 			const userId = getUserIdFromToken(token);
-			const statsDate = '2024.03';
+			const statsDate = value;
 	
 			try {
 				const response = await axios.get(`http://15.164.151.130:4000/api/v4/statsTag/${userId}/${statsDate}`, {
@@ -184,8 +195,10 @@ function Stat({ }) {
 			}
 		};
 	
-		fetchTagStats();
-	}, []);
+		if (value) {
+			fetchTagStats();
+		}
+	}, [value]);
 
 	useEffect(() => {
 		const fetchDayWeekStats = async () => {
@@ -432,6 +445,10 @@ function Stat({ }) {
 		setIsGoalSet(true);
 	};
 
+	const toggleDropDown = () => {
+        setOpen(!open);
+    };
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
@@ -440,7 +457,16 @@ function Stat({ }) {
 						<MainText style={{ fontSize: 15, marginTop: 50 }}>{userNickname} 님의 한 달</MainText>
 						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요!</MainText>
 
-						<MainText style={{ marginBottom: 5 }}>기간 선택</MainText>
+						<TouchableOpacity onPress={toggleDropDown} style={{ marginBottom: 5 }} />
+
+                        <DropDownPicker
+                            open={open}
+                            value={value}
+                            items={items}
+                            setOpen={setOpen}
+                            setValue={setValue}
+                            setItems={setItems}
+                        />
 
 						<ScrollView
 							horizontal={true}

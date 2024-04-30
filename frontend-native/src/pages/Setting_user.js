@@ -241,7 +241,7 @@ const Setting_user = () => {
 				}
 			}
 		);
-	};
+	};	
 
 	const handleSubmit = async () => {
 		try {
