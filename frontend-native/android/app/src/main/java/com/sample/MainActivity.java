@@ -16,9 +16,6 @@ import android.app.NotificationChannel;
 import java.util.Map;
 import android.os.Build;
 
-
-
-
 public class MainActivity extends ReactActivity {
 
   /**

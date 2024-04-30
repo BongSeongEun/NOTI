@@ -48,8 +48,7 @@ function Todo() {
   const [fcmToken, setFcmToken] = useState('');
 
   const getFcmToken = async () => {
-    const fcmTokenInfo = await messaging().getToken();
-    setFcmToken(fcmTokenInfo);
+    return await messaging().getToken();
   };
   useEffect(() => {
     fetchUserData();
@@ -58,7 +57,7 @@ function Todo() {
 
   const SaveDeviceToken = async () => {
     const userId = await getUserIdFromToken();
-    getFcmToken();
+    const fcmToken = await getFcmToken();
     console.log(fcmToken);
     console.log(userId);
     axios.post(`http://15.164.151.130:4000/api/v1/user/${userId}`, {
