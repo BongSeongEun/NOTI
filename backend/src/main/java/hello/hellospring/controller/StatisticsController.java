@@ -112,6 +112,15 @@ public class StatisticsController {
         return ResponseEntity.ok(savedGoalDTO);
     }
 
+    @GetMapping("summary/{userId}/{statsDate}") // 이번달 통계 한줄요약
+    public ResponseEntity<?> getSummary(@PathVariable Long userId,
+                                        @PathVariable String statsDate) throws Exception {
+
+        Map<String, Object> summaryResult = todoService.findSummary(userId, statsDate);
+        return ResponseEntity.ok(summaryResult);
+
+    }
+
 
 }
 

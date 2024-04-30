@@ -7,10 +7,10 @@ import hello.hellospring.model.Todo;
 import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.GptGoalService;
+import hello.hellospring.service.AI.GptSummaryService;
 import hello.hellospring.service.AI.GptTagService;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,15 +32,18 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final GoalRepository goalRepository;
     private final GptGoalService gptGoalService;
+    private final GptSummaryService gptSummaryService;
     @Autowired
     public TodoService(GptTagService gptTagService,
                        TodoRepository todoRepository,
                        GoalRepository goalRepository,
-                       GptGoalService gptGoalService) {
+                       GptGoalService gptGoalService,
+                       GptSummaryService gptSummaryService) {
         this.gptTagService = gptTagService;
         this.todoRepository = todoRepository;
         this.goalRepository = goalRepository;
         this.gptGoalService = gptGoalService;
+        this.gptSummaryService = gptSummaryService;
     }
     public List<Todo> createTodo(Todo todo){
         validateEmptyTodoTile(todo);
@@ -402,6 +405,22 @@ public class TodoService {
             // 해당 데이터가 없으면 콘솔에 메시지 출력
             System.out.println("목표가 없으세요");
         }
+    }
 
+    public Map<String, Object> findSummary(Long userId, String statsDate) throws Exception {
+        Map<String, Object> wordsResult = findWords(userId, statsDate); // 최빈도 단어들 추출
+        Map<String, Object> result = new LinkedHashMap<>();
+        
+        String wordsResultText = formatWordsResult(wordsResult);
+
+        if (wordsResultText.isEmpty()) {
+            result.put("summaryResult", "아직 이번달 데이터가 존재하지 않습니다.");
+
+        } else {
+            String goalResult = gptSummaryService.askGpt(wordsResultText);
+            result.put("summaryResult", goalResult);
+
+        }
+        return result;
     }
 }
