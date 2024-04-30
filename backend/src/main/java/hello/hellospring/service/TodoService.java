@@ -264,8 +264,15 @@ public class TodoService {
             // 목표가 존재하는지 확인하는 로직
             List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
 
+            //저번달 변환 로직
+            DateTimeFormatter parseFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd"); // 날짜 파싱을 위한 포맷터
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy.MM"); // 날짜 출력을 위한 포맷터
+            LocalDate date = LocalDate.parse(statsDate + ".01", parseFormatter); // statsDate에서 LocalDate 객체를 생성
+            LocalDate prevMonthDate = date.minusMonths(1); // 이전 달의 LocalDate 객체를 계산
+            String prevMonthStatsDate = prevMonthDate.format(outputFormatter); // 이전 달을 "YYYY.MM" 형식으로 변환
+
             //prompt 가공 로직
-            Map<String, Object> wordsResult = findWords(userId, statsDate); // 최빈도 단어들 추출
+            Map<String, Object> wordsResult = findWords(userId, prevMonthStatsDate); // 최빈도 단어들 추출
             String wordsResultText = formatWordsResult(wordsResult); //텍스트 화
             String goalResult = gptGoalService.askGpt(wordsResultText); // gpt 작동
             String cleanedGoalResult = removeNewLines(goalResult); // 줄바꿈 제거
