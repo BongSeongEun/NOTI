@@ -1,4 +1,6 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -261,10 +263,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'com.google.android.gms:play-services-base:17.2.1'
-    implementation 'com.google.firebase:firebase-core:17.0.0'
-    implementation "com.google.firebase:firebase-messaging:20.0.0"
-    implementation 'me.leolin:ShortcutBadger:1.1.21@aar'
+    implementation 'com.google.firebase:firebase-messaging:23.0.0'
+
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
