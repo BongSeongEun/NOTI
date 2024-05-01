@@ -24,8 +24,6 @@ public class DiaryService {
 
     private final DiaryRepository diaryRepository;
 
-
-
     public void save(DiaryDTO diaryDTO) {
         Diary diary = Diary.toSaveEntity(diaryDTO);
         diaryRepository.save(diary);
@@ -40,15 +38,6 @@ public class DiaryService {
         return diaryDTOList;
 
     }
-
-//    public List<DiaryDTO> delete(Long diaryId, Long userId) {
-//        // 존재하는 Diary인지 확인 후 삭제
-//        if (!diaryRepository.existsById(diaryId)) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with id: " + diaryId);
-//        }
-//        diaryRepository.deleteById(diaryId);
-//        return findByUserId(userId);
-//    }
 
     @Transactional
     public List<DiaryDTO> delete(Long userId, Long diaryId){

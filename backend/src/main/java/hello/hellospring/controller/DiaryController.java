@@ -45,9 +45,6 @@ public class DiaryController {
     }
 
 
-
-
-
     @DeleteMapping("/diaryDelete/{userId}/{diaryId}") //삭제
     public ResponseEntity<?> deleteDiary(@PathVariable Long userId, @PathVariable Long diaryId) {
         diaryService.delete(userId, diaryId); // 서비스 계층에서 일기 삭제 처리
@@ -69,7 +66,7 @@ public class DiaryController {
         return null;
     }
 
-    @GetMapping("/diaryPaging/{userId}") //페이징처리
+    @GetMapping("/diaryPaging/{userId}") //페이징처리 아 해야되는데 언제하지ㅋㅋ
     public ResponseEntity<Page<DiaryDTO>> getDiariesByUserId(
             @PathVariable Long userId,
             @RequestParam(value = "page", defaultValue = "0") int page,

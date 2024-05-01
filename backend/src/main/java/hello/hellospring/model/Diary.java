@@ -31,6 +31,9 @@ public class Diary {
     @Column(name = "diary_title")
     private String diaryTitle;
 
+    @Column(name = "diary_emotion")
+    private Long diaryEmotion;
+
     //모든 값을 여기로 담아와서 전달해줌
     public static Diary toSaveEntity(DiaryDTO diaryDTO){
         Diary diary = new Diary();
@@ -40,6 +43,7 @@ public class Diary {
         diary.setDiaryContent(diaryDTO.getDiaryContent());
         diary.setDiaryImg(diaryDTO.getDiaryImg());
         diary.setDiaryTitle(diaryDTO.getDiaryTitle());
+        diary.setDiaryEmotion(diaryDTO.getDiaryEmotion());
         return diary;
     }
 
@@ -60,6 +64,7 @@ public class Diary {
         diary.setDiaryDate(diaryDTO.getDiaryDate());
         diary.setDiaryContent(diaryDTO.getDiaryContent());
         diary.setDiaryImg(diaryDTO.getDiaryImg());
+        diary.setDiaryEmotion(diaryDTO.getDiaryEmotion());
         return diary;
     }
 }

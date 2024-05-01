@@ -72,6 +72,7 @@ public class GptServiceImpl implements GptDiaryService {
 
         String diaryContent = ""; // 생성된 일기 내용을 저장할 변수
         String diaryTitle = "";   // 생성된 일기 제목을 저장할 변수
+        String dirayEmotion = ""; // 생성된 일기 감정을 저장할 변수
 
 
         // 투두리스트 내용 끌어다오기
@@ -100,10 +101,39 @@ public class GptServiceImpl implements GptDiaryService {
             diaryTitle = callGptApi(diaryContent, "이 일기 내용을 기반으로 일기 제목을 생성해줘." +
                     "여기 내용중에 가장 많이 나온 내용을 토픽으로 제목을 써주면돼");
 
+            dirayEmotion = callGptApi(diaryContent, "너의 임무는 감정 nlp 분류야. " +
+                    "0~100중에서 숫자가 높을수록 긍정적인 감정이고 숫자가 낮을수록 부정적인 감정이라고 치자. " +
+                    "위 내용들을 학습하고, 감정에 관한 단어들을 뽑아서 종합적으로 판단을 해보고, " +
+                    "이 일기에서 감정은 어땠는지 0~100중에 숫자를 뽑아줘" +
+                    "결과값은 다른 설명들 하지말고 오직 숫자만 뽑아주면 돼");
+
+            long diaryEmotionScore;
+
+            try { // 감정 점수를 숫자로 변환
+                diaryEmotionScore = Long.valueOf(dirayEmotion); // 감정 점수를 숫자로 변환
+            } catch (NumberFormatException e) {
+                diaryEmotionScore = 0; // 숫자가 아니면 0으로 처리
+            }
+
+            long diaryEmotionResult;
+
+            if (diaryEmotionScore >= 81 && diaryEmotionScore <= 100) {
+                diaryEmotionResult = 5;
+            } else if (diaryEmotionScore >= 61) {
+                diaryEmotionResult = 4;
+            } else if (diaryEmotionScore >= 41) {
+                diaryEmotionResult = 3;
+            } else if (diaryEmotionScore >= 21) {
+                diaryEmotionResult = 2;
+            } else {
+                diaryEmotionResult = 1;
+            }
+
             Diary diary = new Diary();
             diary.setUserId(userId); //user_id에 저장
             diary.setDiaryTitle(diaryTitle); //diary_title에 저장
             diary.setDiaryContent(diaryContent); //diary_content에 저장
+            diary.setDiaryEmotion(diaryEmotionResult); //diary_emotion에 저장
 
             String formattedDate = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
             diary.setDiaryDate(formattedDate); //diary_date에 저장
