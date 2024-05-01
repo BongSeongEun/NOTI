@@ -150,7 +150,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
 
             Chat chat = new Chat();
             chat.setUserId(todo.getUserId());
-            chat.setChatContent(todo.getTodoTitle() + "를 달성하셨나요?");
+            chat.setChatContent(todo.getTodoTitle() + "을(를) 달성하셨나요?");
             chat.setChatWho(true);
             chat.setTodoFinishAsk(true);
             chat.setTodoFinishAns(false);
