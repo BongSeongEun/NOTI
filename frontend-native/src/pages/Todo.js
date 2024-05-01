@@ -7,7 +7,13 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {ScrollView, TouchableOpacity, Text, Modal} from 'react-native';
+import {
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Modal,
+  NativeModules,
+} from 'react-native';
 import styled, {ThemeProvider} from 'styled-components/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -64,6 +70,13 @@ function Todo() {
       deviceToken: String(fcmToken),
     });
   };
+
+  const {NotificationActionReceiver} = NativeModules;
+
+  async function passValueToNative() {
+    const userId = await getUserIdFromToken();
+    NotificationActionReceiver.passValue(userId);
+  }
 
   useFocusEffect(
     useCallback(() => {
