@@ -6,16 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.hellospring.Oauth.OauthToken;
 import hello.hellospring.model.Chat;
 import hello.hellospring.model.Todo;
+import hello.hellospring.model.User;
 import hello.hellospring.repository.ChatRepository;
 import hello.hellospring.repository.TodoRepository;
-import lombok.extern.slf4j.Slf4j;
+import hello.hellospring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,6 +39,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     private final TaskScheduler taskScheduler;
     private final TodoRepository todoRepository;
     private final ChatRepository chatRepository;
+    private final UserRepository userRepository;
     private ScheduledFuture<?> scheduledFuture;
     private static final Logger logger = LoggerFactory.getLogger(TodoToChatSchedulerService.class);
 
@@ -69,10 +69,11 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     public String accessToken = "ya29.a0Ad52N39xQkqvEFgAYIyr6mVZtBWqhOFcginiIQGRmn-aJRU-4kJp6_qFSbhXIqU5xlpI5r_NDgqat_ecXhm9WjT2HuIjcbbSzx9ZeXtw2rfp0hXjjPps2zFQ8qJTz4-ybg1Zvg75eqfGRG1YUbp2A_CD4eQp2A8xE4UkFwaCgYKAbISARASFQHGX2MiF-h6y9Tz-ooHZBXLmNcEYw0173";
 
     @Autowired
-    public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository, Environment environment) {
+    public TodoToChatSchedulerService(TaskScheduler taskScheduler, TodoRepository todoRepository, ChatRepository chatRepository, UserRepository userRepository, Environment environment) {
         this.taskScheduler = taskScheduler;
         this.todoRepository = todoRepository;
         this.chatRepository = chatRepository;
+        this.userRepository = userRepository;
         this.environment = environment;
 
         logger.info("Loaded CLIENT_ID: {}", CLIENT_ID);
@@ -88,6 +89,11 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         String clientId = environment.getProperty("google.client.id");
         String clientSecret = environment.getProperty("google.client.secret");
         String refreshToken = environment.getProperty("google.refresh.token");
+        String type = "refresh_token";
+        logger.info("Loaded CLIENT_ID: {}", clientId);
+        logger.info("Loaded CLIENT_SECRET: {}", clientSecret);
+        logger.info("Loaded REFRESH_TOKEN: {}", refreshToken);
+        logger.info("Loaded GRANT_TYPE: {}", type);
 
         RestTemplate rt = new RestTemplate();
 
@@ -95,10 +101,12 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         headers.add("Content-type", "application/x-www-form-urlencoded");
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "refresh_token");
+        params.add("grant_type", type);
         params.add("client_id", clientId);
         params.add("client_secret", clientSecret);
         params.add("refresh_token", refreshToken);
+        logger.info("Loaded param: {}", params);
+
 
 
         HttpEntity<MultiValueMap<String, String>> GoogleTokenRequest =
@@ -149,10 +157,13 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             chatRepository.save(chat);
 
             String body = chat.getChatContent();
+            User user =
+                    userRepository.findByUserId(todo.getUserId());
+            String token = user.getDeviceToken();
 
             String jsonRequest = "{\n" +
             "    \"message\": {\n" +
-            "        \"token\": \"e1M8MFyBRbe_tMIkQeKOVf:APA91bHMn2FYfFNqbNJcLDA_ctnK5jlrCAn-ITCOp-JYiEv-LmoL-1VesZbuO36DtACKLh-SSY-WzbfCVwWC9cru2Ubu4neNt_QUcG1ZPCR4_b9wWvff64yq0yflfKyWWblT_j7d1Bmo\",\n" +
+            "        \"token\": \"" + token + "\",\n" +
             "        \"data\": {\n" +
             "          \"body\": \"" + body + "\",\n" +
             "          \"title\": \"노티\", \n" +
