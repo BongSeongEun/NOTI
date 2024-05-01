@@ -15,7 +15,6 @@ import java.util.List;
 import android.os.Build;
 import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;
 
-
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =

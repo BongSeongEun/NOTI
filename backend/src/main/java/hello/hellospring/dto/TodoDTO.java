@@ -22,6 +22,7 @@ public class TodoDTO {
     private String todoColor;
     private boolean todoDone;
     private String todoDate;
+    private String todoTag;
 
     public static Todo toEntity(final TodoDTO dto){
         if(dto.getTodoTitle()==null || dto.getTodoTitle().equals("")){
@@ -36,6 +37,7 @@ public class TodoDTO {
                 .todoColor(dto.getTodoColor())
                 .todoDone(dto.isTodoDone())
                 .todoDate(dto.getTodoDate())
+                .todoTag(dto.getTodoTag())
                 .build();
     }
     public static TodoDTO from(Todo todo) {
@@ -48,6 +50,7 @@ public class TodoDTO {
                 .todoColor(todo.getTodoColor())
                 .todoDone(todo.isTodoDone())
                 .todoDate(todo.getTodoDate())
+                .todoTag(todo.getTodoTag())
                 .build();
     }
 
