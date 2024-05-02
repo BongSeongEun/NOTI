@@ -40,7 +40,6 @@ function Diary_Main({ }) {
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaries, setDiaries] = useState([]);
 	const isFocused = useIsFocused();
-
     useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');

@@ -17,7 +17,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
-import { decode } from 'base-64';
+import {decode} from 'base-64';
 import axios from 'axios';
 import { PieChart, BarChart } from "react-native-gifted-charts";
 import { ProgressCircle } from 'react-native-svg-charts';
@@ -810,13 +810,13 @@ const FullView = styled.View`
 `;
 
 const MainView = styled(FullView)`
-   height: auto;
-   align-self: center;
-   width: 300px;
+  height: auto;
+  align-self: center;
+  width: 300px;
 `;
 
 const HorisontalView = styled(MainView)`
-   flex-direction: row;
+  flex-direction: row;
 `;
 
 const MainText = styled.Text`
@@ -828,13 +828,13 @@ const MainText = styled.Text`
 `;
 
 const States = styled.TouchableOpacity`
-	width: 290px;
-	height: 100px;
-	border-radius: 15px;
-	background-color: ${props => props.color || "#FF7154"};
-	flex-direction: row;
-	align-items: center;
-	margin: 5px;
+  width: 290px;
+  height: 100px;
+  border-radius: 15px;
+  background-color: ${props => props.color || '#FF7154'};
+  flex-direction: row;
+  align-items: center;
+  margin: 5px;
 `;
 
 const StatFrame = styled.TouchableOpacity`

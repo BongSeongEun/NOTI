@@ -32,7 +32,7 @@ function Diary() {
    const { diaryId } = route.params;
 
    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
-    const [base64Image, setBase64Image] = useState('');
+   const [base64Image, setBase64Image] = useState('');
    const [userNickname, setUserNickname] = useState('');
    const [clicked_modify, setClicked_modify] = useState(false);
    const [clicked_delete, setClicked_delete] = useState(false);
