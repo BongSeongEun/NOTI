@@ -21,46 +21,89 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import androidx.annotation.NonNull;
-
+import okhttp3.Call;
+import okhttp3.Callback;
 
 public class NotificationActionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
         String userId = intent.getStringExtra("userId");
         String todoId = intent.getStringExtra("todoId");
-        String action = intent.getStringExtra("action");
-        if ("yes".equals(action)) {
+        if ("YES_ACTION".equals(action)) {
             OkHttpClient client = new OkHttpClient();
-
-                // JSON으로 서버에 전송할 데이터 구성
-                JSONObject data = new JSONObject();
-                try {
-                    // 여기에 JSON 데이터를 추가합니다. 예를 들면:
-                    // data.put("key", "value");
-                    data.put("todoDone", "true");
-                } catch (JSONException e) {
+        
+            // JSON으로 서버에 전송할 데이터 구성
+            JSONObject data = new JSONObject();
+            try {
+                data.put("todoDone", true);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        
+            // RequestBody 생성 (JSON 타입)
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), data.toString());
+        
+            // Request 생성
+            Request request = new Request.Builder()
+                    .url("http://15.164.151.130:4000/api/v1/updateTodoDone/" + userId + "/" + todoId)
+                    .put(requestBody)
+                    .build();
+        
+            // 비동기 요청
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    // 실패 처리
                     e.printStackTrace();
                 }
-
-                // RequestBody 생성 (JSON 타입)
-                RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), data.toString());
-
-                // Request 생성
-                Request request = new Request.Builder()
-                        .url("http://localhost:4000/api/v1/updateTodo/" + userId + "/" + todoId)
-                        .post(requestBody)
-                        .build();
-
-                try {
-                    // 동기적으로 요청을 보내고 응답을 기다림
-                    Response response = client.newCall(request).execute();
-                    // TODO: 응답 처리
-                } catch (IOException e) {
+        
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    // 성공 처리
+                    if (response.isSuccessful()) {
+                        // 서버 응답 처리
+                    }
+                }
+            });
+        }
+         else if ("NO_ACTION".equals(action)) {
+            OkHttpClient client = new OkHttpClient();
+        
+            // JSON으로 서버에 전송할 데이터 구성
+            JSONObject data = new JSONObject();
+            try {
+                data.put("todoDone", false);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        
+            // RequestBody 생성 (JSON 타입)
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), data.toString());
+        
+            // Request 생성
+            Request request = new Request.Builder()
+                    .url("http://15.164.151.130:4000/api/v1/updateTodoDone/" + userId + "/" + todoId)
+                    .put(requestBody)
+                    .build();
+        
+            // 비동기 요청
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    // 실패 처리
                     e.printStackTrace();
                 }
-        } else if ("no".equals(action)) {
-            // "아니오" 버튼 클릭 처리
+        
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    // 성공 처리
+                    if (response.isSuccessful()) {
+                        // 서버 응답 처리
+                    }
+                }
+            });
         }
     }
 }
