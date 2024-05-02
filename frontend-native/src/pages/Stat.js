@@ -32,7 +32,6 @@ function Stat({ }) {
 	const navigation = useNavigation();
 
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
-	const [base64Image, setBase64Image] = useState('');
 	const [userNickname, setUserNickname] = useState('');
 	const [dailyCompletionRates, setDailyCompletionRates] = useState({
 		MON: 0, TUE: 0, WED: 0, THU: 0, FRI: 0, SAT: 0, SUN: 0,
@@ -97,7 +96,7 @@ function Stat({ }) {
 	const handleTimeChange = (text) => setGoal(prev => ({ ...prev, time: text }));
 	const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 	const [isGoalSet, setIsGoalSet] = useState(false);
-	const goalPersent = 58;
+	const [goalPercent, setGoalPercent] = useState(0);
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(null);
 	const [items, setItems] = useState([
@@ -120,13 +119,11 @@ function Stat({ }) {
 						},
 					});
 					const userThemeName = response.data.userColor || 'OrangeTheme';
-					const userProfileImage = response.data.userProfile;
 					const nickname = response.data.userNickname;
   
 					if (theme[userThemeName]) {
 						setCurrentTheme(theme[userThemeName]);
 					}
-					setBase64Image(userProfileImage || '');
 					setUserNickname(nickname || '');
 				} catch (error) {
 					console.error("Error fetching user data:", error);
@@ -206,7 +203,7 @@ function Stat({ }) {
 			if (!token) return;
 	  
 			const userId = getUserIdFromToken(token);
-			const statsDate = '2024.03';
+			const statsDate = value;
 	  
 			try {
 				const response = await axios.get(`http://15.164.151.130:4000/api/v4/dayWeek/${userId}/${statsDate}`, {
@@ -232,53 +229,10 @@ function Stat({ }) {
 			}
 		};
 	  
-		fetchDayWeekStats();
-	}, []);
-
-	/*
-	const fetchAndSetGoal = async () => {
-		try {
-			const token = await AsyncStorage.getItem('token');
-			if (!token) {
-				console.error("Token not available");
-				return;
-			}
-
-			const userId = getUserIdFromToken(token);
-			const statsDate = '2024.03';
-	  
-			const url = `http://15.164.151.130:4000/api/v4/suggestGoal/${userId}/${statsDate}`;
-			const headers = { Authorization: `Bearer ${token}` };
-			const response = await axios.get(url, { headers });
-	  
-			const { data } = response;
-			if (data.goalTitle) {
-				setGoal({
-					schedule: data.goalTitle,
-					time: data.goalTime.toString(),
-					rate: data.goalAchieveRate.toString(),
-				});
-			} else if (data.GptSuggest) {
-				const regex = /Title: (.*), 추천하는 달성률: (\d+)%, Duration: (\d+)/;
-				const match = data.GptSuggest.match(regex);
-				if (match) {
-					const [, title, rate, time] = match;
-					setGoal({
-						schedule: title,
-						time: time,
-						rate: rate,
-					});
-				}
-			}
-		} catch (error) {
-			console.error("Error fetching goal:", error);
+		if (value) {
+			fetchDayWeekStats();
 		}
-	};
-	  
-	useEffect(() => {
-		fetchAndSetGoal();
-	}, []);
-	*/
+	}, [value]);
 
 	const saveGoalToServer = async () => {
 		const token = await AsyncStorage.getItem('token');
@@ -286,38 +240,116 @@ function Stat({ }) {
 			console.error("Token not available");
 			return;
 		}
-	
+	  
 		const userId = getUserIdFromToken(token);
-		const statsDate = '2024.03'; 
+		const statsDate = value;
 		const url = `http://15.164.151.130:4000/api/v4/GoalWrite/${userId}/${statsDate}`;
-	
+	  
 		const headers = {
 			'Authorization': `Bearer ${token}`,
 			'Content-Type': 'application/json',
 		};
-	
+	  
 		const data = {
 			goalTitle: goal.schedule,
 			goalTime: goal.time,
 			goalAchieveRate: goal.rate,
 		};
-	
+	  
 		try {
 			const response = await axios.post(url, data, { headers });
-			console.log("Goal saved successfully:", response.data);
+			if (response.status === 200) {
+				console.log("Goal saved successfully:", response.data);
+			} else {
+				console.error(`Unexpected status code: ${response.status}`);
+			}
 		} catch (error) {
 			console.error("Error saving goal:", error);
 		}
 	};
+	
+	useEffect(() => {
+		const fetchRecommendedGoals = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (!token) return;
+	
+			const userId = getUserIdFromToken(token);
+			const statsDate = value;
+	
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v4/suggestGoal/${userId}/${statsDate}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+				console.log("Response Data:", response.data);
+				
+				if (response.data.goalTitle) {
+					setIsGoalSet(true);
+					setGoal({
+						schedule: response.data.goalTitle,
+						rate: response.data.goalAchieveRate.toString(),
+                    	time: response.data.goalTime.toString(),
+					});
+				}
+	
+				setRecommendedGoals([
+					{
+						title: response.data.suggestGoalTitle1,
+						rate: response.data.suggestGoalAchieveRate1,
+						time: response.data.suggestGoalTime1,
+					},
+					{
+						title: response.data.suggestGoalTitle2,
+						rate: response.data.suggestGoalAchieveRate2,
+						time: response.data.suggestGoalTime2,
+					},
+					{
+						title: response.data.suggestGoalTitle3,
+						rate: response.data.suggestGoalAchieveRate3,
+						time: response.data.suggestGoalTime3,
+					},
+				]);
+			} catch (error) {
+				console.error("Error fetching recommended goals:", error);
+			}
+		};
+	
+		if (value) {
+			fetchRecommendedGoals();
+		}
+	}, [value]);	
 
 	useEffect(() => {
-		setRecommendedGoals([
-			{ schedule: '산책', time: '2', rate: '100' },
-			{ schedule: '운동', time: '1', rate: '70' },
-			{ schedule: '공부', time: '2', rate: '50' },
-		]);
-	}, []);
+		const fetchCurrentGoalRate = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (!token) {
+				console.error("Token not available");
+				return;
+			}
 	
+			const userId = getUserIdFromToken(token);
+			const statsDate = value;
+	
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v4/currentGoal/${userId}/${statsDate}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+	
+				if (response.data && response.data.currentGoalRate !== undefined) {
+					setGoalPercent(response.data.currentGoalRate);
+				}
+			} catch (error) {
+				console.error("Error fetching current goal rate:", error);
+			}
+		};
+	
+		if (value) {
+			fetchCurrentGoalRate();
+		}
+	}, [value]);	
 
 	const pieData = [
 		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },
@@ -437,13 +469,13 @@ function Stat({ }) {
 
 	const handleSelectRecommendedGoal = (selectedGoal) => {
 		setGoal({
-			schedule: selectedGoal.schedule,
-			time: selectedGoal.time,
-			rate: selectedGoal.rate
+			schedule: selectedGoal.title,
+			time: selectedGoal.time.toString(),
+			rate: selectedGoal.rate.toString(),
 		});
 		setShowRecommendedGoals(false);
 		setIsGoalSet(true);
-	};
+	};	
 
 	const toggleDropDown = () => {
         setOpen(!open);
@@ -459,14 +491,14 @@ function Stat({ }) {
 
 						<TouchableOpacity onPress={toggleDropDown} style={{ marginBottom: 5 }} />
 
-                        <DropDownPicker
-                            open={open}
-                            value={value}
-                            items={items}
-                            setOpen={setOpen}
-                            setValue={setValue}
-                            setItems={setItems}
-                        />
+						<DropDownPicker
+							open={open}
+							value={value}
+							items={items}
+							setOpen={setOpen}
+							setValue={setValue}
+							setItems={setItems}
+						/>
 
 						<ScrollView
 							horizontal={true}
@@ -537,7 +569,7 @@ function Stat({ }) {
 									placeholder="시간"
 									keyboardType="numeric"
 								/>
-								<MainText>시간</MainText>
+								<MainText>분</MainText>
 								<StyledTextInput
 									onChangeText={handleRateChange}
 									value={goal.rate}
@@ -551,10 +583,10 @@ function Stat({ }) {
 								<View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', width: 265 }}>
 									<View style={{ flexDirection: 'row', backgroundColor: 'transparent' }}>
 										<GoalChart />
-										<GoalChart style={{ backgroundColor: currentTheme.color1, width: `${goalPersent}%`, position: 'absolute' }} />
+										<GoalChart style={{ backgroundColor: currentTheme.color1, width: `${goalPercent}%`, position: 'absolute' }} />
 									</View>
 
-									<MainText>{goalPersent}%</MainText>
+									<MainText>{goalPercent}%</MainText>
 								</View>
 							)}
 
@@ -576,7 +608,7 @@ function Stat({ }) {
 									{recommendedGoals.map((goal, index) => (
 										<TouchableOpacity key={index} onPress={() => handleSelectRecommendedGoal(goal)}>
 											<MainText style={{ padding: 5, color: 'gray' }}>
-												{goal.schedule} 일정 {goal.time} 시간 {goal.rate} 달성률
+												{goal.title} 일정 {goal.time} 분 {goal.rate} 달성률 달성하기
 											</MainText>
 										</TouchableOpacity>
 									))}
@@ -689,9 +721,13 @@ function Stat({ }) {
 							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
 								<View style={{ marginTop: 20 }}>
 									<MainText>전체 노티의 달성률이</MainText>
-									<MainText>지난 달 이맘때보다</MainText>
-									<MainText>{statData.difference}% 늘었어요!</MainText>
+									{statData.difference >= 0 ? (
+										<MainText>지난 달 이맘때보다 {'\n'} {statData.difference}% 늘었어요!</MainText>
+									) : (
+										<MainText>지난 달 이맘때보다 {'\n'} {Math.abs(statData.difference)}% 줄었어요!</MainText>
+									)}
 								</View>
+
 								<View style={{ alignItems: 'center', justifyContent: 'center' }}>
 									<RingChart
 										animate={true}
