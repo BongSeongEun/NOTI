@@ -260,6 +260,7 @@ function Stat({ }) {
 			const response = await axios.post(url, data, { headers });
 			if (response.status === 200) {
 				console.log("Goal saved successfully:", response.data);
+				fetchCurrentGoalRate();
 			} else {
 				console.error(`Unexpected status code: ${response.status}`);
 			}
@@ -320,36 +321,30 @@ function Stat({ }) {
 		}
 	}, [value]);	
 
-	useEffect(() => {
-		const fetchCurrentGoalRate = async () => {
-			const token = await AsyncStorage.getItem('token');
-			if (!token) {
-				console.error("Token not available");
-				return;
-			}
-	
-			const userId = getUserIdFromToken(token);
-			const statsDate = value;
-	
-			try {
-				const response = await axios.get(`http://15.164.151.130:4000/api/v4/currentGoal/${userId}/${statsDate}`, {
-					headers: {
-						'Authorization': `Bearer ${token}`,
-					},
-				});
-	
-				if (response.data && response.data.currentGoalRate !== undefined) {
-					setGoalPercent(response.data.currentGoalRate);
-				}
-			} catch (error) {
-				console.error("Error fetching current goal rate:", error);
-			}
-		};
-	
-		if (value) {
-			fetchCurrentGoalRate();
+	const fetchCurrentGoalRate = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (!token) {
+			console.error("Token not available");
+			return;
 		}
-	}, [value]);	
+	  
+		const userId = getUserIdFromToken(token);
+		const statsDate = value;
+	  
+		try {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v4/currentGoal/${userId}/${statsDate}`, {
+				headers: {
+					'Authorization': `Bearer ${token}`,
+				},
+			});
+	  
+			if (response.data && response.data.currentGoalRate !== undefined) {
+				setGoalPercent(response.data.currentGoalRate);
+			}
+		} catch (error) {
+			console.error("Error fetching current goal rate:", error);
+		}
+	};
 
 	const pieData = [
 		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },

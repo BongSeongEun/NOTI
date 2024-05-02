@@ -122,7 +122,7 @@ function Diary_Main({ }) {
 				<>
 					<DiaryText
 						style={{ margin: 10 }}
-						numberOfLines={isExpanded ? undefined : 7}
+						numberOfLines={isExpanded ? undefined : 5}
 						onTextLayout={!isExpanded ? onTextLayout : undefined}
 					>
 						{content}
@@ -136,7 +136,7 @@ function Diary_Main({ }) {
 			);
 		};
 
-		const pictureHeight = !isExpanded && lineCount <= 5 ? 110 : 60;
+		const pictureHeight = !isExpanded && lineCount <= 4 ? 110 : 60;
 		const pictureTop = pictureHeight === 110 ? 170 : 220;
 
 		return (
@@ -322,7 +322,7 @@ const MainText = styled.Text`
 `;
 
 const DiaryText = styled(MainText)`
-	font-size: 8px;
+	font-size: 10px;
 	font-weight: normal;
 `;
 

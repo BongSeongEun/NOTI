@@ -7,7 +7,7 @@
 import styled, { ThemeProvider } from "styled-components/native";
 
 import React, { useState, useEffect } from 'react';
-import {  } from "react-native";
+import { ScrollView } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import 'react-native-gesture-handler';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -36,185 +36,162 @@ function Todo_Add({ }) {
     const [selectedStartTime, setSelectedStartTime] = useState(initialSelectedStartTime || '');
     const [selectedEndTime, setSelectedEndTime] = useState(initialSelectedEndTime || '');
     const [selectedColor, setSelectedColor] = useState(initialSelectedColor || '');
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
-	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
+    const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 
-	useEffect(() => {
-		if (isEditing) {
-			setInputTitle(inputTitle);
-			setSelectedStartTime(selectedStartTime);
-			setSelectedEndTime(selectedEndTime);
-			setSelectedColor(selectedColor);
-		}
-	}, [isEditing, inputTitle, selectedStartTime, selectedEndTime, selectedColor]);
-    
-	useEffect(() => {
+    useEffect(() => {
         fetchUserData();
     }, []);
 
-    const showDatePicker = (type) => {
-		switch (type) {
-			case 'startTime':
-				setStartTimePickerVisible(true);
-				break;
-			case 'endTime':
-				setEndTimePickerVisible(true);
-				break;
-			default:
-				break;
-		}
-	};
+    const showStartTimePicker = () => {
+        setStartTimePickerVisible(true);
+    };
 
-	const hideDatePicker = () => {
-		setDatePickerVisibility(false);
-	};
-    
+    const hideStartTimePicker = () => {
+        setStartTimePickerVisible(false);
+    };
+
+    const showEndTimePicker = () => {
+        setEndTimePickerVisible(true);
+    };
+
+    const hideEndTimePicker = () => {
+        setEndTimePickerVisible(false);
+    };
+
     const handleTimePickerConfirm = (type, date) => {
-		let hours = date.getHours();
-		let minutes = date.getMinutes();
-	
-		hours = hours < 10 ? `0${hours}` : hours;
-		minutes = minutes < 10 ? `0${minutes}` : minutes;
-	
-		const formattedTime = `${hours}:${minutes}`;
-	
-		switch (type) {
-			case 'startTime':
-				setSelectedStartTime(formattedTime);
-				break;
-			case 'endTime':
-				setSelectedEndTime(formattedTime);
-				break;
-			default:
-				break;
-		}
-	
-		hideDatePicker();
-	};
-	
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
 
-	const getUserIdFromToken = async () => {
-		try {
-		  const token = await AsyncStorage.getItem('token');
-		  const payload = token.split('.')[1];
-		  const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-		  const decodedPayload = decode(base64);
-		  const decodedJSON = JSON.parse(decodedPayload);
-		  
-		  return decodedJSON.id.toString();
-		} catch (error) {
-		  console.error('Error decoding token:', error);
-		  return null;
-		}
-	};
+        hours = hours < 10 ? `0${hours}` : hours;
+        minutes = minutes < 10 ? `0${minutes}` : minutes;
 
-	const fetchUserData = async () => { 
-		const userId = await getUserIdFromToken();
-		try {
-			const userResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
-			  headers: {
-				'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
-			  },
-			});
-	  
-			if (userResponse.status === 200) {
-				const userThemeName = userResponse.data.userColor;
-				if (theme[userThemeName]) {
-					setCurrentTheme(theme[userThemeName]);
-				}
-			} else {
+        const formattedTime = `${hours}:${minutes}`;
+
+        if (type === 'startTime') {
+            setSelectedStartTime(formattedTime);
+            hideStartTimePicker();
+        } else if (type === 'endTime') {
+            setSelectedEndTime(formattedTime);
+            hideEndTimePicker();
+        }
+    };
+
+    const getUserIdFromToken = async () => {
+        const token = await AsyncStorage.getItem('token');
+        const payload = token.split('.')[1];
+        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedPayload = decode(base64);
+        const decodedJSON = JSON.parse(decodedPayload);
+        return decodedJSON.id.toString();
+    };
+
+    const fetchUserData = async () => {
+        const userId = await getUserIdFromToken();
+        try {
+            const userResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+                },
+            });
+
+            if (userResponse.status === 200) {
+                const userThemeName = userResponse.data.userColor;
+                if (theme[userThemeName]) {
+                    setCurrentTheme(theme[userThemeName]);
+                }
+            } else {
                 console.error("Failed to fetch theme:", userResponse);
             }
         } catch (error) {
             console.error("Error fetching theme:", error);
         }
-	};
-	
-	const handleSaveTodo = async () => {
-		const userId = await getUserIdFromToken();
-		const formattedSelectedDate = selectedDate.replace(/-/g, '.');
-		
-		const url = isEditing
-			? `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`
-			: `http://15.164.151.130:4000/api/v1/createTodo/${userId}`;
-		
-		const method = isEditing ? 'put' : 'post';
-		
-		try {
-			const response = await axios[method](url, {
-				todoTitle: inputTitle,
-				todoStartTime: selectedStartTime,
-				todoEndTime: selectedEndTime,
-				todoColor: selectedColor,
-				todoDate: formattedSelectedDate,
-			}, {
-				headers: {
-					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
-				},
-			});
-			
-			if (response.status === 200) {
-				navigation.goBack();
-			} else {
-				console.error("Failed to save todo:", response);
-			}
-		} catch (error) {
-			console.error("Error saving todo:", error);
-		}
-	};
+    };
+
+    const handleSaveTodo = async () => {
+        const userId = await getUserIdFromToken();
+        const formattedSelectedDate = selectedDate.replace(/-/g, '.');
+        const url = isEditing
+            ? `http://15.164.151.130:4000/api/v1/updateTodo/${userId}/${todoId}`
+            : `http://15.164.151.130:4000/api/v1/createTodo/${userId}`;
+
+        const method = isEditing ? 'put' : 'post';
+
+        try {
+            const response = await axios[method](url, {
+                todoTitle: inputTitle,
+                todoStartTime: selectedStartTime,
+                todoEndTime: selectedEndTime,
+                todoColor: selectedColor,
+                todoDate: formattedSelectedDate,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.status === 200) {
+                navigation.goBack();
+            } else {
+                console.error("Failed to save todo:", response);
+            }
+        } catch (error) {
+            console.error("Error saving todo:", error);
+        }
+    };
 
     return (
         <ThemeProvider theme={currentTheme}>
             <FullView>
-                <MainView>
-                    <MainText>노티 제목</MainText>
-                    <TextBox>
-                        <InputBox
-                            placeholder="노티 제목을 입력해주세요(한글 15자 이내)"
-                            value={inputTitle}
-                            onChangeText={(text) => setInputTitle(text)}
+                <ScrollView>
+                    <MainView>
+                        <MainText>노티 제목</MainText>
+                        <TextBox>
+                            <InputBox
+                                placeholder="노티 제목을 입력해주세요(한글 15자 이내)"
+                                value={inputTitle}
+                                onChangeText={setInputTitle}
+                            />
+                        </TextBox>
+
+                        <MainText>노티 시간</MainText>
+                        <TextBox onPress={() => showStartTimePicker()}>
+                            <TextBoxText>시작 시간</TextBoxText>
+                            <Time>{selectedStartTime}</Time>
+                        </TextBox>
+                        <DateTimePickerModal
+                            isVisible={isStartTimePickerVisible}
+                            mode="time"
+                            onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
+                            onCancel={hideStartTimePicker}
                         />
-                    </TextBox>
+                        <TextBox onPress={() => showEndTimePicker()}>
+                            <TextBoxText>종료 시간</TextBoxText>
+                            <Time>{selectedEndTime}</Time>
+                        </TextBox>
+                        <DateTimePickerModal
+                            isVisible={isEndTimePickerVisible}
+                            mode="time"
+                            onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
+                            onCancel={hideEndTimePicker}
+                        />
 
-                    <MainText>노티 시간</MainText>
-                    <TextBox onPress={() => showDatePicker('startTime')}>
-                        <TextBoxText>시작 시간</TextBoxText>
-                        <Time>{selectedStartTime}</Time>
-                    </TextBox>
-                    <DateTimePickerModal
-                        isVisible={isStartTimePickerVisible}
-                        mode="time"
-                        onConfirm={(date) => handleTimePickerConfirm('startTime', date)}
-                        onCancel={hideDatePicker}
-                    />
-                    <TextBox onPress={() => showDatePicker('endTime')}>
-                        <TextBoxText>종료 시간</TextBoxText>
-                        <Time>{selectedEndTime}</Time>
-                    </TextBox>
-                    <DateTimePickerModal
-                        isVisible={isEndTimePickerVisible}
-                        mode="time"
-                        onConfirm={(date) => handleTimePickerConfirm('endTime', date)}
-                        onCancel={hideDatePicker}
-                    />
+                        <MainText>노티 색상</MainText>
+                        <HorisontalView>
+                            {Object.keys(currentTheme).filter(key => key.startsWith('color')).map((key) => (
+                                <ThemedButton
+                                    key={key}
+                                    style={{ backgroundColor: currentTheme[key] }}
+                                    onPress={() => setSelectedColor(key)}
+                                />
+                            ))}
+                        </HorisontalView>
 
-					<MainText>노티 색상</MainText>
-					<HorisontalView>
-						{Object.keys(currentTheme).filter(key => key.startsWith('color')).map((key, index) => (
-							<ThemedButton
-								key={key}
-								style={{ backgroundColor: currentTheme[key] }}
-								onPress={() => setSelectedColor(key)}
-							/>
-						))}
-					</HorisontalView>
-
-					<ResultButton onPress={() => { handleSaveTodo(); }} selectedColorKey={selectedColor}>
+                        <ResultButton onPress={() => { handleSaveTodo(); }} selectedColorKey={selectedColor}>
 						<MainText style={{marginTop: 0}} color="white">완료</MainText>
 					</ResultButton>
-
-                </MainView>
+                    </MainView>
+                </ScrollView>
             </FullView>
         </ThemeProvider>
     );

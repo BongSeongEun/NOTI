@@ -375,7 +375,7 @@ const Diary_TItle = styled.Text`
 `;
 
 const DiaryText = styled(MainText)`
-   font-size: 10px;
+   font-size: 12px;
    font-weight: normal;
 `;
 
