@@ -330,29 +330,42 @@ public class TodoService {
     // 현재 목표 달성 상태 체크하는 로직
     public Map<String, Object> currentGoal(Long userId, String statsDate) {
         List<Goal> goalExist = goalRepository.findByUserIdAndStatsDate(userId, statsDate);
-        Map<String, Object> result = null;
+        Map<String, Object> result = new HashMap<>();
         if (!goalExist.isEmpty()) {
             // 첫번째 goal_title 가져오기
             String goalTitle = goalExist.get(0).getGoalTitle();
 
             List<Todo> allTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, goalTitle);
-            List<Todo> completeTagTodo = todoRepository.findCompletedTodosByUserIdAndStatsDateAndTodoTag(userId, statsDate, goalTitle);
 
-            int totalTags = allTag.size();
-            int totalCompleteTag = completeTagTodo.size();
+            // 문자열 날짜 포맷 정의
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            // 시간 계산 로직
+            long totalDurationMinutes = allTag.stream()
+                    .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
+                    .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
+                    .mapToLong(todo -> {
+                        LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), timeFormatter);
+                        LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), timeFormatter);
+                        Duration duration = Duration.between(startTime, endTime);
+                        return duration.isNegative() ? duration.plusDays(1).toMinutes() : duration.toMinutes();
+                    })
+                    .sum();
+
+            System.out.println("총시간은 : " + totalDurationMinutes);
+
+            Long goalTime = goalExist.get(0).getGoalTime();
 
             double completionRate = 0;
-            if (totalTags > 0) { // 분모가 0이 되는 경우를 방지
-                completionRate = ((double) totalCompleteTag / totalTags) * 100;
-
-            } else {
-                // 애초에 일정이 없을때 코드 작성하기
-                completionRate = 0;
+            // 퍼센트 계산 로직
+            if (goalTime > 0) { // 분모가 0이 되는 경우를 방지
+                completionRate = ( (double) totalDurationMinutes / goalTime) * 100;
+                completionRate = Math.min(completionRate, 100);
             }
-            int intCompletionRate = (int) completionRate;
 
-            result = new LinkedHashMap<>();
-            result.put("currentGoalRate", intCompletionRate);
+            long completionRateLong = (long) completionRate;
+
+            result.put("currentGoalRate", completionRateLong);
+
         } else {
             System.out.println("목표가 없어용");
         }
