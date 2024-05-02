@@ -45,7 +45,7 @@ public class TodoUpdateService extends IntentService {
 
                 // Request 생성
                 Request request = new Request.Builder()
-                        .url("http://192.168.101.195:4000/api/v1/updateTodo/" + userId + "/" + todoId)
+                        .url("http://15.164.151.130:4000/api/v1/updateTodo/" + userId + "/" + todoId)
                         .post(requestBody)
                         .build();
 
