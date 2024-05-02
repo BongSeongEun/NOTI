@@ -51,6 +51,14 @@ public class TodoController {
         TodoDTO dto = TodoDTO.from(updatedTodo);
         return ResponseEntity.ok().body(dto);
     }
+
+    @PutMapping("/updateTodoDone/{userId}/{todoId}")
+    public ResponseEntity<TodoDTO> updateTodoDone(@PathVariable Long userId, @PathVariable Long todoId, @RequestBody TodoDTO todoDTO){
+        Todo updatedTodo = todoService.updateDone(todoDTO, userId, todoId);
+        TodoDTO dto = TodoDTO.from(updatedTodo);
+        return ResponseEntity.ok().body(dto);
+    }
+
     @GetMapping("/getTodo/{userId}")
     public ResponseEntity<?> getTodo(@PathVariable String userId){
         List<Todo> todoEntity = todoService.getTodo(userId);
