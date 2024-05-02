@@ -164,17 +164,17 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             Long userId = user.getUserId();
 
             String jsonRequest = "{\n" +
-            "    \"message\": {\n" +
-            "        \"token\": \"" + token + "\",\n" +
-            "        \"data\": {\n" +
-            "          \"body\": \"" + body + "\",\n" +
-            "          \"title\": \"노티\", \n" +
-            "          \"action\": \"YES_OR_NO\", \n" +
-            "          \"todoId\": \"" + todoId + "\"\n" +
-            "          \"userId\": \"" + userId + "\"\n" +
-            "        }\n" +
-            "    }\n" +
-            "}";
+                    "    \"message\": {\n" +
+                    "        \"token\": \"" + token + "\",\n" +
+                    "        \"data\": {\n" +
+                    "          \"body\": \"" + body + "\",\n" +
+                    "          \"title\": \"노티\", \n" +
+                    "          \"action\": \"YES_OR_NO\", \n" +
+                    "          \"todoId\": \"" + todoId + "\",\n" + 
+                    "          \"userId\": \"" + userId + "\"\n" +
+                    "        }\n" +
+                    "    }\n" +
+                    "}";
         
             RestTemplate rt = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
