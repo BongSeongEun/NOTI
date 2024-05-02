@@ -60,7 +60,7 @@ public class DiaryController {
 
     @GetMapping("/diaryEmotion/{userId}/{emotionDate}") // 한달동안의 일기 감정추출
     public ResponseEntity<?> getEmotion(@PathVariable Long userId, @PathVariable String emotionDate){
-        Map<String, Long> emotionList = diaryService.findEmotion(userId, emotionDate);
+        Map<String, Object> emotionList = diaryService.findEmotion(userId, emotionDate);
         return ResponseEntity.ok(emotionList);
 
     }

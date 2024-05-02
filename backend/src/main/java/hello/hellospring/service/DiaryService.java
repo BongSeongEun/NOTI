@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,18 +104,22 @@ public class DiaryService {
     }
 
     // 일기 한달 단위로 감정표현 출력
-    public Map<String, Long> findEmotion(Long userId, String emotionDate) {
+    public Map<String, Object> findEmotion(Long userId, String emotionDate) {
         List<Diary> diaryEmotions = diaryRepository.findByUserIdAndEmotionDate(userId, emotionDate);
-
+        Map<String, Object> result = new HashMap<>();
         if(!diaryEmotions.isEmpty()){    // 일기 데이터가 있는 경우
+            for (Diary diary : diaryEmotions) {
+                String diaryDate = diary.getDiaryDate(); // 날짜 추출, 예를 들면 "2024-05-01"
+                Long emotion = diary.getDiaryEmotion(); // 감정 값 추출, 이는 long 유형임
 
+                // 날짜별 감정 값을 저장하는 Map 구조를 갱신
+                result.put(diaryDate, emotion);
+                System.out.println(emotion);
+            }
 
-        } else {                         //일기 데이터가 없는경우
-
-
+        } else {    //일기 데이터가 없는경우
+            System.out.println(" ");
         }
-
-
-        return null;
+        return result;
     }
 }
