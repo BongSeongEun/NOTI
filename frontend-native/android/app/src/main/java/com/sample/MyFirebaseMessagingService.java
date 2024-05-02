@@ -15,12 +15,28 @@ import android.os.Build;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     public static final String CHANNEL_ID = "your_channel_id";
-
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> data = remoteMessage.getData();
+
+            String todoId = data.get("todoId");
+            String userId = data.get("userId");
+
+            Intent actionIntent = new Intent(this, NotificationActionReceiver.class);
+            actionIntent.setAction("action");
+            actionIntent.putExtra("todoId", todoId);
+            actionIntent.putExtra("userId", userId);
+
+
+            PendingIntent actionPendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    0,
+                    actionIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
             showNotification(data);
+
         }
     }
 

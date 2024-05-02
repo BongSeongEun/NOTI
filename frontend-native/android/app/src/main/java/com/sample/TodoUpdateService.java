@@ -1,16 +1,7 @@
 package com.sample;
 
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.app.PendingIntent;
-import androidx.core.app.NotificationCompat;
-import android.app.NotificationManager;
-import android.app.NotificationChannel;
-import android.os.Build;
 import android.app.IntentService;
+import android.content.Intent;
 import androidx.annotation.Nullable;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -22,16 +13,22 @@ import org.json.JSONObject;
 import java.io.IOException;
 import androidx.annotation.NonNull;
 
-
-public class NotificationActionReceiver extends BroadcastReceiver {
+public class TodoUpdateService extends IntentService {
+    public TodoUpdateService() {
+        super("TodoUpdateService");
+    }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        String userId = intent.getStringExtra("userId");
-        String todoId = intent.getStringExtra("todoId");
-        String action = intent.getStringExtra("action");
-        if ("yes".equals(action)) {
-            OkHttpClient client = new OkHttpClient();
+    protected void onHandleIntent(@Nullable Intent intent) {
+        if (intent != null) {
+            String todoId = intent.getStringExtra("todoId");
+            String userId = intent.getStringExtra("userId");
+            String action = intent.getStringExtra("action");
+
+            // 예 버튼 클릭 시 서버로 POST 요청
+            if ("yes".equals(action)) {
+                // HTTP 클라이언트 초기화
+                OkHttpClient client = new OkHttpClient();
 
                 // JSON으로 서버에 전송할 데이터 구성
                 JSONObject data = new JSONObject();
@@ -48,7 +45,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
 
                 // Request 생성
                 Request request = new Request.Builder()
-                        .url("http://localhost:4000/api/v1/updateTodo/" + userId + "/" + todoId)
+                        .url("http://192.168.101.195:4000/api/v1/updateTodo/" + userId + "/" + todoId)
                         .post(requestBody)
                         .build();
 
@@ -59,8 +56,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-        } else if ("no".equals(action)) {
-            // "아니오" 버튼 클릭 처리
+            }
         }
     }
 }

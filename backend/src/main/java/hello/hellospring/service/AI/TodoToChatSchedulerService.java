@@ -160,6 +160,8 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             User user =
                     userRepository.findByUserId(todo.getUserId());
             String token = user.getDeviceToken();
+            Long todoId = todo.getTodoId();
+            Long userId = user.getUserId();
 
             String jsonRequest = "{\n" +
             "    \"message\": {\n" +
@@ -168,6 +170,8 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             "          \"body\": \"" + body + "\",\n" +
             "          \"title\": \"노티\", \n" +
             "          \"action\": \"YES_OR_NO\", \n" +
+            "          \"todoId\": \"" + todoId + "\"\n" +
+            "          \"userId\": \"" + userId + "\"\n" +
             "        }\n" +
             "    }\n" +
             "}";
