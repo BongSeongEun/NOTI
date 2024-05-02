@@ -1,7 +1,6 @@
 import React, {useEffect} from 'react';
 import {Platform, Alert} from 'react-native';
-import firebase from 'react-native-firebase';
-import DeviceInfo from 'react-native-device-info';
+import firebase from '@react-native-firebase/app';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Axios from 'axios';
 
