@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 // DTO에서 담아서 Controller로 넘어오도록
 @RestController
@@ -57,7 +58,15 @@ public class DiaryController {
         return ResponseEntity.ok(updatedDiary);
     }
 
+    @GetMapping("/diaryEmotion/{userId}/{emotionDate}") // 한달동안의 일기 감정추출
+    public ResponseEntity<?> getEmotion(@PathVariable Long userId, @PathVariable String emotionDate){
+        Map<String, Long> emotionList = diaryService.findEmotion(userId, emotionDate);
+        return ResponseEntity.ok(emotionList);
 
+    }
+
+
+// ______________________________________________________________ 폐기합니다 ._.
 
     @PostMapping("/diaryUpdate") // 안쓸거임
     public String update(@ModelAttribute DiaryDTO diaryDTO, Model model){
