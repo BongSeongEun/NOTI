@@ -45,6 +45,13 @@ public class TodoService {
 
         return originalTodo;
     }
+    public Todo updateDone(TodoDTO todoDTO, Long userId, Long todoId){
+        Todo original = todoRepository.findByTodoIdAndUserId(todoId, userId);
+        original.setTodoDone(todoDTO.isTodoDone());
+
+        todoRepository.save(original);
+        return original;
+    }
 
     public List<Todo> getTodo(String userId){
         return todoRepository.findByUserId(Long.valueOf(userId));
