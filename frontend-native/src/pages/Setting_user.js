@@ -222,26 +222,23 @@ const Setting_user = () => {
 	const [imageFile, setImageFile] = useState("");
 
 	const onSelectImage = () => {
-		launchImageLibrary(
-			{
-				mediaType: 'photo',
-				maxWidth: 512,
-				maxHeight: 512,
-				includeBase64: true,
-			},
-			(response) => {
-				if (response.didCancel) {
-					console.log('User cancelled image picker');
-				} else if (response.error) {
-					console.log('ImagePicker Error: ', response.error);
-				} else if (response.assets) {
-					const source = { uri: 'data:image/jpeg;base64,' + response.assets[0].base64 };
-					setUserProfileImage(source);
-					setImageFile(response.assets[0].base64);
-				}
+		launchImageLibrary({
+			mediaType: 'photo',
+			maxWidth: 512,
+			maxHeight: 512,
+			includeBase64: true,
+		}, (response) => {
+			if (response.didCancel) {
+				console.log('User cancelled image picker');
+			} else if (response.error) {
+				console.log('ImagePicker Error: ', response.error);
+			} else if (response.assets) {
+				const source = { uri: `data:image/jpeg;base64,${response.assets[0].base64}` };
+				setUserProfileImage(source);
+				setImageFile(response.assets[0].base64);
 			}
-		);
-	};	
+		});
+	};
 
 	const handleSubmit = async () => {
 		try {
@@ -255,15 +252,15 @@ const Setting_user = () => {
 
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
 
-	const handleThemeChange = selectedThemeName  => {
-		const newTheme = theme[selectedThemeName ];
+	const handleThemeChange = selectedThemeName => {
+		const newTheme = theme[selectedThemeName];
 		if (newTheme) {
-		  setCurrentTheme(newTheme);
-		  setSelectedTheme(selectedThemeName );
+			setCurrentTheme(newTheme);
+			setSelectedTheme(selectedThemeName);
 		} else {
-		  console.error("Selected theme does not exist:", selectedThemeName );
+			console.error("Selected theme does not exist:", selectedThemeName);
 		}
-	  };
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>

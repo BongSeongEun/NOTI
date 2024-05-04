@@ -1,10 +1,6 @@
-/* eslint-disable curly */
-/* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prettier/prettier */
-/* eslint-disable no-unused-vars */
-/* eslint-disable quotes */
-/* eslint-disable no-trailing-spaces */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-native/no-inline-styles */
 import styled, { ThemeProvider } from 'styled-components/native';
 
 import React, {useState, useEffect, useRef } from 'react';
@@ -13,7 +9,15 @@ import axios from 'axios';
 import ChatMessage from '../components/ChatMessage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode } from 'base-64';
-import { format, parseISO  } from "date-fns";
+import { format, parseISO, getDay } from "date-fns";
+import { ko } from "date-fns/locale";
+
+function formatDateWithDay(date) {
+   const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+   const formattedDate = format(date, "MM/dd", { locale: ko });
+   const dayName = days[getDay(date)];
+   return `${formattedDate} ${dayName}`;
+}
 
 import images from "../components/images";
 import theme from "../components/theme";
@@ -34,75 +38,62 @@ function Chatting() {
 	const scrollViewRef = useRef();
 
 	useEffect(() => {
-        fetchChatHistory();
+		fetchChatHistory();
 		fetchUserData();
 	}, []);
 
+	const getUserIdFromToken = (token) => {
+		try {
+			const payload = token.split('.')[1];
+			const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+			const decodedPayload = decode(base64);
+			const decodedJSON = JSON.parse(decodedPayload);
+
+			return decodedJSON.id.toString();
+		} catch (error) {
+			console.error('Error decoding token:', error);
+			return null;
+		}
+	};
+
+	const addMessage = (message) => {
+		setMessages(prevMessages => [...prevMessages, message]);
+	};
+
 	const handleSubmit = async (message) => {
-		if (!message.trim()) return; // 메시지가 비어있는 경우 무시
-		addMessage(message, true);
+		if (!message.trim()) return;
+
+		const currentDate = new Date();
+		addMessage({
+			text: message,
+			isUser: true,
+			date: formatDateWithDay(currentDate),
+			time: format(currentDate, "HH:mm"),
+		});
+
 		const storedToken = await AsyncStorage.getItem('token');
 		if (!storedToken) return;
-	
+
 		try {
 			const userId = getUserIdFromToken(storedToken);
 			const response = await axios.post(`http://15.164.151.130:4000/api/v3/ask/${userId}`, {
 				chat_content: message,
 			});
 			if (response.data) {
-				addMessage(response.data.chatContent, !response.data.chatWho);
+				addMessage({
+					text: response.data.chatContent,
+					isUser: !response.data.chatWho,
+					date: formatDateWithDay(parseISO(response.data.chatDate)),
+					time: format(parseISO(response.data.chatDate), "HH:mm"),
+				});
 				setInputValue('');
 				await fetchChatHistory();
 			}
 		} catch (error) {
-			console.error('Error fetching Gpt response: ', error);
+			console.error('Error fetching Gpt response:', error);
 		}
 	};
 
-	const addMessage = (message, isUser) => {
-		const currentDate = format(new Date(), "MM/dd");
-		setMessages(prevMessages => [...prevMessages, { text: message, isUser, date: currentDate }]);
-	};
-	
-	const fetchUserData = async () => {
-		const token = await AsyncStorage.getItem('token');
-		if (token) {
-			const userId = getUserIdFromToken(token);
-			try {
-				const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
-					headers: {
-						'Authorization': `Bearer ${token}`,
-					},
-				});
-				const userThemeName = response.data.userColor || 'OrangeTheme';
-					const userProfileImage = response.data.userProfile;
-					const nickname = response.data.userNickname;
-
-					if (theme[userThemeName]) {
-						setCurrentTheme(theme[userThemeName]);
-					}
-					setBase64Image(userProfileImage || ""); 
-					setUserNickname(nickname || ""); 
-			} catch (error) {
-				console.error("Error fetching user data:", error);
-			}
-		}
-	};
-
-	const getUserIdFromToken = (token) => {
-        try {
-            const payload = token.split('.')[1];
-            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-            const decodedPayload = decode(base64);
-            const decodedJSON = JSON.parse(decodedPayload);
-
-            return decodedJSON.id.toString();
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return null;
-        }
-	};
-	
 	const fetchChatHistory = async () => {
 		const token = await AsyncStorage.getItem('token');
 		if (!token) return;
@@ -116,14 +107,42 @@ function Chatting() {
 					'Authorization': `Bearer ${token}`,
 				},
 			});
+
 			const chatHistory = response.data.map(chat => ({
 				text: chat.chatContent,
 				isUser: !chat.chatWho,
-				date: format(parseISO(chat.chatDate), "MM/dd"),
+				date: formatDateWithDay(parseISO(chat.chatDate)),
+				time: format(parseISO(chat.chatDate), "HH:mm"),
 			}));
+
 			setMessages(chatHistory);
 		} catch (error) {
 			console.error('Error fetching chat history:', error);
+		}
+	};
+
+	const fetchUserData = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			const userId = getUserIdFromToken(token);
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`,
+					},
+				});
+				const userThemeName = response.data.userColor || 'OrangeTheme';
+				const userProfileImage = response.data.userProfile;
+				const nickname = response.data.userNickname;
+
+				if (theme[userThemeName]) {
+					setCurrentTheme(theme[userThemeName]);
+				}
+				setBase64Image(userProfileImage || ""); 
+				setUserNickname(nickname || ""); 
+			} catch (error) {
+				console.error("Error fetching user data:", error);
+			}
 		}
 	};
 
@@ -132,8 +151,7 @@ function Chatting() {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={base64Image ? { uri: base64Image } : images.profile}
-							style={{ marginTop: 20 }} />
+						<Profile source={base64Image ? { uri: base64Image } : images.profile} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>
@@ -143,29 +161,32 @@ function Chatting() {
 					</HorisontalView>
 				</MainView>
 			</FullView>
-			
+
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<Bar />
-				<ScrollView
-					ref={scrollViewRef}
-					onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}
-				>
+				<ScrollView ref={scrollViewRef} onContentSizeChange={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
 					<MainView>
 						<ChatDiv>
 							{messages.map((message, index) => (
-								<ChatMessage
-									key={index}
-									message={message.text}
-									isUser={message.isUser}
-									userColor={currentTheme.color1}
-									date={message.date}
-								/>
+								<React.Fragment key={index}>
+									{index === 0 || messages[index - 1].date !== message.date ? (
+										<DateBox>
+											<MainText style={{ color: 'white', alignSelf: 'center', fontSize: 10 }}>{message.date}</MainText>
+										</DateBox>
+									) : null}
+									<ChatMessage
+										message={message.text}
+										isUser={message.isUser}
+										userColor={currentTheme.color1}
+										time={message.time}
+									/>
+								</React.Fragment>
 							))}
 						</ChatDiv>
 					</MainView>
 				</ScrollView>
 
-				<View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, width: 350, alignSelf:'center', justifyContent: 'center' }}>
+				<View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, width: 350, alignSelf: 'center', justifyContent: 'center' }}>
 					<InputBox
 						style={{
 							flex: 1,
@@ -179,7 +200,7 @@ function Chatting() {
 						placeholder="메세지를 입력해주세요"
 					/>
 					<TouchableOpacity onPress={() => handleSubmit(inputValue)}
-					style={{ backgroundColor: currentTheme.color1, borderRadius: 100, width: 45, height: 45, justifyContent: 'center', alignItems: 'center' }}>
+						style={{ backgroundColor: currentTheme.color1, borderRadius: 100, width: 45, height: 45, justifyContent: 'center', alignItems: 'center' }}>
 						<images.message_send width={20} height={20}
 							style={{ alignSelf: 'center' }}
 						/>
@@ -246,6 +267,16 @@ const InputBox = styled.TextInput`
     width: 100%;
     height: 100%;
     margin-left: 10px;
+`;
+
+const DateBox = styled.TouchableOpacity`
+	width: 100px;
+	height: 25px;
+	background-color: #505050;
+	border-radius: 15px;
+	align-self: center;
+	justify-content: center;
+	margin-top: 15px;
 `;
 
 export default Chatting;

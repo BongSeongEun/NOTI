@@ -34,6 +34,13 @@ import plus from "../asset/plus.svg";
 
 import creat_down from "../asset/caret-down";
 
+import emotion1 from "../asset/noti_emotion1";
+import emotion2 from "../asset/noti_emotion2";
+import emotion3 from "../asset/noti_emotion3";
+import emotion4 from "../asset/noti_emotion4";
+import emotion5 from "../asset/noti_emotion5";
+
+
 export const images = {
 	Noti: Noti,
 	Kakao: Kakao,
@@ -67,6 +74,12 @@ export const images = {
 	plus: plus,
 
 	creat_down: creat_down,
+
+	emotion1: emotion1,
+	emotion2: emotion2,
+	emotion3: emotion3,
+	emotion4: emotion4,
+	emotion5: emotion5,
 };
 
 export default images;

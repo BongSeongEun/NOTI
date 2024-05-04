@@ -91,7 +91,7 @@ function Setting({ }) {
 
 					<View>
 						<TouchableOpacity onPress={() => navigation.navigate('Setting_user', { currentTheme: currentTheme })}>
-							<MainText fontSize={15}>회원 정보 수정</MainText>
+							<MainText style={{fontSize: 15}}>회원 정보 수정</MainText>
 						</TouchableOpacity>
 					</View>
 				</MainView>

@@ -100,6 +100,7 @@ function Stat({ }) {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(null);
 	const [items, setItems] = useState([
+		{ label: '2024.05', value: '2024.05' },
 		{ label: '2024.04', value: '2024.04' },
 		{ label: '2024.03', value: '2024.03' },
 		{ label: '2024.02', value: '2024.02' },
@@ -346,6 +347,10 @@ function Stat({ }) {
 		}
 	};
 
+	useEffect(() => {
+		fetchCurrentGoalRate();
+	}, [value]);
+
 	const pieData = [
 		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },
 		{ id: tagStats.Word2st, value: tagStats.Word2stPercent, color: currentTheme.color2 },
@@ -523,7 +528,9 @@ function Stat({ }) {
 								style={{ padding: 10 }}
 							>
 								<View>
-									<MainText>3</MainText>
+								<MainText color='white'>{userNickname} 님의 3번째 많은 노티는</MainText>
+									<MainText color='white'>{tagStats.Word3st}로 {tagStats.Word2stNum}개의 노티 중 {tagStats.Word3stDoneTodos}개를 달성했어요!</MainText>
+									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word3stPercent}% 입니다!</Stat_Text>
 								</View>
 							</States>
 
@@ -531,7 +538,9 @@ function Stat({ }) {
 								style={{ padding: 10 }}
 							>
 								<View>
-									<MainText>4</MainText>
+								<MainText color='white'>{userNickname} 님의 4번째 많은 노티는</MainText>
+									<MainText color='white'>{tagStats.Word4st}로 {tagStats.Word2stNum}개의 노티 중 {tagStats.Word4stDoneTodos}개를 달성했어요!</MainText>
+									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word4stPercent}% 입니다!</Stat_Text>
 								</View>
 							</States>
 
@@ -539,7 +548,8 @@ function Stat({ }) {
 								style={{ padding: 10 }}
 							>
 								<View>
-									<MainText>5</MainText>
+								<MainText color='white'>{userNickname} 님의 기타 노티는</MainText>
+									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.etcPercent}% 입니다!</Stat_Text>
 								</View>
 							</States>
 						</ScrollView>
