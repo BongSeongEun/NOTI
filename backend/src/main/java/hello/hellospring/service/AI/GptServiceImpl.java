@@ -117,13 +117,13 @@ public class GptServiceImpl implements GptDiaryService {
 
             long diaryEmotionResult;
 
-            if (diaryEmotionScore >= 81 && diaryEmotionScore <= 100) {
+            if (diaryEmotionScore >= 91 && diaryEmotionScore <= 100) {
                 diaryEmotionResult = 5;
-            } else if (diaryEmotionScore >= 61) {
+            } else if (diaryEmotionScore >= 81) {
                 diaryEmotionResult = 4;
-            } else if (diaryEmotionScore >= 41) {
+            } else if (diaryEmotionScore >= 61) {
                 diaryEmotionResult = 3;
-            } else if (diaryEmotionScore >= 21) {
+            } else if (diaryEmotionScore >= 41) {
                 diaryEmotionResult = 2;
             } else {
                 diaryEmotionResult = 1;
