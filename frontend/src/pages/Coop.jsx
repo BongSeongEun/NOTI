@@ -14,7 +14,7 @@ import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import CoopDetail from "../pages/CoopDetail"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때;
-import Confirm from "../asset/fi-rr-sign-out.png"; //
+import Confirm from "../asset/fi-rr-sign-out.png";
 import NavBar from "../components/Navigation";
 
 const MainDiv = styled.div`

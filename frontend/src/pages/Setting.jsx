@@ -10,26 +10,41 @@ import {
   redirect,
 } from "react-router-dom";
 import { backgrounds, lighten } from "polished";
+import NavBar from "../components/Navigation";
+import SettingIcon from "../asset/setting.png"; // 수정하기
 import theme from "../styles/theme"; // 테마 파일 불러오기
 
 const MainDiv = styled.div`
-  //전체화면 테두리
+  height: auto;
   display: flex;
-  flex-basis: auto;
-  flex-direction: column; // 세로 나열
-  align-items: center; // 가운데 놓기
-  justify-content: center; // 가운데 놓기
-  width: 100%;
-  background-color: #333;
-  height: 100%;
-  color: white;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 350px;
+  margin-left: 350px;
+  @media (max-width: 1050px) {
+    margin-left: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  padding-top: 140px;
+  justify-content: center;
 `;
+
 function Setting() {
   const navigate = useNavigate();
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
+  const [selectedDate, setSelectedDate] = useState("");
+
+  const setDate = date => {
+    setSelectedDate(date);
+  };
   return (
-    <div>
-      <MainDiv>설정</MainDiv>
-    </div>
+    <ThemeProvider theme={currentTheme}>
+      <NavBar setDate={setDate} />
+      <div>
+        <MainDiv>설정</MainDiv>
+      </div>
+    </ThemeProvider>
   );
 }
 export default Setting;

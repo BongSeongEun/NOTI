@@ -11,6 +11,10 @@ const DiaryItemContainer = styled.div`
   padding: 10px;
   margin: 10px 0;
   width: 80%;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
   cursor: pointer;
   &:hover {
     background-color: #f0f0f0;

@@ -21,7 +21,17 @@ const Redirection = () => {
       .then(res => {
         const token = res.headers.authorization;
         window.localStorage.setItem("token", token);
-        navigate("/Register");
+        // 토큰이 있으면 메인 페이지로 이동, 없으면 회원가입 페이지로 이동
+        if (token) {
+          navigate("/Main");
+        } else {
+          navigate("/Register");
+        }
+      })
+      .catch(error => {
+        // 에러 발생 시 로그 출력 및 회원가입 페이지로 리다이렉트
+        console.error("로그인 중 에러 발생: ", error);
+        navigate("/");
       });
   }, [code, navigate]);
 

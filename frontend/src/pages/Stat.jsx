@@ -58,7 +58,14 @@ const HorizontalBox = styled.div`
     flex-direction: column;
   }
 `;
-
+const VerticalBox = styled.div`
+  // 아이템을 세로정렬하는 상자
+  display: flex; // 정렬하려면 이거 먼저 써야함
+  align-items: left; // 수직 가운데 정렬
+  flex-direction: column; // 세로나열
+  width: 100%;
+  height: auto;
+`;
 const StatsContainer = styled.div`
   background: #fff;
   border-radius: 20px;
@@ -92,6 +99,13 @@ const BarChartLabel = styled.div`
   text-align: center;
   font-size: 1.5em;
   margin-top: 20px;
+`;
+
+const MonthLabel = styled.div`
+  margin-left: 10px;
+  font-size: 30px;
+  font-weight: bold;
+  color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
 function Stat() {
@@ -204,6 +218,14 @@ function Stat() {
     } catch (error) {
       console.error("Error fetching weekly achievement data:", error);
     }
+  };
+  // 달력에 년.월.일 나오게 하는 함수
+  const formatDate = date => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = `0${d.getMonth() + 1}`.slice(-2); // 월은 0부터 시작하므로 1을 더함
+    const day = `0${d.getDate()}`.slice(-2);
+    return `${year}.${month}`;
   };
 
   // useEffect 내부에서 두 함수를 호출
@@ -518,47 +540,50 @@ function Stat() {
         <MainDiv>
           <DateHeader>노티 분석</DateHeader>
           <FlexContainer>
-            <HorizontalBox>
-              <StatsContainer>
-                {/* 조건부 렌더링: statsData가 있을 경우에만 Chart를 렌더링 */}
-                {statsData ? (
-                  <>
-                    <Chart
-                      options={chartOptions}
-                      series={chartSeries}
-                      type="polarArea"
-                      width="450"
-                    />
-                    <Chart
-                      options={barChartOptions}
-                      series={barChartSeries}
-                      type="bar"
-                      width="500"
-                    />
-                  </>
-                ) : (
-                  // 데이터가 로드되는 중이거나 없을 경우 표시될 메시지
-                  <p>데이터를 로드하는 중입니다...</p>
-                )}
-              </StatsContainer>
-              <StatsContainer>
-                {/* 원형 그래프 (달성률) 렌더링 */}
-                <Chart
-                  options={achievementChartOptions}
-                  series={achievementChartSeries}
-                  type="radialBar"
-                  height={280}
-                />
+            <VerticalBox>
+              <MonthLabel>{formatDate(selectedDate)} 분석결과</MonthLabel>
+              <HorizontalBox>
+                <StatsContainer>
+                  {/* 조건부 렌더링: statsData가 있을 경우에만 Chart를 렌더링 */}
+                  {statsData ? (
+                    <>
+                      <Chart
+                        options={chartOptions}
+                        series={chartSeries}
+                        type="polarArea"
+                        width="450"
+                      />
+                      <Chart
+                        options={barChartOptions}
+                        series={barChartSeries}
+                        type="bar"
+                        width="500"
+                      />
+                    </>
+                  ) : (
+                    // 데이터가 로드되는 중이거나 없을 경우 표시될 메시지
+                    <p>데이터를 로드하는 중입니다...</p>
+                  )}
+                </StatsContainer>
+                <StatsContainer>
+                  {/* 원형 그래프 (달성률) 렌더링 */}
+                  <Chart
+                    options={achievementChartOptions}
+                    series={achievementChartSeries}
+                    type="radialBar"
+                    height={280}
+                  />
 
-                {/* 막대 그래프 (요일별 달성률) 렌더링 */}
-                <Chart
-                  options={weeklyAchievementChartOptions}
-                  series={weeklyAchievementChartSeries}
-                  type="bar"
-                  height={350}
-                />
-              </StatsContainer>
-            </HorizontalBox>
+                  {/* 막대 그래프 (요일별 달성률) 렌더링 */}
+                  <Chart
+                    options={weeklyAchievementChartOptions}
+                    series={weeklyAchievementChartSeries}
+                    type="bar"
+                    height={350}
+                  />
+                </StatsContainer>
+              </HorizontalBox>
+            </VerticalBox>
           </FlexContainer>
         </MainDiv>
       </div>

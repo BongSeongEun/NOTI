@@ -23,6 +23,11 @@ const MainDiv = styled.div`
   align-items: center;
   margin-right: 350px;
   margin-left: 350px;
+
+  // 스크롤바 숨기기
+  ::-webkit-scrollbar {
+    display: none; // 웹킷 브라우저(크롬, 사파리 등)에서 스크롤바 숨김
+  }
   @media (max-width: 1050px) {
     margin-left: 0;
     padding-left: 20px;
