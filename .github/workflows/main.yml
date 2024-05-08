@@ -27,7 +27,9 @@ jobs:
         distribution: 'temurin'
 
     - name: Grant execute permission for gradlew
-      run: touch ./src/main/resources/application.properties
+      run: mkdir -p ./src/main/java/resources 
+           cd ./src/main/java/resources
+           touch ./application.properties
       working-directory: ${{ env.working-directory }}
 
     - name: Set Properties file 
