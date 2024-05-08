@@ -43,7 +43,7 @@ jobs:
 
     
     - name: Build with Gradle
-      run: cd cd build/libs/
+      run: cd build/libs/
       working-directory: ${{ env.working-directory }}
       
     - name: Build with Gradle
