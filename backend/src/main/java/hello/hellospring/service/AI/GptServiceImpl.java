@@ -83,6 +83,12 @@ public class GptServiceImpl implements GptDiaryService {
                 .map(todo -> todo.getTodoTitle() + ":" + (todo.isTodoDone() ? "달성성공" : "달성실패"))
                 .collect(Collectors.joining(", "));
 
+//        if (diaryInputs.isEmpty() && todoContents.isEmpty()){
+//
+//        } else {
+//
+//        }
+
 
         // diaryContent + todoContents 둘이 합치기
         String combinedInputs = diaryInputs + "= 이거는 오늘 하루동안 gpt와 대화했던 내용들이고"
