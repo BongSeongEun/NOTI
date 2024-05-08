@@ -26,14 +26,17 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - uses: actions/checkout@v4
-    - run: mkdir .backend/src/main/resources
-    - run: touch .backend/src/main/resources/application.properties
-    - run: echo "${{secrets.APPLICATION}}" > .backend/src/main/resources/application.properties
-    - uses: actions/upload-artifact@v2
-      with:
-        name: application.properties
-        path: .backend/src/main/resources/application.properties
+    - name: Grant execute permission for gradlew
+      run: mkdir src/main/resources
+      working-directory: ${{ env.working-directory }}
+
+    - name: Grant execute permission for gradlew
+      run: touch .backend/src/main/resources/application.properties
+      working-directory: ./backend/src/main/resources
+
+    - name: Grant execute permission for gradlew
+      run: echo "${{secrets.APPLICATION}}" > .backend/src/main/resources/application.properties
+      working-directory: ${{ env.working-directory }}
 
     - name: Grant execute permission for gradlew
       run: sudo su
