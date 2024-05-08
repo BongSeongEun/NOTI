@@ -43,6 +43,10 @@ jobs:
 
     
     - name: Build with Gradle
+      run: fuser -k 4000/tcp
+      working-directory: ${{ env.working-directory }}
+
+    - name: Build with Gradle
       run: cd build/libs/
       working-directory: ${{ env.working-directory }}
       
