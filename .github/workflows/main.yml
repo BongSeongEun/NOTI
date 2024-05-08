@@ -13,7 +13,7 @@ env:
   AWS_CODE_DEPLOY_GROUP: cicd-noti-group
   working-directory: ./backend
   working-ubuntu-directory: /home/ubuntu
-  working-backend-directory: /home/ubuntu/backend/build/libs
+  working-backend-directory: /home/ubuntu/backend/build/libs/
 
 
 jobs:
