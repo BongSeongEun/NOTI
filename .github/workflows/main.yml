@@ -44,11 +44,11 @@ jobs:
 
     - name: Build with Gradle
       run: cd build/libs/
-      working-directory: ${{ env.working-directory }}
+
       
     - name: Build with Gradle
       run: java -jar hello-spring-0.0.1-SNAPSHOT.jar
-      working-directory: ${{ env.working-directory }}
+
       
       
     - name: AWS credential 설정
