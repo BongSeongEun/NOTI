@@ -43,16 +43,16 @@ jobs:
         spring.jpa.properties.hibernate.show_sql: true
         spring.jpa.properties.hibernate.format_sql: true
         spring.jpa.hibernate.ddl-auto: update
-        openai.api.key.a: ${{ secret.KEY_A }}
-        openai.api.key.b: ${{ secret.KEY_B }}
-        openai.api.key.c: ${{ secret.KEY_C }}
-        openai.api.key.d: ${{ secret.KEY_D }}
-        openai.api.key.e: ${{ secret.KEY_E }}
-        openai.api.key.f: ${{ secret.KEY_F }}
-        openai.api.key.g: ${{ secret.KEY_G }}
-        google.refresh.token: ${{ secret.REFRESH_TOKEN }}
-        google.client.id: ${{ secret.CLIENT_ID }}
-        google.client.secret: ${{ secret.CLIENT_SECRET }}
+        openai.api.key.a: ${{ secrets.KEY_A }}
+        openai.api.key.b: ${{ secrets.KEY_B }}
+        openai.api.key.c: ${{ secrets.KEY_C }}
+        openai.api.key.d: ${{ secrets.KEY_D }}
+        openai.api.key.e: ${{ secrets.KEY_E }}
+        openai.api.key.f: ${{ secrets.KEY_F }}
+        openai.api.key.g: ${{ secrets.KEY_G }}
+        google.refresh.token: ${{ secrets.REFRESH_TOKEN }}
+        google.client.id: ${{ secrets.CLIENT_ID }}
+        google.client.secret: ${{ secrets.CLIENT_SECRET }}
         
     - name: Grant execute permission for gradlew
       run: sudo su
