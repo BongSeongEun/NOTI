@@ -31,6 +31,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         String userId = intent.getStringExtra("userId");
         String todoId = intent.getStringExtra("todoId");
+        int notificationId = intent.getIntExtra("notificationId", -1);
         if ("YES_ACTION".equals(action)) {
             OkHttpClient client = new OkHttpClient();
         
@@ -63,10 +64,12 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                 public void onResponse(Call call, Response response) throws IOException {
                     // 성공 처리
                     if (response.isSuccessful()) {
-                        // 서버 응답 처리
+                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                        notificationManager.cancel(notificationId);
                     }
                 }
             });
+
         }
          else if ("NO_ACTION".equals(action)) {
             OkHttpClient client = new OkHttpClient();
@@ -100,7 +103,8 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                 public void onResponse(Call call, Response response) throws IOException {
                     // 성공 처리
                     if (response.isSuccessful()) {
-                        // 서버 응답 처리
+                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                        notificationManager.cancel(notificationId);
                     }
                 }
             });
