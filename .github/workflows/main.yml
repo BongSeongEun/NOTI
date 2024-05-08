@@ -30,31 +30,8 @@ jobs:
       run: mkdir -p ./src/main/java/resources 
            cd ./src/main/java/resources
            touch ./application.properties
+           echo "${{ secrets.APPLICATION }}" > ./src/main/java/resources/application.properties
       working-directory: ${{ env.working-directory }}
-
-    - name: Set Properties file 
-      uses: microsoft/variable-substitution@v1
-      with:
-        files: ${{ env.resource-path }} 
-      env:
-        server.port: 4000
-        spring.datasource.driver-class-name: ${{ secrets.DRIVER_CLASS_NAME }}
-        spring.datasource.url: ${{ secrets.URL }} 
-        spring.datasource.username: ${{ secrets.USERNAME }} 
-        spring.datasource.password: ${{ secrets.PASSWORD }} 
-        spring.jpa.properties.hibernate.show_sql: true
-        spring.jpa.properties.hibernate.format_sql: true
-        spring.jpa.hibernate.ddl-auto: update
-        openai.api.key.a: ${{ secrets.KEY_A }}
-        openai.api.key.b: ${{ secrets.KEY_B }}
-        openai.api.key.c: ${{ secrets.KEY_C }}
-        openai.api.key.d: ${{ secrets.KEY_D }}
-        openai.api.key.e: ${{ secrets.KEY_E }}
-        openai.api.key.f: ${{ secrets.KEY_F }}
-        openai.api.key.g: ${{ secrets.KEY_G }}
-        google.refresh.token: ${{ secrets.REFRESH_TOKEN }}
-        google.client.id: ${{ secrets.CLIENT_ID }}
-        google.client.secret: ${{ secrets.CLIENT_SECRET }}
 
     - name: Grant execute permission for gradlew
       run: sudo su
