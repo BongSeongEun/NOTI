@@ -12,6 +12,7 @@ env:
   AWS_CODE_DEPLOY_APPLICATION: cicd-noti
   AWS_CODE_DEPLOY_GROUP: cicd-noti-group
   working-directory: ./backend
+  resource-path: ./backend/src/main/java/resources/application.properties
 
 jobs:
   build:
@@ -29,6 +30,30 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Set Properties file 
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: ${{ env.resource-path }} 
+      env:
+        server.port: 4000
+        spring.datasource.driver-class-name: ${{ secrets.DRIVER_CLASS_NAME }}
+        spring.datasource.url: ${{ secrets.URL }} 
+        spring.datasource.username: ${{ secrets.USERNAME }} 
+        spring.datasource.password: ${{ secrets.PASSWORD }} 
+        spring.jpa.properties.hibernate.show_sql: true
+        spring.jpa.properties.hibernate.format_sql: true
+        spring.jpa.hibernate.ddl-auto: update
+        openai.api.key.a: ${{ secret.KEY_A }}
+        openai.api.key.b: ${{ secret.KEY_B }}
+        openai.api.key.c: ${{ secret.KEY_C }}
+        openai.api.key.d: ${{ secret.KEY_D }}
+        openai.api.key.e: ${{ secret.KEY_E }}
+        openai.api.key.f: ${{ secret.KEY_F }}
+        openai.api.key.g: ${{ secret.KEY_G }}
+        google.refresh.token: ${{ secret.REFRESH_TOKEN }}
+        google.client.id: ${{ secret.CLIENT_ID }}
+        google.client.secret: ${{ secret.CLIENT_SECRET }}
+        
     - name: Grant execute permission for gradlew
       run: sudo su
       working-directory: ${{ env.working-directory }}
