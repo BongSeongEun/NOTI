@@ -27,6 +27,7 @@ jobs:
         distribution: 'temurin'
 
     - uses: actions/checkout@v4
+    - run: mkdir .backend/src/main/resources
     - run: touch .backend/src/main/resources/application.properties
     - run: echo "${{secrets.APPLICATION}}" > .backend/src/main/resources/application.properties
     - uses: actions/upload-artifact@v2
