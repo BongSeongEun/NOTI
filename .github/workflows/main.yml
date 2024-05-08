@@ -16,11 +16,7 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
-
-
     steps:
     - uses: actions/checkout@v4
 
@@ -29,6 +25,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: touch ./src/main/resources/application.properties
+      working-directory: ${{ env.working-directory }}
 
     - name: Set Properties file 
       uses: microsoft/variable-substitution@v1
@@ -53,7 +53,7 @@ jobs:
         google.refresh.token: ${{ secrets.REFRESH_TOKEN }}
         google.client.id: ${{ secrets.CLIENT_ID }}
         google.client.secret: ${{ secrets.CLIENT_SECRET }}
-        
+
     - name: Grant execute permission for gradlew
       run: sudo su
       working-directory: ${{ env.working-directory }}
