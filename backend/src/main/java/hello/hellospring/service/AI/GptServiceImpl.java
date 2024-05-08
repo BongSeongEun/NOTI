@@ -83,6 +83,12 @@ public class GptServiceImpl implements GptDiaryService {
                 .map(todo -> todo.getTodoTitle() + ":" + (todo.isTodoDone() ? "달성성공" : "달성실패"))
                 .collect(Collectors.joining(", "));
 
+//        if (diaryInputs.isEmpty() && todoContents.isEmpty()){
+//
+//        } else {
+//
+//        }
+
 
         // diaryContent + todoContents 둘이 합치기
         String combinedInputs = diaryInputs + "= 이거는 오늘 하루동안 gpt와 대화했던 내용들이고"
@@ -117,13 +123,13 @@ public class GptServiceImpl implements GptDiaryService {
 
             long diaryEmotionResult;
 
-            if (diaryEmotionScore >= 81 && diaryEmotionScore <= 100) {
+            if (diaryEmotionScore >= 91 && diaryEmotionScore <= 100) {
                 diaryEmotionResult = 5;
-            } else if (diaryEmotionScore >= 61) {
+            } else if (diaryEmotionScore >= 81) {
                 diaryEmotionResult = 4;
-            } else if (diaryEmotionScore >= 41) {
+            } else if (diaryEmotionScore >= 61) {
                 diaryEmotionResult = 3;
-            } else if (diaryEmotionScore >= 21) {
+            } else if (diaryEmotionScore >= 41) {
                 diaryEmotionResult = 2;
             } else {
                 diaryEmotionResult = 1;

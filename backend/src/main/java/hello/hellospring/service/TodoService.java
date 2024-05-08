@@ -208,6 +208,7 @@ public class TodoService {
         result.put("etcPercent", etcResult);
         result.put("etcNum", etcNumResult);
         result.put("etcTime", etcTimeResult);
+        result.put("statsDate", statsDate);
         System.out.println("totalTodos는 : "+totalTodos);
 
         return result;
