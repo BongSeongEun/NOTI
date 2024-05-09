@@ -45,9 +45,18 @@ public class TodoService {
         this.gptGoalService = gptGoalService;
         this.gptSummaryService = gptSummaryService;
     }
-    public List<Todo> createTodo(Todo todo){
+    public List<Todo> createTodo(Todo todo) {
         validateEmptyTodoTile(todo);
         todoRepository.save(todo);
+
+        String tag = null;
+        try {
+            tag = gptTagService.askGpt(todo.getTodoTitle(), todo.getUserId());
+        } catch (Exception e) {
+            System.err.println("이 문구가 뜨면.. gpt가 터진거에요..: " + todo.getTodoId() + " - " + e.getMessage());
+        }
+        todo.setTodoTag(tag);
+        todoRepository.save(todo); // 태그 저장
 
         return todoRepository.findByUserId(todo.getUserId());
     }
@@ -75,6 +84,7 @@ public class TodoService {
     }
 
     public List<Todo> getTodo(String userId){
+
         return todoRepository.findByUserId(Long.valueOf(userId));
     }
 
@@ -121,7 +131,7 @@ public class TodoService {
             todos.forEach(todo -> {
                 String tag = null; // 서비스 호출
                 try {
-                    tag = gptTagService.askGpt(todo.getTodoTitle());
+                    tag = gptTagService.askGpt(todo.getTodoTitle(), userId);
                 } catch (Exception e) {
                     System.err.println("이 문구가 뜨면.. gpt가 터진거에요..: " + todo.getTodoId() + " - " + e.getMessage());
                 }
