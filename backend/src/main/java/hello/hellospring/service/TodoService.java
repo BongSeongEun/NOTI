@@ -12,6 +12,7 @@ import hello.hellospring.service.AI.GptTagService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,24 +103,29 @@ public class TodoService {
     }
 
     public int completedTodos(Long userId, String month) {
-        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, month);
-        List<Todo> completedTodos = todoRepository.findCompletedTodosByMonthAndUserId(userId, month);
+        try {
+            List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, month);
+            List<Todo> completedTodos = todoRepository.findCompletedTodosByMonthAndUserId(userId, month);
 
-        // 모든 일정의 수
-        int totalTodos = allTodos.size();
-        // 완료된 일정의 수
-        int completedTodosCount = completedTodos.size();
+            // 모든 일정의 수
+            int totalTodos = allTodos.size();
+            // 완료된 일정의 수
+            int completedTodosCount = completedTodos.size();
 
-        // 모든 일정 중에서 달성한 일정의 비율 계산
-        double completionRate = 0;
-        if (totalTodos > 0) { // 분모가 0이 되는 경우를 방지
-            completionRate = ((double) completedTodosCount / totalTodos) * 100;
+            // 모든 일정 중에서 달성한 일정의 비율 계산
+            double completionRate = 0;
+            if (totalTodos > 0) { // 분모가 0이 되는 경우를 방지
+                completionRate = ((double) completedTodosCount / totalTodos) * 100;
+            }
+
+            System.out.println("이번달 일정 :" + totalTodos);
+            System.out.println("일정 중 달성갯수 :" + completedTodosCount);
+
+            return (int) completionRate;
+        } catch (Exception e){
+            System.err.println("값이 없습닏다 " + e.getMessage());
+            return 0;
         }
-
-        System.out.println("이번달 일정 :" + totalTodos);
-        System.out.println("일정 중 달성갯수 :" + completedTodosCount);
-
-        return (int) completionRate;
     }
 
     public void updateTodoTags(Long userId, String statsDate) {
@@ -235,44 +241,78 @@ public class TodoService {
 
 
     public Map<String, Long> findWeekDay(Long userId, String statsDate) {
-        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
-        List<Todo> doneTodos = todoRepository.findAllTodosByMonthAndUserIdAndTodoDone(userId, statsDate, true);
+        try {
+            List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+            List<Todo> doneTodos = todoRepository.findAllTodosByMonthAndUserIdAndTodoDone(userId, statsDate, true);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        LocalDate startOfMonth = LocalDate.parse(statsDate + ".01", formatter);
-        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            LocalDate startOfMonth = LocalDate.parse(statsDate + ".01", formatter);
+            LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 
-        Map<String, List<String>> weekDaysMap = new HashMap<>();
-        weekDaysMap.put("MONDAY", new ArrayList<>());
-        weekDaysMap.put("TUESDAY", new ArrayList<>());
-        weekDaysMap.put("WEDNESDAY", new ArrayList<>());
-        weekDaysMap.put("THURSDAY", new ArrayList<>());
-        weekDaysMap.put("FRIDAY", new ArrayList<>());
-        weekDaysMap.put("SATURDAY", new ArrayList<>());
-        weekDaysMap.put("SUNDAY", new ArrayList<>());
+            Map<String, List<String>> weekDaysMap = new HashMap<>();
+            weekDaysMap.put("MONDAY", new ArrayList<>());
+            weekDaysMap.put("TUESDAY", new ArrayList<>());
+            weekDaysMap.put("WEDNESDAY", new ArrayList<>());
+            weekDaysMap.put("THURSDAY", new ArrayList<>());
+            weekDaysMap.put("FRIDAY", new ArrayList<>());
+            weekDaysMap.put("SATURDAY", new ArrayList<>());
+            weekDaysMap.put("SUNDAY", new ArrayList<>());
 
-        Map<String, Long> result = new HashMap<>();
-        for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
-            String dayOfWeek = date.getDayOfWeek().toString();
-            weekDaysMap.get(dayOfWeek).add(date.format(formatter));
+            Map<String, Long> result = new HashMap<>();
+            for (LocalDate date = startOfMonth; !date.isAfter(endOfMonth); date = date.plusDays(1)) {
+                String dayOfWeek = date.getDayOfWeek().toString();
+                weekDaysMap.get(dayOfWeek).add(date.format(formatter));
+            }
+
+            // 일정 개수와 달성 일정 개수 계산하여 결과 맵에 저장
+            weekDaysMap.forEach((dayOfWeek, dates) -> {
+                long totalTodosCount = allTodos.stream()
+                        .filter(todo -> dates.contains(todo.getTodoDate()))
+                        .count();
+                long doneTodosCount = doneTodos.stream()
+                        .filter(todo -> dates.contains(todo.getTodoDate()))
+                        .count();
+
+                // 결과 맵에 요일별로 저장
+                String prefix = dayOfWeek.substring(0, 3).toUpperCase();
+                result.put(prefix + "doneTodos", doneTodosCount);
+                result.put(prefix + "totalTodos", totalTodosCount);
+            });
+
+            return result;
+
+        } catch (DateTimeParseException e) {
+            System.err.println("날짜 형식 오류: " + e.getMessage());
+
+            Map<String, Long> errorResult = new HashMap<>();
+            String[] days = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+            for (String day : days) {
+                errorResult.put(day + "doneTodos", 0L);
+                errorResult.put(day + "totalTodos", 0L);
+            }
+            return errorResult;
+
+        } catch (DataAccessException e) {
+            System.err.println("데이터베이스 접근 오류: " + e.getMessage());
+
+            Map<String, Long> errorResult = new HashMap<>();
+            String[] days = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+            for (String day : days) {
+                errorResult.put(day + "doneTodos", 0L);
+                errorResult.put(day + "totalTodos", 0L);
+            }
+            return errorResult;
+        } catch (Exception e) {
+            System.err.println("알 수 없는 오류 발생: " + e.getMessage());
+
+            Map<String, Long> errorResult = new HashMap<>();
+            String[] days = {"MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"};
+            for (String day : days) {
+                errorResult.put(day + "doneTodos", 0L);
+                errorResult.put(day + "totalTodos", 0L);
+            }
+            return errorResult;
         }
-
-        // 일정 개수와 달성 일정 개수 계산하여 결과 맵에 저장
-        weekDaysMap.forEach((dayOfWeek, dates) -> {
-            long totalTodosCount = allTodos.stream()
-                    .filter(todo -> dates.contains(todo.getTodoDate()))
-                    .count();
-            long doneTodosCount = doneTodos.stream()
-                    .filter(todo -> dates.contains(todo.getTodoDate()))
-                    .count();
-
-            // 결과 맵에 요일별로 저장
-            String prefix = dayOfWeek.substring(0, 3).toUpperCase();
-            result.put(prefix + "doneTodos", doneTodosCount);
-            result.put(prefix + "totalTodos", totalTodosCount);
-        });
-
-        return result;
     }
 
     public Map<String, Object> getGoal(Long userId, String statsDate) {
@@ -309,10 +349,23 @@ public class TodoService {
                     response.put("goalAchieveRate", goal.getGoalAchieveRate());
                 }
             }
+            return response;
         } catch (Exception e) {
-            response.put("error", "An error occurred: " + e.getMessage());
+            System.err.println("저번달 데이터가 없거나, gpt 오류가 났어요 " + e.getMessage());
+
+            Map<String, Object> ErrResponse = new HashMap<>();
+            ErrResponse.put("suggestGoalAchieveRate1", 0);
+            ErrResponse.put("suggestGoalTime1", 0);
+            ErrResponse.put("suggestGoalAchieveRate2", 0);
+            ErrResponse.put("suggestGoalTitle3", "");  // 문자열 값은 유지
+            ErrResponse.put("suggestGoalAchieveRate3", 0);
+            ErrResponse.put("suggestGoalTitle2", "");  // 문자열 값은 유지
+            ErrResponse.put("suggestGoalTime3", 0);
+            ErrResponse.put("suggestGoalTitle1", "");  // 문자열 값은 유지
+            ErrResponse.put("suggestGoalTime2", 0);
+
+            return ErrResponse;
         }
-        return response;
     }
 
 
