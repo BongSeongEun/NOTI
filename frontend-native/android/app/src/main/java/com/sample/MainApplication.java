@@ -14,6 +14,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import android.os.Build;
 import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;
+import com.sample.UserIdBridge;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.uimanager.ViewManager;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List; 
+import android.content.SharedPreferences;
+import android.os.Bundle;
+
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -31,6 +41,21 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           new ReactNativeFirebaseAppPackage();
+
+          packages.add(new ReactPackage() {
+            @Override
+            public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+              List<NativeModule> modules = new ArrayList<>();
+              modules.add(new UserIdBridge(reactContext));
+              return modules;
+            }
+        
+            @Override
+            public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
+              return Collections.emptyList();
+            }
+          });
+
           return packages;
         }
 

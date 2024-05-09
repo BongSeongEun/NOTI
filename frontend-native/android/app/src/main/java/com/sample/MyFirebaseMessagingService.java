@@ -61,32 +61,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, notificationBuilder.build());
     }
-
-    // private void showChatNotification(String title, String body, String todoId, String userId){
-    //     String replyLabel = "여기에 답장을 입력하세요";
-    //     RemoteInput remoteInput = new RemoteInput.Builder("KEY_TEXT_REPLY")
-    //         .setLabel(replyLabel)
-    //         .build();
-
-    //     Intent replyIntent = new Intent(this, ReplyReceiver.class);
-    //     PendingIntent replyPendingIntent =
-    //         PendingIntent.getBroadcast(getApplicationContext(),
-    //             0, replyIntent,
-    //             PendingIntent.FLAG_UPDATE_CURRENT);
-
-    //     // '답장' 액션 생성
-    //     NotificationCompat.Action replyAction =
-    //         new NotificationCompat.Action.Builder(R.drawable.ic_reply_icon,
-    //             "답장", replyPendingIntent)
-    //             .addRemoteInput(remoteInput)
-    //             .build();
-
-    //     // 알림 빌더에 액션 추가
-    //     NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-    //         .setSmallIcon(R.drawable.kakaotalk_20240105_025405447)
-    //         .setContentTitle(title)
-    //         .setContentText(body)
-    //         .setPriority(NotificationCompat.PRIORITY_HIGH)
-    //         .addAction(replyAction);
-    // }
 }
