@@ -151,7 +151,7 @@ function Chatting() {
 			<FullView>
 				<MainView>
 					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
-						<Profile source={base64Image ? { uri: base64Image } : images.profile} />
+						<Profile source={base64Image ? { uri: base64Image } : images.profile} style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
 							<MainText>{userNickname} 님,</MainText>
 							<MainText style={{ color: currentTheme.color1 }}>

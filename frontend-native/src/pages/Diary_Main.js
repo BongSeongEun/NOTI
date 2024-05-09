@@ -16,6 +16,7 @@ import {
 	TouchableOpacity,
 	Alert,
 	Text,
+	Image,
 } from "react-native";
 import { useNavigation, useIsFocused, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -139,6 +140,20 @@ function Diary_Main({ }) {
 		const pictureHeight = !isExpanded && lineCount <= 4 ? 110 : 60;
 		const pictureTop = pictureHeight === 110 ? 170 : 220;
 
+		const getEmotionIcon = () => {
+			const emotionLevel = diary.diaryEmotion;
+			switch (emotionLevel) {
+				case 1: return images.emotion1;
+				case 2: return images.emotion2;
+				case 3: return images.emotion3;
+				case 4: return images.emotion4;
+				case 5: return images.emotion5;
+				default: return null;
+			}
+		};
+
+		const emotionIcon = getEmotionIcon();
+
 		return (
 			<DiaryContainer>
 				<Diary_Frame onPress={() => {
@@ -153,7 +168,6 @@ function Diary_Main({ }) {
 					<Diary_TItle style={{ margin: 10 }}>{diary.diaryTitle}</Diary_TItle>
 					<TouchableOpacity style={{ width: 250, height: 1, backgroundColor: '#B7BABF', alignSelf: 'center' }} />
 					{renderContent(diary.diaryContent, isExpanded)}
-
 					{
 						diary.diaryImg ? (
 							<Diary_Picture
@@ -164,6 +178,25 @@ function Diary_Main({ }) {
 							<View style={{ width: 250, height: pictureHeight, backgroundColor: '#D3D3D3', borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }} />
 						)
 					}
+					{emotionIcon && (
+						<View style={{
+							width: 55,
+							height: 55,
+							borderRadius: 100,
+							backgroundColor: currentTheme.color1,
+							justifyContent: 'center',
+							alignItems: 'center',
+							position: 'absolute',
+							right: 10,
+							top: 200,
+							elevation: 5,
+							borderColor: "white",
+							borderWidth: 1, 
+							borderStyle: "solid",
+						}}>
+							<Image source={emotionIcon} style={{ width: 32, height: 40 }} />
+						</View>
+					)}
 				</Diary_Frame>
 			</DiaryContainer>
 		);
@@ -220,6 +253,24 @@ function Diary_Main({ }) {
             Alert.alert("생성 실패", "일기 생성 중 문제가 발생했습니다.");
         }
     };
+
+	const fetchEmotions = async (month) => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			const userId = getUserIdFromToken(token);
+			try {
+				const response = await axios.get(`http://15.164.151.130:4000/api/v2/diaryEmotion/${userId}/${month}`, {
+					headers: { 'Authorization': `Bearer ${token}` },
+				});
+				if (response.status === 200 && response.data) {
+					return response.data;
+				}
+			} catch (error) {
+				console.error("Error fetching emotions:", error);
+			}
+		}
+		return {};
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>

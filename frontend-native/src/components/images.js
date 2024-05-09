@@ -34,12 +34,11 @@ import plus from "../asset/plus.svg";
 
 import creat_down from "../asset/caret-down";
 
-import emotion1 from "../asset/noti_emotion1";
-import emotion2 from "../asset/noti_emotion2";
-import emotion3 from "../asset/noti_emotion3";
-import emotion4 from "../asset/noti_emotion4";
-import emotion5 from "../asset/noti_emotion5";
-
+import emotion1 from "../asset/emotion1.png";
+import emotion2 from "../asset/emotion2.png";
+import emotion3 from "../asset/emotion3.png";
+import emotion4 from "../asset/emotion4.png";
+import emotion5 from "../asset/emotion5.png";
 
 export const images = {
 	Noti: Noti,
