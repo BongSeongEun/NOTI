@@ -89,7 +89,6 @@ public class GptServiceImpl implements GptDiaryService {
 //
 //        }
 
-
         // diaryContent + todoContents 둘이 합치기
         String combinedInputs = diaryInputs + "= 이거는 오늘 하루동안 gpt와 대화했던 내용들이고"
                 + "\n" + todoContents + "= 이거는 오늘 하루동안의 일정목록이야.";
@@ -118,7 +117,7 @@ public class GptServiceImpl implements GptDiaryService {
             try { // 감정 점수를 숫자로 변환
                 diaryEmotionScore = Long.valueOf(dirayEmotion); // 감정 점수를 숫자로 변환
             } catch (NumberFormatException e) {
-                diaryEmotionScore = 0; // 숫자가 아니면 0으로 처리
+                diaryEmotionScore = 3; // 숫자가 아니면 3으로 처리
             }
 
             long diaryEmotionResult;
