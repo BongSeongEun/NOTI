@@ -58,14 +58,7 @@ const HorizontalBox = styled.div`
     flex-direction: column;
   }
 `;
-const VerticalBox = styled.div`
-  // 아이템을 세로정렬하는 상자
-  display: flex; // 정렬하려면 이거 먼저 써야함
-  align-items: left; // 수직 가운데 정렬
-  flex-direction: column; // 세로나열
-  width: 100%;
-  height: auto;
-`;
+
 const StatsContainer = styled.div`
   background: #fff;
   border-radius: 20px;
@@ -101,18 +94,53 @@ const BarChartLabel = styled.div`
   margin-top: 20px;
 `;
 
-const MonthLabel = styled.div`
-  margin-left: 10px;
-  font-size: 30px;
+const VerticalBox = styled.div`
+  // 아이템을 세로정렬하는 상자
+  display: flex; // 정렬하려면 이거 먼저 써야함
+  align-items: left; // 수직 가운데 정렬
+  flex-direction: column; // 세로나열
+  width: 100%;
+  height: auto;
+`;
+
+const TextBox = styled.div`
   font-weight: bold;
+  font-size: 20px;
   color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+`;
+
+const Btn = styled.div`
+  font-weight: bold;
+  font-size: 20px;
+
+  margin-left: 10px;
+  margin-right: 10px;
+  border: none; // 테두리 없음
+  color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+`;
+
+const SummaryText = styled.div`
+  font-size: 18px;
+  color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  margin: 20px 0;
 `;
 
 function Stat() {
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token"); // 토큰 추가
-  const [selectedDate, setSelectedDate] = useState("");
+  const [summaryText, setSummaryText] = useState(""); // 한줄평 상태 추가
+
+  // 달력에 년.월.일 나오게 하는 함수
+  const formatDate = date => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = `0${d.getMonth() + 1}`.slice(-2); // 월은 0부터 시작하므로 1을 더함
+    const day = `0${d.getDate()}`.slice(-2);
+    return `${year}.${month}`;
+  };
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [statsData, setStatsData] = useState(null);
   // 이번달과 저번달의 달성률 데이터를 저장할 상태
   const [monthlyAchievement, setMonthlyAchievement] = useState(null);
@@ -155,7 +183,10 @@ function Stat() {
   };
 
   // 통계 데이터 가져오기
-  const fetchStatsData = async (userId, statsDate) => {
+  const fetchStatsData = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    const statsDate = formatDate(selectedDate);
+
     try {
       const response = await axios.get(
         `http://15.164.151.130:4000/api/v4/statsTag/${userId}/${statsDate}`,
@@ -172,7 +203,10 @@ function Stat() {
   };
 
   // 이번달과 저번달의 달성률 데이터를 가져오는 함수
-  const fetchMonthlyAchievement = async (userId, statsDate) => {
+  const fetchMonthlyAchievement = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    const statsDate = formatDate(selectedDate);
+
     try {
       const response = await axios.get(
         `http://15.164.151.130:4000/api/v4/statsMonth/${userId}/${statsDate}`,
@@ -183,7 +217,30 @@ function Stat() {
     }
   };
 
-  const fetchWeeklyAchievement = async (userId, statsDate) => {
+  // 이번 달 통계 한줄평 가져오기
+  const fetchSummaryText = async () => {
+    const userId = getUserIdFromToken();
+    const statsDate = formatDate(selectedDate);
+
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v4/summary/${userId}/${statsDate}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setSummaryText(response.data.summaryResult);
+    } catch (error) {
+      console.error("Error fetching summary text:", error);
+    }
+  };
+
+  const fetchWeeklyAchievement = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    const statsDate = formatDate(selectedDate);
+
     try {
       const response = await axios.get(
         `http://15.164.151.130:4000/api/v4/dayWeek/${userId}/${statsDate}`,
@@ -218,27 +275,6 @@ function Stat() {
     } catch (error) {
       console.error("Error fetching weekly achievement data:", error);
     }
-  };
-  // 달력에 년.월.일 나오게 하는 함수
-  const formatDate = date => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = `0${d.getMonth() + 1}`.slice(-2); // 월은 0부터 시작하므로 1을 더함
-    const day = `0${d.getDate()}`.slice(-2);
-    return `${year}.${month}`;
-  };
-
-  // useEffect 내부에서 두 함수를 호출
-  useEffect(() => {
-    const userId = getUserIdFromToken(token);
-    const statsDate = "2024.03"; // 예시로 사용된 날짜, 실제 사용 시 변경 필요
-    fetchStatsData(userId, statsDate);
-    fetchMonthlyAchievement(userId, statsDate);
-    fetchWeeklyAchievement(userId, statsDate);
-  }, [selectedDate]);
-
-  const setDate = date => {
-    setSelectedDate(date);
   };
 
   // 도넛 차트 옵션
@@ -533,6 +569,31 @@ function Stat() {
       ],
     },
   ];
+
+  const handleMonthChange = offset => {
+    const newDate = new Date(
+      selectedDate.setMonth(selectedDate.getMonth() + offset),
+    );
+    fetchSummaryText(newDate);
+    setSelectedDate(newDate);
+    fetchStatsData(newDate);
+    fetchMonthlyAchievement(newDate);
+    fetchWeeklyAchievement(newDate);
+  };
+
+  // useEffect 내부에서 두 함수를 호출
+  useEffect(() => {
+    fetchSummaryText();
+    fetchUserData();
+    fetchStatsData();
+    fetchMonthlyAchievement();
+    fetchWeeklyAchievement();
+  }, [selectedDate]);
+
+  const setDate = date => {
+    setSelectedDate(date);
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
       <NavBar setDate={setDate} />
@@ -541,7 +602,12 @@ function Stat() {
           <DateHeader>노티 분석</DateHeader>
           <FlexContainer>
             <VerticalBox>
-              <MonthLabel>{formatDate(selectedDate)} 분석결과</MonthLabel>
+              <HorizontalBox style={{ justifyContent: "left" }}>
+                <Btn onClick={() => handleMonthChange(-1)}>{"<"}</Btn>
+                <TextBox>{formatDate(selectedDate)} 노티분석</TextBox>
+                <Btn onClick={() => handleMonthChange(1)}>{">"}</Btn>
+              </HorizontalBox>
+              노티 분석 결과 : {summaryText}
               <HorizontalBox>
                 <StatsContainer>
                   {/* 조건부 렌더링: statsData가 있을 경우에만 Chart를 렌더링 */}
