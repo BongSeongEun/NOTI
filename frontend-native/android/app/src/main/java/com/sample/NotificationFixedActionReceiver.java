@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List; 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import java.io.IOException;
+
 
 public class NotificationFixedActionReceiver extends BroadcastReceiver {
 
@@ -40,6 +42,11 @@ public class NotificationFixedActionReceiver extends BroadcastReceiver {
         .url("http://15.164.151.130:4000/api/v3/ask" + userId + "/")
         .post(body)
         .build();
-        Response response = client.newCall(request).execute();
+        try {
+            Response response = client.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
     }
 }

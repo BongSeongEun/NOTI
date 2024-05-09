@@ -29,11 +29,10 @@ public class UserIdBridge extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sendUserIdToNative(String userId, Callback callback) {
+    public void sendUserIdToNative(String userId) {
         SharedPreferences sharedPreferences = getReactApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("userId", userId);
             editor.apply();
-            successCallback.invoke("UserId saved successfully");
-    }
+        }
 }
