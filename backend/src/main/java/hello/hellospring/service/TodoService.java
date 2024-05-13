@@ -220,6 +220,16 @@ public class TodoService {
                 etcTime += totalDurationMinutes;
                 rank++;
             }
+            // 충분한 단어가 없는 경우 빈 값으로 채우기
+            while (rank <= 4) {
+                result.put("Word" + rank + "st", "");
+                result.put("Word" + rank + "stNum", 0);
+                result.put("Word" + rank + "stDoneTodos", 0);
+                result.put("Word" + rank + "stPercent", 0);
+                result.put("Word" + rank + "stTime", 0);
+                rank++;
+            }
+
             result.put("etcPercent", 100 - etc);
             result.put("etcNum", totalTodos - etcNum);
             result.put("etcTime", totalDurationAllTodos - etcTime);
