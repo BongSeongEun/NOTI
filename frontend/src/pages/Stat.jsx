@@ -15,6 +15,8 @@ import { backgrounds, lighten } from "polished";
 import DiaryContainer from "../components/DiaryContainer";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import NavBar from "../components/Navigation";
+import CaretLeft from "../asset/fi-rr-caret-left.png"; // 왼쪽 화살표
+import CaretRight from "../asset/fi-rr-caret-right.png"; // 왼쪽 화살표
 
 const MainDiv = styled.div`
   height: auto;
@@ -49,6 +51,7 @@ const HorizontalBox = styled.div`
   display: flex; // 정렬하려면 이거 먼저 써야함
   flex-direction: row; // 가로나열
   justify-content: center; // 가운데 정렬
+  align-items: center;
   width: 100%;
   height: auto;
   @media (max-width: 1050px) {
@@ -109,14 +112,44 @@ const TextBox = styled.div`
   color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
-const Btn = styled.div`
-  font-weight: bold;
-  font-size: 20px;
-
+const Btn = styled.img`
+  display: flex;
+  align-items: left;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
   margin-left: 10px;
   margin-right: 10px;
-  border: none; // 테두리 없음
-  color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
+
+  &:hover + div {
+    display: block;
+  }
+`;
+
+const Tooltip = styled.div`
+  display: none;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+  }
 `;
 
 const SummaryText = styled.div`
@@ -603,9 +636,23 @@ function Stat() {
           <FlexContainer>
             <VerticalBox>
               <HorizontalBox style={{ justifyContent: "left" }}>
-                <Btn onClick={() => handleMonthChange(-1)}>{"<"}</Btn>
+                <div style={{ position: "relative" }}>
+                  <Btn
+                    src={CaretLeft}
+                    alt="지난달"
+                    onClick={() => handleMonthChange(-1)}
+                  />
+                  <Tooltip>이전 달</Tooltip>
+                </div>
                 <TextBox>{formatDate(selectedDate)} 노티분석</TextBox>
-                <Btn onClick={() => handleMonthChange(1)}>{">"}</Btn>
+                <div style={{ position: "relative" }}>
+                  <Btn
+                    src={CaretRight}
+                    alt="다음달"
+                    onClick={() => handleMonthChange(1)}
+                  />
+                  <Tooltip>다음 달</Tooltip>
+                </div>
               </HorizontalBox>
               노티 분석 결과 : {summaryText}
               <HorizontalBox>
