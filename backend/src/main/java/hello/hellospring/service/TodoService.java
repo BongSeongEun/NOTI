@@ -535,12 +535,27 @@ public class TodoService {
         
         String wordsResultText = formatWordsResult(wordsResult);
 
-        if (wordsResultText.isEmpty()) {
-            result.put("summaryResult", "아직 이번달 데이터가 존재하지 않습니다.");
+        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+
+        if (allTodos.isEmpty()) {
+            result.put("summaryResult", "이번달 데이터가 존재하지 않습니다.");
 
         } else {
-            String goalResult = gptSummaryService.askGpt(wordsResultText);
-            result.put("summaryResult", goalResult);
+            try {
+                String goalResult = gptSummaryService.askGpt(wordsResultText);
+                result.put("summaryResult", goalResult);
+            } catch (Exception e) {
+                // 예외가 발생했을 때 적절한 오류 메시지를 반환
+                result.put("summaryResult", "GPT가 오류가 났어요.. :( " + e.getMessage());
+                // 필요하다면 오류 로깅 또는 추가적인 오류 처리를 수행
+                System.err.println("GPT터짐ㅋㅋ : " + e);
+            }
+
+//            String goalResult = gptSummaryService.askGpt(wordsResultText);
+//
+//
+//
+//            result.put("summaryResult", goalResult);
 
         }
         return result;
