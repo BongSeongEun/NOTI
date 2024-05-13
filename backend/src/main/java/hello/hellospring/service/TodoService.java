@@ -144,52 +144,44 @@ public class TodoService {
     }
 
     public Map<String, Object> findWords(Long userId, String statsDate) {
-        // 단순 일정의 총 개수 구하는 로직
-        List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
-        int totalTodos = allTodos.size();
-
-        List<String> todoTags = todoRepository.findAllTodoTagsByUserIdAndStatsDate(userId, statsDate);
-        Map<String, Long> wordFrequency = new HashMap<>();
-
-        // ',' 기준으로 단어 분리 및 "없음" 단어 제외 후 빈도수 계산
-        todoTags.forEach(tags -> Arrays.stream(tags.split(","))
-                .map(String::trim) // 공백 제거
-                .filter(word -> !word.equalsIgnoreCase("없음")) // "없음" 단어 제외
-                .forEach(word -> wordFrequency.put(word, wordFrequency.getOrDefault(word, 0L) + 1)));
-
-        // 빈도수 내림차순으로 정렬 후 상위 4개 단어와 빈도수 추출
-        List<Map.Entry<String, Long>> sortedEntries = wordFrequency.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .limit(4)
-                .collect(Collectors.toList());
-
-        // 상위 네 단어와 빈도수를 JSON 형태로 매핑
         Map<String, Object> result = new LinkedHashMap<>();
-        int rank = 1;
-        long etc = 0;
-        long etcNum = 0;
-        long etcTime = 0;
-
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm"); // 문자열 날짜 포맷 정의
+        try {
+            List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
+            int totalTodos = allTodos.size();
 
-        long totalDurationAllTodos = allTodos.stream()
-                .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
-                .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
-                .mapToLong(todo -> {
-                    LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), timeFormatter);
-                    LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), timeFormatter);
-                    Duration duration = Duration.between(startTime, endTime);
-                    return duration.isNegative() ? duration.plusDays(1).toMinutes() : duration.toMinutes();
-                })
-                .sum();
+            List<String> todoTags = todoRepository.findAllTodoTagsByUserIdAndStatsDate(userId, statsDate);
 
-        for (Map.Entry<String, Long> entry : sortedEntries) {
+            if (allTodos.isEmpty() || todoTags.isEmpty()) { // 예외처리!!!!!!!!!!!
+                // 빈 리스트 검사 결과 하나라도 비어있을 경우 오류 응답 반환
+                for (int i = 1; i <= 4; i++) {
+                    result.put("Word" + i + "st", "");
+                    result.put("Word" + i + "stNum", 0);
+                    result.put("Word" + i + "stDoneTodos", 0);
+                    result.put("Word" + i + "stPercent", 0);
+                    result.put("Word" + i + "stTime", 0);
+                }
+                result.put("etcPercent", 0);
+                result.put("etcNum", 0);
+                result.put("etcTime", 0);
+                result.put("statsDate", statsDate);
 
-            //몇개중에 몇개달성했어요 용도
-            List<Todo> todosDone = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(userId, statsDate, entry.getKey(), true);
-            // 태그마다 총 시간 출력 용도
-            List<Todo> todosWithTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, entry.getKey());
-            long totalDurationMinutes = todosWithTag.stream()
+                return result;
+            }
+
+            Map<String, Long> wordFrequency = new HashMap<>();
+
+            todoTags.forEach(tags -> Arrays.stream(tags.split(","))
+                    .map(String::trim)
+                    .filter(word -> !word.equalsIgnoreCase("없음"))
+                    .forEach(word -> wordFrequency.put(word, wordFrequency.getOrDefault(word, 0L) + 1)));
+
+            List<Map.Entry<String, Long>> sortedEntries = wordFrequency.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .limit(4)
+                    .collect(Collectors.toList());
+
+            long totalDurationAllTodos = allTodos.stream()
                     .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
                     .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
                     .mapToLong(todo -> {
@@ -200,27 +192,63 @@ public class TodoService {
                     })
                     .sum();
 
-            int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
-            result.put("Word"+rank+"st", entry.getKey()); // 태그 이름
-            result.put("Word"+rank+"stNum", entry.getValue()); // 태그 갯수
-            result.put("Word"+rank+"stDoneTodos", todosDone.size()); // 태그 완료 갯수
-            result.put("Word"+rank+"stPercent", frequencyPercentage); // 태그 퍼센트
-            result.put("Word"+rank+"stTime", totalDurationMinutes); // 태그 달성시간
-            etc += frequencyPercentage; //기타 퍼센트 계산
-            etcNum += entry.getValue();  //기타 갯수 계산
-            etcTime += totalDurationMinutes; //기타 시간 계산
-            rank++;
-        }
-        long etcResult = 100 - etc; // 그외 퍼센트 계산
-        long etcNumResult = totalTodos - etcNum; // 그외 갯수 계산
-        long etcTimeResult = totalDurationAllTodos - etcTime;
-        result.put("etcPercent", etcResult);
-        result.put("etcNum", etcNumResult);
-        result.put("etcTime", etcTimeResult);
-        result.put("statsDate", statsDate);
-        System.out.println("totalTodos는 : "+totalTodos);
+            int rank = 1;
+            long etc = 0, etcNum = 0, etcTime = 0;
+            for (Map.Entry<String, Long> entry : sortedEntries) {
+                List<Todo> todosDone = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(userId, statsDate, entry.getKey(), true);
+                List<Todo> todosWithTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, entry.getKey());
 
-        return result;
+                long totalDurationMinutes = todosWithTag.stream()
+                        .filter(todo -> todo.getTodoEndTime() != null && todo.getTodoStartTime() != null)
+                        .filter(todo -> isValidTimeFormat(todo.getTodoStartTime(), timeFormatter) && isValidTimeFormat(todo.getTodoEndTime(), timeFormatter))
+                        .mapToLong(todo -> {
+                            LocalTime startTime = LocalTime.parse(todo.getTodoStartTime(), timeFormatter);
+                            LocalTime endTime = LocalTime.parse(todo.getTodoEndTime(), timeFormatter);
+                            Duration duration = Duration.between(startTime, endTime);
+                            return duration.isNegative() ? duration.plusDays(1).toMinutes() : duration.toMinutes();
+                        })
+                        .sum();
+
+                int frequencyPercentage = (int) Math.round(((double) entry.getValue() / totalTodos) * 100);
+                result.put("Word" + rank + "st", entry.getKey());
+                result.put("Word" + rank + "stNum", entry.getValue());
+                result.put("Word" + rank + "stDoneTodos", todosDone.size());
+                result.put("Word" + rank + "stPercent", frequencyPercentage);
+                result.put("Word" + rank + "stTime", totalDurationMinutes);
+                etc += frequencyPercentage;
+                etcNum += entry.getValue();
+                etcTime += totalDurationMinutes;
+                rank++;
+            }
+            result.put("etcPercent", 100 - etc);
+            result.put("etcNum", totalTodos - etcNum);
+            result.put("etcTime", totalDurationAllTodos - etcTime);
+            result.put("statsDate", statsDate);
+
+            System.out.println("totalTodos는 : " + (result.containsKey("etcNum") ? result.get("etcNum") : 0));
+
+            return result;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            Map<String, Object> ErrResponse = new HashMap<>();
+
+            for (int i = 1; i <= 4; i++) {
+                ErrResponse.put("Word" + i + "st", "");
+                ErrResponse.put("Word" + i + "stNum", 0);
+                ErrResponse.put("Word" + i + "stDoneTodos", 0);
+                ErrResponse.put("Word" + i + "stPercent", 0);
+                ErrResponse.put("Word" + i + "stTime", 0);
+            }
+            ErrResponse.put("etcPercent", 0);
+            ErrResponse.put("etcNum", 0);
+            ErrResponse.put("etcTime", 0);
+            ErrResponse.put("statsDate", statsDate);
+
+            return ErrResponse;
+
+        }
     }
 
     private boolean isValidTimeFormat(String timeStr, DateTimeFormatter formatter) {
