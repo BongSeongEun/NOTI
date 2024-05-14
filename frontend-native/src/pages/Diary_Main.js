@@ -16,6 +16,7 @@ import {
 	TouchableOpacity,
 	Alert,
 	Text,
+	Image,
 } from "react-native";
 import { useNavigation, useIsFocused, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -39,7 +40,7 @@ function Diary_Main({ }) {
 	const [clicked_share, setClicked_share] = useState(false);
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaries, setDiaries] = useState([]);
-	const isFocused = useIsFocused();
+
     useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');
@@ -104,40 +105,45 @@ function Diary_Main({ }) {
         React.useCallback(() => {
             fetchDiaries();
         }, [])
-    );
+	);
+	
+	const renderContent = (content) => {
+		return (
+			<>
+				<DiaryText
+					style={{ margin: 10 }}
+					numberOfLines={4}
+				>
+					{content}
+				</DiaryText>
+				<DiaryText style={{ marginLeft: 20 }} color={"#B7BABF"}>더보기...</DiaryText>
+			</>
+		);
+	};
+	
 
 	const DiaryFrame = ({ diary }) => {
 		const diaryDate = new Date(diary.diaryDate);
 		const isValidDate = !isNaN(diaryDate);
-		const [isExpanded, setIsExpanded] = useState(false);
 		const [lineCount, setLineCount] = useState(0);
-
-		const onTextLayout = (e) => {
-			setLineCount(e.nativeEvent.lines.length);
+	
+		const pictureHeight = lineCount <= 4 ? 80 : 40;
+		const pictureTop = pictureHeight === 80 ? 200 : 250;
+	
+		const getEmotionIcon = () => {
+			const emotionLevel = diary.diaryEmotion;
+			switch (emotionLevel) {
+				case 1: return images.emotion1;
+				case 2: return images.emotion2;
+				case 3: return images.emotion3;
+				case 4: return images.emotion4;
+				case 5: return images.emotion5;
+				default: return null;
+			}
 		};
-
-		const renderContent = (content, isExpanded) => {
-			return (
-				<>
-					<DiaryText
-						style={{ margin: 10 }}
-						numberOfLines={isExpanded ? undefined : 7}
-						onTextLayout={!isExpanded ? onTextLayout : undefined}
-					>
-						{content}
-					</DiaryText>
-					{!isExpanded && lineCount > 7 && (
-						<TouchableOpacity onPress={() => setIsExpanded(true)}>
-							<DiaryText style={{ marginLeft: 20 }} color={"#B7BABF"}>더보기...</DiaryText>
-						</TouchableOpacity>
-					)}
-				</>
-			);
-		};
-
-		const pictureHeight = !isExpanded && lineCount <= 5 ? 110 : 60;
-		const pictureTop = pictureHeight === 110 ? 170 : 220;
-
+	
+		const emotionIcon = getEmotionIcon();
+	
 		return (
 			<DiaryContainer>
 				<Diary_Frame onPress={() => {
@@ -150,9 +156,8 @@ function Diary_Main({ }) {
 					)}
 					<Diary_TItle color={currentTheme.color1} style={{ marginTop: 5, fontSize: 12 }}>{diary.diaryDate}</Diary_TItle>
 					<Diary_TItle style={{ margin: 10 }}>{diary.diaryTitle}</Diary_TItle>
-					<TouchableOpacity style={{ width: 250, height: 1, backgroundColor: '#B7BABF', alignSelf: 'center' }} />
-					{renderContent(diary.diaryContent, isExpanded)}
-
+					<TouchableOpacity style={{ width: 250, height: 1, backgroundColor: '#E3E4E6', alignSelf: 'center' }} />
+					{renderContent(diary.diaryContent)}
 					{
 						diary.diaryImg ? (
 							<Diary_Picture
@@ -160,13 +165,19 @@ function Diary_Main({ }) {
 								style={{ width: 250, height: pictureHeight, borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }}
 							/>
 						) : (
-							<View style={{ width: 250, height: pictureHeight, backgroundColor: '#D3D3D3', borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }} />
+							<View style={{ width: 250, height: pictureHeight, backgroundColor: '#E3E4E6', borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }} />
 						)
 					}
+					{emotionIcon && (
+						<DiaryEmotion style={{elevation: 5,}}>
+							<Image source={emotionIcon} style={{ width: 50, height: 60 }} />
+						</DiaryEmotion>
+					)}
 				</Diary_Frame>
 			</DiaryContainer>
 		);
 	};
+	
 
 	const formatDate = date => {
 		const d = new Date(date);
@@ -176,12 +187,19 @@ function Diary_Main({ }) {
 		return `${year}.${month}.${day}`;
 	};
 
-	const markedDates = {
+	const markedDates = diaries.reduce((acc, diary) => {
+		const formattedDate = diary.diaryDate.replace(/\./g, '-');
+		acc[formattedDate] = {
+			marked: true,
+			dotColor: currentTheme.color1,
+		};
+		return acc;
+	}, {
 		[selectedDate]: {
 			selected: true,
 			selectedColor: currentTheme.color1,
 		},
-	};
+	});
 
 	const onDayPress = day => {
 		setSelectedDate(day.dateString);
@@ -198,27 +216,27 @@ function Diary_Main({ }) {
 	};
 
 	const createDiary = async () => {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-            Alert.alert("오류", "로그인 정보를 찾을 수 없습니다.");
-            return;
-        }
+		const token = await AsyncStorage.getItem('token');
+		if (!token) {
+			Alert.alert("오류", "로그인 정보를 찾을 수 없습니다.");
+			return;
+		}
         
-        try {
-            const userId = getUserIdFromToken(token);
-            const response = await axios.get(`http://15.164.151.130:4000/api/v3/createDiary/${userId}`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-                params: { diaryDate: selectedDate },
-            });
+		try {
+			const userId = getUserIdFromToken(token);
+			const response = await axios.get(`http://15.164.151.130:4000/api/v3/createDiary/${userId}`, {
+				headers: { 'Authorization': `Bearer ${token}` },
+				params: { diaryDate: selectedDate },
+			});
 
-            if (response.data) {
-                Alert.alert("성공", "일기가 성공적으로 생성되었습니다.", [{ text: "OK", onPress: () => fetchDiaries() }]);
-            }
-        } catch (error) {
-            console.error("Error creating diary:", error);
-            Alert.alert("생성 실패", "일기 생성 중 문제가 발생했습니다.");
-        }
-    };
+			if (response.data) {
+				Alert.alert("성공", "일기가 성공적으로 생성되었습니다.", [{ text: "OK", onPress: () => fetchDiaries() }]);
+			}
+		} catch (error) {
+			console.error("Error creating diary:", error);
+			Alert.alert("생성 실패", "일기 생성 중 문제가 발생했습니다.");
+		}
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>
@@ -321,7 +339,7 @@ const MainText = styled.Text`
 `;
 
 const DiaryText = styled(MainText)`
-	font-size: 8px;
+	font-size: 10px;
 	font-weight: normal;
 `;
 
@@ -356,6 +374,22 @@ const Diary_TItle = styled.Text`
 const Diary_Picture = styled.Image`
 	width: ${(props) => props.size || '200px'};
 	height: ${(props) => props.size || '100px'};
+`;
+
+const DiaryEmotion = styled.View`
+	width: 80px;
+	height: 80px;
+	border-radius: 100px;
+	background-color: ${(props) => props.theme.color1 || "white"};
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	position: absolute;
+	right: 10px;
+	top: 180px;
+	border-color: white;
+	border-width: 1px;
+	border-style: solid;
 `;
 
 

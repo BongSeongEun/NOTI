@@ -13,6 +13,8 @@ import {
 	TextInput,
 	Button,
 	TouchableOpacity,
+	View,
+	Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -40,7 +42,8 @@ function Diary() {
    const [diaryTitle, setDiaryTitle] = useState('');
    const [diaryContent, setDiaryContent] = useState('');
    const [diaryDate, setDiaryDate] = useState(format(new Date(), "yyyy-MM-dd"));
-   const [diaryImg, setDiaryImg] = useState('');
+	const [diaryImg, setDiaryImg] = useState('');
+	const [diaryEmotion, setDiaryEmotion] = useState();
    const [isEditing, setIsEditing] = useState(false);
 
    const toggleEdit = () => {
@@ -116,29 +119,30 @@ function Diary() {
         }
    };
 
-   useEffect(() => {
-        const fetchDiaryDetail = async () => {
-            const token = await AsyncStorage.getItem('token');
-            if (token) {
-            try {
-               const userId = getUserIdFromToken(token);
-                    const response = await axios.get(`http://15.164.151.130:4000/api/v2/diaryDetail/${userId}/${diaryId}`, {
-                        headers: { 'Authorization': `Bearer ${token}` },
-               });
-               if (response.data) {
-                        setDiaryTitle(response.data.diaryTitle);
-                  setDiaryContent(response.data.diaryContent);
-                  setDiaryDate(response.data.diaryDate);
-                  setDiaryImg(response.data.diaryImg);
-                    }
-                } catch (error) {
-                    console.error("Error fetching diary detail:", error);
-                }
-            }
-        };
+	useEffect(() => {
+		const fetchDiaryDetail = async () => {
+			const token = await AsyncStorage.getItem('token');
+			if (token) {
+				try {
+					const userId = getUserIdFromToken(token);
+					const response = await axios.get(`http://15.164.151.130:4000/api/v2/diaryDetail/${userId}/${diaryId}`, {
+						headers: { 'Authorization': `Bearer ${token}` },
+					});
+					if (response.data) {
+						setDiaryTitle(response.data.diaryTitle);
+						setDiaryContent(response.data.diaryContent);
+						setDiaryDate(response.data.diaryDate);
+						setDiaryImg(response.data.diaryImg);
+						setDiaryEmotion(response.data.diaryEmotion);
+					}
+				} catch (error) {
+					console.error("Error fetching diary detail:", error);
+				}
+			}
+		};
 
-        fetchDiaryDetail();
-    }, [diaryId]);
+		fetchDiaryDetail();
+	}, [diaryId]);
 
 	const deleteDiary = async () => {
 		const token = await AsyncStorage.getItem('token');
@@ -170,6 +174,17 @@ function Diary() {
 				setDiaryImg(source.uri);
 			}
 		});
+	};
+
+	const getEmotionImage = (emotion) => {
+		switch (emotion) {
+			case 1: return images.emotion1;
+			case 2: return images.emotion2;
+			case 3: return images.emotion3;
+			case 4: return images.emotion4;
+			case 5: return images.emotion5;
+			default: return null;
+		}
 	};
 
 	return (
@@ -221,21 +236,41 @@ function Diary() {
 								<Diary_TItle style={{ margin: 10, fontSize: 20 }}>{diaryTitle}</Diary_TItle>
 								<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
 								{diaryImg ? (
-									<Diary_Picture source={{ uri: diaryImg }} style={{ width: 250, height: 250, margin: 10 }} />
-								) : null}
+									<View>
+										<Diary_Picture source={{ uri: diaryImg }} style={{ width: 250, height: 250, margin: 10, marginBottom: 30, }} />
+										<DiaryEmotion style={{ elevation: 5, }}>
+											<Image source={getEmotionImage(diaryEmotion)} style={{ width: 50, height: 60 }} />
+										</DiaryEmotion>
+									</View>
+								) : (
+									<View style={{ alignItems: 'center', justifyContent: 'center', height: 1, marginVertical: 50 }}>
+										<DiaryEmotion style={{
+											width: 80,
+											height: 80,
+											borderRadius: 40,
+											backgroundColor: currentTheme.color1,
+											justifyContent: 'center',
+											alignItems: 'center',
+											elevation: 5,
+												marginBottom: 50,
+											top: -60
+										}}>
+											<Image source={getEmotionImage(diaryEmotion)} style={{ width: 50, height: 60 }} />
+										</DiaryEmotion>
+									</View>)}
 							</>
 						) : (
 							<>
 								<TextInput
 									value={diaryTitle}
 									onChangeText={setDiaryTitle}
-									style={{ margin: 10, fontSize: 20, borderBottomWidth: 1, borderColor: '#ccc' }}
+									style={{ margin: 10, fontSize: 20, borderBottomWidth: 1, borderColor: '#ccc', fontWeight: 'bold' }}
 								/>
 								<TextInput
 									value={diaryContent}
 									onChangeText={setDiaryContent}
 									multiline
-									style={{ margin: 10, textAlignVertical: 'top', fontSize: 10, minHeight: 100, padding: 5 }}
+									style={{ margin: 10, textAlignVertical: 'top', fontSize: 12, minHeight: 100, padding: 5 }}
 								/>
 								{diaryImg ? (
 									<TouchableOpacity onPress={selectImage}>
@@ -375,7 +410,7 @@ const Diary_TItle = styled.Text`
 `;
 
 const DiaryText = styled(MainText)`
-   font-size: 10px;
+   font-size: 12px;
    font-weight: normal;
 `;
 
@@ -384,6 +419,22 @@ const Diary_Picture = styled.Image`
    height: 280px;
    align-self: center;
    border-radius: 15px;
+`;
+
+const DiaryEmotion = styled.View`
+	width: 80px;
+	height: 80px;
+	border-radius: 100px;
+	background-color: ${(props) => props.theme.color1 || "white"};
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	position: absolute;
+	right: 10px;
+	top: 200px;
+	border-color: white;
+	border-width: 2px;
+	border-style: solid;
 `;
 
 export default Diary;
