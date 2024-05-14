@@ -15,6 +15,7 @@ public class UserDTO {
     private String muteStartTime;
     private String muteEndTime;
     private String diaryTime;
+    private String deviceToken;
 
     public User toEntity(){
         return User.builder()
@@ -27,6 +28,7 @@ public class UserDTO {
                 .muteStartTime(muteStartTime)
                 .muteEndTime(muteEndTime)
                 .diaryTime(diaryTime)
+                .deviceToken(deviceToken)
                 .build();
     }
 }
