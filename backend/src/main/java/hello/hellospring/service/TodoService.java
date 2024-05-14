@@ -5,6 +5,7 @@ import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Goal;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.GoalRepository;
+import hello.hellospring.repository.SummaryRepository;
 import hello.hellospring.repository.TodoRepository;
 import hello.hellospring.service.AI.GptGoalService;
 import hello.hellospring.service.AI.GptSummaryService;
@@ -34,17 +35,19 @@ public class TodoService {
     private final GoalRepository goalRepository;
     private final GptGoalService gptGoalService;
     private final GptSummaryService gptSummaryService;
+    private final SummaryRepository summaryRepository;
     @Autowired
     public TodoService(GptTagService gptTagService,
                        TodoRepository todoRepository,
                        GoalRepository goalRepository,
                        GptGoalService gptGoalService,
-                       GptSummaryService gptSummaryService) {
+                       GptSummaryService gptSummaryService, SummaryRepository summaryRepository) {
         this.gptTagService = gptTagService;
         this.todoRepository = todoRepository;
         this.goalRepository = goalRepository;
         this.gptGoalService = gptGoalService;
         this.gptSummaryService = gptSummaryService;
+        this.summaryRepository = summaryRepository;
     }
     public List<Todo> createTodo(Todo todo) {
         validateEmptyTodoTile(todo);
@@ -542,14 +545,25 @@ public class TodoService {
         
         String wordsResultText = formatWordsResult(wordsResult);
 
+        // 입력한 달에 todo가 존재하는지 점검
         List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
 
         if (allTodos.isEmpty()) {
             result.put("summaryResult", "이번달 데이터가 존재하지 않습니다.");
 
         } else {
+
+
+
+
+
+
             try {
                 String goalResult = gptSummaryService.askGpt(wordsResultText);
+
+
+
+
                 result.put("summaryResult", goalResult);
             } catch (Exception e) {
                 // 예외가 발생했을 때 적절한 오류 메시지를 반환
