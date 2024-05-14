@@ -38,7 +38,7 @@ public class NlpCompareTodoService {
         jsonBody.put("max_tokens", 50); // 답변 최대 글자수
         jsonBody.put("n", 1); // 한 번의 요청에 대해 하나의 응답만 받기
         jsonBody.put("temperature", 0.7);
-        jsonBody.put("model", "gpt-3.5-turbo");
+        jsonBody.put("model", "gpt-4o");
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
