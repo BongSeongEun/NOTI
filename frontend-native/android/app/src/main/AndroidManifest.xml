@@ -49,6 +49,13 @@
         <action android:name="action" />
       </intent-filter>
     </receiver>
+    <receiver android:name=".NotificationFixedActionReceiver"
+      android:exported="true"
+    >
+    <intent-filter>
+        <action android:name="com.sample.REPLY_ACTION" />
+    </intent-filter>
+    </receiver>
 
     </application>
 </manifest>

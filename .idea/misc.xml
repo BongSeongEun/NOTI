@@ -1,11 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/backend" />
     <file type="web" url="file://$PROJECT_DIR$/frontend-native/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/@actbase/react-kakaosdk/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/@react-native-async-storage/async-storage/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/@react-native-community/clipboard/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/@react-native-community/datetimepicker/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/@react-native-firebase/app/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/@react-native-firebase/messaging/android" />
     <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-gesture-handler/android" />
     <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-gradle-plugin" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-image-picker/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-linear-gradient/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-push-notification/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-reanimated/android" />
     <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-safe-area-context/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-svg/android" />
+    <file type="web" url="file://$PROJECT_DIR$/frontend-native/node_modules/react-native-webview/android" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />

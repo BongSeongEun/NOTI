@@ -59,7 +59,20 @@ function Todo() {
   useEffect(() => {
     fetchUserData();
     SaveDeviceToken();
+    sendUserIdToNative();
   }, []);
+
+  const {UserIdBridge} = NativeModules;
+
+  async function sendUserIdToNative() {
+    try {
+      const userId = await getUserIdFromToken();
+      UserIdBridge.sendUserIdToNative(userId);
+      console.log('UserId sent to native: ', userId);
+    } catch (error) {
+      console.error('Failed to send userId to native: ', error);
+    }
+  }
 
   const SaveDeviceToken = async () => {
     const userId = await getUserIdFromToken();
