@@ -162,7 +162,7 @@ public class GptServiceImpl implements GptDiaryService {
         jsonBody.put("max_tokens", 1000);
         jsonBody.put("n", 1);
         jsonBody.put("temperature", 0.7);
-        jsonBody.put("model", "gpt-3.5-turbo");
+        jsonBody.put("model", "gpt-4o");
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
