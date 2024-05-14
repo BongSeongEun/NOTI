@@ -1,18 +1,8 @@
-// 설정 페이지
 import React, { useState } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { useDropzone, open } from "react-dropzone";
-import {
-  Navigate,
-  useNavigate,
-  Link,
-  Toggle,
-  redirect,
-} from "react-router-dom";
-import { backgrounds, lighten } from "polished";
+import { useNavigate } from "react-router-dom";
 import NavBar from "../components/Navigation";
-import SettingIcon from "../asset/setting.png"; // 수정하기
-import theme from "../styles/theme"; // 테마 파일 불러오기
+import theme from "../styles/theme";
 
 const MainDiv = styled.div`
   height: auto;
@@ -30,21 +20,60 @@ const MainDiv = styled.div`
   justify-content: center;
 `;
 
+const ButtonContainer = styled.div`
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const Button = styled.button`
+  background-color: ${props => props.theme.color1};
+  color: white;
+  padding: 10px 20px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background-color: ${props => props.theme.color2};
+  }
+`;
+
 function Setting() {
   const navigate = useNavigate();
-  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
   const [selectedDate, setSelectedDate] = useState("");
 
   const setDate = date => {
     setSelectedDate(date);
   };
+
+  const handleLogout = () => {
+    window.localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  const handleEditProfile = () => {
+    navigate("/edit-profile");
+  };
+
   return (
     <ThemeProvider theme={currentTheme}>
       <NavBar setDate={setDate} />
       <div>
-        <MainDiv>설정</MainDiv>
+        <MainDiv>
+          설정
+          <ButtonContainer>
+            <Button onClick={handleLogout}>로그아웃</Button>
+            <Button onClick={handleEditProfile}>회원정보 수정</Button>
+          </ButtonContainer>
+        </MainDiv>
       </div>
     </ThemeProvider>
   );
 }
+
 export default Setting;
