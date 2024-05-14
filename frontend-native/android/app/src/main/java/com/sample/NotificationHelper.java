@@ -39,9 +39,10 @@ public class NotificationHelper {
 
         // 인텐트와 PendingIntent 준비
         Intent replyIntent = new Intent(context, NotificationFixedActionReceiver.class);
+        replyIntent.setAction("com.sample.REPLY_ACTION");
         PendingIntent replyPendingIntent = PendingIntent.getBroadcast(
                 context,
-                0,
+                NOTIFICATION_ID,
                 replyIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
         );
@@ -62,8 +63,8 @@ public class NotificationHelper {
         // 알림 생성
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.kakaotalk_20240105_025405447)
-                .setContentTitle("새 메시지")
-                .setContentText("여기에 입력하세요")
+                .setContentTitle("지금 어떤걸 하고 계신가요?")
+                .setContentText("")
                 .addAction(replyAction) // 액션 추가
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();

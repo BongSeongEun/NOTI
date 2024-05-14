@@ -65,8 +65,9 @@ function Todo() {
   const {UserIdBridge} = NativeModules;
 
   async function sendUserIdToNative() {
-    const userId = await getUserIdFromToken();
+    const userId = String(await getUserIdFromToken());
     UserIdBridge.sendUserIdToNative(userId);
+    console.log(userId);
   }
 
   const SaveDeviceToken = async () => {
