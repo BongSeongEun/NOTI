@@ -6,14 +6,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.uimanager.ViewManager;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List; 
-import android.content.SharedPreferences;
-import android.os.Bundle;
-
 
 public class UserIdBridge extends ReactContextBaseJavaModule {
 
@@ -31,10 +23,9 @@ public class UserIdBridge extends ReactContextBaseJavaModule {
     @ReactMethod
     public void sendUserIdToNative(String userId) {
         SharedPreferences sharedPreferences = getReactApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("userId", userId);
-            // editor.apply();
-            editor.commit();
-            NotificationHelper.createNotification(getReactApplicationContext());
-        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("userId", userId);
+        editor.commit(); // Save userId to SharedPreferences
+        NotificationHelper.createNotification(getReactApplicationContext());
+    }
 }
