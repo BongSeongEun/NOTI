@@ -46,12 +46,13 @@ public class NlpService {
 
         messagesArray.put(new JSONObject().put("role", "system")
                 .put("content", "이 문장을 nlp기술로 event와 time과 date를 분리해줘" +
-                        "배열 형식으로 결과값을 리턴해줘.7시에 커피집을 갔다하면 [커피집을 갔다],[07:00~07:00],[2024.02.29] 이런식으로" +
-                        "만약 xx시부터 yy시까지 c를 한다하면 [c를 한다],[xx:00~yy:00][2024.02.29] 이런식으로"+
+                        "배열 형식으로 결과값을 리턴해줘.7시에 커피집을 갈거야 하면 [[\"커피집 가기\"],[\"07:00~07:00\"],[\"2024.02.29\"]] 이런식으로" +
+                        "만약 xx시부터 yy시까지 c를 한다하면 [[\"c 하기\"],[\"xx:00~yy:00\"],[\"2024.02.29\"]] 이런식으로"+
                         "첫번째 배열에는 event를 넣어주고, 두번째 배열에는 time을 넣어주고, 세번째 배열에는 date를 넣어줘" +
                         "time의 경우에는 xx:yy~xx:yy 형식으로 값을 넣어줘" + "만약 지금부터 d시간동안 무엇을 할꺼다 라고 하면 지금 시간인"+ formattedTime + "에서 부터 d시간이 추가된 값을 넣어줘"+
                         "date의 경우에는 언급이 없으면 오늘 날짜인"+ formattedDate +"를 넣어주고, 내일이라고 하면 오늘날짜를 기준으로 다음날짜를 넣어줘" +
-                        "event랑 time과 date가 여러개이면 : [[운전을 한다, 집에 간다],[02:00~02:00,06:00~06:00],[2024.02.29, 2024.02.29]] 이런식으로 분리해줘"));
+                        "event랑 time과 date가 여러개이면 : [[\"운전하기\", \"집가기\"],[\"02:00~02:00\",\"06:00~06:00\"],[\"2024.02.29\", \"2024.02.29\"]] 이런식으로 분리해줘" +
+                        "배열과 배열 사이에 빈칸 띄우지마"));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", userMessage));
 
@@ -83,6 +84,7 @@ public class NlpService {
 
             // 예외처리 우선 해놓음
             try {
+                System.out.println("content는 : " + content);
                 // content 형식 검증
                 JSONArray contentArray = new JSONArray(content);
                 if (contentArray.length() == 3
@@ -95,10 +97,12 @@ public class NlpService {
                     System.out.println("현재 시간은 : " + formattedTime);
                     return content;
                 } else {
+                    System.out.println("else문은 거치셨습니다");
                     // 형식이 올바르지 않은 경우, 빈 배열 반환
                     return "[[\"\"],[\"\"],[\"\"]]";
                 }
             } catch (JSONException e) {
+                System.out.println("catch문은 거치셨습니다");
                 // JSON 파싱 오류 발생 시, 빈 배열 반환
                 return "[[\"\"],[\"\"],[\"\"]]";
             }
