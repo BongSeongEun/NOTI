@@ -80,14 +80,19 @@ function Chatting() {
 				chat_content: message,
 			});
 			if (response.data) {
-				addMessage({
-					text: response.data.chatContent,
-					isUser: !response.data.chatWho,
-					date: formatDateWithDay(parseISO(response.data.chatDate)),
-					time: format(parseISO(response.data.chatDate), "HH:mm"),
-				});
-				setInputValue('');
-				await fetchChatHistory();
+				const chatDate = parseISO(response.data.chatDate);
+				if (!isNaN(chatDate)) {
+					addMessage({
+						text: response.data.chatContent,
+						isUser: !response.data.chatWho,
+						date: formatDateWithDay(chatDate),
+						time: format(chatDate, "HH:mm"),
+					});
+					setInputValue('');
+					await fetchChatHistory();
+				} else {
+					console.error('Invalid date format:', response.data.chatDate);
+				}
 			}
 		} catch (error) {
 			console.error('Error fetching Gpt response:', error);

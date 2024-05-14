@@ -13,6 +13,7 @@ import {
 	View,
 	TouchableOpacity,
 	TextInput,
+	FlatList,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,7 +31,6 @@ import DropDownPicker from 'react-native-dropdown-picker'
 
 function Stat({ }) {
 	const navigation = useNavigation();
-
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
 	const [userNickname, setUserNickname] = useState('');
 	const [dailyCompletionRates, setDailyCompletionRates] = useState({
@@ -106,6 +106,7 @@ function Stat({ }) {
 		{ label: '2024.02', value: '2024.02' },
 		{ label: '2024.01', value: '2024.01' },
 	]);
+	const [summaryResult, setSummaryResult] = useState('');
 	
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -290,7 +291,6 @@ function Stat({ }) {
 					setIsGoalSet(true);
 					setGoal({
 						schedule: response.data.goalTitle,
-						rate: response.data.goalAchieveRate.toString(),
                     	time: response.data.goalTime.toString(),
 					});
 				}
@@ -298,17 +298,14 @@ function Stat({ }) {
 				setRecommendedGoals([
 					{
 						title: response.data.suggestGoalTitle1,
-						rate: response.data.suggestGoalAchieveRate1,
 						time: response.data.suggestGoalTime1,
 					},
 					{
 						title: response.data.suggestGoalTitle2,
-						rate: response.data.suggestGoalAchieveRate2,
 						time: response.data.suggestGoalTime2,
 					},
 					{
 						title: response.data.suggestGoalTitle3,
-						rate: response.data.suggestGoalAchieveRate3,
 						time: response.data.suggestGoalTime3,
 					},
 				]);
@@ -347,8 +344,34 @@ function Stat({ }) {
 		}
 	};
 
+	const fetchSummary = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (!token) {
+			console.error("Token not available");
+			return;
+		}
+	
+		const userId = getUserIdFromToken(token);
+		const statsDate = value;
+	
+		try {
+			const response = await axios.get(`http://15.164.151.130:4000/api/v4/summary/${userId}/${statsDate}`, {
+				headers: {
+					'Authorization': `Bearer ${token}`,
+				},
+			});
+	
+			if (response.data && response.data.summaryResult) {
+				setSummaryResult(response.data.summaryResult);
+			}
+		} catch (error) {
+			console.error("Error fetching summary data:", error);
+		}
+	};
+
 	useEffect(() => {
 		fetchCurrentGoalRate();
+		fetchSummary();
 	}, [value]);
 
 	const pieData = [
@@ -471,7 +494,6 @@ function Stat({ }) {
 		setGoal({
 			schedule: selectedGoal.title,
 			time: selectedGoal.time.toString(),
-			rate: selectedGoal.rate.toString(),
 		});
 		setShowRecommendedGoals(false);
 		setIsGoalSet(true);
@@ -486,7 +508,7 @@ function Stat({ }) {
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<ScrollView>
 					<MainView>
-						<MainText style={{ fontSize: 15, marginTop: 50 }}>{userNickname} 님의 한 달</MainText>
+						<MainText style={{ fontSize: 15, marginTop: 50,  }}>{userNickname} 님의 한 달</MainText>
 						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요!</MainText>
 
 						<TouchableOpacity onPress={toggleDropDown} style={{ marginBottom: 5 }} />
@@ -548,8 +570,8 @@ function Stat({ }) {
 								style={{ padding: 10 }}
 							>
 								<View>
-								<MainText color='white'>{userNickname} 님의 기타 노티는</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.etcPercent}% 입니다!</Stat_Text>
+								<MainText color='white'>이번 달의 한줄평은</MainText>
+									<Stat_Text style={{ marginTop: 5 }}>{summaryResult || "데이터가 없습니다."}</Stat_Text>
 								</View>
 							</States>
 						</ScrollView>
@@ -560,28 +582,25 @@ function Stat({ }) {
 								? (showRecommendedGoals ? 270 : 180)
 								: (showRecommendedGoals ? 240 : 150),
 						}}>
-							<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+							<GoalB>
+								<MainText style={{color: "white"}}>이번 달의 목표 🔥</MainText>
+							</GoalB>
+							<View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
 								<StyledTextInput
 									onChangeText={handleScheduleChange}
 									value={goal.schedule}
 									placeholder="일정"
 									keyboardType="default"
 								/>
-								<MainText>일정</MainText>
+								<MainText style={{marginRight: 10, fontSize: 13}}>일정</MainText>
 								<StyledTextInput
 									onChangeText={handleTimeChange}
 									value={goal.time}
 									placeholder="시간"
 									keyboardType="numeric"
 								/>
-								<MainText>분</MainText>
-								<StyledTextInput
-									onChangeText={handleRateChange}
-									value={goal.rate}
-									placeholder="달성률"
-									keyboardType="numeric"
-								/>
-								<MainText>달성률 달성하기!</MainText>
+								<MainText style={{ marginRight: 10, fontSize: 13}}>분</MainText>
+								<MainText>달성하기!</MainText>
 							</View>
 
 							{isGoalSet && (
@@ -613,7 +632,7 @@ function Stat({ }) {
 									{recommendedGoals.map((goal, index) => (
 										<TouchableOpacity key={index} onPress={() => handleSelectRecommendedGoal(goal)}>
 											<MainText style={{ padding: 5, color: 'gray' }}>
-												{goal.title} 일정 {goal.time} 분 {goal.rate} 달성률 달성하기
+												{goal.title} 일정 {goal.time} 분 달성하기!
 											</MainText>
 										</TouchableOpacity>
 									))}
@@ -886,7 +905,7 @@ const StyledTextInput = styled.TextInput`
   border-radius: 5px;
   margin: 3px;
   background-color: white;
-  font-size: 10px;
+  font-size: 13px;
 `;
 
 const GoalChart = styled.TouchableOpacity`
@@ -894,6 +913,18 @@ const GoalChart = styled.TouchableOpacity`
 	height: 20px;
 	border-radius: 100px;
 	background-color: ${props => props.color || "#B7BABF"};
+`;
+
+const GoalB = styled.TouchableOpacity`
+	width: 180px;
+	height: 30px;
+	border-radius: 15px;
+	background-color: ${props => props.theme.color1 || "white"};
+	align-items: center;
+	justify-content: center;
+	align-self: center;
+	position: absolute;
+	top: -15px;
 `;
 
 export default Stat;

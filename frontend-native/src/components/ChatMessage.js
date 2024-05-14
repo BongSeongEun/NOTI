@@ -18,7 +18,7 @@ const MessageContainer = styled.View`
 	border-radius: 20px;
 	margin: 5px 0;
 	align-self: ${props => props.isUser ? 'flex-end' : 'flex-start'};
-	max-width: 70%;
+	max-width: 80%;
 	${props => props.isUser ? 'border-bottom-right-radius: 0;' : 'border-bottom-left-radius: 0;'}
 `;
 
