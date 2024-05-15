@@ -385,11 +385,17 @@ public class TodoService {
                 // 해당하는 달의 목표가 존재하는 경우
                 System.out.println("있음");
 
+
                 // 기존 목표 정보를 response에 추가
                 for (Goal goal : goalExist) {
-                    response.put("goalTitle", goal.getGoalTitle());
-                    response.put("goalTime", goal.getGoalTime());
-                    response.put("goalAchieveRate", goal.getGoalAchieveRate());
+                    String goalTitle = goal.getGoalTitle() != null ? goal.getGoalTitle() : "";
+                    Long goalTime = goal.getGoalTime() != null ? goal.getGoalTime() : 0;
+                    Long goalAchieveRate = goal.getGoalAchieveRate() != null ? goal.getGoalAchieveRate() : 0;
+
+
+                    response.put("goalTitle", goalTitle);
+                    response.put("goalTime", goalTime);
+                    response.put("goalAchieveRate", goalAchieveRate);
                 }
             }
             return response;
