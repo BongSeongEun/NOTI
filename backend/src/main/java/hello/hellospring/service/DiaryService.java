@@ -83,11 +83,14 @@ public class DiaryService {
     }
 
     public DiaryDTO findByUserIdAndDiaryDate(Long userId, String diaryDate) {
-        Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryDate(userId, diaryDate)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_id를 찾을 수 없어요..." + userId + " 앗.. diray_date도요... :( " + diaryDate));
-        // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
-        return DiaryDTO.diaryDTO(diary);
+        List<Diary> diaries = diaryRepository.findByUserIdAndDiaryDate(userId, diaryDate);
+        if (diaries.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "일치하는 일기를 찾을 수 없어요...");
+        }
+        // 첫 번째 일기 엔티티를 DiaryDTO로 변환하여 반환
+        return DiaryDTO.diaryDTO(diaries.get(0));
     }
+
 
 
     // 페이징

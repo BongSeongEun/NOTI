@@ -12,7 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -21,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -137,8 +146,11 @@ public class GptServiceImpl implements GptDiaryService {
                 diaryEmotionResult = 1;
             }
 
-//            String imagePrompt = "위 일기 내용을 기반으로 이미지를 생성해줘";
-//            String imageUrl = generateImage(imagePrompt);
+            String imagePrompt = diaryContent +"위 일기 내용을 기반으로 이미지를 생성해줘";
+            String imgResult = generateImage(imagePrompt);
+            String imageUrl = encodeToBase64(imgResult, 200, 200);
+//            System.out.println("인코딩 반환값은? :" + imageUrl);
+
 
 
             Diary diary = new Diary();
@@ -146,7 +158,7 @@ public class GptServiceImpl implements GptDiaryService {
             diary.setDiaryTitle(diaryTitle); //diary_title에 저장
             diary.setDiaryContent(diaryContent); //diary_content에 저장
             diary.setDiaryEmotion(diaryEmotionResult); //diary_emotion에 저장
-//            diary.setDiaryImg(imageUrl); // diary_img에 저장
+            diary.setDiaryImg(imageUrl); // diary_img에 저장
 
             String formattedDate = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
             diary.setDiaryDate(formattedDate); //diary_date에 저장
@@ -214,11 +226,52 @@ public class GptServiceImpl implements GptDiaryService {
         JSONArray data = jsonResponse.getJSONArray("data");
         if (data.length() > 0) {
             JSONObject firstImage = data.getJSONObject(0);
+
+            System.out.println(firstImage.getString("url"));
             return firstImage.getString("url"); // DALL-E로부터 생성된 이미지 URL 반환
         } else {
             throw new Exception("이미지 생성 API 호출에 실패했어요...");
         }
     }
+
+    public static String encodeToBase64(String fillImageUrl, int targetWidth, int targetHeight) throws IOException {
+        URL url = new URL(fillImageUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        // 이미지 다운로드
+        InputStream inputStream = connection.getInputStream();
+        BufferedImage originalImage = ImageIO.read(inputStream);
+        inputStream.close();
+        connection.disconnect();
+
+        // 이미지 리사이징
+        Image resizedImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        BufferedImage bufferedResizedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = bufferedResizedImage.createGraphics();
+        g2d.drawImage(resizedImage, 0, 0, null);
+        g2d.dispose();
+
+        // 이미지를 base64로 인코딩
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedResizedImage, "jpg", baos);
+        byte[] imageBytes = baos.toByteArray();
+        String base64EncodedImage = Base64.getEncoder().encodeToString(imageBytes);
+
+        return base64EncodedImage;
+    }
+
+    private String convertImageUrl(String originalUrl) { // 삭제예정
+        // 예시로 제공된 URL에서 파일 이름을 추출합니다
+        String fileName = originalUrl.substring(originalUrl.lastIndexOf("/") + 1);
+
+        // 파일 이름을 이용하여 새로운 URL을 생성합니다
+        // 파일 이름은 그대로 사용됩니다
+        String newUrl = "file:///data/user/0/com.sample/cache/" + fileName;
+
+        return newUrl;
+    }
+
 
 
 }
