@@ -38,7 +38,7 @@
 - 앱을 켰을 경우 뜨는 상시 알림을 통해 GPT와의 대화 기능
 - 대화를 통해 일정 추가 및 완료 여부 전달 가능
 
--> NOTI 데이터베이스 설계  <br/>
+### -> NOTI 데이터베이스 설계  <br/>
  https://www.notion.so/NOTI-36a20d703f2f4923bd0794985359db06?pvs=4  <br/>  <br/>
--> NOTI API 명세서  <br/>
+### -> NOTI API 명세서  <br/>
  https://www.notion.so/API-aa77fa7808c84c1697af7fbbb469f81a?pvs=4  <br/>
