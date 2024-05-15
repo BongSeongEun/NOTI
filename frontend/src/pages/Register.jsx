@@ -16,14 +16,12 @@ import {
 import { backgrounds, lighten } from "polished";
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
-
 import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
 import USER from "../asset/userimage.png";
 import COM from "../asset/cam.png";
 
 // 이미지 업로드
 const ImageUpload = ({ onFileChange }) => {
-  // onFileChange prop 추가
   const [uploadedImage, setUploadedImage] = useState(USER);
   const { getRootProps, getInputProps } = useDropzone({
     accept: "image/*",
@@ -31,9 +29,12 @@ const ImageUpload = ({ onFileChange }) => {
       const file = acceptedFiles[0];
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result); // 이미지 미리보기를 위한 상태 업데이트
-        onFileChange(file); // 선택된 파일을 상위 컴포넌트로 전달
+        // 이미지 미리보기를 위한 상태 업데이트
+        setUploadedImage(reader.result);
+        // Base64 인코딩된 이미지 데이터를 상위 컴포넌트로 전달
+        onFileChange(reader.result);
       };
+      // 파일을 읽어 Base64로 변환
       reader.readAsDataURL(file);
     },
   });
@@ -98,7 +99,7 @@ const RegDiv = styled.div`
 
 const RegBox = styled.div`
   //회원가입 회색 큰 박스
-  border: 3px solid #b7babf;
+  border: 2px solid ${props => props.theme.color1};
   width: 350px;
   height: auto;
   padding: 30px;
@@ -122,6 +123,7 @@ const MainTextBox = styled.div`
 `;
 
 const HorizontalBox = styled.div`
+  margin-bottom: 10px;
   // 아이템을 가로정렬하는 상자
   display: flex; // 정렬하려면 이거 먼저 써야함
   //flex-direction: row; // 가로나열
@@ -163,7 +165,7 @@ const InputBox = styled.input`
 const InputBox2 = styled.input`
   // 사용자에게 입력받는 input box
   border: none;
-  width: 180px;
+  width: 90%;
   height: 30px;
   border-radius: 30px; // 모서리 둥굴게
   background-color: #f2f3f5;
@@ -172,24 +174,24 @@ const InputBox2 = styled.input`
   text-align: center;
 `;
 
-const Button2 = styled.button`
-  // 중복확인
-  border: none;
-  height: 30px;
-  width: 60px;
-  top: 0;
-  bottom: 0;
-  margin: auto 0;
-  border-radius: 3px;
-  font-size: 10px;
-  background-color: ${props => props.theme.color1};
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  &:hover {
-    background-color: ${props => lighten(0.1, props.theme.color1)};
-  }
-  color: #ffffff;
-`;
+// const Button2 = styled.button`
+//   // 중복확인
+//   border: none;
+//   height: 30px;
+//   width: 60px;
+//   top: 0;
+//   bottom: 0;
+//   margin: auto 0;
+//   border-radius: 3px;
+//   font-size: 10px;
+//   background-color: ${props => props.theme.color1};
+//   cursor: pointer;
+//   transition: background-color 0.3s ease;
+//   &:hover {
+//     background-color: ${props => lighten(0.1, props.theme.color1)};
+//   }
+//   color: #ffffff;
+// `;
 
 const RegBtn = styled.button`
   // 가입하기 버튼
@@ -210,10 +212,6 @@ const RegBtn = styled.button`
   // transition: transform 80ms ease-in; // 부드럽게 전환
   text-align: center; // 텍스트 가운데 정렬
 `;
-
-function myLighten(amount, color) {
-  return lighten(amount, color);
-}
 
 const ThemedButton = styled.button`
   border: 4px solid #ffffff;
@@ -245,6 +243,7 @@ function Register() {
   const token = window.localStorage.getItem("token");
   const [themeName, setThemeName] = useState("OrangeTheme"); // 기본 테마 이름
   const [selectedFile, setSelectedFile] = useState(null);
+  const [userEmail, setUserEmail] = useState(""); // 사용자 이메일 상태 변수 추가
 
   // 테마 변경 핸들러
   const handleThemeChange = selectedThemeName => {
@@ -252,17 +251,12 @@ function Register() {
     if (newTheme) {
       setCurrentTheme(newTheme); // UI 상에서 테마를 적용
       setThemeName(selectedThemeName); // 선택된 테마 이름을 상태에 저장
-      localStorage.setItem("userTheme", selectedThemeName); // 선택된 테마 이름을 localStorage에 저장
     } else {
       console.error("Selected theme does not exist:", selectedThemeName);
     }
   };
 
-  // 이미지 파일 변경 처리
-  const handleFileChange = file => {
-    setSelectedFile(file);
-  };
-
+  // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
     const payload = token.split(".")[1];
     const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
@@ -272,18 +266,27 @@ function Register() {
     console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
+  // Base64 이미지 데이터를 저장할 상태
+  const [base64Image, setBase64Image] = useState("");
+
+  // ImageUpload 컴포넌트로부터 Base64 인코딩된 이미지 데이터를 받음
+  const handleFileChange = base64 => {
+    setBase64Image(base64);
+  };
+
   // 사용자 정보 전송 함수
   async function postUser() {
     const userId = getUserIdFromToken();
     try {
-      await axios.put(
-        `/api/v1/user/${userId}`,
+      const response = await axios.put(
+        `http://15.164.151.130:4000/api/v1/user/${userId}`,
         {
           userNickname,
           userColor: themeName, // 테마의 주 색상
           diaryTime, // 일기 생성 시간
           muteStartTime, // 방해 금지 시작 시간
           muteEndTime, // 방해 금지 종료 시간
+          userProfile: base64Image, // Base64 인코딩된 이미지 데이터
         },
         {
           headers: {
@@ -291,16 +294,50 @@ function Register() {
           },
         },
       );
+      if (response.status === 200 || response.status === 201) {
+        // 회원 정보 업데이트 성공 시
+        // 로컬 스토리지에 사용자가 선택한 테마 정보 저장
+        localStorage.setItem("userTheme", themeName);
+        // 회원 정보 업데이트가 성공했을 때, Welcome 페이지로 이동
+        navigate("/Welcome");
+      }
     } catch (error) {
       console.error("Error posting user data:", error);
       // 에러 처리
     }
   }
   // 가입하기 버튼 클릭 핸들러
-  const handleSubmit = async () => {
+  const handleSubmit = async e => {
+    e.preventDefault(); // 폼 제출에 의한 페이지 새로고침 방지
     await postUser(); // 사용자 정보 전송
     localStorage.setItem("userColor", currentTheme.color1); // 색상을 로컬 스토리지에 저장
   };
+
+  // 사용자 정보를 가져오는 함수
+  async function fetchUserInfo() {
+    const userId = getUserIdFromToken(); // 이미 정의된 getUserIdFromToken 함수를 사용
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+      if (response.status === 200) {
+        const { kakaoEmail } = response.data; // 응답 데이터에서 kakaoEmail 추출
+        setUserEmail(kakaoEmail); // 상태 업데이트
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      // 에러 처리
+    }
+  }
+
+  useEffect(() => {
+    fetchUserInfo(); // 컴포넌트 마운트 시 사용자 정보 가져오기
+  }, []); // 빈 의존성 배열로 마운트 시에만 호출
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -321,7 +358,7 @@ function Register() {
                 프로필을 등록해보세요
               </MainTextBox>
               <HorizontalBox>
-                <ImageUpload onFileChange={file => setSelectedFile(file)} />
+                <ImageUpload onFileChange={handleFileChange} />
                 <VerticalBox>
                   <SubTextBox style={{ marginTop: "15px" }}>
                     사용자명*
@@ -334,7 +371,6 @@ function Register() {
                       value={userNickname}
                       onChange={e => setUserNickname(e.target.value)}
                     />
-                    <Button2 style={{ marginLeft: "5px" }}>중복 확인</Button2>
                   </HorizontalBox>
                 </VerticalBox>
               </HorizontalBox>
@@ -344,6 +380,7 @@ function Register() {
                   id="user_email"
                   type="text"
                   readOnly
+                  value={userEmail}
                   style={{ width: "320px" }}
                 />
                 <HorizontalBox>
@@ -401,14 +438,13 @@ function Register() {
                   onClick={() => handleThemeChange("BlueTheme")}
                 ></ThemedButton>
               </HorizontalBox>
-              <Link to="/Welcome">
-                <RegBtn
-                  style={{ marginTop: "30px" }}
-                  onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
-                >
-                  가입하기
-                </RegBtn>
-              </Link>
+
+              <RegBtn
+                style={{ marginTop: "30px" }}
+                onClick={handleSubmit} // 가입하기 버튼에 postUser 함수 연결
+              >
+                가입하기
+              </RegBtn>
             </RegBox>
           </RegDiv>
         </MainDiv>
