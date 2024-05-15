@@ -3,7 +3,7 @@
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable react-native/no-inline-styles */
 
-import styled, {ThemeProvider} from "styled-components/native"
+import styled, { ThemeProvider } from "styled-components/native"
 import React, { useState, useEffect } from 'react';
 import {
 	ScrollView,
@@ -11,7 +11,6 @@ import {
 	Modal,
 	Alert,
 	TextInput,
-	Button,
 	TouchableOpacity,
 	View,
 	Image,
@@ -29,95 +28,95 @@ import { theme } from '../components/theme';
 import { format } from "date-fns";
 
 function Diary() {
-   const navigation = useNavigation();
-   const route = useRoute();
-   const { diaryId } = route.params;
+	const navigation = useNavigation();
+	const route = useRoute();
+	const { diaryId } = route.params;
 
-   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
-   const [base64Image, setBase64Image] = useState('');
-   const [userNickname, setUserNickname] = useState('');
-   const [clicked_modify, setClicked_modify] = useState(false);
-   const [clicked_delete, setClicked_delete] = useState(false);
-   const [modal_DeleteVisible, set_DeleteModalVisible] = useState(false);
-   const [diaryTitle, setDiaryTitle] = useState('');
-   const [diaryContent, setDiaryContent] = useState('');
-   const [diaryDate, setDiaryDate] = useState(format(new Date(), "yyyy-MM-dd"));
+	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+	const [base64Image, setBase64Image] = useState('');
+	const [userNickname, setUserNickname] = useState('');
+	const [clicked_modify, setClicked_modify] = useState(false);
+	const [clicked_delete, setClicked_delete] = useState(false);
+	const [modal_DeleteVisible, set_DeleteModalVisible] = useState(false);
+	const [diaryTitle, setDiaryTitle] = useState('');
+	const [diaryContent, setDiaryContent] = useState('');
+	const [diaryDate, setDiaryDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaryImg, setDiaryImg] = useState('');
 	const [diaryEmotion, setDiaryEmotion] = useState();
-   const [isEditing, setIsEditing] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
 
-   const toggleEdit = () => {
-      setIsEditing(!isEditing);
-   };
+	const toggleEdit = () => {
+		setIsEditing(!isEditing);
+	};
 
-   const saveChanges = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-         try {
-            const userId = getUserIdFromToken(token);
-            await axios.put(`http://15.164.151.130:4000/api/v2/diaryUpdate/${userId}/${diaryId}`, {
-               diaryTitle,
-               diaryContent,
-               diaryImg,
-            }, {
-               headers: { 'Authorization': `Bearer ${token}` },
-            });
-            Alert.alert("저장 성공", "일기가 성공적으로 업데이트되었습니다.", [
-               {
-                  text: "확인", onPress: () => {
-                     setIsEditing(false);
-                     setClicked_modify(!clicked_modify);
-                  }
-               }]);
-         } catch (error) {
-            console.error("Error updating diary:", error);
-            Alert.alert("저장 실패", "일기 업데이트 중 문제가 발생했습니다.");
-         }
-      }
-   };
+	const saveChanges = async () => {
+		const token = await AsyncStorage.getItem('token');
+		if (token) {
+			try {
+				const userId = getUserIdFromToken(token);
+				await axios.put(`http://15.164.151.130:4000/api/v2/diaryUpdate/${userId}/${diaryId}`, {
+					diaryTitle,
+					diaryContent,
+					diaryImg,
+				}, {
+					headers: { 'Authorization': `Bearer ${token}` },
+				});
+				Alert.alert("저장 성공", "일기가 성공적으로 업데이트되었습니다.", [
+					{
+						text: "확인", onPress: () => {
+							setIsEditing(false);
+							setClicked_modify(!clicked_modify);
+						}
+					}]);
+			} catch (error) {
+				console.error("Error updating diary:", error);
+				Alert.alert("저장 실패", "일기 업데이트 중 문제가 발생했습니다.");
+			}
+		}
+	};
 
-    useEffect(() => {
-      const fetchUserData = async () => {
-         const token = await AsyncStorage.getItem('token');
+	useEffect(() => {
+		const fetchUserData = async () => {
+			const token = await AsyncStorage.getItem('token');
 
-         if (token) {
-            const userId = getUserIdFromToken(token);
-            try {
-               const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
-                  headers: {
-                     'Authorization': `Bearer ${token}`,
-                  },
-               });
-               const userThemeName = response.data.userColor || 'OrangeTheme';
-               const userProfileImage = response.data.userProfile;
-               const nickname = response.data.userNickname;
+			if (token) {
+				const userId = getUserIdFromToken(token);
+				try {
+					const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+					});
+					const userThemeName = response.data.userColor || 'OrangeTheme';
+					const userProfileImage = response.data.userProfile;
+					const nickname = response.data.userNickname;
 
-               if (theme[userThemeName]) {
-                  setCurrentTheme(theme[userThemeName]);
-               }
-               setBase64Image(userProfileImage || ''); 
-               setUserNickname(nickname || ''); 
-            } catch (error) {
-               console.error("Error fetching user data:", error);
-            }
-         }
-      };
-      fetchUserData();
-   }, []);
+					if (theme[userThemeName]) {
+						setCurrentTheme(theme[userThemeName]);
+					}
+					setBase64Image(userProfileImage || '');
+					setUserNickname(nickname || '');
+				} catch (error) {
+					console.error("Error fetching user data:", error);
+				}
+			}
+		};
+		fetchUserData();
+	}, []);
 
-    const getUserIdFromToken = (token) => {
-        try {
-            const payload = token.split('.')[1];
-            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-            const decodedPayload = decode(base64);
-            const decodedJSON = JSON.parse(decodedPayload);
+	const getUserIdFromToken = (token) => {
+		try {
+			const payload = token.split('.')[1];
+			const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+			const decodedPayload = decode(base64);
+			const decodedJSON = JSON.parse(decodedPayload);
 
-            return decodedJSON.id.toString();
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return null;
-        }
-   };
+			return decodedJSON.id.toString();
+		} catch (error) {
+			console.error('Error decoding token:', error);
+			return null;
+		}
+	};
 
 	useEffect(() => {
 		const fetchDiaryDetail = async () => {
@@ -149,7 +148,6 @@ function Diary() {
 		if (token) {
 			try {
 				const userId = getUserIdFromToken(token);
-				console.log(userId);
 				await axios.delete(`http://15.164.151.130:4000/api/v2/diaryDelete/${userId}/${diaryId}`, {
 					headers: { 'Authorization': `Bearer ${token}` },
 				});
@@ -187,6 +185,8 @@ function Diary() {
 		}
 	};
 
+	const isBase64 = diaryImg && diaryImg.startsWith("/9j/");
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
@@ -203,7 +203,7 @@ function Diary() {
 					</HorisontalView>
 				</MainView>
 			</FullView>
-         
+
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<Bar />
 
@@ -237,7 +237,7 @@ function Diary() {
 								<DiaryText style={{ margin: 10 }}>{diaryContent}</DiaryText>
 								{diaryImg ? (
 									<View>
-										<Diary_Picture source={{ uri: diaryImg }} style={{ width: 250, height: 250, margin: 10, marginBottom: 30, }} />
+										<Diary_Picture source={{ uri: isBase64 ? `data:image/jpeg;base64,${diaryImg}` : diaryImg }} style={{ width: 250, height: 250, margin: 10, marginBottom: 30, }} />
 										<DiaryEmotion style={{ elevation: 5, }}>
 											<Image source={getEmotionImage(diaryEmotion)} style={{ width: 50, height: 60 }} />
 										</DiaryEmotion>
@@ -252,7 +252,7 @@ function Diary() {
 											justifyContent: 'center',
 											alignItems: 'center',
 											elevation: 5,
-												marginBottom: 50,
+											marginBottom: 50,
 											top: -60
 										}}>
 											<Image source={getEmotionImage(diaryEmotion)} style={{ width: 50, height: 60 }} />
@@ -274,7 +274,7 @@ function Diary() {
 								/>
 								{diaryImg ? (
 									<TouchableOpacity onPress={selectImage}>
-										<Diary_Picture source={{ uri: diaryImg }} style={{ width: 250, height: 250, margin: 10, justifyContent: 'center', alignItems: 'center', borderRadius: 15 }} />
+										<Diary_Picture source={{ uri: isBase64 ? `data:image/jpeg;base64,${diaryImg}` : diaryImg }} style={{ width: 250, height: 250, margin: 10, justifyContent: 'center', alignItems: 'center', borderRadius: 15 }} />
 									</TouchableOpacity>
 								) : (
 									<TouchableOpacity onPress={selectImage} style={{ width: 250, height: 250, backgroundColor: '#D3D3D3', justifyContent: 'center', alignSelf: 'center', alignItems: 'center', margin: 10, borderRadius: 15 }}>
@@ -310,7 +310,7 @@ function Diary() {
 											}}
 											style={{ backgroundColor: currentTheme.color1 }}
 										>
-                                 
+
 											<Text style={{ color: "white" }}>아니요</Text>
 										</Delete>
 									</HorisontalView>
@@ -326,99 +326,98 @@ function Diary() {
 }
 
 const FullView = styled.View`
-   width: 100%;
-   background-color: white;
+	width: 100%;
+	background-color: white;
 `;
 
 const MainView = styled(FullView)`
-   height: auto;
-   align-self: center;
-   width: 300px;
+	height: auto;
+	align-self: center;
+	width: 300px;
 `;
 
 const HorisontalView = styled(MainView)`
-   flex-direction: row;
+	flex-direction: row;
 `;
 
-
 const ProfileContainer = styled.View`
-    display: flex;
-    flex-direction: row;
+	display: flex;
+	flex-direction: row;
 `;
 
 const ProfileTextContainer = styled(ProfileContainer)`
-   flex-direction: column;
-   margin-top: 25px;
-   margin-left: 15px;
-   margin-bottom: 25px;
+	flex-direction: column;
+	margin-top: 25px;
+	margin-left: 15px;
+	margin-bottom: 25px;
 `;
 
 const Profile = styled.Image`
-    width: 40px;
-    height: 40px;
-    margin-left: 20px;
-   border-radius: 100px;
+	width: 40px;
+	height: 40px;
+	margin-left: 20px;
+	border-radius: 100px;
 `;
 
 const MainText = styled.Text`
-    font-size: ${props => props.fontSize || "12px"};
-    font-weight: bold;
-    color: ${props => props.color || "black"};
-    text-align: left;
+	font-size: ${props => props.fontSize || "12px"};
+	font-weight: bold;
+	color: ${props => props.color || "black"};
+	text-align: left;
 `;
 
 const Bar = styled.View`
-    width: 100%;
-    height: 1px;
-    background-color: #B7BABF;
+	width: 100%;
+	height: 1px;
+	background-color: #B7BABF;
 `;
 
 const ModalContainer = styled.View`
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: flex-end;
-    align-items: center;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	top: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	justify-content: flex-end;
+	align-items: center;
 `;
 
 const ModalView = styled.View`
-    background-color: white;
-   border-top-left-radius: 20px;
-   border-top-right-radius: 20px;
-   width: 100%;
-   height: 250px;
-    align-items: center;
+	background-color: white;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
+	width: 100%;
+	height: 250px;
+	align-items: center;
 `;
 
 const Delete = styled.TouchableOpacity`
-   width: 120px;
-   height: 40px;
-   border-radius: 15px;
-   justify-content: center;
-   align-items: center;
-   margin: 20px;
+	width: 120px;
+	height: 40px;
+	border-radius: 15px;
+	justify-content: center;
+	align-items: center;
+	margin: 20px;
 `;
 
 const Diary_TItle = styled.Text`
-   font-size: ${props => props.fontSize || "15px"};
-   text-align: center;
-   font-weight: bold;
-   color: ${props => props.color || "black"};
+	font-size: ${props => props.fontSize || "15px"};
+	text-align: center;
+	font-weight: bold;
+	color: ${props => props.color || "black"};
 `;
 
 const DiaryText = styled(MainText)`
-   font-size: 12px;
-   font-weight: normal;
+	font-size: 12px;
+	font-weight: normal;
 `;
 
 const Diary_Picture = styled.Image`
-   width: 280px;
-   height: 280px;
-   align-self: center;
-   border-radius: 15px;
+	width: 280px;
+	height: 280px;
+	align-self: center;
+	border-radius: 15px;
 `;
 
 const DiaryEmotion = styled.View`

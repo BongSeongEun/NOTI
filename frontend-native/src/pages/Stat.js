@@ -1,9 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-native/no-inline-styles */
-/* eslint-disable prettier/prettier */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable no-trailing-spaces */
+/* eslint-disable quotes */
 /* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable no-trailing-spaces */
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable prettier/prettier */
 
 import styled, { ThemeProvider } from "styled-components/native";
 import React, { useState, useEffect } from 'react';
@@ -12,10 +12,7 @@ import {
 	Text,
 	View,
 	TouchableOpacity,
-	TextInput,
-	FlatList,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
 import {decode} from 'base-64';
@@ -30,7 +27,6 @@ import { theme } from '../components/theme';
 import DropDownPicker from 'react-native-dropdown-picker'
 
 function Stat({ }) {
-	const navigation = useNavigation();
 	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
 	const [userNickname, setUserNickname] = useState('');
 	const [dailyCompletionRates, setDailyCompletionRates] = useState({
@@ -45,34 +41,14 @@ function Stat({ }) {
 	const [statData, setStatData] = useState({
 		prevMonth: 0,
 		difference: 0,
-		thisMonth: 0
+		thisMonth: 0,
 	});
 	const [tagStats, setTagStats] = useState({
-		Word1st: '',
-		Word1stPercent: 0,
-		Word1stNum: 0,
-		Word1stDoneTodos: 0,
-		Word1stTime: 0,
-		
-		Word2st: '',
-		Word2stPercent: 0,
-		Word2stNum: 0,
-		Word2stDoneTodos: 0,
-		Word2stTime: 0,
-
-		Word3st: '',
-		Word3stPercent: 0,
-		Word3stNum: 0,
-		Word3stDoneTodos: 0,
-		Word3stTime: 0,
-
-		Word4st: '',
-		Word4stPercent: 0,
-		Word4stNum: 0,
-		Word4stDoneTodos: 0,
-		Word4stTime: 0,
-
-		etcPercent: 0
+		Word1st: '', Word1stPercent: 0, Word1stNum: 0, Word1stDoneTodos: 0, Word1stTime: 0,
+		Word2st: '', Word2stPercent: 0, Word2stNum: 0, Word2stDoneTodos: 0, Word2stTime: 0,
+		Word3st: '', Word3stPercent: 0, Word3stNum: 0, Word3stDoneTodos: 0, Word3stTime: 0,
+		Word4st: '', Word4stPercent: 0, Word4stNum: 0, Word4stDoneTodos: 0, Word4stTime: 0,
+		etcPercent: 0,
 	});
 
 	const [barDataDay, setBarDataDay] = useState([
@@ -85,20 +61,16 @@ function Stat({ }) {
 		{ value: dailyCompletionRates.SAT, label: '토', frontColor: "#B7BABF" },
 	]);
 
-	const [goal, setGoal] = useState({
-		schedule: '',
-		time: '',
-		rate: '',
-	});
+	const [goal, setGoal] = useState({ schedule: '', time: '', rate: '' });
+	const [initialGoal, setInitialGoal] = useState({ schedule: '', time: '', rate: '' });
+	const [isGoalChanged, setIsGoalChanged] = useState(false);
 	const [recommendedGoals, setRecommendedGoals] = useState([]);
 	const [showRecommendedGoals, setShowRecommendedGoals] = useState(false);
 	const handleScheduleChange = (text) => setGoal(prev => ({ ...prev, schedule: text }));
 	const handleTimeChange = (text) => setGoal(prev => ({ ...prev, time: text }));
-	const handleRateChange = (text) => setGoal(prev => ({ ...prev, rate: text }));
 	const [isGoalSet, setIsGoalSet] = useState(false);
 	const [goalPercent, setGoalPercent] = useState(0);
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(null);
 	const [items, setItems] = useState([
 		{ label: '2024.05', value: '2024.05' },
 		{ label: '2024.04', value: '2024.04' },
@@ -106,8 +78,14 @@ function Stat({ }) {
 		{ label: '2024.02', value: '2024.02' },
 		{ label: '2024.01', value: '2024.01' },
 	]);
+	const [value, setValue] = useState(items[0].value);
 	const [summaryResult, setSummaryResult] = useState('');
+
 	
+	/*
+		>> API
+	*/
+
 	useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');
@@ -262,6 +240,8 @@ function Stat({ }) {
 			const response = await axios.post(url, data, { headers });
 			if (response.status === 200) {
 				console.log("Goal saved successfully:", response.data);
+				setInitialGoal(goal);
+				setIsGoalChanged(false);
 				fetchCurrentGoalRate();
 			} else {
 				console.error(`Unexpected status code: ${response.status}`);
@@ -291,8 +271,13 @@ function Stat({ }) {
 					setIsGoalSet(true);
 					setGoal({
 						schedule: response.data.goalTitle,
-                    	time: response.data.goalTime.toString(),
+						time: response.data.goalTime.toString(),
 					});
+					setInitialGoal({
+						schedule: response.data.goalTitle,
+						time: response.data.goalTime.toString(),
+					});
+					setIsGoalChanged(false);
 				}
 	
 				setRecommendedGoals([
@@ -317,7 +302,7 @@ function Stat({ }) {
 		if (value) {
 			fetchRecommendedGoals();
 		}
-	}, [value]);	
+	}, [value]);
 
 	const fetchCurrentGoalRate = async () => {
 		const token = await AsyncStorage.getItem('token');
@@ -373,6 +358,11 @@ function Stat({ }) {
 		fetchCurrentGoalRate();
 		fetchSummary();
 	}, [value]);
+
+
+	/*
+		>> 함수
+	*/
 
 	const pieData = [
 		{ id: tagStats.Word1st, value: tagStats.Word1stPercent, color: currentTheme.color1, focused: true },
@@ -497,18 +487,89 @@ function Stat({ }) {
 		});
 		setShowRecommendedGoals(false);
 		setIsGoalSet(true);
-	};	
+	};
 
 	const toggleDropDown = () => {
-        setOpen(!open);
-    };
+		setOpen(!open);
+	};
+
+	useEffect(() => {
+		setIsGoalChanged(
+			goal.schedule !== initialGoal.schedule ||
+			goal.time !== initialGoal.time ||
+			goal.rate !== initialGoal.rate
+		);
+	}, [goal, initialGoal]);
+
+	const renderStates = () => {
+		const statesData = [
+			{
+				color: currentTheme.color1,
+				text: `${userNickname} 님의 가장 많은 노티는`,
+				word: tagStats.Word1st,
+				num: tagStats.Word1stNum,
+				doneTodos: tagStats.Word1stDoneTodos,
+				percent: tagStats.Word1stPercent
+			},
+			{
+				color: currentTheme.color2,
+				text: `${userNickname} 님의 2번째 많은 노티는`,
+				word: tagStats.Word2st,
+				num: tagStats.Word2stNum,
+				doneTodos: tagStats.Word2stDoneTodos,
+				percent: tagStats.Word2stPercent
+			},
+			{
+				color: currentTheme.color3,
+				text: `${userNickname} 님의 3번째 많은 노티는`,
+				word: tagStats.Word3st,
+				num: tagStats.Word3stNum,
+				doneTodos: tagStats.Word3stDoneTodos,
+				percent: tagStats.Word3stPercent
+			},
+			{
+				color: currentTheme.color4,
+				text: `${userNickname} 님의 4번째 많은 노티는`,
+				word: tagStats.Word4st,
+				num: tagStats.Word4stNum,
+				doneTodos: tagStats.Word4stDoneTodos,
+				percent: tagStats.Word4stPercent
+			},
+			{
+				color: currentTheme.color5,
+				text: `이번 달의 한줄평은`,
+				summary: summaryResult || "데이터가 없습니다.",
+			},
+		];
+	
+		return statesData.map((state, index) => (
+			<States key={index} color={state.color} style={{ padding: 10 }}>
+				<View>
+					<MainText color='white'>{state.text}</MainText>
+					{state.word ? (
+						<>
+							<MainText color='white'>{state.word}로 {state.num}개의 노티 중 {state.doneTodos}개를 달성했어요!</MainText>
+							<Stat_Text style={{ marginTop: 5 }}>전체 중 {state.percent}% 입니다!</Stat_Text>
+						</>
+					) : (
+						<Stat_Text style={{ marginTop: 5 }}>{state.summary}</Stat_Text>
+					)}
+				</View>
+			</States>
+		));
+	};
+
+
+	/*
+		>> RETURN문
+	*/
 
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<ScrollView>
 					<MainView>
-						<MainText style={{ fontSize: 15, marginTop: 50,  }}>{userNickname} 님의 한 달</MainText>
+						<MainText style={{ fontSize: 15, marginTop: 50, }}>{userNickname} 님의 한 달</MainText>
 						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요!</MainText>
 
 						<TouchableOpacity onPress={toggleDropDown} style={{ marginBottom: 5 }} />
@@ -522,68 +583,13 @@ function Stat({ }) {
 							setItems={setItems}
 						/>
 
-						<ScrollView
-							horizontal={true}
-							showsHorizontalScrollIndicator={true}
-						>
-							<States color={currentTheme.color1}
-								style={{ padding: 10 }}
-							>
-								<View>
-									<MainText color='white'>{userNickname} 님의 가장 많은 노티는</MainText>
-									<MainText color='white'>{tagStats.Word1st}로 {tagStats.Word1stNum}개의 노티 중 {tagStats.Word1stDoneTodos}개를 달성했어요!</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word1stPercent}% 입니다!</Stat_Text>
-								</View>
-							</States>
-
-							<States color={currentTheme.color2}
-								style={{ padding: 10 }}
-							>
-								<View>
-									<MainText color='white'>{userNickname} 님의 2번째 많은 노티는</MainText>
-									<MainText color='white'>{tagStats.Word2st}로 {tagStats.Word2stNum}개의 노티 중 {tagStats.Word2stDoneTodos}개를 달성했어요!</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word2stPercent}% 입니다!</Stat_Text>
-								</View>
-							</States>
-
-							<States color={currentTheme.color3}
-								style={{ padding: 10 }}
-							>
-								<View>
-								<MainText color='white'>{userNickname} 님의 3번째 많은 노티는</MainText>
-									<MainText color='white'>{tagStats.Word3st}로 {tagStats.Word2stNum}개의 노티 중 {tagStats.Word3stDoneTodos}개를 달성했어요!</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word3stPercent}% 입니다!</Stat_Text>
-								</View>
-							</States>
-
-							<States color={currentTheme.color4}
-								style={{ padding: 10 }}
-							>
-								<View>
-								<MainText color='white'>{userNickname} 님의 4번째 많은 노티는</MainText>
-									<MainText color='white'>{tagStats.Word4st}로 {tagStats.Word2stNum}개의 노티 중 {tagStats.Word4stDoneTodos}개를 달성했어요!</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>전체 중 {tagStats.Word4stPercent}% 입니다!</Stat_Text>
-								</View>
-							</States>
-
-							<States color={currentTheme.color5}
-								style={{ padding: 10 }}
-							>
-								<View>
-								<MainText color='white'>이번 달의 한줄평은</MainText>
-									<Stat_Text style={{ marginTop: 5 }}>{summaryResult || "데이터가 없습니다."}</Stat_Text>
-								</View>
-							</States>
+						<ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
+							{renderStates()}
 						</ScrollView>
 
-						<GoalFrame color={currentTheme.color1} style={{
-							marginTop: 20,
-							height: isGoalSet
-								? (showRecommendedGoals ? 270 : 180)
-								: (showRecommendedGoals ? 240 : 150),
-						}}>
+						<GoalFrame color={currentTheme.color1} isGoalChanged={isGoalChanged} isGoalSet={isGoalSet}>
 							<GoalB>
-								<MainText style={{color: "white"}}>이번 달의 목표 🔥</MainText>
+								<MainText style={{ color: "white" }}>이번 달의 목표 🔥</MainText>
 							</GoalB>
 							<View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
 								<StyledTextInput
@@ -592,14 +598,14 @@ function Stat({ }) {
 									placeholder="일정"
 									keyboardType="default"
 								/>
-								<MainText style={{marginRight: 10, fontSize: 13}}>일정</MainText>
+								<MainText style={{ marginRight: 10, fontSize: 13 }}>일정</MainText>
 								<StyledTextInput
 									onChangeText={handleTimeChange}
 									value={goal.time}
 									placeholder="시간"
 									keyboardType="numeric"
 								/>
-								<MainText style={{ marginRight: 10, fontSize: 13}}>분</MainText>
+								<MainText style={{ marginRight: 10, fontSize: 13 }}>분</MainText>
 								<MainText>달성하기!</MainText>
 							</View>
 
@@ -609,12 +615,10 @@ function Stat({ }) {
 										<GoalChart />
 										<GoalChart style={{ backgroundColor: currentTheme.color1, width: `${goalPercent}%`, position: 'absolute' }} />
 									</View>
-
 									<MainText>{goalPercent}%</MainText>
 								</View>
 							)}
 
-							
 							<TouchableOpacity onPress={toggleRecommendedGoals} style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 								<MainText>추천 목표 보기</MainText>
 								<images.creat_down
@@ -638,11 +642,12 @@ function Stat({ }) {
 									))}
 								</View>
 							)}
-							
-							<TouchableOpacity onPress={saveGoalToServer} style={{ padding: 10, backgroundColor: currentTheme.color1, borderRadius: 5, marginTop: 10 }}>
-								<MainText style={{ textAlign: 'center', color: 'white' }}>목표 저장하기</MainText>
-							</TouchableOpacity>
-							
+
+							{isGoalChanged && (
+								<TouchableOpacity onPress={saveGoalToServer} style={{ padding: 10, backgroundColor: currentTheme.color1, borderRadius: 5, marginTop: 10 }}>
+									<MainText style={{ textAlign: 'center', color: 'white' }}>목표 저장하기</MainText>
+								</TouchableOpacity>
+							)}
 						</GoalFrame>
 					
 						<HorisontalView style={{ justifyContent: 'space-between', marginTop: 25 }}>
@@ -651,7 +656,6 @@ function Stat({ }) {
 								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
 								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
-						
 
 						<StatFrame style={{ marginTop: 10, height: expandedStates.statFrame1 ? 380 : 200, }}>
 							<HorisontalView style={{ width: 270, justifyContent: 'space-between' }}>
@@ -891,10 +895,10 @@ const Stat_Label = styled.TouchableOpacity`
 
 const GoalFrame = styled.TouchableOpacity`
 	width: 300px;
-	height: 80px;
+	height: ${props => props.isGoalChanged ? (props.isGoalSet ? 'auto' : '130px') : (props.isGoalSet ? 'auto' : '110px')};
 	border-radius: 15px;
 	border-width: 1px;
-	border-color:  ${props => props.color || "#B7BABF"};
+	border-color: ${props => props.color || "#B7BABF"};
 	padding: 15px;
 	margin-top: 20px;
 `;
@@ -912,7 +916,7 @@ const GoalChart = styled.TouchableOpacity`
 	width: 230px;
 	height: 20px;
 	border-radius: 100px;
-	background-color: ${props => props.color || "#B7BABF"};
+	background-color: ${props => props.color || "#E3E4E6"};
 `;
 
 const GoalB = styled.TouchableOpacity`

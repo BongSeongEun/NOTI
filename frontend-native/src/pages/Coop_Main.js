@@ -119,9 +119,7 @@ function Coop_Main({ onSelectTeam }) {
 		} catch (error) {
 			console.error("팀 목록을 불러오는데 실패했습니다:", error);
 		}
-
-		
-	};	
+	};
 	
 	const fetchTeamMembers = async (teamId) => {
 		try {

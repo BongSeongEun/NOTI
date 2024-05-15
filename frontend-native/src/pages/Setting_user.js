@@ -33,7 +33,7 @@ const Setting_user = () => {
 	const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
 	const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
 	const [isDiaryTimePickerVisible, setDiaryTimePickerVisible] = useState(false);
-	const [userEmail, setUserEmail] = useState(false);
+	const [userEmail, setUserEmail] = useState("");
     const [userNickname, setUserNickname] = useState("");
     const [userTheme, setUserTheme] = useState("");
     const [userStartTime, setUserStartTime] = useState("");
@@ -124,7 +124,7 @@ const Setting_user = () => {
 	};
 	
 	useEffect(() => {
-		const fetchAndDecodeToken = async () => {
+		const fetchAndSetUserData = async () => {
 			try {
 				const storedToken = await AsyncStorage.getItem('token');
 				setToken(storedToken);
@@ -142,13 +142,28 @@ const Setting_user = () => {
 					},
 				});
 				
-				const userEmail = userInfoResponse.data.kakaoEmail;
-				setUserEmail(userEmail);
+				const userData = userInfoResponse.data;
+				setUserEmail(userData.kakaoEmail);
+				setUserNickname(userData.userNickname);
+				setInputName(userData.userNickname); // 초기값 설정
+				setUserTheme(userData.userColor);
+				setSelectedTheme(userData.userColor); // 초기값 설정
+				setUserDiaryTime(userData.diaryTime);
+				setSelectedDiaryTime(userData.diaryTime); // 초기값 설정
+				setUserStartTime(userData.muteStartTime);
+				setSelectedStartTime(userData.muteStartTime); // 초기값 설정
+				setUserEndTime(userData.muteEndTime);
+				setSelectedEndTime(userData.muteEndTime); // 초기값 설정
+				if (userData.userProfile) {
+					setUserProfileImage({ uri: userData.userProfile });
+				} else {
+					setUserProfileImage(images.profile);
+				}
 			} catch (error) {
 				console.error('Error fetching user info:', error);
 			}
 		};
-		fetchAndDecodeToken();
+		fetchAndSetUserData();
 	}, []);
 
 	const postUser = async () => {
@@ -161,16 +176,21 @@ const Setting_user = () => {
 			}
 		
 			const userId = getUserIdFromToken(storedToken);
-			const preparedImageData = prepareImageDataForServer(imageFile);
+			const preparedImageData = imageFile ? prepareImageDataForServer(imageFile) : null;
 		
-			const response = await axios.put(`http://15.164.151.130:4000/api/v1/user/${userId}`, {
-				userNickname: String(inputName),
-				userColor: String(selectedTheme),
-				diaryTime: String(selectedDiaryTime),
-				muteStartTime: String(selectedStartTime),
-				muteEndTime: String(selectedEndTime),
-				userProfile: preparedImageData,
-			}, {
+			const userPayload = {
+				userNickname: inputName || userNickname,
+				userColor: selectedTheme || userTheme,
+				diaryTime: selectedDiaryTime || userDiaryTime,
+				muteStartTime: selectedStartTime || userStartTime,
+				muteEndTime: selectedEndTime || userEndTime,
+			};
+
+			if (preparedImageData) {
+				userPayload.userProfile = preparedImageData;
+			}
+
+			const response = await axios.put(`http://15.164.151.130:4000/api/v1/user/${userId}`, userPayload, {
 				headers: {
 					'Authorization': `Bearer ${storedToken}`,
 				},
@@ -185,39 +205,6 @@ const Setting_user = () => {
 		}
 	};
 
-	useEffect(() => {
-		const fetchAndSetUserData = async () => {
-			try {
-				const storedToken = await AsyncStorage.getItem('token');
-				setToken(storedToken);
-                
-				if (!storedToken) {
-					console.log('Token not found');
-					return;
-				}
-
-				const userId = getUserIdFromToken(storedToken);
-				const userInfoResponse = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
-					headers: {
-						'Authorization': `Bearer ${storedToken}`,
-					},
-				});
-
-				const userData = userInfoResponse.data;
-				setUserEmail(userData.kakaoEmail);
-				setUserNickname(userData.userNickname);
-				setUserTheme(userData.userColor);
-				setUserDiaryTime(userData.diaryTime);
-				setUserStartTime(userData.muteStartTime);
-				setUserEndTime(userData.muteEndTime);
-				setUserProfileImage(userData.userProfile || images.profile);
-			} catch (error) {
-				console.error('Error fetching user info:', error);
-			}
-		};
-		fetchAndSetUserData();
-	}, []);
-	
 	const [response, setResponse] = useState("");
 	const [imageFile, setImageFile] = useState("");
 
@@ -282,7 +269,7 @@ const Setting_user = () => {
 						<TextBox>
 							<InputName
 								placeholder="닉네임(한글 6자 이내/특수문자 입력 불가)"
-								value={inputName || userNickname}
+								value={inputName}
 								onChangeText={(text) => setInputName(text)}
 							/>
 						</TextBox>
