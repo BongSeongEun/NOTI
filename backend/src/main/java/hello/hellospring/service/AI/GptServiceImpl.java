@@ -146,7 +146,7 @@ public class GptServiceImpl implements GptDiaryService {
                 diaryEmotionResult = 1;
             }
 
-            String imagePrompt = diaryContent +"위 일기 내용을 기반으로 이미지를 생성해줘";
+            String imagePrompt = diaryContent +"위 일기 내용을 기반으로 나의 오늘의 일상 부분 중 하나를 이미지화 해서 생성해줘";
             String imgResult = generateImage(imagePrompt);
             String imageUrl = encodeToBase64(imgResult, 200, 200);
 //            System.out.println("인코딩 반환값은? :" + imageUrl);
