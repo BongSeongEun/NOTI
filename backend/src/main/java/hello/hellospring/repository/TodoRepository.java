@@ -66,4 +66,10 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag = :todoTag AND t.todoDone = true")
     List<Todo> findCompletedTodosByUserIdAndStatsDateAndTodoTag(@Param("userId") Long userId, @Param("statsDate") String statsDate,@Param("todoTag") String todoTag);
+
+    // userId, statsDate, todoTitle, todoDone이 true 인 데이터들 추출
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag = :goalTitle AND t.todoDone = true")
+    List<Todo> findAllByUserIdAndStatsDateAndTodoTagAndTodoDoneTrue(@Param("userId") Long userId,
+                                                                    @Param("statsDate") String statsDate,
+                                                                    @Param("goalTitle") String goalTitle);
 }

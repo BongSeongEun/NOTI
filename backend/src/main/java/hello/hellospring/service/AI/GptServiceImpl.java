@@ -101,7 +101,7 @@ public class GptServiceImpl implements GptDiaryService {
                     "그 다음 문단에는 하루동안의 일정목록 내용들을 통해 ~~는 달성했고, ~~는 달성하지못했다 라는 내용도 넣어줘" +
                     "꼭 몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
                     "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘" +
-                    "총 내용은 2~줄 분량으로 (200자가 넘지 않도록) 간략하게 작성부탁해");
+                    "총 내용은 300자 안으로 작성부탁해");
 
             // 생성된 일기 내용을 기반으로 제목 생성
             diaryTitle = callGptApi(diaryContent, "이 일기 내용을 기반으로 일기 제목을 생성해줘." +
@@ -112,6 +112,8 @@ public class GptServiceImpl implements GptDiaryService {
                     "위 내용들을 학습하고, 감정에 관한 단어들을 뽑아서 종합적으로 판단을 해보고, " +
                     "이 일기에서 감정은 어땠는지 0~100중에 숫자를 뽑아줘" +
                     "결과값은 다른 설명들 하지말고 오직 숫자만 뽑아주면 돼");
+
+
 
             long diaryEmotionScore;
 
@@ -135,11 +137,16 @@ public class GptServiceImpl implements GptDiaryService {
                 diaryEmotionResult = 1;
             }
 
+//            String imagePrompt = "위 일기 내용을 기반으로 이미지를 생성해줘";
+//            String imageUrl = generateImage(imagePrompt);
+
+
             Diary diary = new Diary();
             diary.setUserId(userId); //user_id에 저장
             diary.setDiaryTitle(diaryTitle); //diary_title에 저장
             diary.setDiaryContent(diaryContent); //diary_content에 저장
             diary.setDiaryEmotion(diaryEmotionResult); //diary_emotion에 저장
+//            diary.setDiaryImg(imageUrl); // diary_img에 저장
 
             String formattedDate = nowSeoul.toLocalDate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")); //생성시간 구하기
             diary.setDiaryDate(formattedDate); //diary_date에 저장
@@ -184,6 +191,32 @@ public class GptServiceImpl implements GptDiaryService {
             return message.getString("content"); // GPT로부터 생성된 일기 내용 반환
         } else {
             return "GPT생성 API 호출에 실패했어요... :(";
+        }
+    }
+    private String generateImage(String prompt) throws Exception {
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("prompt", prompt);
+        jsonBody.put("n", 1);
+        jsonBody.put("size", "512x512");
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.openai.com/v1/images/generations"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + API_KEY)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody.toString()))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseBody = response.body();
+
+        JSONObject jsonResponse = new JSONObject(responseBody);
+        JSONArray data = jsonResponse.getJSONArray("data");
+        if (data.length() > 0) {
+            JSONObject firstImage = data.getJSONObject(0);
+            return firstImage.getString("url"); // DALL-E로부터 생성된 이미지 URL 반환
+        } else {
+            throw new Exception("이미지 생성 API 호출에 실패했어요...");
         }
     }
 

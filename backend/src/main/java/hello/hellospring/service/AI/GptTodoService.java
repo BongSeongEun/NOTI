@@ -80,7 +80,8 @@ public class GptTodoService {
         } else {
             return "사용가능한 content가 아니에요!! :(";
         }
-
-
     }
+
+
+
 }
