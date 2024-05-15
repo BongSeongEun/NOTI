@@ -277,25 +277,31 @@ function Todo() {
 							</>
 						)}
 						
-						{events.map((event, index) => (
-							<Noti key={event.todoId}
-								style={{
-									backgroundColor: event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor,
-								}}
-								onPress={() => {
-									setModalVisible(true);
-									handleEditEvent(event);
-								}}>
-								<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
-									{event.todoDone && <images.noticheck width={15} height={15}
-										color={event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor} /> }
-								</Noti_Check>
-								<NotiTextContainer>
-									<NotiText>{event.todoTitle}</NotiText>
-									<NotiText>{`${event.todoStartTime} ~ ${event.todoEndTime}`}</NotiText>
-								</NotiTextContainer>
-							</Noti>
-						))}
+						{events.length === 0 ? (
+							<NoTodoNoti>
+							<NoTodoText>일정이 없습니다. 새 일정을 추가해주세요!</NoTodoText>
+						</NoTodoNoti>
+						) : (
+							events.map((event, index) => (
+								<Noti key={event.todoId}
+									style={{
+										backgroundColor: event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor,
+									}}
+									onPress={() => {
+										setModalVisible(true);
+										handleEditEvent(event);
+									}}>
+									<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
+										{event.todoDone && <images.noticheck width={15} height={15}
+											color={event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor} /> }
+									</Noti_Check>
+									<NotiTextContainer>
+										<NotiText>{event.todoTitle}</NotiText>
+										<NotiText>{`${event.todoStartTime} ~ ${event.todoEndTime}`}</NotiText>
+									</NotiTextContainer>
+								</Noti>
+							))
+						)}
 
 						<Noti onPress={() => navigation.navigate("Todo_Add", { selectedDate: selectedDate })}
 							style={{ width: 150, backgroundColor: "#B7BABF", alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
@@ -390,7 +396,6 @@ const MainView = styled(FullView)`
 const HorisontalView = styled(MainView)`
 	flex-direction: row;
 `;
-
 
 const ProfileContainer = styled.View`
     display: flex;
@@ -508,6 +513,24 @@ const TeamOut = styled.TouchableOpacity`
 	justify-content: center;
 	align-items: center;
 	margin: 20px;
+`;
+
+const NoTodoNoti = styled.View`
+	width: 300px;
+	height: 40px;
+	border-radius: 15px;
+	background-color: #E3E4E6;
+	flex-direction: row;
+	align-items: center;
+	margin: 10px;
+	justify-content: center;
+	align-self: center;
+`;
+
+const NoTodoText = styled.Text`
+	font-size: 10px;
+	color: black; 
+	font-weight: bold;
 `;
 
 export default Todo;

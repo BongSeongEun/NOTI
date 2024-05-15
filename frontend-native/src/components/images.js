@@ -23,16 +23,16 @@ import diary from "../asset/diary.svg";
 import stat from "../asset/stat.svg";
 import todo from "../asset/todo.svg";
 import chatting from "../asset/chatting.svg";
-import setting from "../asset/setting";
+import setting from "../asset/setting.svg";
 
-import diary_modify from "../asset/diary_modify";
-import diary_delete from "../asset/diary_delete";
+import diary_modify from "../asset/diary_modify.svg";
+import diary_delete from "../asset/diary_delete.svg";
 
 import message_send from "../asset/message_send.svg";
 import copy from "../asset/copy.svg";
 import plus from "../asset/plus.svg";
 
-import creat_down from "../asset/caret-down";
+import creat_down from "../asset/caret-down.svg";
 
 import emotion1 from "../asset/emotion1.png";
 import emotion2 from "../asset/emotion2.png";

@@ -76,6 +76,15 @@ function Setting({ }) {
 		}
 	};
 
+	const handleLogout = async () => {
+		try {
+			await AsyncStorage.removeItem('token');
+			navigation.navigate('Login');
+		} catch (error) {
+			console.error('Error logging out:', error);
+		}
+	};
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
@@ -91,7 +100,10 @@ function Setting({ }) {
 
 					<View>
 						<TouchableOpacity onPress={() => navigation.navigate('Setting_user', { currentTheme: currentTheme })}>
-							<MainText style={{fontSize: 15}}>회원 정보 수정</MainText>
+							<MainText style={{ fontSize: 15 }}>회원 정보 수정</MainText>
+						</TouchableOpacity>
+						<TouchableOpacity onPress={handleLogout} style={{ marginTop: 20 }}>
+							<MainText style={{ fontSize: 15, color: currentTheme.color1 }}>로그아웃</MainText>
 						</TouchableOpacity>
 					</View>
 				</MainView>
