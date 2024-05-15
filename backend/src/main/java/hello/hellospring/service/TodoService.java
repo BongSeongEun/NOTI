@@ -442,7 +442,7 @@ public class TodoService {
             // 첫번째 goal_title 가져오기
             String goalTitle = goalExist.get(0).getGoalTitle();
 
-            List<Todo> allTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, goalTitle);
+            List<Todo> allTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDoneTrue(userId, statsDate, goalTitle);
 
             // 문자열 날짜 포맷 정의
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -574,8 +574,7 @@ public class TodoService {
                 }
             } catch (EmptyResultDataAccessException e){
                 // summary가 존재하지 않습니다.
-
-
+                result.put("summaryResult", "오류가 발생 했습니다. 다시 시도해주세요");
             }
         }
         return result;
