@@ -9,7 +9,7 @@ const ChatDiv = styled.div`
   border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1}; // 새로운 스타일
   /* border: 3px solid black; */
   margin-top: 10px;
-  height: 500px;
+  height: 480px;
   /* justify-content: flex-end; // 아래 정렬 */
   /* justify-content: bottom; */
   display: flex;
@@ -152,7 +152,6 @@ function ChatComponent() {
   useEffect(() => {
     fetchUserData();
     fetchChatList();
-    // 메시지 목록의 끝으로 스크롤하기 위한 코드 추가
   }, [newMessage]); // messages가 변경될 때마다 이 effect를 실행
 
   // 새 채팅 메시지 전송
@@ -189,7 +188,7 @@ function ChatComponent() {
 
   return (
     <ThemeProvider theme={currentTheme}>
-      <ChatDiv onClick={handleChatDivClick}>
+      <ChatDiv>
         <MessagesContainer>
           {messages.map((msg, index) => (
             <ChatRole
@@ -203,6 +202,7 @@ function ChatComponent() {
         </MessagesContainer>
         <ChatInputDiv>
           <ChatInput
+            onClick={handleChatDivClick}
             type="text"
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}

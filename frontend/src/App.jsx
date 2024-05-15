@@ -12,6 +12,7 @@ import Coop from "./pages/Coop.jsx"; // Coop 컴포넌트 import
 import Setting from "./pages/Setting.jsx"; // Setting 컴포넌트 import
 import Stat from "./pages/Stat.jsx"; // Stat 컴포넌트 import
 import CoopDetail from "./pages/CoopDetail.jsx";
+import EditProfile from "./pages/EditProfile.jsx";
 // import DiaryPage from "./pages/DiaryPage.jsx";
 
 const MainDiv = styled.div`
@@ -40,6 +41,7 @@ function App() {
           {/* <Route path="/Diary/:id" element={<DiaryPage />} /> */}
           <Route path="/Stat" element={<Stat />} />
           <Route path="/Setting" element={<Setting />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/auth" element={<Redirection />} />
         </Routes>
       </Router>

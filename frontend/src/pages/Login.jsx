@@ -21,6 +21,18 @@ const MainDiv = styled.div`
   height: 100vh;
 `;
 
+const KakaoText = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  border-radius: 20px;
+  font-size: 18px;
+  width: 300px;
+  height: 3.5rem;
+  background-color: #fddc3f;
+`;
+
 const MainLogo = styled.img`
   width: 10rem;
   height: 13rem;
@@ -28,22 +40,31 @@ const MainLogo = styled.img`
 `;
 
 const SocialImg = styled.img`
-  margin-top: 10px;
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 3rem;
+  margin-right: 10px;
 `;
 const SocialWrap = styled.div`
-  flex-direction: row;
+  height: 50px;
+  width: 200px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
 `;
 const LoginImage = styled.image`
   width: 30px;
   height: 30px;
 `;
+
+const StyledLink = styled.a`
+  text-decoration: none; // 링크의 밑줄 없애기
+  color: inherit; // 상위 요소의 글자 색상 상속받기
+`;
 function Login() {
   const [message, setMassege] = useState([]);
   const REACT_APP_REST_API_KEY = "77cf97c36317f2622a926b9ddb30f96f";
-  const REACT_APP_REDIRECT_URI = "http://15.165.100.226:3000/auth";
+  const REACT_APP_REDIRECT_URI = "http://localhost:3000/auth";
   // oauth 요청 URL
   const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${REACT_APP_REST_API_KEY}&redirect_uri=${REACT_APP_REDIRECT_URI}&response_type=code`;
   const handleLogin = () => {
@@ -63,11 +84,13 @@ function Login() {
       <MainDiv>
         <MainLogo src={NOTI} />
         <h1>{message}</h1>
-        <SocialWrap>
-          <a href={kakaoURL}>
+
+        <StyledLink href={kakaoURL}>
+          <KakaoText>
             <SocialImg src={KAKAO} />
-          </a>
-        </SocialWrap>
+            <div>카카오 계정으로 로그인</div>
+          </KakaoText>
+        </StyledLink>
       </MainDiv>
     </>
   );

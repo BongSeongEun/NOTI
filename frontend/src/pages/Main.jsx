@@ -300,7 +300,7 @@ function Main() {
       case "CoopDetail":
         return <CoopDetail team={selectedTeam} selectedDate={selectedDate} />;
       case "Stat":
-        return <Stat />;
+        return <Stat selectedDate={selectedDate} />;
       case "Setting":
         return <Setting />;
       default:

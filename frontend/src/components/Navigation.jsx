@@ -39,7 +39,7 @@ const LeftSidebar = styled.aside`
     ${props => props.theme.color1 || theme.OrangeTheme.color1}; */
   overflow-y: auto; // 내용이 많을 경우 스크롤
   padding: 20px;
-  box-sizing: border-box; // 패딩을 너비에 포함
+  box-sizing: border-box; // 패딩을 너비에 포함z
 
   // 미디어 쿼리 추가
   @media (max-width: 1050px) {
@@ -296,6 +296,7 @@ function Navigation({ setDate }) {
           <StyledLink to="/Main">일정</StyledLink>
           <StyledLink to="/Coop">협업</StyledLink>
           <StyledLink to="/Diary">일기</StyledLink>
+          <StyledLink to="/Stat">통계</StyledLink>
           <StyledLink to="/Setting">설정</StyledLink>
         </div>
         <LeftSidebar>

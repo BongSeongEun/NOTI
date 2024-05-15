@@ -8,6 +8,9 @@ const DiaryContainer = styled.div`
   margin-right: 300px;
   margin-left: 300px;
   height: 100%;
+  ::-webkit-scrollbar {
+    display: none;
+  }
 
   @media (max-width: 1050px) {
     margin-left: 0;
