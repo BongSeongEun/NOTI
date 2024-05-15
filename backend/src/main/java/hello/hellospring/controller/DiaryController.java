@@ -69,7 +69,7 @@ public class DiaryController {
     
     @GetMapping("/calendarapi")
     public ResponseEntity<?> getcalendarAccessToken(){
-        String accessToken = todoToChatSchedulerService.getGoogleAccessToken();
+        String accessToken = todoToChatSchedulerService.getCalendarAccessToken();
         return ResponseEntity.ok(accessToken);
     }
 

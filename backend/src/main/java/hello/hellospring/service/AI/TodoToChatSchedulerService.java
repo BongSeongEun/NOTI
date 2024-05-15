@@ -84,6 +84,10 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
         scheduleTokenRefresh();
     }
 
+    public String getCalendarAccessToken(){
+        return accessToken;
+    }
+
     public String getGoogleAccessToken(){
 
         String clientId = environment.getProperty("google.client.id");
