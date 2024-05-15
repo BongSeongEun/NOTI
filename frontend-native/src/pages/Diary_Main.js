@@ -142,6 +142,7 @@ function Diary_Main({ }) {
 		};
 	
 		const emotionIcon = getEmotionIcon();
+		const isBase64 = diary.diaryImg && diary.diaryImg.startsWith("/9j/");
 	
 		return (
 			<DiaryContainer>
@@ -160,7 +161,7 @@ function Diary_Main({ }) {
 					{
 						diary.diaryImg ? (
 							<Diary_Picture
-								source={{ uri: diary.diaryImg }}
+								source={{ uri: isBase64 ? `data:image/jpeg;base64,${diary.diaryImg}` : diary.diaryImg }}
 								style={{ width: 250, height: pictureHeight, borderRadius: 15, top: pictureTop, position: 'absolute', alignSelf: 'center' }}
 							/>
 						) : (
