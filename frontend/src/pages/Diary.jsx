@@ -1,20 +1,11 @@
-// 일기/달력 페이지
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { useDropzone, open } from "react-dropzone";
-import {
-  Navigate,
-  useNavigate,
-  Link,
-  Toggle,
-  redirect,
-} from "react-router-dom";
-import { backgrounds, lighten } from "polished";
-import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import axios from "axios";
+import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import DiaryList from "../components/DiaryList"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때
 import NavBar from "../components/Navigation";
+import DiaryEntry from "../components/DiaryEntry"; // 일기 항목 컴포넌트
 
 const MainDiv = styled.div`
   height: auto;
@@ -46,10 +37,20 @@ const DateHeader = styled.div`
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
 `;
 
+const DiaryContent = styled.div`
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+`;
+
 function Diary() {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
   const token = window.localStorage.getItem("token"); // 토큰 추가
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [diary, setDiary] = useState(null);
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
@@ -58,7 +59,6 @@ function Diary() {
     const decodedPayload = atob(base642);
     const decodedJSON = JSON.parse(decodedPayload);
 
-    console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
 
@@ -89,6 +89,66 @@ function Diary() {
     fetchUserData();
   }, [token]);
 
+  const fetchDiary = async (userId, diaryDate) => {
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v2/diaryDate/${userId}/${diaryDate}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setDiary(response.data);
+    } catch (error) {
+      console.error("Error fetching diary:", error);
+      setDiary(null); // 오류 발생 시 일기 초기화
+    }
+  };
+
+  const saveDiary = async updatedDiary => {
+    const { diaryId, ...data } = updatedDiary;
+    const userId = getUserIdFromToken();
+    try {
+      await axios.put(
+        `http://15.164.151.130:4000/api/v2/diaryUpdate/${userId}/${diaryId}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      fetchDiary(userId, format(selectedDate, "yyyy.MM.dd")); // 저장 후 일기 다시 로드
+    } catch (error) {
+      console.error("Error saving diary:", error);
+    }
+  };
+
+  const deleteDiary = async diaryId => {
+    const userId = getUserIdFromToken();
+    try {
+      await axios.delete(
+        `http://15.164.151.130:4000/api/v2/diaryDelete/${userId}/${diaryId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setDiary(null); // 삭제 후 일기 초기화
+    } catch (error) {
+      console.error("Error deleting diary:", error);
+    }
+  };
+
+  useEffect(() => {
+    const userId = getUserIdFromToken();
+    const formattedDate = format(selectedDate, "yyyy.MM.dd");
+    fetchDiary(userId, formattedDate);
+  }, [selectedDate]);
+
   const setDate = date => {
     setSelectedDate(date);
   };
@@ -99,7 +159,30 @@ function Diary() {
 
       <MainDiv>
         <DateHeader>노티의 하루 일기</DateHeader>
-        <DiaryList />
+        <DiaryContent>
+          {diary ? (
+            <DiaryEntry
+              diary={diary}
+              onSave={saveDiary}
+              onDelete={deleteDiary}
+              onRefresh={() =>
+                fetchDiary(
+                  getUserIdFromToken(),
+                  format(selectedDate, "yyyy.MM.dd"),
+                )
+              }
+            />
+          ) : (
+            <p>선택한 날짜에 일기가 없습니다.</p>
+          )}
+        </DiaryContent>
+        <DiaryList
+          onSave={saveDiary}
+          onDelete={deleteDiary}
+          onRefresh={() =>
+            fetchDiary(getUserIdFromToken(), format(selectedDate, "yyyy.MM.dd"))
+          }
+        />
       </MainDiv>
     </ThemeProvider>
   );

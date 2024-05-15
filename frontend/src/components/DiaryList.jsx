@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import DiaryEntry from "./DiaryEntry"; // 수정된 DiaryEntry 컴포넌트 import
+import Emotion1 from "../asset/Emotion1.png";
 
 const DiaryItemContainer = styled.div`
   border: 1px solid #ccc;
@@ -41,7 +42,7 @@ const DetailContainer = styled.div`
 `;
 
 // DiaryList 컴포넌트 정의
-const DiaryList = () => {
+const DiaryList = ({ onSave, onDelete }) => {
   // 선택된 일기의 상세 정보 상태
   const [selectedDiaryId, setSelectedDiaryId] = useState(null);
   const [diaries, setDiaries] = useState([]); // 일기 목록을 담을 상태
@@ -54,7 +55,6 @@ const DiaryList = () => {
     const decodedPayload = atob(base642);
     const decodedJSON = JSON.parse(decodedPayload);
 
-    console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
 
@@ -71,7 +71,7 @@ const DiaryList = () => {
         const sortedDiaries = response.data.sort(
           (a, b) => new Date(b.diaryDate) - new Date(a.diaryDate),
         );
-        setDiaries(response.data); // 받아온 데이터를 상태에 저장합니다.
+        setDiaries(sortedDiaries); // 받아온 데이터를 상태에 저장합니다.
       } catch (error) {
         console.error("일기 목록을 불러오는데 실패했습니다.", error);
       }
@@ -99,8 +99,7 @@ const DiaryList = () => {
           </DiaryItemContainer>
           {selectedDiaryId === diary.diaryId && (
             <DetailContainer>
-              {/* 로딩 상태 표시를 위한 조건부 렌더링 */}
-              {diary.diaryContent || "로딩 중..."}
+              <DiaryEntry diary={diary} onSave={onSave} onDelete={onDelete} />
             </DetailContainer>
           )}
         </React.Fragment>
