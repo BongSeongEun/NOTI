@@ -24,7 +24,7 @@ public class Summary {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "summary_statsDate")
+    @Column(name = "summary_stats_date")
     private String summaryStatsDate;
 
     @Column(name = "summary_result")

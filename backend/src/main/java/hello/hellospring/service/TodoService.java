@@ -3,6 +3,7 @@ package hello.hellospring.service;
 import hello.hellospring.Exception.AppException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Goal;
+import hello.hellospring.model.Summary;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.SummaryRepository;
@@ -14,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -447,7 +449,7 @@ public class TodoService {
             // 첫번째 goal_title 가져오기
             String goalTitle = goalExist.get(0).getGoalTitle();
 
-            List<Todo> allTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTag(userId, statsDate, goalTitle);
+            List<Todo> allTag = todoRepository.findAllByUserIdAndStatsDateAndTodoTagAndTodoDoneTrue(userId, statsDate, goalTitle);
 
             // 문자열 날짜 포맷 정의
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -540,10 +542,7 @@ public class TodoService {
     }
 
     public Map<String, Object> findSummary(Long userId, String statsDate) throws Exception {
-        Map<String, Object> wordsResult = findWords(userId, statsDate); // 최빈도 단어들 추출
         Map<String, Object> result = new LinkedHashMap<>();
-        
-        String wordsResultText = formatWordsResult(wordsResult);
 
         // 입력한 달에 todo가 존재하는지 점검
         List<Todo> allTodos = todoRepository.findAllTodosByMonthAndUserId(userId, statsDate);
@@ -552,25 +551,65 @@ public class TodoService {
             result.put("summaryResult", "이번달 데이터가 존재하지 않습니다.");
 
         } else {
-
-
-
-
-
-
+            // summary가 db에 존재하는지 확인
             try {
-                String goalResult = gptSummaryService.askGpt(wordsResultText);
+                List<Summary> summaryExist = summaryRepository.findByUserIdAndSummaryStatsDate(userId, statsDate);
+                if (summaryExist.isEmpty()) { // summary 데이터가 없는 경우에 대한 처리
 
+                    Map<String, Object> wordsResult = findWords(userId, statsDate); // 최빈도 단어들 추출
+                    String wordsResultText = formatWordsResult(wordsResult);
 
+                    String goalResult = gptSummaryService.askGpt(wordsResultText);
+                    result.put("summaryResult", goalResult);
 
+                    boolean isCurrent = isCurrentMonth(statsDate);
+                    System.out.println("입력한 날짜가 이번 달인가요? " + isCurrent);
 
-                result.put("summaryResult", goalResult);
-            } catch (Exception e) {
-                // 예외가 발생했을 때 적절한 오류 메시지를 반환
-                result.put("summaryResult", "GPT가 오류가 났어요.. :( " + e.getMessage());
-                System.err.println("GPT터짐ㅋㅋ : " + e);
+                    if(!isCurrent){
+                        //DB에 저장 로직
+                        Summary newSummary = new Summary();
+                        newSummary.setUserId(userId);
+                        newSummary.setSummaryResult(goalResult);
+                        newSummary.setSummaryStatsDate(statsDate);
+                        summaryRepository.save(newSummary); // Summary 객체를 DB에 저장
+                    }
+                } else {  // summary 데이터가 있는 경우에 대한 처리
+                    for (Summary summary : summaryExist) { // summaryResult만 추출
+                        String summaryResult = summary.getSummaryResult();
+                        result.put("summaryResult", summaryResult);
+                    }
+                }
+            } catch (EmptyResultDataAccessException e){
+                // summary가 존재하지 않습니다.
+                result.put("summaryResult", "오류가 발생 했습니다. 다시 시도해주세요");
             }
         }
         return result;
     }
+
+    // 오늘날짜와 같은 달인지 판별하는 코드
+    public boolean isCurrentMonth(String statsDate) {
+        // 입력된 statsDate가 올바른 형식인지 먼저 확인
+        if (!statsDate.matches("\\d{4}\\.\\d{2}")) {
+            System.err.println("날짜 형식이 올바르지 않습니다. 올바른 형식: YYYY.MM");
+            return false;
+        }
+
+        // 현재 날짜 가져오기
+        LocalDate currentDate = LocalDate.now();
+
+        // 입력된 statsDate를 LocalDate로 변환
+        LocalDate inputDate;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            inputDate = LocalDate.parse(statsDate + ".01", formatter); // 월의 첫 날을 사용하여 날짜로 파싱
+        } catch (DateTimeParseException e) {
+            System.err.println("날짜 파싱 중 오류가 발생했습니다: " + statsDate + ". 확인해 주세요.");
+            return false;
+        }
+
+        // 현재 월과 입력된 월이 동일한지 확인
+        return currentDate.getMonth() == inputDate.getMonth() && currentDate.getYear() == inputDate.getYear();
+    }
+
 }
