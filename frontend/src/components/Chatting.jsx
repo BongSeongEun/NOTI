@@ -1,97 +1,138 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import styled, { ThemeProvider } from "styled-components";
-import theme from "../styles/theme"; // 테마 파일 불러오기zz
+import theme from "../styles/theme"; // 테마 파일 불러오기
 import SEND from "../asset/fi-rr-paper-plane.png";
 
 const ChatDiv = styled.div`
   border-radius: 10px;
-  border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1}; // 새로운 스타일
-  /* border: 3px solid black; */
+  border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
   margin-top: 10px;
   height: 480px;
-  /* justify-content: flex-end; // 아래 정렬 */
-  /* justify-content: bottom; */
   display: flex;
   flex-direction: column;
-  justify-content: space-between; // 채팅 입력란을 아래로 정렬
-
+  justify-content: space-between;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  -ms-overflow-style: none;
-
-  ::-webkit-scrollbar {
-    display: none;
-  }
+  overflow: hidden;
 `;
 
 const ChatInputDiv = styled.div`
-  height: 35px;
-  /* border-radius: 20px; */
-  width: 100%; // 변경: 고정 폭 대신 부모 요소의 너비를 차지하도록 설정
+  height: 40px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: #e3e4e6;
   padding: 10px;
-  box-sizing: border-box; // 패딩이 폭에 포함되도록 설정
+  box-sizing: border-box;
 `;
 
 const ChatInput = styled.input`
+  font-size: 12px;
   border: none;
-  background-color: #e3e4e6; // 배경색 설정
+  background-color: #e3e4e6;
   flex-grow: 1;
   padding: 5px;
+  outline: none; /* 기본 테두리 없애기 */
+  &:focus {
+    border-radius: 5px;
+    border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1}; /* 포커스 시 테두리 색상 변경 */
+  }
 `;
 
 const ChatRole = styled.div`
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   &.bot-message {
-    background-color: #e8e8e8; // 배경색 변경
-    align-self: flex-start; // 왼쪽 정렬
-    width: 200px;
-    border-radius: 15px;
+    background-color: #e8e8e8;
+    align-self: flex-start;
+    max-width: 80%;
+    border-radius: 15px 15px 15px 0px;
     padding: 10px;
     margin-bottom: 10px;
     margin-top: 10px;
     font-size: 13px;
+    position: relative;
   }
   &.user-message {
     background-color: ${props =>
-      props.theme.color1 || theme.OrangeTheme.color1}; // 배경색 변경
+      props.theme.color1 || theme.OrangeTheme.color1};
     color: white;
     font-weight: bold;
-    border-radius: 15px;
+    border-radius: 15px 15px 0px 15px;
     padding: 10px;
     font-size: 13px;
-    align-self: flex-end; // 오른쪽 정렬
+    align-self: flex-end;
     margin-bottom: 10px;
     margin-top: 10px;
+    max-width: 80%;
+    position: relative;
   }
 `;
+
+const Timestamp = styled.span`
+  font-size: 10px;
+  color: #a0a0a0;
+  position: absolute;
+  bottom: -15px;
+  ${props => (props.isBot ? "left: 10px;" : "right: 10px;")}
+`;
+
+const DateSeparator = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0;
+  font-size: 12px;
+  color: #a0a0a0;
+  &:before,
+  &:after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #a0a0a0;
+    margin: 0 10px;
+  }
+`;
+
 const SendButton = styled.img`
-  padding: 10;
+  padding: 10px;
   cursor: pointer;
-  width: 20px; // 버튼 크기 조정
+  width: 20px;
+  transition: transform 0.2s ease; /* 부드러운 전환 효과 */
+  &:hover {
+    transform: scale(1.2); /* 크기를 1.2배로 확대 */
+  }
 `;
 
 const MessagesContainer = styled.div`
   display: flex;
   flex-direction: column;
-  flex-grow: 1; // 부모의 flex-direction이 column이므로 flex-grow를 사용하여 여분의 공간을 채웁니다.
-  overflow-y: auto; // 이 부분에서 스크롤을 가능하게 합니다.
-  padding: 10px; // 메시지와 컨테이너 가장자리 사이의 여백을 추가합니다.
-  margin-bottom: 10px; // 입력란과의 간격을 유지합니다.
+  flex-grow: 1;
+  overflow-y: auto; // 스크롤 가능
+  padding: 10px;
+  margin-bottom: 10px;
   transition: all 0.3s ease;
+
+  /* 스크롤바 스타일 */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 function ChatComponent() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme); // 현재 테마 상태변수
+  const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
 
   const token = window.localStorage.getItem("token");
-  const messagesEndRef = useRef(null); // 메시지 목록의 끝을 참조하기 위한 ref
+  const messagesEndRef = useRef(null);
 
   const getUserIdFromToken = () => {
     const payload = token.split(".")[1];
@@ -99,7 +140,6 @@ function ChatComponent() {
     const decodedPayload = atob(base642);
     const decodedJSON = JSON.parse(decodedPayload);
 
-    console.log(decodedJSON);
     return decodedJSON.id.toString();
   };
   const userId = getUserIdFromToken();
@@ -114,10 +154,8 @@ function ChatComponent() {
           },
         },
       );
-      // 사용자의 테마 정보와 이미지 데이터를 서버로부터 받아옴
-      const userThemeName = response.data.userColor; // 사용자의 테마 이름
+      const userThemeName = response.data.userColor;
 
-      // 사용자의 테마를 상태에 적용
       if (theme[userThemeName]) {
         setCurrentTheme(theme[userThemeName]);
       }
@@ -126,12 +164,10 @@ function ChatComponent() {
     }
   };
 
-  // 메시지 목록의 끝으로 스크롤하는 함수
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 채팅 컴포넌트를 클릭했을 때 실행될 핸들러
   const handleChatDivClick = () => {
     scrollToBottom();
   };
@@ -148,13 +184,11 @@ function ChatComponent() {
     }
   };
 
-  // 채팅 내역 불러오기
   useEffect(() => {
-    fetchUserData();
+    fetchUserData(token);
     fetchChatList();
-  }, [newMessage]); // messages가 변경될 때마다 이 effect를 실행
+  }, [token]);
 
-  // 새 채팅 메시지 전송
   const sendMessage = async event => {
     event.preventDefault();
     try {
@@ -162,13 +196,18 @@ function ChatComponent() {
         `http://15.164.151.130:4000/api/v3/ask/${userId}`,
         {
           chat_content: newMessage,
-          chatWho: false, // 예시로, 사용자 메시지로 설정
+          chatWho: false,
         },
       );
+      const now = new Date().toISOString();
       setMessages(prevMessages => [
         ...prevMessages,
-        { chat_content: newMessage, chatWho: false },
-        { chat_content: response.data.chat_content, chatWho: true },
+        { chat_content: newMessage, chatWho: false, chatDate: now },
+        {
+          chat_content: response.data.chat_content,
+          chatWho: true,
+          chatDate: now,
+        },
       ]);
       setNewMessage("");
     } catch (error) {
@@ -176,28 +215,45 @@ function ChatComponent() {
     }
   };
 
-  // 메시지를 보내는 함수에 Enter 키 이벤트 추가
   const handleKeyPress = event => {
     if (event.key === "Enter") {
       sendMessage(event);
     }
   };
 
-  const scrollRef = useRef();
-  console.log(scrollRef.current);
+  const formatDate = date => {
+    const options = { year: "numeric", month: "numeric", day: "numeric" };
+    return new Date(date).toLocaleDateString(undefined, options);
+  };
 
   return (
     <ThemeProvider theme={currentTheme}>
       <ChatDiv>
         <MessagesContainer>
-          {messages.map((msg, index) => (
-            <ChatRole
-              key={index}
-              className={msg.chatWho ? "bot-message" : "user-message"}
-            >
-              {msg.chatContent}
-            </ChatRole>
-          ))}
+          {messages.map((msg, index) => {
+            const showDateSeparator =
+              index === 0 ||
+              formatDate(messages[index - 1].chatDate) !==
+                formatDate(msg.chatDate);
+            return (
+              <React.Fragment key={index}>
+                {showDateSeparator && (
+                  <DateSeparator>{formatDate(msg.chatDate)}</DateSeparator>
+                )}
+                <ChatRole
+                  className={msg.chatWho ? "bot-message" : "user-message"}
+                >
+                  {msg.chatContent}
+                  <Timestamp isBot={msg.chatWho}>
+                    {new Date(msg.chatDate).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Timestamp>
+                </ChatRole>
+              </React.Fragment>
+            );
+          })}
           <div ref={messagesEndRef} />
         </MessagesContainer>
         <ChatInputDiv>

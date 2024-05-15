@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
+import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/Navigation";
 import theme from "../styles/theme";
@@ -46,6 +48,35 @@ function Setting() {
   const navigate = useNavigate();
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
   const [selectedDate, setSelectedDate] = useState("");
+  const token = window.localStorage.getItem("token");
+
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+    return decodedJSON.id.toString();
+  };
+
+  const fetchUserData = async () => {
+    const userId = getUserIdFromToken();
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      const userThemeName = response.data.userColor;
+      if (theme[userThemeName]) {
+        setCurrentTheme(theme[userThemeName]);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
   const setDate = date => {
     setSelectedDate(date);
@@ -60,12 +91,15 @@ function Setting() {
     navigate("/edit-profile");
   };
 
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
   return (
     <ThemeProvider theme={currentTheme}>
       <NavBar setDate={setDate} />
       <div>
         <MainDiv>
-          설정
           <ButtonContainer>
             <Button onClick={handleLogout}>로그아웃</Button>
             <Button onClick={handleEditProfile}>회원정보 수정</Button>

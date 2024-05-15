@@ -174,25 +174,6 @@ const InputBox2 = styled.input`
   text-align: center;
 `;
 
-// const Button2 = styled.button`
-//   // 중복확인
-//   border: none;
-//   height: 30px;
-//   width: 60px;
-//   top: 0;
-//   bottom: 0;
-//   margin: auto 0;
-//   border-radius: 3px;
-//   font-size: 10px;
-//   background-color: ${props => props.theme.color1};
-//   cursor: pointer;
-//   transition: background-color 0.3s ease;
-//   &:hover {
-//     background-color: ${props => lighten(0.1, props.theme.color1)};
-//   }
-//   color: #ffffff;
-// `;
-
 const RegBtn = styled.button`
   // 가입하기 버튼
   border: none;

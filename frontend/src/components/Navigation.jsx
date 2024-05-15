@@ -314,7 +314,7 @@ function Navigation({ setDate }) {
             value={selectedDate}
             formatDay={formatDay}
           />
-          <ChatComponent userId={userId} />
+          <ChatComponent userId={userId} currentTheme={currentTheme} />
         </RightSidebar>
       </Nav>
     </>
