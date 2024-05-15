@@ -221,9 +221,9 @@ function Diary_Main({ }) {
 			<View style={{ alignItems: 'center', backgroundColor: marked ? currentTheme.color1 : 'transparent', padding: 5, borderRadius: 100 }}>
 				<Text style={{ color: marked ? 'white' : 'black' }}>{day.day}</Text>
 				{marked && marked.emotionIcon ? (
-					<Image source={marked.emotionIcon} style={{ width: 30, height: 40 }} />
+					<Image source={marked.emotionIcon} style={{ width: 30, height: 35 }} />
 				) : (
-					<View style={{ width: 30, height: 40 }} />
+					<View style={{ width: 30, height: 35 }} />
 				)}
 			</View>
 		);

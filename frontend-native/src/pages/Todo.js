@@ -7,7 +7,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, TouchableOpacity, Text, Modal, Share,  } from "react-native";
+import { ScrollView, TouchableOpacity, Text, Modal, Share, Alert, Linking,  } from "react-native";
 import styled, { ThemeProvider } from 'styled-components/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -241,6 +241,7 @@ function Todo() {
 					console.log('Shared with activity type:', result.activityType);
 				} else {
 					console.log('Shared');
+					addEventsToGoogleCalendar(events);
 				}
 			} else if (result.action === Share.dismissedAction) {
 				console.log('Dismissed');
@@ -250,7 +251,74 @@ function Todo() {
 		} finally {
 			setClicked_share(false);
 		}
-	};	
+	};
+	
+	const addEventsToGoogleCalendar = async (events) => {
+		const accessToken = await getGoogleAccessToken();
+	
+		if (!accessToken) {
+			Alert.alert('Error', 'Failed to retrieve Google access token');
+			return;
+		}
+	
+		events.forEach(async (event) => {
+			const title = encodeURIComponent(event.todoTitle);
+			const startDateTime = `${selectedDate}T${event.todoStartTime.replace(':', '')}00`;
+			const endDateTime = `${selectedDate}T${event.todoEndTime.replace(':', '')}00`;
+	
+			const eventDetails = {
+				summary: event.todoTitle,
+				start: {
+					dateTime: `${selectedDate}T${event.todoStartTime}:00`,
+					timeZone: 'Asia/Seoul',
+				},
+				end: {
+					dateTime: `${selectedDate}T${event.todoEndTime}:00`,
+					timeZone: 'Asia/Seoul',
+				},
+			};
+	
+			try {
+				const response = await axios.post(
+					'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+					eventDetails,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+							'Content-Type': 'application/json',
+						},
+					}
+				);
+				if (response.status === 200) {
+					Alert.alert('Success', 'Event added to Google Calendar');
+				} else {
+					console.error('Failed to add event to Google Calendar:', response);
+				}
+			} catch (error) {
+				console.error('Error adding event to Google Calendar:', error);
+			}
+		});
+	};
+	
+	const getGoogleAccessToken = async () => {
+		try {
+			const response = await axios.get('http://15.164.151.130:4000/api/v2/calendarapi', {
+				headers: {
+					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+				},
+			});
+	
+			if (response.status === 200) {
+				return response.data.accessToken;
+			} else {
+				console.error('Failed to retrieve Google access token:', response);
+				return null;
+			}
+		} catch (error) {
+			console.error('Error retrieving Google access token:', error);
+			return null;
+		}
+	};
 
 	return (
 		<ThemeProvider theme={currentTheme}>
@@ -276,7 +344,7 @@ function Todo() {
 				</BarContainer>
 				<Bar />
 				<Bar_Mini />
-
+	
 				<ScrollView>
 					<MainView>
 						<HorisontalView style={{ justifyContent: 'space-between', padding: 20 }}>
@@ -289,9 +357,9 @@ function Todo() {
 									setClicked_share(true);
 									shareSchedule();
 								}} />
-
+	
 						</HorisontalView>
-
+	
 						{clicked_calendar && (
 							<>
 								<Calendar
@@ -329,12 +397,12 @@ function Todo() {
 								</Noti>
 							))
 						)}
-
+	
 						<Noti onPress={() => navigation.navigate("Todo_Add", { selectedDate: selectedDate })}
 							style={{ width: 150, backgroundColor: "#B7BABF", alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
 							<NotiText style={{ marginRight: 10 }}>+ 새 노티 추가하기</NotiText>
 						</Noti>
-
+	
 						<Modal
 							animationType="slide"
 							transparent={true}
@@ -358,7 +426,7 @@ function Todo() {
 										}} style={{ padding: 20, marginTop: 20 }}>
 											<MainText style={{ fontSize: 15 }}>수정하기</MainText>
 										</TouchableOpacity>
-
+	
 										
 										<TouchableOpacity onPress={() => setClicked_delete(true)}
 											style={{ padding: 20 }}>
@@ -380,7 +448,7 @@ function Todo() {
 															style={{ backgroundColor: "#F2F3F5" }}>
 															<Text>예</Text>
 														</TeamOut>
-
+	
 														<TeamOut onPress={() => setClicked_delete(false)}
 															style={{ backgroundColor: currentTheme.color1 }}>
 															<Text style={{ color: "white" }}>아니요</Text>
@@ -389,7 +457,7 @@ function Todo() {
 												</ModalView>
 											</ModalContainer>
 										</Modal>
-
+	
 										<TeamOut onPress={() => setModalVisible(false)}
 											style={{ backgroundColor: currentTheme.color1, width: 250 }}>
 											<Text style={{ color: 'white' }}>닫기</Text>
@@ -398,7 +466,7 @@ function Todo() {
 								</ModalView>
 							</ModalContainer>
 						</Modal>
-
+	
 						<TimeTable schedule={schedule} />
 					</MainView>
 				</ScrollView>

@@ -916,7 +916,7 @@ const GoalChart = styled.TouchableOpacity`
 	width: 230px;
 	height: 20px;
 	border-radius: 100px;
-	background-color: ${props => props.color || "#B7BABF"};
+	background-color: ${props => props.color || "#E3E4E6"};
 `;
 
 const GoalB = styled.TouchableOpacity`
