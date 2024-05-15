@@ -47,13 +47,13 @@ public class NotificationHelper {
 
         // 알림에 추가할 액션
         NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(
-            R.drawable.kakaotalk_20240105_025405447, "답변하기", replyPendingIntent)
+            R.drawable.notilogo, "답변하기", replyPendingIntent)
             .addRemoteInput(remoteInput) // RemoteInput 추가
             .build();
 
         // 알림 생성
         Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.kakaotalk_20240105_025405447)
+                .setSmallIcon(R.drawable.notilogo)
                 .setContentTitle("노티 NOTI")
                 .setContentText("지금 어떤걸 하고 계신가요?")
                 .addAction(replyAction) // 액션 추가

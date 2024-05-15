@@ -91,7 +91,7 @@ public class MainActivity extends ReactActivity {
    */
   private void sendNotification(String message) {
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-        .setSmallIcon(R.drawable.kakaotalk_20240105_025405447) // 알림 아이콘
+        .setSmallIcon(R.drawable.notilogo) // 알림 아이콘
         .setContentTitle("새 알림") // 알림 제목
         .setContentText(message) // 알림 내용
         .setPriority(NotificationCompat.PRIORITY_DEFAULT); // 우선순위

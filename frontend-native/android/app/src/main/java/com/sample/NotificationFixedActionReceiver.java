@@ -1,12 +1,12 @@
 package com.sample;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
 import okhttp3.Call;
@@ -18,6 +18,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import java.io.IOException;
 import android.content.SharedPreferences;
+import android.util.Log;
+import android.os.Bundle;
 
 public class NotificationFixedActionReceiver extends BroadcastReceiver {
     private static final String TAG = NotificationFixedActionReceiver.class.getSimpleName();
@@ -35,7 +37,7 @@ public class NotificationFixedActionReceiver extends BroadcastReceiver {
                 String input = results.getCharSequence(NotificationHelper.KEY_REPLY).toString();
                 Log.d(TAG, "User input from notification: " + input); // 입력된 내용 로깅
                 // 입력 데이터로 필요한 작업 수행, 예를 들어 서버로 전송
-                sendInputToServer(context, input, userId);
+                new Thread(() -> sendInputToServer(context, input, userId)).start();
             }
         }
     }
@@ -89,22 +91,34 @@ public class NotificationFixedActionReceiver extends BroadcastReceiver {
 
         // 알림에 추가할 액션
         NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(
-            R.drawable.kakaotalk_20240105_025405447, "답변하기", replyPendingIntent)
+            R.drawable.notilogo, "답변하기", replyPendingIntent)
             .addRemoteInput(remoteInput) // RemoteInput 추가
             .build();
 
+        // 앱을 열기 위한 인텐트와 PendingIntent 생성
+        Intent appIntent = new Intent(context, MainActivity.class); // MainActivity를 원하는 액티비티로 변경
+        appIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent appPendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                appIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
         // 알림 갱신
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
-                .setSmallIcon(R.drawable.kakaotalk_20240105_025405447)
+                .setSmallIcon(R.drawable.notilogo)
                 .setContentTitle("노티 NOTI")
-                .setContentText(responseBody) // 서버 응답 내용을 ContentText로 설정
+                .setContentText(responseBody) // 기본 텍스트 설정
                 .setStyle(new NotificationCompat.BigTextStyle()
-                    .bigText(responseBody))
+                    .bigText(responseBody)) // BigTextStyle로 설정하여 확장 시 전체 텍스트 표시
                 .addAction(replyAction) // 액션 추가
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(appPendingIntent) // 알림 클릭 시 앱 열기
+                .setAutoCancel(true); // 알림을 클릭하면 자동으로 취소되도록 설정
 
-        // 알림 고정
-        notificationBuilder.setOngoing(true);
+        // 알림 고정 해제 (확장 시 자동으로 사라지도록 설정)
+        notificationBuilder.setOngoing(false);
 
         // 알림 표시
         notificationManager.notify(NotificationHelper.NOTIFICATION_ID, notificationBuilder.build());
