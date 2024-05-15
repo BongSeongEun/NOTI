@@ -92,11 +92,11 @@ public class GptServiceImpl implements GptDiaryService {
                 .map(todo -> todo.getTodoTitle() + ":" + (todo.isTodoDone() ? "달성성공" : "달성실패"))
                 .collect(Collectors.joining(", "));
 
-//        if (diaryInputs.isEmpty() && todoContents.isEmpty()){
-//
-//        } else {
-//
-//        }
+        if (diaryInputs.isEmpty() && todoContents.isEmpty()){
+            System.out.println("오늘 활동이 없어요..");
+
+            return "오늘은 활동이 없어요";
+        }
 
         // diaryContent + todoContents 둘이 합치기
         String combinedInputs = diaryInputs + "= 이거는 오늘 하루동안 gpt와 대화했던 내용들이고"
@@ -260,18 +260,4 @@ public class GptServiceImpl implements GptDiaryService {
 
         return base64EncodedImage;
     }
-
-    private String convertImageUrl(String originalUrl) { // 삭제예정
-        // 예시로 제공된 URL에서 파일 이름을 추출합니다
-        String fileName = originalUrl.substring(originalUrl.lastIndexOf("/") + 1);
-
-        // 파일 이름을 이용하여 새로운 URL을 생성합니다
-        // 파일 이름은 그대로 사용됩니다
-        String newUrl = "file:///data/user/0/com.sample/cache/" + fileName;
-
-        return newUrl;
-    }
-
-
-
 }
