@@ -7,7 +7,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, TouchableOpacity, Text, Modal } from "react-native";
+import { ScrollView, TouchableOpacity, Text, Modal, Share,  } from "react-native";
 import styled, { ThemeProvider } from 'styled-components/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,11 +20,6 @@ import Navigation_Bar from "../components/Navigation_Bar";
 import { format, parseISO } from "date-fns";
 import { Calendar } from "react-native-calendars";
 import TimeTable from "../components/TimeTable";
-
-const addOpacityToColor = (color, opacity) => {
-    const hexOpacity = Math.floor(opacity * 255).toString(16).padStart(2, '0');
-    return `${color}${hexOpacity}`;
-};
 
 function Todo() {
 	const navigation = useNavigation();
@@ -229,11 +224,39 @@ function Todo() {
 		}
 	};
 
+	const shareSchedule = async () => {
+		try {
+			const formattedEvents = events.map(event => {
+				return `${event.todoTitle}: ${event.todoStartTime} ~ ${event.todoEndTime}`;
+			}).join('\n');
+	
+			const message = `${format(new Date(selectedDate), "yyyy.MM.dd")}일의 일정:\n${formattedEvents}`;
+	
+			const result = await Share.share({
+				message,
+			});
+	
+			if (result.action === Share.sharedAction) {
+				if (result.activityType) {
+					console.log('Shared with activity type:', result.activityType);
+				} else {
+					console.log('Shared');
+				}
+			} else if (result.action === Share.dismissedAction) {
+				console.log('Dismissed');
+			}
+		} catch (error) {
+			console.error('Error sharing schedule:', error.message);
+		} finally {
+			setClicked_share(false);
+		}
+	};	
+
 	return (
 		<ThemeProvider theme={currentTheme}>
 			<FullView>
 				<MainView>
-				<HorisontalView style={{marginTop: 20, marginBottom: 10}}>
+					<HorisontalView style={{ marginTop: 20, marginBottom: 10 }}>
 						<Profile source={base64Image ? { uri: base64Image } : images.profile}
 							style={{ marginTop: 20 }} />
 						<ProfileTextContainer>
@@ -246,23 +269,27 @@ function Todo() {
 				</MainView>
 			</FullView>
 			
-			<FullView style={{flex: 1, marginBottom: 80}}>
+			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<BarContainer>
 					<MainText style={{ marginRight: 20 }}>나의 일정</MainText>
-                    <MainText onPress={() => navigation.navigate('Coop_Main')}style={{ marginLeft: 20, color: "#B7BABF" }}>협업 일정</MainText>
-                </BarContainer>
+					<MainText onPress={() => navigation.navigate('Coop_Main')} style={{ marginLeft: 20, color: "#B7BABF" }}>협업 일정</MainText>
+				</BarContainer>
 				<Bar />
 				<Bar_Mini />
 
 				<ScrollView>
 					<MainView>
-						<HorisontalView style={{ justifyContent: 'space-between', padding: 20}}>
-						<images.calendar width={20} height={20}
-						color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
-						onPress={() => setClicked_calendar(!clicked_calendar)} />
-						<images.share width={20} height={20}
-						color={clicked_share ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => setClicked_share(!clicked_share)} />
+						<HorisontalView style={{ justifyContent: 'space-between', padding: 20 }}>
+							<images.calendar width={20} height={20}
+								color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => setClicked_calendar(!clicked_calendar)} />
+							<images.share width={20} height={20}
+								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
+								onPress={() => {
+									setClicked_share(true);
+									shareSchedule();
+								}} />
+
 						</HorisontalView>
 
 						{clicked_calendar && (
@@ -279,8 +306,8 @@ function Todo() {
 						
 						{events.length === 0 ? (
 							<NoTodoNoti>
-							<NoTodoText>일정이 없습니다. 새 일정을 추가해주세요!</NoTodoText>
-						</NoTodoNoti>
+								<NoTodoText>일정이 없습니다. 새 일정을 추가해주세요!</NoTodoText>
+							</NoTodoNoti>
 						) : (
 							events.map((event, index) => (
 								<Noti key={event.todoId}
@@ -293,7 +320,7 @@ function Todo() {
 									}}>
 									<Noti_Check onPress={() => toggleComplete(event.todoId, index)}>
 										{event.todoDone && <images.noticheck width={15} height={15}
-											color={event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor} /> }
+											color={event.todoDone ? addOpacityToColor(event.selectedColor, 0.6) : event.selectedColor} />}
 									</Noti_Check>
 									<NotiTextContainer>
 										<NotiText>{event.todoTitle}</NotiText>
@@ -334,7 +361,7 @@ function Todo() {
 
 										
 										<TouchableOpacity onPress={() => setClicked_delete(true)}
-										style={{ padding: 20 }}>
+											style={{ padding: 20 }}>
 											<MainText style={{ fontSize: 15 }}>삭제하기</MainText>
 										</TouchableOpacity>
 										<Modal
@@ -350,12 +377,12 @@ function Todo() {
 															handleDelete();
 															setClicked_delete(false);
 														}}
-														style={{ backgroundColor: "#F2F3F5" }}>
+															style={{ backgroundColor: "#F2F3F5" }}>
 															<Text>예</Text>
 														</TeamOut>
 
 														<TeamOut onPress={() => setClicked_delete(false)}
-														style={{ backgroundColor: currentTheme.color1 }}>
+															style={{ backgroundColor: currentTheme.color1 }}>
 															<Text style={{ color: "white" }}>아니요</Text>
 														</TeamOut>
 													</HorisontalView>
@@ -364,7 +391,7 @@ function Todo() {
 										</Modal>
 
 										<TeamOut onPress={() => setModalVisible(false)}
-										style={{ backgroundColor: currentTheme.color1, width: 250 }}>
+											style={{ backgroundColor: currentTheme.color1, width: 250 }}>
 											<Text style={{ color: 'white' }}>닫기</Text>
 										</TeamOut>
 									</ModalContent>
@@ -373,13 +400,13 @@ function Todo() {
 						</Modal>
 
 						<TimeTable schedule={schedule} />
-						</MainView>
+					</MainView>
 				</ScrollView>
-				</FullView>
-				<Navigation_Bar />
+			</FullView>
+			<Navigation_Bar />
 			
 		</ThemeProvider>
-	);	
+	);
 }
 
 const FullView = styled.View`

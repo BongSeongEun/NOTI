@@ -7,8 +7,7 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable quotes */
 
-import styled, { ThemeProvider } from "styled-components/native"
-
+import styled, { ThemeProvider } from "styled-components/native";
 import React, { useState, useEffect } from 'react';
 import {
 	View,
@@ -18,7 +17,7 @@ import {
 	Text,
 	Image,
 } from "react-native";
-import { useNavigation, useIsFocused, useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from "react-native-calendars";
 import 'react-native-gesture-handler';
@@ -187,11 +186,23 @@ function Diary_Main({ }) {
 		return `${year}.${month}.${day}`;
 	};
 
+	const getEmotionIconForDate = (emotionLevel) => {
+		switch (emotionLevel) {
+			case 1: return images.emotion1;
+			case 2: return images.emotion2;
+			case 3: return images.emotion3;
+			case 4: return images.emotion4;
+			case 5: return images.emotion5;
+			default: return null;
+		}
+	};
+
 	const markedDates = diaries.reduce((acc, diary) => {
 		const formattedDate = diary.diaryDate.replace(/\./g, '-');
 		acc[formattedDate] = {
 			marked: true,
 			dotColor: currentTheme.color1,
+			emotionIcon: getEmotionIconForDate(diary.diaryEmotion),
 		};
 		return acc;
 	}, {
@@ -200,6 +211,23 @@ function Diary_Main({ }) {
 			selectedColor: currentTheme.color1,
 		},
 	});
+	
+	const renderDay = (day) => {
+		const { dateString } = day;
+		const marked = markedDates[dateString];
+	
+		return (
+			<View style={{ alignItems: 'center', backgroundColor: marked ? currentTheme.color1 : 'transparent', padding: 5, borderRadius: 100 }}>
+				<Text style={{ color: marked ? 'white' : 'black' }}>{day.day}</Text>
+				{marked && marked.emotionIcon ? (
+					<Image source={marked.emotionIcon} style={{ width: 30, height: 40 }} />
+				) : (
+					<View style={{ width: 30, height: 40 }} />
+				)}
+			</View>
+		);
+	};
+	
 
 	const onDayPress = day => {
 		setSelectedDate(day.dateString);
@@ -274,6 +302,10 @@ function Diary_Main({ }) {
 								<Calendar
 									onDayPress={onDayPress}
 									markedDates={markedDates}
+									markingType={'custom'}
+									dayComponent={({ date, state }) => {
+										return renderDay(date);
+									}}
 								/>
 							</>
 						)}

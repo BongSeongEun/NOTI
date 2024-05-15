@@ -8,7 +8,7 @@
 
 import styled, { ThemeProvider } from "styled-components/native";
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, Image, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import { ScrollView, Text, View, Image, TouchableOpacity, Modal, StyleSheet, Share } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -273,8 +273,36 @@ function Coop() {
 		</Modal>
 	);
 
-	const shareShowModal = () => setIsShareModalVisible(true);
+	const shareShowModal = () => {
+		shareTeamId();
+	};
+
 	const copyTeamId = () => Clipboard.setString(teamId.teamId);
+
+	const shareTeamId = async () => {
+		try {
+			const message = `Team ID: ${teamId.teamId}`;
+			const result = await Share.share({ message });
+	
+			if (result.action === Share.sharedAction) {
+				if (result.activityType) {
+					console.log('Shared with activity type:', result.activityType);
+				} else {
+					console.log('Shared');
+				}
+			} else if (result.action === Share.dismissedAction) {
+				console.log('Dismissed');
+			}
+		} catch (error) {
+			console.error('Error sharing team ID:', error.message);
+		}
+	};
+
+	useEffect(() => {
+		if (!isShareModalVisible) {
+			setClickedShare(false);
+		}
+	}, [isShareModalVisible]);
 
 	/*
 		>> RETURN문
