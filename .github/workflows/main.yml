@@ -8,16 +8,15 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  AWS_S3_BUCKET: cicdtestt
-  AWS_CODE_DEPLOY_APPLICATION: cicd-test-CD
-  AWS_CODE_DEPLOY_GROUP: cicd-test-CD-group
+  AWS_S3_BUCKET: noti
+  AWS_CODE_DEPLOY_APPLICATION: cicd-noti
+  AWS_CODE_DEPLOY_GROUP: cicd-noti-group
   working-directory: ./backend
+  resource-path: ./backend/src/main/resources/application.properties
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
 
@@ -26,19 +25,30 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: mkdir src/main/resources
+      working-directory: ${{ env.working-directory }}
+
+    - name: Grant execute permission for gradlew
+      run: touch application.properties
+      working-directory: ./backend/src/main/resources
+
+    - name: Grant execute permission for gradlew
+      run: echo "${{ secrets.APPLICATION }}" > application.properties
+      working-directory: backend/src/main/resources
+
+    - name: Grant execute permission for gradlew
+      run: sudo su
+      working-directory: ${{ env.working-directory }}
         
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       working-directory: ${{ env.working-directory }}
 
     - name: gradlew Update
-      run: ./gradlew wrapper --gradle-version 8.4
-      working-directory: ${{ env.working-directory }}
-
-    
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ${{ env.working-directory }}
+      run: ./gradlew build
+      working-directory: ${{ env.working-directory }}   
       
     - name: AWS credential 설정
       uses: aws-actions/configure-aws-credentials@v4
@@ -48,8 +58,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.CICD_SECRET_KEY }}
         
     - name: S3에 업로드
-      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://$AWS_S3_BUCKET/cicdtest/$GITHUB_SHA.zip --source .
+      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://$AWS_S3_BUCKET/noti/$GITHUB_SHA.zip --source .
    
     - name: EC2에 배포
-      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=$AWS_S3_BUCKET,key=cicdtest/$GITHUB_SHA.zip,bundleType=zip  
+      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=$AWS_S3_BUCKET,key=noti/$GITHUB_SHA.zip,bundleType=zip  
 #1

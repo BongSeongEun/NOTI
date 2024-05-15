@@ -1,6 +1,9 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable quotes */
 
+import Noti from "../asset/Noti.png";
+import Kakao from "../asset/kakao.png";
+
 import profile from "../asset/profile.png";
 import gallery from "../asset/gallery.png";
 import noticheck from "../asset/noticheck.svg";
@@ -29,7 +32,17 @@ import message_send from "../asset/message_send.svg";
 import copy from "../asset/copy.svg";
 import plus from "../asset/plus.svg";
 
+import creat_down from "../asset/caret-down";
+
+import emotion1 from "../asset/emotion1.png";
+import emotion2 from "../asset/emotion2.png";
+import emotion3 from "../asset/emotion3.png";
+import emotion4 from "../asset/emotion4.png";
+import emotion5 from "../asset/emotion5.png";
+
 export const images = {
+	Noti: Noti,
+	Kakao: Kakao,
 	profile: profile,
 	gallery: gallery,
 
@@ -58,6 +71,14 @@ export const images = {
 	message_send: message_send,
 	copy: copy,
 	plus: plus,
+
+	creat_down: creat_down,
+
+	emotion1: emotion1,
+	emotion2: emotion2,
+	emotion3: emotion3,
+	emotion4: emotion4,
+	emotion5: emotion5,
 };
 
 export default images;

@@ -71,6 +71,7 @@ public class GptController {
 
 
                 chatEvent = nlpService.askNlp(userMessage, userId);
+                System.out.println("chatEvent : " + chatEvent);
 
                 JSONArray mainArray = new JSONArray(chatEvent);
 
@@ -155,12 +156,16 @@ public class GptController {
                 if (works.size() == times.size()){ // nlp 결과값 갯수 서로 같은지 검증
                     if (works.size() == dates.size()){
                         for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
-                            saveTodoAndDate(works.get(i).trim(), times.get(i).trim(), dates.get(i).trim(), userId);
+                            saveTodoAndDate(works.get(i).trim(), times.get(i).trim(), dates.get(i).trim(), userId); // gpt4이후 오류
                         }
 
                     } else {
                         for (int i = 0; i < works.size(); i++){ // 갯수대로 todo에 저장
+                            System.out.println(works);
+                            System.out.println(times);
+                            System.out.println(dates);
                             saveTodo(works.get(i).trim(), times.get(i).trim(), userId);
+
                         }
                     }
                 } else {
@@ -263,6 +268,9 @@ public class GptController {
     }
 
     private void saveTodoAndDate (String processedEvent, String processedTime, String processedDate, Long userId){
+        System.out.println("date값 : " + processedDate);
+        System.out.println("event값 : " + processedEvent);
+        System.out.println("time값 : " + processedTime);
         String[] times = processedTime.split("~"); // ~ 기준으로 분리
         if (times.length == 2){
             String startTimeStr = times[0];
@@ -296,7 +304,7 @@ public class GptController {
 
         } else {
             // nlpTime 형식이 예상과 다를 경우의 처리
-            System.out.println("nlpTime 형식이 이상해요...ㅡ3ㅡ : " + processedTime);
+            System.out.println("nlpTime 형식이 이상해요...ㅡ3ㅡ : 여기가 gpt4이후로 오류" + processedTime);
 
         }
 

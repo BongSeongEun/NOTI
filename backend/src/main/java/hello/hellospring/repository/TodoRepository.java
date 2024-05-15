@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -56,4 +55,15 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     @Query("SELECT t.todoTag FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag IS NOT NULL")
     List<String> findAllTodoTagsByUserIdAndStatsDate(@Param("userId") Long userId, @Param("statsDate") String statsDate);
 
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoDone = :todoDone")
+    List<Todo> findAllTodosByMonthAndUserIdAndTodoDone(@Param("userId") Long userId, @Param("statsDate") String statsDate, @Param("todoDone") boolean todoDone);
+
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND FUNCTION('DATE_FORMAT', t.todoDate, '%Y.%m') = :statsDate AND t.todoTag = :todoTag AND t.todoDone = :todoDone")
+    List<Todo> findAllByUserIdAndStatsDateAndTodoTagAndTodoDone(@Param("userId") Long userId, @Param("statsDate") String statsDate, @Param("todoTag") String todoTag, @Param("todoDone") boolean todoDone);
+
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag = :todoTag")
+    List<Todo> findAllByUserIdAndStatsDateAndTodoTag(@Param("userId") Long userId, @Param("statsDate") String statsDate,@Param("todoTag") String todoTag);
+
+    @Query("SELECT t FROM Todo t WHERE t.userId = :userId AND t.todoDate LIKE CONCAT(:statsDate, '%') AND t.todoTag = :todoTag AND t.todoDone = true")
+    List<Todo> findCompletedTodosByUserIdAndStatsDateAndTodoTag(@Param("userId") Long userId, @Param("statsDate") String statsDate,@Param("todoTag") String todoTag);
 }

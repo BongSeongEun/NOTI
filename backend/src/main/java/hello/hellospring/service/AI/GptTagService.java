@@ -1,7 +1,8 @@
 package hello.hellospring.service.AI;
 
-import hello.hellospring.model.Chat;
+import hello.hellospring.model.Todo;
 import hello.hellospring.repository.ChatRepository;
+import hello.hellospring.repository.TodoRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class GptTagService {
@@ -22,17 +22,35 @@ public class GptTagService {
     @Autowired
     private ChatRepository chatRepository; //ChatRepository 참조
 
+    @Autowired
+    private TodoRepository todoRepository;
+
     @Value("${openai.api.key.e}")
     private String API_KEY; // 환경변수에서 API 키를 불러오기
 
-    public String askGpt(String todoTitle) throws Exception{
+    public String askGpt(String todoTitle, Long userId) throws Exception{
+        List<Todo> todos = todoRepository.findByUserId(userId);
+        String todoTags = "";
+        String coment ="";
+        for (Todo todo : todos) {
+            String todoTag = todo.getTodoTag();
+            if (todoTag != null) {
+                todoTags += todoTag + ",";
+            }
+        }
+        System.out.println(todoTags);
+
+        if (!todoTags.isEmpty()){
+            coment = todoTags + "이 값들 중에 유사한 단어가 있다면, 이 값들 중에 하나를 출력해줘";
+        }
+
         JSONArray messagesArray = new JSONArray(); // 모든 Chat 내용과 사용자 메시지를 JSON 요청 바디에 추가
 
         messagesArray.put(new JSONObject().put("role", "system")
                 .put("content", "다음 메시지의 핵심 키워드를 단어를 추출해주세요. " +
                         "딱 하나의 단어로만 추출해줘야하고 (키워드 : 밥 이런거 안된다는 소리야), 대략적이면서 포괄적인 단어로 추출해주세요." +
                         "예를들어서 수학 수업 학습 공부 이런 말이 들어가있으면 공부를 추출해주세요" +
-                        "예를들어서 식사 점심 저녁 밥 먹는다 이런 말이 들어가있으면 식사로 추출해주세요"));
+                        "예를들어서 식사 점심 저녁 밥 먹는다 이런 말이 들어가있으면 식사로 추출해주세요" + coment ));
 
         messagesArray.put(new JSONObject().put("role", "user").put("content", todoTitle));
 
