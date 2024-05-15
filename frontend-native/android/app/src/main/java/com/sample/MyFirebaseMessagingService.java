@@ -52,7 +52,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.kakaotalk_20240105_025405447)
-            .setContentTitle(title)
+            .setContentTitle("노티 NOTI")
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .addAction(R.drawable.ic_yes, "예", yesPendingIntent)

@@ -12,8 +12,8 @@ import androidx.core.app.RemoteInput;
 
 public class NotificationHelper {
 
-    private static final String CHANNEL_ID = "channel_id";
-    private static final int NOTIFICATION_ID = 101;
+    public static final String CHANNEL_ID = "channel_id";
+    public static final int NOTIFICATION_ID = 101;
     public static final String KEY_REPLY = "key_reply";
 
     public static void createNotification(Context context) {
@@ -37,7 +37,7 @@ public class NotificationHelper {
                 context,
                 0,
                 replyIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE
         );
 
         // RemoteInput 추가
@@ -48,7 +48,7 @@ public class NotificationHelper {
         // 알림에 추가할 액션
         NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(
             R.drawable.kakaotalk_20240105_025405447, "답변하기", replyPendingIntent)
-            .addRemoteInput(remoteInput)
+            .addRemoteInput(remoteInput) // RemoteInput 추가
             .build();
 
         // 알림 생성
@@ -56,7 +56,7 @@ public class NotificationHelper {
                 .setSmallIcon(R.drawable.kakaotalk_20240105_025405447)
                 .setContentTitle("노티 NOTI")
                 .setContentText("지금 어떤걸 하고 계신가요?")
-                .addAction(replyAction)
+                .addAction(replyAction) // 액션 추가
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
 
