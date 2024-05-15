@@ -2,6 +2,7 @@ package hello.hellospring.controller;
 
 import hello.hellospring.dto.DiaryDTO;
 import hello.hellospring.model.Diary;
+import hello.hellospring.service.AI.TodoToChatSchedulerService;
 import hello.hellospring.service.DiaryService;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.connector.Response;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 public class DiaryController {
     private final DiaryService diaryService; // 생성자 주입방식으로 의존성 주입
+    private final TodoToChatSchedulerService todoToChatSchedulerService;
 
     @GetMapping("/diarylist/{userId}") // 리스트 조회
     public ResponseEntity<List<DiaryDTO>> getDiary(@PathVariable Long userId){ //Model model 뺌
@@ -63,6 +65,12 @@ public class DiaryController {
         Map<String, Object> emotionList = diaryService.findEmotion(userId, emotionDate);
         return ResponseEntity.ok(emotionList);
 
+    }
+    
+    @GetMapping("/calendarapi")
+    public ResponseEntity<?> getcalendarAccessToken(){
+        String accessToken = todoToChatSchedulerService.getGoogleAccessToken();
+        return ResponseEntity.ok(accessToken);
     }
 
 
