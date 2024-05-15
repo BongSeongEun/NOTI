@@ -3,6 +3,7 @@ package hello.hellospring.service;
 import hello.hellospring.Exception.AppException;
 import hello.hellospring.dto.TodoDTO;
 import hello.hellospring.model.Goal;
+import hello.hellospring.model.Summary;
 import hello.hellospring.model.Todo;
 import hello.hellospring.repository.GoalRepository;
 import hello.hellospring.repository.SummaryRepository;
@@ -14,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -552,24 +554,34 @@ public class TodoService {
             result.put("summaryResult", "이번달 데이터가 존재하지 않습니다.");
 
         } else {
-
-
-
-
-
-
+            // summary가 db에 존재하는지 확인
             try {
-                String goalResult = gptSummaryService.askGpt(wordsResultText);
+                List<Summary> summaryExist = summaryRepository.findByUserIdAndSummaryStatsDate(userId, statsDate);
+                if (summaryExist.isEmpty()) { // summary 데이터가 없는 경우에 대한 처리
+                    String goalResult = gptSummaryService.askGpt(wordsResultText);
 
+                } else {  // summary 데이터가 있는 경우에 대한 처리
+                    for (Summary summary : summaryExist) { // summaryResult만 추출
+                        String summaryResult = summary.getSummaryResult();
+                        result.put("summaryResult", summaryResult);
+                    }
+                }
+            } catch (EmptyResultDataAccessException e){
+                // summary가 존재하지 않습니다.
 
-
-
-                result.put("summaryResult", goalResult);
-            } catch (Exception e) {
-                // 예외가 발생했을 때 적절한 오류 메시지를 반환
-                result.put("summaryResult", "GPT가 오류가 났어요.. :( " + e.getMessage());
-                System.err.println("GPT터짐ㅋㅋ : " + e);
             }
+//            try {
+//                String goalResult = gptSummaryService.askGpt(wordsResultText);
+//
+//
+//
+//
+//                result.put("summaryResult", goalResult);
+//            } catch (Exception e) {
+//                // 예외가 발생했을 때 적절한 오류 메시지를 반환
+//                result.put("summaryResult", "GPT가 오류가 났어요.. :( " + e.getMessage());
+//                System.err.println("GPT터짐ㅋㅋ : " + e);
+//            }
         }
         return result;
     }
