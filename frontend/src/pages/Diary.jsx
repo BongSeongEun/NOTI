@@ -51,6 +51,7 @@ function Diary() {
   const token = window.localStorage.getItem("token"); // 토큰 추가
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [diary, setDiary] = useState(null);
+  const [isEditingGlobal, setIsEditingGlobal] = useState(false);
 
   // jwt토큰을 디코딩해서 userid를 가져오는 코드
   const getUserIdFromToken = () => {
@@ -171,6 +172,8 @@ function Diary() {
                   format(selectedDate, "yyyy.MM.dd"),
                 )
               }
+              isEditingGlobal={isEditingGlobal}
+              setIsEditingGlobal={setIsEditingGlobal}
             />
           ) : (
             <p>선택한 날짜에 일기가 없습니다.</p>
@@ -182,6 +185,7 @@ function Diary() {
           onRefresh={() =>
             fetchDiary(getUserIdFromToken(), format(selectedDate, "yyyy.MM.dd"))
           }
+          isEditingGlobal={isEditingGlobal}
         />
       </MainDiv>
     </ThemeProvider>

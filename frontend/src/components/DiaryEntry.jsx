@@ -1,6 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useDropzone } from "react-dropzone";
+import axios from "axios";
+import Emotion1 from "../asset/Emotion1.png";
+import Emotion2 from "../asset/Emotion2.png";
+import Emotion3 from "../asset/Emotion3.png";
+import Emotion4 from "../asset/Emotion4.png";
+import Emotion5 from "../asset/Emotion5.png";
+
+const emotions = {
+  1: Emotion1,
+  2: Emotion2,
+  3: Emotion3,
+  4: Emotion4,
+  5: Emotion5,
+};
 
 const DiaryEntryContainer = styled.div`
   display: flex;
@@ -13,6 +27,11 @@ const DiaryEntryContainer = styled.div`
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  position: relative; /* Position for absolute children */
+  pointer-events: ${props =>
+    props.isDisabled ? "none" : "auto"}; /* 클릭 방지 */
+  opacity: ${props =>
+    props.isDisabled ? 0.5 : 1}; /* 비활성화 시 불투명도 조정 */
 `;
 
 const DiaryTitle = styled.h2`
@@ -99,12 +118,38 @@ const TextArea = styled.textarea`
   box-sizing: border-box;
 `;
 
-function DiaryEntry({ diary, onDelete, onSave, onRefresh }) {
+const EmotionContainer = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: ${props => props.theme.color1};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out; // 부드러운 전환 효과
+
+  &:hover {
+    transform: scale(1.5); // 확대 비율 설정
+  }
+`;
+
+const EmotionImage = styled.img`
+  width: 70px;
+  height: 70px;
+`;
+
+function DiaryEntry({ diary, onDelete, onSave, onRefresh, isEditingGlobal }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(diary.diaryTitle);
   const [editedContent, setEditedContent] = useState(diary.diaryContent);
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(diary.diaryImg);
+  const [emotion, setEmotion] = useState(null); // 감정 상태 추가
 
   const toBase64 = file =>
     new Promise((resolve, reject) => {
@@ -153,8 +198,30 @@ function DiaryEntry({ diary, onDelete, onSave, onRefresh }) {
     setPreview(null);
   };
 
+  const fetchEmotionData = async (userId, diaryDate) => {
+    try {
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v2/diaryEmotion/${userId}/${diaryDate}`,
+      );
+      setEmotion(response.data[diary.diaryDate]);
+    } catch (error) {
+      console.error("Error fetching emotion data:", error);
+    }
+  };
+
+  useEffect(() => {
+    const { userId } = diary;
+    const diaryDate = diary.diaryDate.split(".").slice(0, 2).join(".");
+    fetchEmotionData(userId, diaryDate);
+  }, [diary]);
+
   return (
-    <DiaryEntryContainer>
+    <DiaryEntryContainer isDisabled={isEditingGlobal && !isEditing}>
+      {!isEditing && emotion !== null && (
+        <EmotionContainer>
+          <EmotionImage src={emotions[emotion]} alt={`emotion ${emotion}`} />
+        </EmotionContainer>
+      )}
       {isEditing ? (
         <>
           <Input
@@ -171,9 +238,11 @@ function DiaryEntry({ diary, onDelete, onSave, onRefresh }) {
             {preview ? (
               <DiaryImageContainer>
                 <DiaryImage src={preview} alt="Diary" />
-                <RemoveImageButton onClick={handleRemoveImage}>
-                  이미지 삭제
-                </RemoveImageButton>
+                {preview && (
+                  <RemoveImageButton onClick={handleRemoveImage}>
+                    이미지 삭제
+                  </RemoveImageButton>
+                )}
               </DiaryImageContainer>
             ) : (
               <p>이미지를 드래그하거나 클릭하여 업로드하세요</p>
@@ -192,7 +261,13 @@ function DiaryEntry({ diary, onDelete, onSave, onRefresh }) {
             </DiaryImageContainer>
           )}
           <ButtonContainer>
-            <Button onClick={() => setIsEditing(true)}>수정</Button>
+            <Button
+              onClick={() => {
+                setIsEditing(true);
+              }}
+            >
+              수정
+            </Button>
             <Button onClick={handleDelete}>삭제</Button>
           </ButtonContainer>
         </>
