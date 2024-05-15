@@ -7,17 +7,16 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, TouchableOpacity, Text, Modal, Share, Alert, Linking,  } from "react-native";
+import { ScrollView, TouchableOpacity, Text, Modal, Alert, Linking, Share } from "react-native";
 import styled, { ThemeProvider } from 'styled-components/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decode } from 'base-64';
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-
 import images from "../components/images";
 import theme from '../components/theme';
 import Navigation_Bar from "../components/Navigation_Bar";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Calendar } from "react-native-calendars";
 import TimeTable from "../components/TimeTable";
 
@@ -231,17 +230,16 @@ function Todo() {
 			}).join('\n');
 	
 			const message = `${format(new Date(selectedDate), "yyyy.MM.dd")}일의 일정:\n${formattedEvents}`;
-	
+			
 			const result = await Share.share({
 				message,
 			});
-	
+
 			if (result.action === Share.sharedAction) {
 				if (result.activityType) {
 					console.log('Shared with activity type:', result.activityType);
 				} else {
 					console.log('Shared');
-					addEventsToGoogleCalendar(events);
 				}
 			} else if (result.action === Share.dismissedAction) {
 				console.log('Dismissed');
@@ -252,72 +250,19 @@ function Todo() {
 			setClicked_share(false);
 		}
 	};
-	
-	const addEventsToGoogleCalendar = async (events) => {
-		const accessToken = await getGoogleAccessToken();
-	
-		if (!accessToken) {
-			Alert.alert('Error', 'Failed to retrieve Google access token');
-			return;
-		}
-	
-		events.forEach(async (event) => {
-			const title = encodeURIComponent(event.todoTitle);
-			const startDateTime = `${selectedDate}T${event.todoStartTime.replace(':', '')}00`;
-			const endDateTime = `${selectedDate}T${event.todoEndTime.replace(':', '')}00`;
-	
-			const eventDetails = {
-				summary: event.todoTitle,
-				start: {
-					dateTime: `${selectedDate}T${event.todoStartTime}:00`,
-					timeZone: 'Asia/Seoul',
-				},
-				end: {
-					dateTime: `${selectedDate}T${event.todoEndTime}:00`,
-					timeZone: 'Asia/Seoul',
-				},
-			};
-	
-			try {
-				const response = await axios.post(
-					'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-					eventDetails,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-							'Content-Type': 'application/json',
-						},
-					}
-				);
-				if (response.status === 200) {
-					Alert.alert('Success', 'Event added to Google Calendar');
-				} else {
-					console.error('Failed to add event to Google Calendar:', response);
-				}
-			} catch (error) {
-				console.error('Error adding event to Google Calendar:', error);
-			}
-		});
+
+	const openGoogleCalendar = (event) => {
+		const url = generateGoogleCalendarURL(event);
+		Linking.openURL(url).catch(err => console.error('Error opening Google Calendar:', err));
 	};
-	
-	const getGoogleAccessToken = async () => {
-		try {
-			const response = await axios.get('http://15.164.151.130:4000/api/v2/calendarapi', {
-				headers: {
-					'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
-				},
-			});
-	
-			if (response.status === 200) {
-				return response.data.accessToken;
-			} else {
-				console.error('Failed to retrieve Google access token:', response);
-				return null;
-			}
-		} catch (error) {
-			console.error('Error retrieving Google access token:', error);
-			return null;
-		}
+
+	const generateGoogleCalendarURL = (event) => {
+		const title = encodeURIComponent(event.todoTitle);
+		const startDateTime = new Date(`${selectedDate}T${event.todoStartTime}:00Z`).toISOString().replace(/[-:.]/g, "").slice(0, -1);
+		const endDateTime = new Date(`${selectedDate}T${event.todoEndTime}:00Z`).toISOString().replace(/[-:.]/g, "").slice(0, -1);
+		const details = encodeURIComponent(event.todoDescription || "");
+
+		return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateTime}/${endDateTime}&details=${details}`;
 	};
 
 	return (
@@ -423,15 +368,22 @@ function Todo() {
 												selectedDate: selectedDate,
 											});
 											setModalVisible(false);
-										}} style={{ padding: 20, marginTop: 20 }}>
+										}} style={{ padding: 10, marginTop: 20 }}>
 											<MainText style={{ fontSize: 15 }}>수정하기</MainText>
 										</TouchableOpacity>
-	
-										
+
 										<TouchableOpacity onPress={() => setClicked_delete(true)}
-											style={{ padding: 20 }}>
+											style={{ padding: 10 }}>
 											<MainText style={{ fontSize: 15 }}>삭제하기</MainText>
 										</TouchableOpacity>
+
+										<TouchableOpacity onPress={() => {
+											openGoogleCalendar(selectedEvent);
+											setModalVisible(false);
+										}} style={{ padding: 10 }}>
+											<MainText style={{ fontSize: 15 }}>캘린더 저장하기</MainText>
+										</TouchableOpacity>
+
 										<Modal
 											animationType="slide"
 											transparent={true}
