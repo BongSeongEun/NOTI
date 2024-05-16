@@ -47,7 +47,7 @@ function Diary_Main({ }) {
 			if (token) {
 				const userId = getUserIdFromToken(token);
 				try {
-					const response = await axios.get(`http://15.164.151.130:4000/api/v1/userInfo/${userId}`, {
+					const response = await axios.get(`http://15.cd .151.130:4000/api/v1/userInfo/${userId}`, {
 						headers: {
 							'Authorization': `Bearer ${token}`,
 						},
