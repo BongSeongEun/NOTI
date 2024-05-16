@@ -177,7 +177,13 @@ function ChatComponent() {
       const response = await axios.get(
         `http://15.164.151.130:4000/api/v3/chatlist/${userId}`,
       );
-      setMessages(response.data);
+      const messagesWithKST = response.data.map(message => ({
+        ...message,
+        chatDate: new Date(
+          new Date(message.chatDate).getTime() + 9 * 60 * 60 * 1000,
+        ).toISOString(),
+      }));
+      setMessages(messagesWithKST);
       scrollToBottom();
     } catch (error) {
       console.error("채팅 내역을 불러오는 중 오류가 발생했습니다.", error);
@@ -199,14 +205,15 @@ function ChatComponent() {
           chatWho: false,
         },
       );
-      const now = new Date().toISOString();
+      const now = new Date();
+      const nowKST = new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString();
       setMessages(prevMessages => [
         ...prevMessages,
-        { chat_content: newMessage, chatWho: false, chatDate: now },
+        { chat_content: newMessage, chatWho: false, chatDate: nowKST },
         {
           chat_content: response.data.chat_content,
           chatWho: true,
-          chatDate: now,
+          chatDate: nowKST,
         },
       ]);
       setNewMessage("");
