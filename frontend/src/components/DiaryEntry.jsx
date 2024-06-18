@@ -22,6 +22,7 @@ const DiaryEntryContainer = styled.div`
   align-items: center;
   justify-content: center;
   width: 95%;
+  height: auto;
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 10px;

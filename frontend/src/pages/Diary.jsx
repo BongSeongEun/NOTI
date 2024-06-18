@@ -6,7 +6,7 @@ import theme from "../styles/theme"; // 테마 파일 불러오기
 import DiaryList from "../components/DiaryList"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때
 import NavBar from "../components/Navigation";
 import DiaryEntry from "../components/DiaryEntry"; // 일기 항목 컴포넌트
-import DiaryCalender from "../components/DiaryCalender";
+import DiaryCalendar from "../components/DiaryCalendar";
 
 const MainDiv = styled.div`
   height: auto;
@@ -39,12 +39,14 @@ const DateHeader = styled.div`
 `;
 
 const DiaryContent = styled.div`
-  width: 100%;
-  padding: 20px;
+  width: 95%;
+  padding-top: 20px;
+  padding-left: 20px;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
+  margin-left: 20px;
 `;
 
 const DiaryWrap = styled.div`
@@ -54,6 +56,7 @@ const DiaryListWrap = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+  margin-top: 20px;
 `;
 const DiaryCalenderWrap = styled.div`
   display: flex;
@@ -168,6 +171,7 @@ function Diary() {
   const setDate = date => {
     setSelectedDate(date);
   };
+  const userId = getUserIdFromToken();
 
   return (
     <ThemeProvider theme={currentTheme}>
@@ -196,17 +200,20 @@ function Diary() {
         </DiaryContent>
         <DiaryWrap>
           <DiaryCalenderWrap>
-            <DiaryCalender />
+            <DiaryCalendar userId={userId} />
           </DiaryCalenderWrap>
           <DiaryListWrap>
-        <DiaryList
-          onSave={saveDiary}
-          onDelete={deleteDiary}
-          onRefresh={() =>
-            fetchDiary(getUserIdFromToken(), format(selectedDate, "yyyy.MM.dd"))
-          }
-          isEditingGlobal={isEditingGlobal}
-        />
+            <DiaryList
+              onSave={saveDiary}
+              onDelete={deleteDiary}
+              onRefresh={() =>
+                fetchDiary(
+                  getUserIdFromToken(),
+                  format(selectedDate, "yyyy.MM.dd"),
+                )
+              }
+              isEditingGlobal={isEditingGlobal}
+            />
           </DiaryListWrap>
         </DiaryWrap>
       </MainDiv>

@@ -34,11 +34,12 @@ const DiaryDate = styled.div`
 `;
 
 const DetailContainer = styled.div`
-  width: 70%;
+  width: 75%;
   height: auto;
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
 `;
 
 // DiaryList 컴포넌트 정의
