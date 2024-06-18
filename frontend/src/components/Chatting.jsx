@@ -159,6 +159,7 @@ function ChatComponent() {
       if (theme[userThemeName]) {
         setCurrentTheme(theme[userThemeName]);
       }
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
@@ -193,6 +194,8 @@ function ChatComponent() {
   useEffect(() => {
     fetchUserData(token);
     fetchChatList();
+    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [token]);
 
   const sendMessage = async event => {
@@ -217,6 +220,8 @@ function ChatComponent() {
         },
       ]);
       setNewMessage("");
+      fetchUserData(token);
+      fetchChatList();
     } catch (error) {
       console.error("메시지 전송 중 오류가 발생했습니다.", error);
     }
