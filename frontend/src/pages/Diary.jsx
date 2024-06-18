@@ -6,6 +6,7 @@ import theme from "../styles/theme"; // 테마 파일 불러오기
 import DiaryList from "../components/DiaryList"; // 다른 파일에서 DiaryItem 컴포넌트를 import할 때
 import NavBar from "../components/Navigation";
 import DiaryEntry from "../components/DiaryEntry"; // 일기 항목 컴포넌트
+import DiaryCalender from "../components/DiaryCalender";
 
 const MainDiv = styled.div`
   height: auto;
@@ -44,6 +45,20 @@ const DiaryContent = styled.div`
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
+`;
+
+const DiaryWrap = styled.div`
+  display: flex;
+`;
+const DiaryListWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+const DiaryCalenderWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 `;
 
 function Diary() {
@@ -179,6 +194,11 @@ function Diary() {
             <p>선택한 날짜에 일기가 없습니다.</p>
           )}
         </DiaryContent>
+        <DiaryWrap>
+          <DiaryCalenderWrap>
+            <DiaryCalender />
+          </DiaryCalenderWrap>
+          <DiaryListWrap>
         <DiaryList
           onSave={saveDiary}
           onDelete={deleteDiary}
@@ -187,6 +207,8 @@ function Diary() {
           }
           isEditingGlobal={isEditingGlobal}
         />
+          </DiaryListWrap>
+        </DiaryWrap>
       </MainDiv>
     </ThemeProvider>
   );
