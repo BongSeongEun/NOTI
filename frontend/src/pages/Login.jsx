@@ -2,7 +2,6 @@
 
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
-
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import styled from "styled-components";

@@ -48,6 +48,7 @@
       "prettier/prettier": [
         "error",
         {
+          "no-console": "off",
           "endOfLine": "auto"
         }
       ]

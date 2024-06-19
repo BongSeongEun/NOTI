@@ -178,7 +178,7 @@ function Diary() {
       <NavBar setDate={setDate} />
 
       <MainDiv>
-        <DateHeader>노티의 하루 일기</DateHeader>
+        <DateHeader>노티의 하루 루틴 분석</DateHeader>
         <DiaryContent>
           {diary ? (
             <DiaryEntry

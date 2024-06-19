@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import DiaryEntry from "./DiaryEntry"; // 수정된 DiaryEntry 컴포넌트 import
-import Emotion1 from "../asset/Emotion1.png";
 
 const DiaryItemContainer = styled.div`
   border: 1px solid #ccc;

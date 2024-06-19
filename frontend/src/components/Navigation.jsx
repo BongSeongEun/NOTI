@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import axios from "axios";
 import Calendar from "react-calendar";
-import { darken, lighten } from "polished";
 import theme from "../styles/theme";
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
 import NOTI from "../asset/KakaoTalk_20240126_160049425.png";

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled, { ThemeProvider } from "styled-components";
-import { backgrounds, lighten } from "polished";
+import { lighten } from "polished";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import AddEventButton from "../components/AddEventButton";
 import editIcon from "../asset/fi-rr-pencil.png"; // 수정하기

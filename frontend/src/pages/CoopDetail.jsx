@@ -1,17 +1,6 @@
-// 협업 페이지
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
-import { useDropzone, open } from "react-dropzone";
-import {
-  Navigate,
-  useNavigate,
-  Link,
-  Toggle,
-  redirect,
-  useParams,
-} from "react-router-dom";
-import { backgrounds, lighten } from "polished";
-import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import theme from "../styles/theme"; // 테마 파일 불러오기
 import CoopTodo from "../components/CoopTodo.jsx";
@@ -127,7 +116,6 @@ function CoopDetail({ team }) {
         <Memo teamId={teamId} />
       </MainDiv>
     </ThemeProvider>
-    // Use 'team' prop to display team details
   );
 }
 export default CoopDetail;

@@ -1,4 +1,3 @@
-// 협업 페이지
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";

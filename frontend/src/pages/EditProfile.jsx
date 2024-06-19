@@ -34,7 +34,7 @@ const RegBox = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  position: relative; /* For positioning the button */
+  position: relative;
 `;
 
 const MainTextBox = styled.div`
@@ -67,9 +67,9 @@ const VerticalBox = styled.div`
 const Label = styled.div`
   letter-spacing: 1px;
   color: #000000;
-  width: 300px; /* Adjusted width for consistent spacing */
+  width: 300px;
   height: 30px;
-  line-height: 30px; /* Center align text vertically */
+  line-height: 30px;
 `;
 
 const InputBox = styled.input`
@@ -77,14 +77,12 @@ const InputBox = styled.input`
   border-radius: 30px;
   background-color: #e3e4e6;
   color: #505050;
-  font-size: 14px; /* Increased font size for better readability */
-  text-align: left; /* Left align text */
-  padding-left: 10px; /* Padding for left-aligned text */
-  width: calc(
-    100% - 300px
-  ); /* Adjusted width to account for fixed width of Label */
+  font-size: 14px;
+  text-align: left;
+  padding-left: 10px;
+  width: calc(100% - 300px);
   height: 30px;
-  margin-left: 10px; /* Margin to match alignment with Label */
+  margin-left: 10px;
 `;
 
 const InputBox2 = styled.input`
@@ -92,21 +90,19 @@ const InputBox2 = styled.input`
   border-radius: 30px;
   background-color: #f2f3f5;
   color: #000000;
-  font-size: 14px; /* Increased font size for better readability */
-  text-align: left; /* Left align text */
-  padding-left: 10px; /* Padding for left-aligned text */
-  width: calc(
-    100% - 300px
-  ); /* Adjusted width to account for fixed width of Label */
+  font-size: 14px;
+  text-align: left;
+  padding-left: 10px;
+  width: calc(100% - 300px);
   height: 30px;
-  margin-left: 10px; /* Margin to match alignment with Label */
+  margin-left: 10px;
 `;
 
 const RegBtn = styled.button`
   border: none;
   width: 30%;
-  height: 40px; /* Increased height for better touch area */
-  border-radius: 30px; /* Increased border radius for more rounded button */
+  height: 40px;
+  border-radius: 30px;
   background-color: ${props => props.theme.color1};
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -114,11 +110,11 @@ const RegBtn = styled.button`
     background-color: ${props => lighten(0.1, props.theme.color1)};
   }
   color: #ffffff;
-  font-size: 14px; /* Increased font size for better readability */
+  font-size: 14px;
   font-weight: bold;
   letter-spacing: 1px;
   text-align: center;
-  position: absolute; /* Positioned to the bottom right */
+  position: absolute;
   right: 30px;
   bottom: -20px;
 `;
