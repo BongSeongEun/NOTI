@@ -810,14 +810,14 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
                     !event.teamTodoDone && handleDeleteClick(event.teamTodoId)
                   }
                 />
-                <DeleteModal
-                  isOpen={isDeleteConfirmModalOpen}
-                  onClose={closeDeleteConfirmModal}
-                  onConfirm={handleDelete}
-                />
               </EventItem>
             ))}
           </EventList>
+          <DeleteModal
+            isOpen={isDeleteConfirmModalOpen}
+            onClose={closeDeleteConfirmModal}
+            onConfirm={handleDelete}
+          />
           <AddEventButton onClick={openNewEventModal}>
             + 새 노티 만들기
           </AddEventButton>
