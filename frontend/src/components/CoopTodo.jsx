@@ -750,6 +750,7 @@ function CoopTodo({ teamId, onTodoChange, selectedDate }) {
     fetchMySchedules();
     fetchTodoStates();
     updateScheduleBlocks();
+    fetchTodos();
     console.log(1);
   }, [teamSchedules, teamMembersCount, selectedDate, deleteSuccess]);
 
