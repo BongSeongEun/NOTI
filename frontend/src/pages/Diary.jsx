@@ -106,7 +106,7 @@ function Diary() {
     }
 
     fetchUserData();
-  }, [token]);
+  }, [token, DiaryList]);
 
   const fetchDiary = async (userId, diaryDate) => {
     try {

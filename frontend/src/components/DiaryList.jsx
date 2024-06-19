@@ -58,27 +58,25 @@ const DiaryList = ({ onSave, onDelete }) => {
     return decodedJSON.id.toString();
   };
 
+  const fetchDiaries = async () => {
+    const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+    try {
+      // 실제 userId를 적절히 채워야 합니다.
+      const response = await axios.get(
+        `http://15.164.151.130:4000/api/v2/diarylist/${userId}`,
+      );
+      // 날짜 순으로 정렬합니다. (가장 최근 날짜가 먼저 오도록)
+      const sortedDiaries = response.data.sort(
+        (a, b) => new Date(b.diaryDate) - new Date(a.diaryDate),
+      );
+      setDiaries(sortedDiaries); // 받아온 데이터를 상태에 저장합니다.
+    } catch (error) {
+      console.error("일기 목록을 불러오는데 실패했습니다.", error);
+    }
+  };
   useEffect(() => {
-    // 서버에서 일기 목록을 가져오는 함수
-    const fetchDiaries = async () => {
-      const userId = getUserIdFromToken(); // 사용자 ID 가져오기
-      try {
-        // 실제 userId를 적절히 채워야 합니다.
-        const response = await axios.get(
-          `http://15.164.151.130:4000/api/v2/diarylist/${userId}`,
-        );
-        // 날짜 순으로 정렬합니다. (가장 최근 날짜가 먼저 오도록)
-        const sortedDiaries = response.data.sort(
-          (a, b) => new Date(b.diaryDate) - new Date(a.diaryDate),
-        );
-        setDiaries(sortedDiaries); // 받아온 데이터를 상태에 저장합니다.
-      } catch (error) {
-        console.error("일기 목록을 불러오는데 실패했습니다.", error);
-      }
-    };
-
     fetchDiaries();
-  }, []); // 컴포넌트가 마운트될 때 한 번만 실행합니다.
+  }); // 컴포넌트가 마운트될 때 한 번만 실행합니다.
 
   const handleDiaryClick = async diaryId => {
     // 이미 선택된 일기를 클릭하면 상세 내용을 숨깁니다.

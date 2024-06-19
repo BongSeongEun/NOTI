@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
+import { format } from "date-fns"; // 날짜 포맷을 위한 라이브러리
+
 import Emotion1 from "../asset/Emotion1.png";
 import Emotion2 from "../asset/Emotion2.png";
 import Emotion3 from "../asset/Emotion3.png";
@@ -77,6 +79,8 @@ const RemoveImageButton = styled.button`
   border-radius: 5px;
   padding: 5px 10px;
   cursor: pointer;
+  width: 100px;
+  height: 40px;
 
   &:hover {
     background-color: ${props => props.theme.color2};
@@ -97,8 +101,9 @@ const Button = styled.button`
   border-radius: 5px;
   padding: 10px 20px;
   margin: 5px;
+  width: 70px;
+  height: 40px;
   cursor: pointer;
-
   &:hover {
     background-color: ${props => props.theme.color2};
   }
@@ -174,18 +179,44 @@ function DiaryEntry({ diary, onDelete, onSave, onRefresh, isEditingGlobal }) {
     },
   });
 
-  const handleSave = async () => {
+  const saveDiary = async async => {
     const base64Image = selectedFile ? await toBase64(selectedFile) : preview;
-
     const updatedDiary = {
       ...diary,
       diaryTitle: editedTitle,
       diaryContent: editedContent,
       diaryImg: base64Image,
     };
+    const { diaryId, ...data } = updatedDiary;
+    const token = window.localStorage.getItem("token"); // 토큰 추가
+    const getUserIdFromToken = () => {
+      const payload = token.split(".")[1];
+      const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+      const decodedPayload = atob(base642);
+      const decodedJSON = JSON.parse(decodedPayload);
 
-    await onSave(updatedDiary);
-    onRefresh(); // 일기 저장 후 재랜더링을 위해 호출
+      return decodedJSON.id.toString();
+    };
+    const userId = getUserIdFromToken();
+    try {
+      await axios.put(
+        `http://15.164.151.130:4000/api/v2/diaryUpdate/${userId}/${diaryId}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      await onSave(updatedDiary);
+    } catch (error) {
+      console.error("Error saving diary:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    saveDiary(); // 일기 저장 후 재랜더링을 위해 호출
 
     setIsEditing(false);
   };
@@ -214,7 +245,7 @@ function DiaryEntry({ diary, onDelete, onSave, onRefresh, isEditingGlobal }) {
     const { userId } = diary;
     const diaryDate = diary.diaryDate.split(".").slice(0, 2).join(".");
     fetchEmotionData(userId, diaryDate);
-  }, [diary]);
+  }, [diary, saveDiary]);
 
   return (
     <DiaryEntryContainer isDisabled={isEditingGlobal && !isEditing}>

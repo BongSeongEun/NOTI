@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import { useDropzone, open } from "react-dropzone";
-import {
-  Navigate,
-  useNavigate,
-  Link,
-  Toggle,
-  redirect,
-} from "react-router-dom";
-import { backgrounds, lighten } from "polished";
+import { useNavigate } from "react-router-dom";
 import axios from "axios"; // axios import 확인
 import DeleteModal from "../components/DeleteModal";
 import theme from "../styles/theme"; // 테마 파일 불러오기
@@ -18,24 +11,6 @@ import TimeTable from "../components/TimeTable"; // 타임테이블
 import DiaryContainer from "../components/DiaryContainer";
 import AddEventButton from "../components/AddEventButton";
 import NavBar from "../components/Navigation";
-import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
-
-const Header = styled.header`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  height: 80px;
-  position: fixed;
-  width: 100%;
-  z-index: 1;
-  position: fixed;
-`;
-
-const Logo = styled.img`
-  height: 50px; // 로고 이미지의 높이 설정
-  width: auto;
-`;
 
 const ModalBackdrop = styled.div`
   position: fixed;
