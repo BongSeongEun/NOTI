@@ -385,7 +385,7 @@ function Register() {
                   onChange={e => setMuteEndTime(e.target.value)}
                   style={{ width: "320px" }}
                 />
-                <SubTextBox>일기 생성 시간 설정*</SubTextBox>
+                <SubTextBox>하루 분석 생성 시간 설정*</SubTextBox>
                 <InputBox2
                   id="diary_create"
                   type="time"

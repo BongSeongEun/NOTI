@@ -60,7 +60,7 @@ const DiaryImageContainer = styled.div`
   justify-content: center;
   position: relative;
   width: 100%;
-  max-width: 500px; // 적절한 이미지 크기 설정
+  max-width: 350px; // 적절한 이미지 크기 설정
 `;
 
 const DiaryImage = styled.img`
@@ -284,7 +284,9 @@ function DiaryEntry({ diary, onDelete, onSave, onRefresh, isEditingGlobal }) {
         </>
       ) : (
         <>
-          <DiaryDate>{diary.diaryDate}</DiaryDate>
+          <DiaryDate style={{ paddingTop: "20px" }}>
+            {diary.diaryDate}
+          </DiaryDate>
           <DiaryTitle>{diary.diaryTitle}</DiaryTitle>
           <DiaryContent>{diary.diaryContent}</DiaryContent>
           {diary.diaryImg && (

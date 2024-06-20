@@ -349,7 +349,7 @@ function EditProfile() {
             />
           </HorizontalBox>
           <HorizontalBox>
-            <Label>일기 생성 시간 설정</Label>
+            <Label>하루 분석 생성 시간 설정</Label>
             <InputBox2
               id="diary_create"
               type="time"
