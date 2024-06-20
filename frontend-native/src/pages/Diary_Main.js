@@ -40,7 +40,7 @@ function Diary_Main({ }) {
 	const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
 	const [diaries, setDiaries] = useState([]);
 
-    useEffect(() => {
+	useEffect(() => {
 		const fetchUserData = async () => {
 			const token = await AsyncStorage.getItem('token');
 
@@ -59,8 +59,8 @@ function Diary_Main({ }) {
 					if (theme[userThemeName]) {
 						setCurrentTheme(theme[userThemeName]);
 					}
-					setBase64Image(userProfileImage || ""); 
-					setUserNickname(nickname || ""); 
+					setBase64Image(userProfileImage || '');
+					setUserNickname(nickname || '');
 				} catch (error) {
 					console.error("Error fetching user data:", error);
 				}

@@ -72,6 +72,7 @@ function Stat({ }) {
 	const [goalPercent, setGoalPercent] = useState(0);
 	const [open, setOpen] = useState(false);
 	const [items, setItems] = useState([
+		{ label: '2024.06', value: '2024.06' },
 		{ label: '2024.05', value: '2024.05' },
 		{ label: '2024.04', value: '2024.04' },
 		{ label: '2024.03', value: '2024.03' },
