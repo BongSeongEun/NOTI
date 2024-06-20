@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from "react";
 import styled, { ThemeProvider } from "styled-components";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import Calendar from "react-calendar";
+import axios from "axios"; // axios import
 import USER from "../asset/userimage.png"; // 사용자 이미지 불러오기
 import theme from "../styles/theme";
-import NOTI from "../asset/KakaoTalk_20240105_025742662.png";
+import NOTI from "../asset/KakaoTalk_20240126_160049425.png";
 import "react-calendar/dist/Calendar.css"; // 로고 이미지를 가져옵니다.
 import Todo from "../pages/Todo"; // Todo 컴포넌트 import
 import Diary from "../pages/Diary"; // Diary 컴포넌트 import
 import Coop from "../pages/Coop"; // Coop 컴포넌트 import
 import Setting from "../pages/Setting"; // Setting 컴포넌트 import
 import Stat from "../pages/Stat"; // Stat 컴포넌트 import
+import CoopDetail from "../pages/CoopDetail";
+import NavBar from "../components/Navigation";
 
 const PageLayout = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: #ccc;
+  }
 `;
 
 const Header = styled.header`
@@ -24,6 +36,9 @@ const Header = styled.header`
   background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
   padding: 0 20px;
   height: 80px;
+  position: fixed;
+  width: 100%;
+  z-index: 1;
 `;
 
 const Logo = styled.img`
@@ -35,6 +50,9 @@ const Navigation = styled.nav`
   display: flex;
   align-items: center;
   height: 80px;
+  width: 100%;
+  justify-content: right;
+  padding-right: 40px;
 
   & > ul {
     display: flex;
@@ -78,12 +96,16 @@ const LeftSidebar = styled.aside`
 const MainContent = styled.section`
   flex-grow: 1;
   padding: 20px;
+  margin-top: 80px;
   // margin-left: 300px; // 기본적으로 LeftSidebar의 너비만큼 여백을 둡니다.
 
   // 미디어 쿼리 추가
   @media (max-width: 1050px) {
     // LeftSidebar가 사라지는 화면 너비
     margin-left: 0; // LeftSidebar가 사라졌을 때 왼쪽 여백 제거
+  }
+  &::-webkit-scrollbar {
+    display: none;
   }
 `;
 
@@ -150,13 +172,12 @@ const StyledCalendar = styled(Calendar)`
   .react-calendar__tile:enabled:focus {
     border-radius: 50%;
     background-color: ${props =>
-      props.theme.color2 || theme.OrangeTheme.color2};
-    border-radius: 50%;
+      props.theme.color1 || theme.OrangeTheme.color1};
   }
 
-  .react-calendar__month-view__days__day--weekend {
-    // 주말 글씨 빨간색 없애기
-    color: var(--festie-gray-800, #000000);
+  /* 일요일에만 빨간 폰트 */
+  .react-calendar__month-view__weekdays__weekday--weekend abbr[title="일요일"] {
+    color: #c70000;
   }
 
   .react-calendar__tile--now {
@@ -164,6 +185,15 @@ const StyledCalendar = styled(Calendar)`
     border-radius: 50%;
     background: ${props => props.theme.color2 || theme.OrangeTheme.color2};
     color: var(--festie-gray-800, #ffffff);
+  }
+
+  .react-calendar__month-view__weekdays abbr {
+    // 요일 밑줄 제거
+    text-decoration: none;
+  }
+
+  .react-calendar__month-view__days__day--weekend {
+    color: inherit; // 주말 색상을 평일과 동일하게 설정
   }
 
   .react-calendar__tile--active {
@@ -177,22 +207,79 @@ const StyledCalendar = styled(Calendar)`
 function Main() {
   const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
   const formatDay = (locale, date) => <span>{date.getDate()}</span>;
-  const [nickname] = useState("사용자");
+  const [userNickname, setUserNickname] = useState("사용자");
   const [selectedDate, setSelectedDate] = useState(new Date()); // 날짜 상태 추가
   const [selectedComponent, setSelectedComponent] = useState("Todo");
+  const [diaryId, setDiaryId] = useState(null); // 선택된 일기의 ID 상태
+  const token = window.localStorage.getItem("token"); // 토큰 추가
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  // Base64 이미지 데이터를 저장할 상태
+  const [base64Image, setBase64Image] = useState("");
+
   const handleMenuClick = component => {
     setSelectedComponent(component);
   };
 
+  const handleSelectTeam = team => {
+    setSelectedTeam(team);
+    setSelectedComponent("CoopDetail");
+  };
+
+  // jwt토큰을 디코딩해서 userid를 가져오는 코드
+  const getUserIdFromToken = () => {
+    const payload = token.split(".")[1];
+    const base642 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedPayload = atob(base642);
+    const decodedJSON = JSON.parse(decodedPayload);
+
+    console.log(decodedJSON);
+    return decodedJSON.id.toString();
+  };
+
   useEffect(() => {
-    const savedThemeName = localStorage.getItem("userTheme"); // localStorage에서 테마 이름 가져오기
-    if (savedThemeName && theme[savedThemeName]) {
-      setCurrentTheme(theme[savedThemeName]); // 존재하는 테마 이름이면, 해당 테마로 업데이트
+    async function fetchUserData() {
+      const userId = getUserIdFromToken(); // 사용자 ID 가져오기
+      try {
+        if (!token) return; // 토큰이 없으면 종료
+
+        // 사용자 ID 가져오기 (토큰에서 디코딩 또는 다른 방식으로)
+        // const userId = getUserIdFromToken();
+
+        const response = await axios.get(
+          `http://15.164.151.130:4000/api/v1/userInfo/${userId}`,
+          {
+            // 사용자의 테마 정보를 가져오는 API 호출
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const userThemeName = response.data.userColor; // 사용자가 선택한 테마 이름
+        const userProfileImage = response.data.userProfile; // 사용자의 프로필 이미지
+        setUserNickname(response.data.userNickname); // 사용자 닉네임 설정
+
+        if (userThemeName && theme[userThemeName]) {
+          setCurrentTheme(theme[userThemeName]); // 가져온 테마로 상태 업데이트
+        }
+
+        // 사용자의 프로필 이미지를 상태에 적용
+        setBase64Image(userProfileImage);
+      } catch (error) {
+        console.error("Error fetching user theme:", error);
+      }
     }
-  }, []);
+
+    fetchUserData();
+  }, [token]);
 
   const handleDateChange = value => {
     setSelectedDate(value); // Calendar에서 날짜가 변경될 때 상태 업데이트
+  };
+
+  // selectedComponent 상태를 'DiaryDetail'로 설정하는 함수를 Diary 컴포넌트에 전달합니다.
+  const renderDiaryDetail = id => {
+    setDiaryId(id);
+    setSelectedComponent("DiaryDetail");
   };
 
   const renderComponent = () => {
@@ -200,11 +287,20 @@ function Main() {
       case "Todo":
         return <Todo selectedDate={selectedDate} />;
       case "Diary":
-        return <Diary />;
+        return <Diary onDiarySelect={setDiaryId} />;
       case "Coop":
-        return <Coop />;
+        return (
+          <Coop
+            onSelectTeam={team => {
+              setSelectedTeam(team); // 상태 업데이트 함수
+              setSelectedComponent("CoopDetail");
+            }}
+          />
+        );
+      case "CoopDetail":
+        return <CoopDetail team={selectedTeam} selectedDate={selectedDate} />;
       case "Stat":
-        return <Stat />;
+        return <Stat selectedDate={selectedDate} />;
       case "Setting":
         return <Setting />;
       default:
@@ -216,48 +312,20 @@ function Main() {
     <ThemeProvider theme={currentTheme}>
       <PageLayout>
         <Header>
-          <Logo src={NOTI} alt="NOTI Logo" /> {/* 로고 이미지를 삽입합니다. */}
-          <Navigation>
-            <ul>
-              <li
-                onClick={() => handleMenuClick("Todo")}
-                style={{ cursor: "pointer" }}
-              >
-                일정
-              </li>
-              <li
-                onClick={() => handleMenuClick("Coop")}
-                style={{ cursor: "pointer" }}
-              >
-                협업
-              </li>
-              <li
-                onClick={() => handleMenuClick("Diary")}
-                style={{ cursor: "pointer" }}
-              >
-                일기
-              </li>
-              <li
-                onClick={() => handleMenuClick("Stat")}
-                style={{ cursor: "pointer" }}
-              >
-                통계
-              </li>
-              <li
-                onClick={() => handleMenuClick("Setting")}
-                style={{ cursor: "pointer" }}
-              >
-                설정
-              </li>
-            </ul>
-          </Navigation>
+          {/* <NavBar /> */}
+          <li
+            onClick={() => handleMenuClick("Coop")}
+            style={{ cursor: "pointer" }}
+          >
+            협업
+          </li>
         </Header>
         <Content>
           <LeftSidebar>
             <GreetingSection>
-              <UserProfileImage src={USER} alt="User Profile" />
+              <UserProfileImage src={base64Image || USER} alt="User Profile" />
               <GreetingText>
-                <div>{nickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
+                <div>{userNickname} 님,</div> {/* 홍길동 대신 사용자를 표시 */}
                 <div style={{ color: "black" }}>반갑습니다!</div>
               </GreetingText>
             </GreetingSection>
@@ -267,7 +335,6 @@ function Main() {
         <MainContent>
           {renderComponent()} {/* 선택된 컴포넌트 렌더링 */}{" "}
         </MainContent>
-
         <RightSidebar>
           <StyledCalendar
             onChange={handleDateChange}

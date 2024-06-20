@@ -34,8 +34,19 @@ public class Todo {
     @Column(name = "todo_date")
     private  String todoDate;
 
+    @Column(name = "todo_tag")
+    private String todoTag;
+
     @Builder
-    public Todo(Long todoId, Long userId, String todoTitle, String todoStartTime, String todoEndTime, String todoColor, Boolean todoDone, String todoDate){
+    public Todo(Long todoId,
+                Long userId,
+                String todoTitle,
+                String todoStartTime,
+                String todoEndTime,
+                String todoColor,
+                Boolean todoDone,
+                String todoDate,
+                String todoTag){
         this.todoId = todoId;
         this.userId = userId;
         this.todoTitle = todoTitle;
@@ -44,6 +55,7 @@ public class Todo {
         this.todoColor = todoColor;
         this.todoDone = todoDone;
         this.todoDate = todoDate;
+        this.todoTag = todoTag;
     }
 
 

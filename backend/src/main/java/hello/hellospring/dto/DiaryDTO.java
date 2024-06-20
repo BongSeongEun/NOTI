@@ -19,6 +19,7 @@ public class DiaryDTO {
     private String diaryContent;
     private String diaryImg;
     private String diaryTitle;
+    private Long diaryEmotion;
 
     public static DiaryDTO diaryDTO(Diary diary){
         DiaryDTO diaryDTO = new DiaryDTO();
@@ -28,6 +29,7 @@ public class DiaryDTO {
         diaryDTO.setDiaryContent(diary.getDiaryContent());
         diaryDTO.setDiaryImg(diary.getDiaryImg());
         diaryDTO.setDiaryTitle(diary.getDiaryTitle());
+        diaryDTO.setDiaryEmotion(diary.getDiaryEmotion());
         return diaryDTO;
     }
 
