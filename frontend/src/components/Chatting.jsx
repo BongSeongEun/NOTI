@@ -57,7 +57,6 @@ const ChatRole = styled.div`
     background-color: ${props =>
       props.theme.color1 || theme.OrangeTheme.color1};
     color: white;
-    font-weight: bold;
     border-radius: 15px 15px 0px 15px;
     padding: 10px;
     font-size: 13px;
