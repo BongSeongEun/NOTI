@@ -104,17 +104,17 @@ public class GptServiceImpl implements GptDiaryService {
                 + "\n" + todoContents + "= 이거는 오늘 하루동안의 일정목록이야.";
 
         try { // 대화한 내용 기반으로 일기내용 생성
-            diaryContent = callGptApi(combinedInputs, "이 내용들을 조합해서 하루 일기를 작성해줘. " +
-                    "모든 내용을 조합할 필요는 없고 많이 언급된 토픽들 위주로 오늘 하루의 루틴 분석을 해줘." +
+            diaryContent = callGptApi(combinedInputs, "이 내용들을 조합해서 하루의 루틴 분석을 간단하게 작성해줘. " +
+                    "많이 언급된 토픽들 위주로 오늘 하루의 루틴 분석을 해줘." +
                     "답변은 존댓말로 통일해줘" +
                     "했던말은 반복하지마" +
                     "그 다음 문단에는 하루동안의 일정목록 내용들을 통해 ~~는 달성했고, ~~는 달성하지못했다 라는 내용도 넣어줘" +
                     "꼭 몇시에 무엇을 했고, 몇시에 어떤걸 했다 라는 형식으로 작성해줘" +
-                    "마지막 부분에는 오늘은 ~~한 하루였다는 식으로 하루 총평을 해줘" +
-                    "총 내용은 300자 안으로 작성부탁해");
+                    "마지막 부분에는 덕담이나 위로나 응원의 한마디로 마무리해줘" +
+                    "총 내용은 150자 안으로 작성부탁해");
 
             // 생성된 일기 내용을 기반으로 제목 생성
-            diaryTitle = callGptApi(diaryContent, "이 일기 내용을 기반으로 일기 제목을 생성해줘." +
+            diaryTitle = callGptApi(diaryContent, "이 하루 루틴을 기반으로 하루 루틴의 제목을 생성해줘." +
                     "여기 내용중에 가장 많이 나온 내용을 토픽으로 제목을 써주면돼");
 
 //            dirayEmotion = callGptApi(diaryContent, "너의 임무는 감정 nlp 분류야. " +
