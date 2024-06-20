@@ -1,4 +1,6 @@
 <resources>
-    <string name="app_name">sample</string>
+    <string name="app_name">NOTI</string>
     <string name="kakao_app_key">63c6a849de12de716c48f9b1c7d875cd</string>
+    <string name="channel_name">YES_OR_NO</string>
+    <string name="channel_description">Your Channel Description</string>
 </resources>

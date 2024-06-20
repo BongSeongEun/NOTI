@@ -39,9 +39,12 @@ public class User {
     @Column(name = "diary_time")
     private String diaryTime;
 
+    @Column(name = "device_token")
+    private String deviceToken;
+
     @Builder
     public User(Long userId, Long kakaoId, String kakaoEmail, String userProfile, String userNickname,
-                String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
+                String userColor, String muteStartTime, String muteEndTime, String diaryTime, String deviceToken) {
 
         this.userId = userId;
         this.kakaoId = kakaoId;
@@ -52,15 +55,16 @@ public class User {
         this.muteStartTime = muteStartTime;
         this.muteEndTime = muteEndTime;
         this.diaryTime = diaryTime;
+        this.deviceToken = deviceToken;
     }
-    public void updateUserInfo(String userNickname, String userProfile, String userColor, String muteStartTime, String muteEndTime, String diaryTime) {
+    public void updateUserInfo(String userNickname, String userProfile, String userColor, String muteStartTime, String muteEndTime, String diaryTime, String deviceToken) {
         if(userNickname != null) this.userNickname = userNickname;
         if(userProfile != null) this.userProfile = userProfile;
         if(userColor != null) this.userColor = userColor;
         if(muteStartTime != null) this.muteStartTime = muteStartTime;
         if(muteEndTime != null) this.muteEndTime = muteEndTime;
         if(diaryTime != null) this.diaryTime = diaryTime;
-
+        if(deviceToken != null) this.deviceToken = deviceToken;
     }
 
 }

@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // 서비스는 dto -> entity   or   entity -> dto
 
@@ -23,8 +25,6 @@ import java.util.List;
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
-
-
 
     public void save(DiaryDTO diaryDTO) {
         Diary diary = Diary.toSaveEntity(diaryDTO);
@@ -40,15 +40,6 @@ public class DiaryService {
         return diaryDTOList;
 
     }
-
-//    public List<DiaryDTO> delete(Long diaryId, Long userId) {
-//        // 존재하는 Diary인지 확인 후 삭제
-//        if (!diaryRepository.existsById(diaryId)) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Diary not found with id: " + diaryId);
-//        }
-//        diaryRepository.deleteById(diaryId);
-//        return findByUserId(userId);
-//    }
 
     @Transactional
     public List<DiaryDTO> delete(Long userId, Long diaryId){
@@ -92,11 +83,14 @@ public class DiaryService {
     }
 
     public DiaryDTO findByUserIdAndDiaryDate(Long userId, String diaryDate) {
-        Diary diary = (Diary) diaryRepository.findByUserIdAndDiaryDate(userId, diaryDate)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_id를 찾을 수 없어요..." + userId + " 앗.. diray_date도요... :( " + diaryDate));
-        // 조회된 Diary 엔티티를 DiaryDTO로 변환하여 반환
-        return DiaryDTO.diaryDTO(diary);
+        List<Diary> diaries = diaryRepository.findByUserIdAndDiaryDate(userId, diaryDate);
+        if (diaries.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "일치하는 일기를 찾을 수 없어요...");
+        }
+        // 첫 번째 일기 엔티티를 DiaryDTO로 변환하여 반환
+        return DiaryDTO.diaryDTO(diaries.get(0));
     }
+
 
 
     // 페이징
@@ -110,5 +104,25 @@ public class DiaryService {
     private DiaryDTO convertToDiaryDTO(Diary diary) {
         // Diary 엔티티를 DiaryDTO로 변환하는 로직 구현
         return new DiaryDTO();
+    }
+
+    // 일기 한달 단위로 감정표현 출력
+    public Map<String, Object> findEmotion(Long userId, String emotionDate) {
+        List<Diary> diaryEmotions = diaryRepository.findByUserIdAndEmotionDate(userId, emotionDate);
+        Map<String, Object> result = new HashMap<>();
+        if(!diaryEmotions.isEmpty()){    // 일기 데이터가 있는 경우
+            for (Diary diary : diaryEmotions) {
+                String diaryDate = diary.getDiaryDate(); // 날짜 추출, 예를 들면 "2024-05-01"
+                Long emotion = diary.getDiaryEmotion(); // 감정 값 추출, 이는 long 유형임
+
+                // 날짜별 감정 값을 저장하는 Map 구조를 갱신
+                result.put(diaryDate, emotion);
+                System.out.println(emotion);
+            }
+
+        } else {    //일기 데이터가 없는경우
+            System.out.println(" ");
+        }
+        return result;
     }
 }
