@@ -22,6 +22,7 @@ const ModalBackdrop = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1;
 `;
 
 const ModalContainer = styled.div`
@@ -45,7 +46,11 @@ const CloseButton = styled.button`
 `;
 
 const EventList = styled.div`
-  width: 95%;
+  width: 70%;
+  z-index: 1;
+  padding-left: 80px;
+  padding-right: 80px;
+  /* margin-top: -420px; */
 `;
 
 const EventItem = styled.div`
@@ -153,9 +158,8 @@ const SubTextBox = styled.div`
 const DateHeader = styled.div`
   font-size: 24px;
   text-align: center;
-  margin-bottom: 20px;
   height: 40px;
-  width: 95%;
+  width: 80%;
   color: black;
   border-bottom: 2px solid
     ${props => props.theme.color1 || theme.OrangeTheme.color1};
@@ -513,9 +517,13 @@ function Todo2() {
   return (
     <ThemeProvider theme={currentTheme}>
       <NavBar setDate={setDate} />
+      <div style={{ marginLeft: "345px" }}>
+        <DateHeader style={{ paddingTop: "150px" }}>
+          {formatDate(selectedDate)}
+        </DateHeader>
+      </div>
       <div>
-        <DiaryContainer style={{ paddingTop: "170px" }}>
-          <DateHeader>{formatDate(selectedDate)}</DateHeader>
+        <DiaryContainer style={{ paddingTop: "10px" }}>
           <EventList>
             {/* 이 부분에서 날짜에 해당하는 일정들을 렌더링합니다.
             EventList 컴포넌트 내에서 events 상태를 기반으로 일정 항목을 동적으로 렌더링 */}
@@ -560,11 +568,15 @@ function Todo2() {
                 />
               </EventItem>
             ))}
+            <AddEventButton
+              style={{ marginLeft: "260px" }}
+              onClick={openNewEventModal}
+            >
+              + 새 노티 만들기
+            </AddEventButton>
           </EventList>
-          <AddEventButton onClick={openNewEventModal}>
-            + 새 노티 만들기
-          </AddEventButton>
-          <TimeTable schedule={schedule} />
+
+          <TimeTable style={{ zIndex: 1 }} schedule={schedule} />
         </DiaryContainer>
       </div>
       {isModalOpen && (
@@ -581,6 +593,9 @@ function Todo2() {
                 borderBottom: `2px solid ${currentTheme[selectedColor]}`,
                 fontSize: "20px",
                 height: "30px",
+                marginLeft: "15px",
+                width: "90%",
+                marginBottom: "10px",
               }}
             >
               {formatDate(selectedDate)}

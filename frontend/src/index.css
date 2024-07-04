@@ -1,29 +1,32 @@
 body {
   margin: 0;
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 p {
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
 }
 div {
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
 }
 button {
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
 }
 input {
   margin: 0;
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
 }
 code {
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
 }
 span {
-  font-family: "GmarketSansTTFMedium";
+  font-family: "NotoSansKR-Medium";
 }
 @font-face {
-  font-family: "GmarketSansTTFMedium";
-  src: url("./fonts/GmarketSansTTFMedium.ttf") format("truetype");
+  font-family: "NotoSansKR-Medium";
+  src: url("./fonts/NotoSansKR-Medium.ttf") format("truetype");
+}
+::-webkit-scrollbar {
+  display: none;
 }

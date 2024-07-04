@@ -17,7 +17,7 @@ const Nav = styled.nav`
   /* padding: 0 40px; // 양쪽 여백을 줍니다. */
   position: fixed;
   background-color: ${props => props.theme.color1 || theme.OrangeTheme.color1};
-  z-index: 1;
+  z-index: 2;
 `;
 
 const NavLink = styled(Link)`
@@ -39,7 +39,6 @@ const LeftSidebar = styled.aside`
   overflow-y: auto; // 내용이 많을 경우 스크롤
   padding: 20px;
   box-sizing: border-box; // 패딩을 너비에 포함z
-
   // 미디어 쿼리 추가
   @media (max-width: 1050px) {
     // 화면 너비가 1200px 이하일 때 적용
@@ -52,10 +51,13 @@ const GreetingSection = styled.div`
   align-items: center;
   background-color: white;
   border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
-  border-radius: 20px;
+  border-radius: 10px;
   padding: 20px;
-  margin: 10px;
+  margin: 5px;
+  margin-left: 0px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 217px;
 `;
 const UserProfileImage = styled.img`
   margin-left: 10px;
@@ -101,9 +103,11 @@ const Logo = styled.img`
 // NavLink 스타일을 Link 컴포넌트로 확장
 const StyledLink = styled(Link)`
   text-decoration: none;
-  margin: 0 1.1rem;
+  margin: 1 1.1rem;
   font-size: 17px;
   color: white;
+  margin-left: 2rem;
+  margin-right: 2rem;
 `;
 
 const StyledCalendar = styled(Calendar)`
@@ -111,7 +115,7 @@ const StyledCalendar = styled(Calendar)`
   width: 100%;
   max-width: 300px; // 달력의 최대 너비를 설정
   background-color: white;
-  border: 1px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
+  border: 2px solid ${props => props.theme.color1 || theme.OrangeTheme.color1};
   border-radius: 10px; // 달력 모서리를 둥글게
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   /* font-family: Arial, sans-serif; // 글꼴 설정 */
@@ -290,15 +294,16 @@ function Navigation({ setDate }) {
   return (
     <>
       <Nav>
-        <Logo src={NOTI} alt="NOTI Logo" />
-        <div>
+        <Logo src={NOTI} alt="NOTI Logo" style={{ marginLeft: "370px" }} />
+        <div style={{ marginRight: "770px" }}>
           <StyledLink to="/Main">일정</StyledLink>
           <StyledLink to="/Coop">협업</StyledLink>
           <StyledLink to="/Diary">하루 분석</StyledLink>
           <StyledLink to="/Stat">통계</StyledLink>
           <StyledLink to="/Setting">설정</StyledLink>
         </div>
-        <LeftSidebar>
+        <LeftSidebar></LeftSidebar>
+        <RightSidebar>
           <GreetingSection>
             <UserProfileImage src={base64Image || USER} alt="User Profile" />
             <GreetingText>
@@ -306,8 +311,6 @@ function Navigation({ setDate }) {
               <div style={{ color: "black" }}>반갑습니다!</div>
             </GreetingText>
           </GreetingSection>
-        </LeftSidebar>
-        <RightSidebar>
           <StyledCalendar
             onChange={handleDateChange}
             value={selectedDate}

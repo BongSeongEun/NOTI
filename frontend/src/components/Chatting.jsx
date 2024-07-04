@@ -73,7 +73,8 @@ const Timestamp = styled.span`
   color: #a0a0a0;
   position: absolute;
   bottom: -15px;
-  ${props => (props.isBot ? "left: 10px;" : "right: 10px;")}
+  ${props => (props.isBot ? "left: 6px;" : "right: 3px;")}
+  width: 50px;
 `;
 
 const DateSeparator = styled.div`
