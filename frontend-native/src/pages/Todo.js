@@ -342,8 +342,8 @@ function Todo() {
 						)}
 	
 						<Noti onPress={() => navigation.navigate("Todo_Add", { selectedDate: selectedDate })}
-							style={{ width: 150, backgroundColor: "#B7BABF", alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
-							<NotiText style={{ marginRight: 10 }}>+ 새 노티 추가하기</NotiText>
+							style={{ width: 120, height: 30, backgroundColor: "#505050", alignSelf: 'center', justifyContent: 'center', alignItems: 'center' }}>
+							<NoTodoText style={{color: 'white'}}>+  새 노티 추가하기</NoTodoText>
 						</Noti>
 	
 						<Modal
@@ -484,9 +484,9 @@ const Bar = styled.View`
 const Bar_Mini = styled(Bar)`
     align-self: flex-start;
     width: 50%;
-    height: 2px;
+    height: 1px;
     background-color: ${props => props.theme.color1};
-    margin-top: 0px;
+    margin-top: -1px;
 `;
 
 const NotiTextContainer = styled.View`

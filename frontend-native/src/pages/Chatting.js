@@ -256,8 +256,8 @@ const InputBox = styled.TextInput`
 `;
 
 const DateBox = styled.TouchableOpacity`
-	width: 100px;
-	height: 25px;
+	width: 80px;
+	height: 20px;
 	background-color: #505050;
 	border-radius: 15px;
 	align-self: center;

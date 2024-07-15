@@ -2,20 +2,20 @@
 /* eslint-disable prettier/prettier */
 
 export const theme = {
+	RedTheme: {
+		color1: "#4059AD",
+		color2: "#6B9AC4",
+		color3: "#97D8C4",
+		color4: "#EEF2F1",
+		color5: "#F4B942",
+	},
+
 	OrangeTheme: {
 		color1: "#FF7154",
 		color2: "#FFB673",
 		color3: "#7CCAE2",
 		color4: "#5B9DFF",
 		color5: "#7E85FF",
-	},
-
-	RedTheme: {
-		color1: "#E63946",
-		color2: "#D3EFC9",
-		color3: "#A8DADC",
-		color4: "#457B9D",
-		color5: "#1D3557",
 	},
 
 	PinkTheme: {

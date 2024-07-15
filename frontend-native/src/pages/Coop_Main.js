@@ -506,9 +506,9 @@ const Bar = styled.View`
 const Bar_Mini = styled(Bar)`
     align-self: flex-end;
     width: 50%;
-    height: 2px;
+    height: 1px;
     background-color: ${props => props.theme.color1};
-    margin-top: 0px;
+    margin-top: -1px;
 `;
 
 const NoTodoNoti = styled.View`
