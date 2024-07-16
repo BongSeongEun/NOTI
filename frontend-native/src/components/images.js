@@ -40,6 +40,9 @@ import emotion3 from "../asset/emotion3.png";
 import emotion4 from "../asset/emotion4.png";
 import emotion5 from "../asset/emotion5.png";
 
+import noti_intro from "../asset/noti_intro.jpg";
+import noti_char from "../asset/noti_char.png";
+
 export const images = {
 	Noti: Noti,
 	Kakao: Kakao,
@@ -79,6 +82,9 @@ export const images = {
 	emotion3: emotion3,
 	emotion4: emotion4,
 	emotion5: emotion5,
+
+	noti_intro: noti_intro,
+	noti_char: noti_char,
 };
 
 export default images;

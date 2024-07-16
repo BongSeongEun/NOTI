@@ -356,6 +356,13 @@ function Todo() {
 								<ModalView>
 									<ModalContent>
 										<TouchableOpacity onPress={() => {
+											openGoogleCalendar(selectedEvent);
+											setModalVisible(false);
+										}} style={{ padding: 10, marginTop: 20 }}>
+											<MainText style={{ fontSize: 15 }}>캘린더 저장하기</MainText>
+										</TouchableOpacity>
+
+										<TouchableOpacity onPress={() => {
 											navigation.navigate("Todo_Add", {
 												todoId: selectedEvent.todoId,
 												inputTitle: selectedEvent.todoTitle,
@@ -366,20 +373,13 @@ function Todo() {
 												selectedDate: selectedDate,
 											});
 											setModalVisible(false);
-										}} style={{ padding: 10, marginTop: 20 }}>
+										}} style={{ padding: 10 }}>
 											<MainText style={{ fontSize: 15 }}>수정하기</MainText>
 										</TouchableOpacity>
 
 										<TouchableOpacity onPress={() => setClicked_delete(true)}
 											style={{ padding: 10 }}>
-											<MainText style={{ fontSize: 15 }}>삭제하기</MainText>
-										</TouchableOpacity>
-
-										<TouchableOpacity onPress={() => {
-											openGoogleCalendar(selectedEvent);
-											setModalVisible(false);
-										}} style={{ padding: 10 }}>
-											<MainText style={{ fontSize: 15 }}>캘린더 저장하기</MainText>
+											<MainText style={{ fontSize: 15, color: currentTheme.color1}}>삭제하기</MainText>
 										</TouchableOpacity>
 
 										<Modal
@@ -500,7 +500,7 @@ const NotiTextContainer = styled.View`
 const Noti = styled.TouchableOpacity`
 	width: 300px;
 	height: 40px;
-	border-radius: 15px;
+	border-radius: 20px;
 	background-color: ${props => props.color || "#FF7154"};
 	flex-direction: row;
 	align-items: center;
@@ -552,18 +552,18 @@ const ModalContent = styled.View`
 `;
 
 const TeamOut = styled.TouchableOpacity`
-	width: 120px;
+	width: 150px;
 	height: 40px;
-	border-radius: 15px;
+	border-radius: 20px;
 	justify-content: center;
 	align-items: center;
-	margin: 20px;
+	margin: 25px;
 `;
 
 const NoTodoNoti = styled.View`
 	width: 300px;
 	height: 40px;
-	border-radius: 15px;
+	border-radius: 20px;
 	background-color: #E3E4E6;
 	flex-direction: row;
 	align-items: center;

@@ -514,7 +514,7 @@ const Bar_Mini = styled(Bar)`
 const NoTodoNoti = styled.View`
 	width: 230px;
 	height: 30px;
-	border-radius: 15px;
+	border-radius: 20px;
 	background-color: #D3D3D3;
 	flex-direction: row;
 	align-items: center;
@@ -568,8 +568,6 @@ const NotiContainer = styled.View`
 	align-items: center;
 	margin-top: 40px;
 `;
-
-
 
 const ModalContainer = styled.View`
     position: absolute;

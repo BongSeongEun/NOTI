@@ -72,6 +72,7 @@ function Stat({ }) {
 	const [goalPercent, setGoalPercent] = useState(0);
 	const [open, setOpen] = useState(false);
 	const [items, setItems] = useState([
+		{ label: '2024.07', value: '2024.07' },
 		{ label: '2024.06', value: '2024.06' },
 		{ label: '2024.05', value: '2024.05' },
 		{ label: '2024.04', value: '2024.04' },
@@ -571,7 +572,7 @@ function Stat({ }) {
 				<ScrollView>
 					<MainView>
 						<MainText style={{ fontSize: 15, marginTop: 50, }}>{userNickname} 님의 한 달</MainText>
-						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요!</MainText>
+						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요 ✨</MainText>
 
 						<TouchableOpacity onPress={toggleDropDown} style={{ marginBottom: 5 }} />
 
@@ -588,7 +589,7 @@ function Stat({ }) {
 							{renderStates()}
 						</ScrollView>
 
-						<GoalFrame color={currentTheme.color1} isGoalChanged={isGoalChanged} isGoalSet={isGoalSet}>
+						<GoalFrame color={currentTheme.color1} isGoalChanged={isGoalChanged} isGoalSet={isGoalSet} showRecommendedGoals={showRecommendedGoals}>
 							<GoalB>
 								<MainText style={{ color: "white" }}>이번 달의 목표 🔥</MainText>
 							</GoalB>
@@ -610,7 +611,6 @@ function Stat({ }) {
 								<MainText>달성하기!</MainText>
 							</View>
 
-							{isGoalSet && (
 								<View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', width: 265 }}>
 									<View style={{ flexDirection: 'row', backgroundColor: 'transparent' }}>
 										<GoalChart />
@@ -618,7 +618,6 @@ function Stat({ }) {
 									</View>
 									<MainText>{goalPercent}%</MainText>
 								</View>
-							)}
 
 							<TouchableOpacity onPress={toggleRecommendedGoals} style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 								<MainText>추천 목표 보기</MainText>
@@ -896,7 +895,8 @@ const Stat_Label = styled.TouchableOpacity`
 
 const GoalFrame = styled.TouchableOpacity`
 	width: 300px;
-	height: ${props => props.isGoalChanged ? (props.isGoalSet ? 'auto' : '130px') : (props.isGoalSet ? 'auto' : '110px')};
+  	height: ${props =>
+    props.isGoalChanged ? '180px' : ( props.showRecommendedGoals ? '220px' : '130px')};
 	border-radius: 15px;
 	border-width: 1px;
 	border-color: ${props => props.color || "#B7BABF"};
