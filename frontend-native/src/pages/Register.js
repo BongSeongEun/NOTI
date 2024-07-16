@@ -212,7 +212,7 @@ const Register = () => {
 	};
 
 
-	const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+	const [currentTheme, setCurrentTheme] = useState(theme.RedTheme);
 
 	const handleThemeChange = selectedThemeName  => {
 		const newTheme = theme[selectedThemeName ];
@@ -308,12 +308,12 @@ const Register = () => {
 						<RegularText>테마 선택</RegularText>
 						<HorisontalView>
 							<ThemedButton
-								style={{ backgroundColor: theme.OrangeTheme.color1 }}
-								onPress={() => handleThemeChange("OrangeTheme")}
-							></ThemedButton>
-							<ThemedButton
 								style={{ backgroundColor: theme.RedTheme.color1 }}
 								onPress={() => handleThemeChange("RedTheme")}
+							></ThemedButton>
+							<ThemedButton
+								style={{ backgroundColor: theme.OrangeTheme.color1 }}
+								onPress={() => handleThemeChange("OrangeTheme")}
 							></ThemedButton>
 							<ThemedButton
 								style={{ backgroundColor: theme.PinkTheme.color1 }}

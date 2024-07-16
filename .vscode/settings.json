@@ -1,4 +1,5 @@
 {
   "java.compile.nullAnalysis.mode": "automatic",
-  "react-native-tools.projectRoot": "frontend-native"
+"react-native-tools.projectRoot": "frontend-native",
+"java.configuration.updateBuildConfiguration": "interactive"
 }

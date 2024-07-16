@@ -293,9 +293,6 @@ function Diary_Main({ }) {
 							<images.calendar width={20} height={20}
 								color={clicked_calendar ? currentTheme.color1 : "#B7BABF"}
 								onPress={() => setClicked_calendar(!clicked_calendar)} />
-							<images.share width={20} height={20}
-								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => setClicked_share(!clicked_share)} />
 						</HorisontalView>
 
 						{clicked_calendar && (

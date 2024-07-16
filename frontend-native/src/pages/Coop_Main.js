@@ -277,7 +277,7 @@ function Coop_Main({ onSelectTeam }) {
 								setClicked_add(!clicked_add);
 								set_TeamAddModalVisible(true);
 							}}
-							style={{ margin: 10, alignSelf: 'flex-end' }}
+							style={{ margin: 15, alignSelf: 'flex-end' }}
 						/>
 
 						<Modal
@@ -506,15 +506,15 @@ const Bar = styled.View`
 const Bar_Mini = styled(Bar)`
     align-self: flex-end;
     width: 50%;
-    height: 2px;
+    height: 1px;
     background-color: ${props => props.theme.color1};
-    margin-top: 0px;
+    margin-top: -1px;
 `;
 
 const NoTodoNoti = styled.View`
 	width: 230px;
 	height: 30px;
-	border-radius: 15px;
+	border-radius: 20px;
 	background-color: #D3D3D3;
 	flex-direction: row;
 	align-items: center;
@@ -531,7 +531,7 @@ const TeamFrameContainer = styled.View`
 	position: relative;
 	width: 300px;
 	height: 150px;
-	margin-bottom: 10px;
+	margin-bottom: 15px;
 `;
 
 const Team_Noti = styled.TouchableOpacity`
@@ -568,8 +568,6 @@ const NotiContainer = styled.View`
 	align-items: center;
 	margin-top: 40px;
 `;
-
-
 
 const ModalContainer = styled.View`
     position: absolute;

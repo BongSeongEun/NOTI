@@ -72,6 +72,7 @@ function Stat({ }) {
 	const [goalPercent, setGoalPercent] = useState(0);
 	const [open, setOpen] = useState(false);
 	const [items, setItems] = useState([
+		{ label: '2024.07', value: '2024.07' },
 		{ label: '2024.06', value: '2024.06' },
 		{ label: '2024.05', value: '2024.05' },
 		{ label: '2024.04', value: '2024.04' },
@@ -538,13 +539,13 @@ function Stat({ }) {
 			},
 			{
 				color: currentTheme.color5,
-				text: `이번 달의 한줄평은`,
+				text: `이번 달의 한줄평은  ✏️`,
 				summary: summaryResult || "데이터가 없습니다.",
 			},
 		];
 	
 		return statesData.map((state, index) => (
-			<States key={index} color={state.color} style={{ padding: 10 }}>
+			<States key={index} color={state.color} style={{ padding: 10, marginBottom: 10 }}>
 				<View>
 					<MainText color='white'>{state.text}</MainText>
 					{state.word ? (
@@ -570,8 +571,8 @@ function Stat({ }) {
 			<FullView style={{ flex: 1, marginBottom: 80 }}>
 				<ScrollView>
 					<MainView>
-						<MainText style={{ fontSize: 15, marginTop: 50, }}>{userNickname} 님의 한 달</MainText>
-						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요!</MainText>
+						<MainText style={{ fontSize: 15, marginTop: 50, }}>{userNickname} 님의 한 달 동안의</MainText>
+						<MainText style={{ fontSize: 15, marginBottom: 15 }}>노티 활동을 모아봤어요 ✨</MainText>
 
 						<TouchableOpacity onPress={toggleDropDown} style={{ marginBottom: 5 }} />
 
@@ -582,15 +583,16 @@ function Stat({ }) {
 							setOpen={setOpen}
 							setValue={setValue}
 							setItems={setItems}
+							style={{ marginBottom: 10, borderRadius: 15, borderColor: '#B7BABF' }}
 						/>
 
 						<ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
 							{renderStates()}
 						</ScrollView>
 
-						<GoalFrame color={currentTheme.color1} isGoalChanged={isGoalChanged} isGoalSet={isGoalSet}>
+						<GoalFrame color={currentTheme.color1} isGoalChanged={isGoalChanged} isGoalSet={isGoalSet} showRecommendedGoals={showRecommendedGoals}>
 							<GoalB>
-								<MainText style={{ color: "white" }}>이번 달의 목표 🔥</MainText>
+								<MainText style={{ color: "white" }}>이달의 목표 🔥</MainText>
 							</GoalB>
 							<View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center' }}>
 								<StyledTextInput
@@ -610,7 +612,6 @@ function Stat({ }) {
 								<MainText>달성하기!</MainText>
 							</View>
 
-							{isGoalSet && (
 								<View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', width: 265 }}>
 									<View style={{ flexDirection: 'row', backgroundColor: 'transparent' }}>
 										<GoalChart />
@@ -618,7 +619,6 @@ function Stat({ }) {
 									</View>
 									<MainText>{goalPercent}%</MainText>
 								</View>
-							)}
 
 							<TouchableOpacity onPress={toggleRecommendedGoals} style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
 								<MainText>추천 목표 보기</MainText>
@@ -652,10 +652,7 @@ function Stat({ }) {
 						</GoalFrame>
 					
 						<HorisontalView style={{ justifyContent: 'space-between', marginTop: 25 }}>
-							<MainText style={{ fontSize: 15 }}>상세 리포트</MainText>
-							<images.share width={20} height={20}
-								color={clicked_share ? currentTheme.color1 : "#B7BABF"}
-								onPress={() => setClicked_share(!clicked_share)} />
+							<MainText style={{ fontSize: 15 }}>📃 상세 리포트 </MainText>
 						</HorisontalView>
 
 						<StatFrame style={{ marginTop: 10, height: expandedStates.statFrame1 ? 380 : 200, }}>
@@ -751,9 +748,9 @@ function Stat({ }) {
 								<View style={{ marginTop: 20 }}>
 									<MainText>전체 노티의 달성률이</MainText>
 									{statData.difference >= 0 ? (
-										<MainText>지난 달 이맘때보다 {'\n'} {statData.difference}% 늘었어요!</MainText>
+										<MainText>지난 달 이맘때보다 {'\n'} {statData.difference}% 늘었어요 📈</MainText>
 									) : (
-										<MainText>지난 달 이맘때보다 {'\n'} {Math.abs(statData.difference)}% 줄었어요!</MainText>
+										<MainText>지난 달 이맘때보다 {'\n'} {Math.abs(statData.difference)}% 줄었어요 📉</MainText>
 									)}
 								</View>
 
@@ -896,7 +893,8 @@ const Stat_Label = styled.TouchableOpacity`
 
 const GoalFrame = styled.TouchableOpacity`
 	width: 300px;
-	height: ${props => props.isGoalChanged ? (props.isGoalSet ? 'auto' : '130px') : (props.isGoalSet ? 'auto' : '110px')};
+  	height: ${props =>
+    props.isGoalChanged ? '180px' : ( props.showRecommendedGoals ? '220px' : '130px')};
 	border-radius: 15px;
 	border-width: 1px;
 	border-color: ${props => props.color || "#B7BABF"};

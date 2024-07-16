@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
 	},
 	hourLabel: {
 		paddingRight: 10,
+		fontSize: 12,
 	},
 	minuteBlocks: {
 		flex: 1,
