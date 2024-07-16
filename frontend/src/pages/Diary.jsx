@@ -15,9 +15,8 @@ const MainDiv = styled.div`
   align-items: center;
   margin-right: 350px;
   margin-left: 350px;
-
   // 스크롤바 숨기기
-  ::-webkit-scrollbar {
+  &::-webkit-scrollbar {
     display: none; // 웹킷 브라우저(크롬, 사파리 등)에서 스크롤바 숨김
   }
   @media (max-width: 1050px) {
@@ -200,7 +199,7 @@ function Diary() {
             <p>선택한 날짜에 일기가 없습니다.</p>
           )}
         </DiaryContent>
-        <DiaryWrap>
+        <DiaryWrap style={{ paddingLeft: "70px" }}>
           <DiaryCalenderWrap>
             <DiaryCalendar userId={userId} />
           </DiaryCalenderWrap>
