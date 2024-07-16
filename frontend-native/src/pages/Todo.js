@@ -23,7 +23,7 @@ import TimeTable from "../components/TimeTable";
 function Todo() {
 	const navigation = useNavigation();
     const [events, setEvents] = useState([]);
-    const [currentTheme, setCurrentTheme] = useState(theme.OrangeTheme);
+    const [currentTheme, setCurrentTheme] = useState(theme.RedTheme);
     const [base64Image, setBase64Image] = useState('');
     const [userNickname, setUserNickname] = useState('');
     const [markedDates, setMarkedDates] = useState({});
@@ -416,7 +416,8 @@ function Todo() {
 								</ModalView>
 							</ModalContainer>
 						</Modal>
-	
+						
+						<MainText style={{marginLeft: 10, marginTop: 10, color: currentTheme.color1}}>TIME TABLE</MainText>
 						<TimeTable schedule={schedule} />
 					</MainView>
 				</ScrollView>

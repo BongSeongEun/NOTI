@@ -381,6 +381,7 @@ function Coop() {
 							</Noti>
 						))}
 
+						<MainText style={{marginLeft: 10, marginTop: 20, color: currentTheme.color1, fontSize: 14}}>{formatDate(new Date(selectedDate))}</MainText>
 						<ScheduleTimeTable schedule={schedule} currentTheme={currentTheme} />
 
 						<HorisontalView style={{ justifyContent: 'space-between' }}>
@@ -548,18 +549,18 @@ const MainText = styled.Text`
 `;
 
 const Bar = styled.View`
-	width: 100%;
-	height: 1px;
-	margin-top: 10px;
-	background-color: #B7BABF;
+    width: 100%;
+    height: 1px;
+    margin-top: 10px;
+    background-color: #B7BABF;
 `;
 
 const BarMini = styled(Bar)`
-	align-self: flex-end;
-	width: 50%;
-	height: 2px;
-	background-color: ${props => props.theme.color1};
-	margin-top: 0px;
+    align-self: flex-end;
+    width: 50%;
+    height: 1px;
+    background-color: ${props => props.theme.color1};
+    margin-top: -1px;
 `;
 
 const NotiTextContainer = styled.View`

@@ -15,23 +15,24 @@ function Login({}) {
 		<FullView>
 			<MainView>
 				<Noti source={images.noti_intro} />
+				<NotiChar source={images.noti_char} />
 				<MainText style={{margin: 20, marginTop: 130}}>스마트한 시간 관리, 효율적인 삶의 시작</MainText>
 				<MainText style={{fontSize: 60, marginBottom: 40}}>N  O  T  I</MainText>
 				<TextContainer>
-					<MainTextBlack>일정에 </MainTextBlack>
-					<MainText>편리함</MainText>
-					<MainTextBlack>을 더하다</MainTextBlack>
+					<MainTextBlack>일 정 에  </MainTextBlack>
+					<MainText>편 리 함 </MainText>
+					<MainTextBlack>을  더 하 다</MainTextBlack>
 				</TextContainer>
 				<TextContainer>
-					<MainTextBlack>일상에</MainTextBlack>
-					<MainText>노티</MainText>
-					<MainTextBlack>를 더하다</MainTextBlack>
+					<MainTextBlack>일 상 에  </MainTextBlack>
+					<MainText>노 티 </MainText>
+					<MainTextBlack>를  더 하 다</MainTextBlack>
 				</TextContainer>
 				
 				<KakaoBox onPress={() => navigation.navigate('kakaoLogin', { nextScreen: 'Todo' })}>
 					<Box>
 						<Kakao source={images.Kakao} />
-					<MainTextBlack style={{marginLeft: 20, fontSize: 14}}>KaKao로 시작하기</MainTextBlack>
+					<MainTextBlack style={{marginLeft: 20, fontSize: 14}}>Kakao 로 시작하기</MainTextBlack>
 					</Box>
 				</KakaoBox>
 				<RegisterText onPress={() => navigation.navigate('kakaoLogin', { nextScreen: 'Register' })}>회원가입</RegisterText>
@@ -104,6 +105,12 @@ const RegisterText = styled.Text`
 	color: #B7BABF;
 	position: absolute;
 	bottom: 40px;
+`;
+
+const NotiChar = styled.Image`
+	position: absolute;
+	left: -80px;;
+	top: 35px;
 `;
 
 export default Login;

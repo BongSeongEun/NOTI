@@ -277,7 +277,7 @@ function Coop_Main({ onSelectTeam }) {
 								setClicked_add(!clicked_add);
 								set_TeamAddModalVisible(true);
 							}}
-							style={{ margin: 10, alignSelf: 'flex-end' }}
+							style={{ margin: 15, alignSelf: 'flex-end' }}
 						/>
 
 						<Modal
@@ -531,7 +531,7 @@ const TeamFrameContainer = styled.View`
 	position: relative;
 	width: 300px;
 	height: 150px;
-	margin-bottom: 10px;
+	margin-bottom: 15px;
 `;
 
 const Team_Noti = styled.TouchableOpacity`
