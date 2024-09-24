@@ -66,6 +66,8 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
     @Value("${google.client.secret}")
     private String CLIENT_SECRET;
 
+    private String refreshToken = REFRESH_TOKEN;
+
     public String accessToken = "ya29.a0Ad52N39xQkqvEFgAYIyr6mVZtBWqhOFcginiIQGRmn-aJRU-4kJp6_qFSbhXIqU5xlpI5r_NDgqat_ecXhm9WjT2HuIjcbbSzx9ZeXtw2rfp0hXjjPps2zFQ8qJTz4-ybg1Zvg75eqfGRG1YUbp2A_CD4eQp2A8xE4UkFwaCgYKAbISARASFQHGX2MiF-h6y9Tz-ooHZBXLmNcEYw0173";
 
     @Autowired
@@ -92,7 +94,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
 
         String clientId = environment.getProperty("google.client.id");
         String clientSecret = environment.getProperty("google.client.secret");
-        String refreshToken = environment.getProperty("google.refresh.token");
+//        String refreshToken = environment.getProperty("google.refresh.token");
         String type = "refresh_token";
         logger.info("Loaded CLIENT_ID: {}", clientId);
         logger.info("Loaded CLIENT_SECRET: {}", clientSecret);
@@ -131,6 +133,7 @@ public class TodoToChatSchedulerService { // todoEndTime에 해당하는 시간�
             e.printStackTrace();
         }
         accessToken = oauthToken.getAccess_token();
+        refreshToken = oauthToken.getRefresh_token();
         logger.info("Loaded ACCESS_TOKEN: {}", accessToken);
         return accessToken;
     }
