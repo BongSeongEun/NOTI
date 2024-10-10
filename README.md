@@ -1,6 +1,6 @@
 # AI챗봇을 활용한 일정관리 플래너 - 노티 NOTI
 
-<img src="https://github.com/user-attachments/assets/7252171e-a370-4788-a458-3265d73d064e">
+<img src="https://github.com/user-attachments/assets/5b4f05a6-8d63-4c24-ad13-5436ec55e931">
 
 ***
 ## 🙋🏻 AI 챗봇을 이용해 간편하게 일정을 정리하자!
@@ -54,7 +54,13 @@
 ***
 
 ## 📺 화면 구성
+|일정 페이지&일정 생성|팀 협업 페이지|
+|:---:|:---:|
+|<img src="https://github.com/user-attachments/assets/75120990-82f2-47d2-9050-d759dc8ec902" width="200"> <img src="https://github.com/user-attachments/assets/212f5a4e-f5b0-4ec7-8476-21e41d636cba" width="200">|<img src="https://github.com/user-attachments/assets/0cc685dc-9ff9-4eb6-8c01-11b909a1ed95" width="200"> <img src="https://github.com/user-attachments/assets/a22f16f3-ede3-45ef-b4ae-845c565f0fa7" width="200">|
 
+|데일리 회고록 페이지|통계 분석 페이지|
+|:---:|:---:|
+|<img src="https://github.com/user-attachments/assets/f0caffc3-3008-48c5-847a-3eeaf6cd1445" width="200"> <img src="https://github.com/user-attachments/assets/fd16480a-3102-4ddb-910f-dab26bf4ce47" width="200">|<img src="https://github.com/user-attachments/assets/9316161a-fbca-473c-bbb2-4e8c4c375417" width="200"> <img src="https://github.com/user-attachments/assets/4c8ceb33-e203-4002-b26c-e0396a57b656" width="200">|
 
 ***
 ## ⚙️ 주요 기능
@@ -95,7 +101,7 @@
 - 앱을 켰을 경우 뜨는 상시 알림을 통해 GPT와의 대화 기능
 - 대화를 통해 일정 추가 및 완료 여부 전달 가능
 
-### -> NOTI 데이터베이스 설계  <br/>
+### 🛠️ NOTI 데이터베이스 설계  <br/>
  https://www.notion.so/NOTI-36a20d703f2f4923bd0794985359db06?pvs=4  <br/>  <br/>
-### -> NOTI API 명세서  <br/>
+### 📃 NOTI API 명세서  <br/>
  https://www.notion.so/API-aa77fa7808c84c1697af7fbbb469f81a?pvs=4  <br/>
