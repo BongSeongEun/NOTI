@@ -56,11 +56,11 @@
 ## 📺 화면 구성
 |일정 페이지&일정 생성|팀 협업 페이지|
 |:---:|:---:|
-|<img src="https://github.com/user-attachments/assets/75120990-82f2-47d2-9050-d759dc8ec902" width="200"> <img src="https://github.com/user-attachments/assets/212f5a4e-f5b0-4ec7-8476-21e41d636cba" width="200">|<img src="https://github.com/user-attachments/assets/0cc685dc-9ff9-4eb6-8c01-11b909a1ed95" width="200"> <img src="https://github.com/user-attachments/assets/a22f16f3-ede3-45ef-b4ae-845c565f0fa7" width="200">|
+|<img src="https://github.com/user-attachments/assets/75120990-82f2-47d2-9050-d759dc8ec902" width="120"> <img src="https://github.com/user-attachments/assets/212f5a4e-f5b0-4ec7-8476-21e41d636cba" width="120">|<img src="https://github.com/user-attachments/assets/0cc685dc-9ff9-4eb6-8c01-11b909a1ed95" width="120"> <img src="https://github.com/user-attachments/assets/a22f16f3-ede3-45ef-b4ae-845c565f0fa7" width="120">|
 
 |데일리 회고록 페이지|통계 분석 페이지|
 |:---:|:---:|
-|<img src="https://github.com/user-attachments/assets/f0caffc3-3008-48c5-847a-3eeaf6cd1445" width="200"> <img src="https://github.com/user-attachments/assets/fd16480a-3102-4ddb-910f-dab26bf4ce47" width="200">|<img src="https://github.com/user-attachments/assets/9316161a-fbca-473c-bbb2-4e8c4c375417" width="200"> <img src="https://github.com/user-attachments/assets/4c8ceb33-e203-4002-b26c-e0396a57b656" width="200">|
+|<img src="https://github.com/user-attachments/assets/f0caffc3-3008-48c5-847a-3eeaf6cd1445" width="120"> <img src="https://github.com/user-attachments/assets/fd16480a-3102-4ddb-910f-dab26bf4ce47" width="120">|<img src="https://github.com/user-attachments/assets/9316161a-fbca-473c-bbb2-4e8c4c375417" width="120"> <img src="https://github.com/user-attachments/assets/4c8ceb33-e203-4002-b26c-e0396a57b656" width="120">|
 
 ***
 ## ⚙️ 주요 기능
